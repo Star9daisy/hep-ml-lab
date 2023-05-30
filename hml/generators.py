@@ -3,6 +3,9 @@ import tempfile
 import os
 from typing import Any
 from pathlib import Path
+import ROOT
+
+ROOT.gSystem.Load("libDelphes")
 
 
 class Madgraph5:
@@ -116,3 +119,36 @@ class Madgraph5:
             cmds += [f"    {Path(c).absolute()}" for c in self.cards]
 
         return cmds
+
+
+class MG5Run:
+    """A class to store information of a MG5 run."""
+
+    def __init__(self, run_dir: str | Path) -> None:
+        self.run_dir = Path(run_dir)
+        self._load()
+
+    def _load(self) -> None:
+        # Find banner file
+        banner_file = list(self.run_dir.glob("*banner.txt"))[0]
+        with open(banner_file, "r") as f:
+            contents = f.readlines()
+
+        # Seach for run tag
+        self.run_tag = "tag_1"
+        for line in contents:
+            if "name of the run" in line:
+                self.run_tag = line.split("!")[0].split("=")[0].strip()
+                break
+
+        # Search for cross section
+        self.cross_section = 0
+        for line in contents[::-1]:
+            if line.startswith("#  Integrated weight (pb)"):
+                self.cross_section = float(line.split()[-1])
+                break
+
+        # Find event file and get events
+        self.event_file = list(self.run_dir.glob("*.root"))[0]
+        self.event_file = ROOT.TFile(str(self.event_file))
+        self.events = self.event_file.Get("Delphes")
