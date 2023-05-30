@@ -6,6 +6,41 @@ from pathlib import Path
 
 
 class Madgraph5:
+    """Simple API for Madgraph5
+
+    Parameters
+    ----------
+    processes : str | list[str]
+        Processes to generate. Equal to the `generate` and `add process` commands in Madgraph5.
+    output_dir : str | None, optional
+        Output directory for the generated files. Equal to the `output` command in Madgraph5.
+    model : str, optional
+        Model to use. Equal to the `import model` command in Madgraph5.
+    definitions : dict[str, str] | None, optional
+        Definitions to use. Equal to the `define` command in Madgraph5.
+    shower : str | None, optional
+        Parton shower tool. Equal to the `shower` option in Madgraph5.
+    detector : str | None, optional
+        Detector simulation tool. Equal to the `detector` option in Madgraph5.
+    settings : dict[str, Any] | None, optional
+        Phase space and parameter settings. Equal to the `set` command in Madgraph5.
+    cards : list[str] | None, optional
+        Shower and detector cards to use. Equal to enter the card paths in Madgraph5.
+
+    Properties
+    ----------
+    All parameters are stored as properties.
+    cmds : list[str]
+        Commands to be executed by Madgraph5.
+    runs: list[MG5Run]
+        List of MG5Run objects containing necessary information of each run.
+
+    Methods
+    -------
+    launch(): None
+        Launch Madgraph5 with the stored commands.
+    """
+
     def __init__(
         self,
         processes: str | list[str],
@@ -28,10 +63,12 @@ class Madgraph5:
         self.cmds = self._params_to_cmds()
 
     def launch(self) -> None:
+        # Save cmds to a temporary file
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
             temp_file.write("\n".join(self.cmds))
             temp_file_path = temp_file.name
 
+        # Launch Madgraph5
         os.system(f"mg5_aMC {temp_file_path}")
         os.system("rm py.py")
 
