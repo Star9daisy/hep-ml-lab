@@ -44,13 +44,13 @@ class Madgraph5:
     def __init__(
         self,
         processes: str | list[str],
-        output_dir: str | None = None,
+        output_dir: str | Path | None = None,
         model: str = "sm",
         definitions: dict[str, str] | None = None,
         shower: str | None = None,
         detector: str | None = None,
         settings: dict[str, Any] | None = None,
-        cards: list[str] | None = None,
+        cards: list[str | Path] | None = None,
     ) -> None:
         self.processes = processes
         self.output_dir = output_dir
@@ -74,7 +74,7 @@ class Madgraph5:
 
     def _params_to_cmds(self) -> list[str]:
         # Model
-        cmds = [f"import model {self.model}"]
+        cmds = [f"import model {str(self.model)}"]
 
         # Definitions
         if self.definitions:
