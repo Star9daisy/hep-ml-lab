@@ -47,7 +47,7 @@ class Madgraph5:
     def __init__(
         self,
         processes: str | list[str],
-        output_dir: str | Path | None = None,
+        output_dir: str | Path,
         model: str = "sm",
         definitions: dict[str, str] | None = None,
         shower: str | None = None,
@@ -62,8 +62,7 @@ class Madgraph5:
         self.shower = shower
         self.detector = detector
         self.settings = settings
-        self.cards = cards
-        self.cmds = self._params_to_cmds()
+        self.cards = [Path(card) for card in cards] if cards else None
 
     def launch(self) -> None:
         # Save cmds to a temporary file
@@ -94,10 +93,7 @@ class Madgraph5:
             raise TypeError("processes must be str or list[str]")
 
         # Output
-        if self.output_dir:
-            cmds += [f"output {Path(self.output_dir).absolute()}"]
-        else:
-            cmds += ["output"]
+        cmds += [f"output {Path(self.output_dir).absolute()}"]
 
         # Launch
         cmds += ["launch"]
