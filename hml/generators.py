@@ -56,13 +56,24 @@ class Madgraph5:
         cards: list[str | Path] | None = None,
     ) -> None:
         self.processes = processes
-        self.output_dir = output_dir
+        self.output_dir = Path(output_dir)
         self.model = model
         self.definitions = definitions
         self.shower = shower
         self.detector = detector
         self.settings = settings
         self.cards = [Path(card) for card in cards] if cards else None
+
+    @property
+    def cmds(self) -> list[str]:
+        return self._params_to_cmds()
+
+    @property
+    def runs(self) -> list[MG5Run]:
+        all_run_dir = self.output_dir / "Events"
+        run_dirs = all_run_dir.glob("run_*")
+        mg5_runs = [MG5Run(i) for i in run_dirs]
+        return mg5_runs
 
     def launch(self) -> None:
         # Save cmds to a temporary file
@@ -112,7 +123,7 @@ class Madgraph5:
 
         # Cards
         if self.cards:
-            cmds += [f"    {Path(c).absolute()}" for c in self.cards]
+            cmds += [f"    {c.absolute()}" for c in self.cards]
 
         return cmds
 
