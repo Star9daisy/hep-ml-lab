@@ -1,9 +1,12 @@
 from __future__ import annotations
-import subprocess, time
+
+import shutil
+import subprocess
 import tempfile
-import os
-from typing import Any
+import time
 from pathlib import Path
+from typing import Any
+
 import ROOT
 
 ROOT.gSystem.Load("libDelphes")
@@ -76,11 +79,22 @@ class Madgraph5:
         mg5_runs = [MG5Run(i) for i in run_dirs]
         return mg5_runs
 
-    def launch(self, show_status=True) -> None:
+    def launch(self, new_output=False, show_status=True) -> None:
         # Save cmds to a temporary file
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-            temp_file.write("\n".join(self.cmds))
-            temp_file_path = temp_file.name
+        def _cmds_to_file(cmds: list[str]) -> str:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+                temp_file.write("\n".join(cmds))
+                temp_file_path = temp_file.name
+            return temp_file_path
+
+        if self.output_dir.exists():
+            if new_output:
+                shutil.rmtree(self.output_dir)
+                temp_file_path = _cmds_to_file(self.cmds)
+            else:
+                temp_file_path = _cmds_to_file([f"launch {self.output_dir}"])
+        else:
+            temp_file_path = _cmds_to_file(self.cmds)
 
         # Launch Madgraph5
         def _check_status(last_status: str) -> str:
