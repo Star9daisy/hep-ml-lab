@@ -1,4 +1,5 @@
 from __future__ import annotations
+import subprocess, time
 import tempfile
 import os
 from typing import Any
@@ -75,16 +76,50 @@ class Madgraph5:
         mg5_runs = [MG5Run(i) for i in run_dirs]
         return mg5_runs
 
-    def launch(self) -> None:
+    def launch(self, show_status=True) -> None:
         # Save cmds to a temporary file
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
             temp_file.write("\n".join(self.cmds))
             temp_file_path = temp_file.name
 
         # Launch Madgraph5
-        os.system(f"mg5_aMC {temp_file_path}")
-        os.system("rm py.py")
+        def _check_status(last_status: str) -> str:
+            with open(f"{self.output_dir}.log", "r") as f:
+                contents = f.readlines()
+            for line in contents[::-1]:
+                if line.startswith("Generating") and last_status == "":
+                    last_status = "Generating events..."
+                    break
+                elif (
+                    "Running Pythia8" in line and last_status == "Generating events..."
+                ):
+                    last_status = "Running Pythia8..."
+                    break
+                elif "Running Delphes" in line and last_status == "Running Pythia8...":
+                    last_status = "Running Delphes..."
+                    break
+                else:
+                    pass
 
+            return last_status
+
+        with open(f"{self.output_dir}.log", "w") as f:
+            process = subprocess.Popen(
+                f"mg5_aMC {temp_file_path}",
+                shell=True,
+                stdout=f,
+                stderr=subprocess.STDOUT,
+            )
+
+        status = ""
+        while process.poll() is None:  # while the process is still running
+            last_status = _check_status(status)
+            if last_status != status:
+                if show_status:
+                    print(last_status)
+                status = last_status
+            time.sleep(1)  # sleep for 5 seconds
+        
     def _params_to_cmds(self) -> list[str]:
         # Model
         cmds = [f"import model {str(self.model)}"]
