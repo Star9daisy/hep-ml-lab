@@ -1,0 +1,15 @@
+site_name: HEP ML Lab
+
+theme:
+  name: "material"
+
+plugins:
+  - mkdocstrings:
+      handlers:
+          python:
+            options:
+              show_source: false
+
+nav:
+  - Introcution: index.md
+  - API: api.md

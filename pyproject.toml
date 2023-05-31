@@ -1,13 +1,18 @@
 [tool.poetry]
 name = "hml"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "HML (HEP ML Lab) is a compact end-to-end framework for machine learning application in high energy physics."
+authors = ["star9daisy@outlook.com"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
 
+
+[tool.poetry.group.dev.dependencies]
+mkdocs = "^1.4.3"
+mkdocstrings = {extras = ["python"], version = "^0.22.0"}
+mkdocs-material = "^9.1.15"
 
 [build-system]
 requires = ["poetry-core"]
