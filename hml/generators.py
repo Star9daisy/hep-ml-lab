@@ -87,19 +87,18 @@ class Madgraph5:
             with open(f"{self.output_dir}.log", "r") as f:
                 contents = f.readlines()
             for line in contents[::-1]:
-                if line.startswith("Generating") and last_status == "":
+                if line.startswith("Generating"):
                     last_status = "Generating events..."
                     break
-                elif (
-                    "Running Pythia8" in line and last_status == "Generating events..."
-                ):
+                elif "Running Pythia8" in line:
                     last_status = "Running Pythia8..."
                     break
-                elif "Running Delphes" in line and last_status == "Running Pythia8...":
+                elif "Running Delphes" in line:
                     last_status = "Running Delphes..."
                     break
-                else:
-                    pass
+                elif line.startswith("INFO: Done"):
+                    last_status = ""
+                    break
 
             return last_status
 
@@ -111,15 +110,16 @@ class Madgraph5:
                 stderr=subprocess.STDOUT,
             )
 
+        # Check and print status
         status = ""
-        while process.poll() is None:  # while the process is still running
+        while process.poll() is None:
             last_status = _check_status(status)
             if last_status != status:
-                if show_status:
+                if show_status and last_status != "":
                     print(last_status)
                 status = last_status
-            time.sleep(1)  # sleep for 5 seconds
-        
+            time.sleep(1)
+
     def _params_to_cmds(self) -> list[str]:
         # Model
         cmds = [f"import model {str(self.model)}"]
