@@ -1,59 +1,68 @@
 from __future__ import annotations
+
 import re
+
 import numpy as np
-from ROOT import TLorentzVector
+from ROOT import TClonesArray, TLorentzVector, TTree
 
 
-def separate_text_and_number(s):
-    if "+" in s:
-        s = s.split("+")
-        names, indices = [], []
-        for name, index in [separate_text_and_number(part) for part in s]:
-            names.append(name)
-            indices.append(index)
+def resolve_string(s):
+    # split the string by '+'
+    elements = s.split("+")
 
-        return names, indices
+    # two lists to store elements and their corresponding numbers
+    element_list = []
+    number_list = []
 
-    match = re.match(r"([a-z]+)([0-9]+)", s, re.I)
-    if match:
-        items = match.groups()
-        items = (items[0], int(items[1]))
-    else:
-        raise ValueError(
-            f"{s} should be in the form of object and index like Jet0, Muon1..."
-        )
-    return items
+    for element in elements:
+        # regular expression to find number at the end of each element
+        match = re.match(r"([a-z]+)([0-9]*)", element, re.I)
+        if match:
+            items = match.groups()
+            element_list.append(items[0])
+
+            # check if number exists, if not return "no number"
+            if items[1] != "":
+                number_list.append(int(items[1]))
+            else:
+                number_list.append("all")
+
+    return element_list, number_list
 
 
 class Observable:
     pass
 
 
-class PT(Observable):
-    def __init__(self, name: str, value: float | None = None):
-        self.name = name
-        self.value = value
-        self.obs_name = f"{name}_PT"
+class PT:
+    def __init__(self, name=""):
+        self._name = name
+        self._values = None
 
-    def from_event(self, event):
-        if "+" in self.name:
-            _branch_names, _indices = separate_text_and_number(self.name)
-            combined_object = TLorentzVector()
-            for _branch_name, _index in zip(_branch_names, _indices):
-                _branch = getattr(event, _branch_name)
-                n_objects = _branch.GetEntries()
-                if _index >= n_objects:
-                    raise IndexError(
-                        f"Index {_index} is out of range in branch {_branch_name}"
-                    )
-                combined_object += _branch[_index].P4()
+    def from_event(self, event: TTree):
+        names, indices = resolve_string(self._name)
 
-            self.value = combined_object.Pt()
+        if indices[0] == "all":
+            self._values = [i.PT for i in getattr(event, names[0])]
         else:
-            _branch_name, _index = separate_text_and_number(self.name)
-            _branch = getattr(event, _branch_name)
-            n_objects = _branch.GetEntries()
-            if _index >= n_objects:
-                raise IndexError(f"Index {_index} is out of range in branch {_branch}")
-            else:
-                self.value = _branch[_index].PT
+            combined_object = TLorentzVector()
+            for name, index in zip(names, indices):
+                branch = getattr(event, name)
+                if branch.GetEntries() <= index + 1:
+                    raise IndexError(
+                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
+                    )
+                combined_object += branch[index].P4()
+
+            self._values = [combined_object.Pt()]
+
+    def from_branch(self, branch: TClonesArray):
+        self._values = [i.P4().Pt() for i in branch]
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def values(self):
+        return np.array(self._values, dtype=np.float32)
