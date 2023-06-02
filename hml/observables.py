@@ -168,3 +168,137 @@ class Phi:
     @property
     def values(self):
         return np.array(self._values, dtype=np.float32)
+
+
+
+class Px:
+    def __init__(self, name=""):
+        self._name = name
+        self._values = None
+
+    def from_event(self, event: TTree):
+        names, indices = resolve_string(self._name)
+
+        if indices[0] == "all":
+            self._values = [i.P4().Px() for i in getattr(event, names[0])]
+        else:
+            combined_object = TLorentzVector()
+            for name, index in zip(names, indices):
+                branch = getattr(event, name)
+                if branch.GetEntries() <= index + 1:
+                    raise IndexError(
+                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
+                    )
+                combined_object += branch[index].P4()
+
+            self._values = [combined_object.Px()]
+
+    def from_branch(self, branch: TClonesArray):
+        self._values = [i.P4().Px() for i in branch]
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def values(self):
+        return np.array(self._values, dtype=np.float32)
+
+class Py:
+    def __init__(self, name=""):
+        self._name = name
+        self._values = None
+
+    def from_event(self, event: TTree):
+        names, indices = resolve_string(self._name)
+
+        if indices[0] == "all":
+            self._values = [i.P4().Py() for i in getattr(event, names[0])]
+        else:
+            combined_object = TLorentzVector()
+            for name, index in zip(names, indices):
+                branch = getattr(event, name)
+                if branch.GetEntries() <= index + 1:
+                    raise IndexError(
+                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
+                    )
+                combined_object += branch[index].P4()
+
+            self._values = [combined_object.Py()]
+
+    def from_branch(self, branch: TClonesArray):
+        self._values = [i.P4().Py() for i in branch]
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def values(self):
+        return np.array(self._values, dtype=np.float32)
+
+class Pz:
+    def __init__(self, name=""):
+        self._name = name
+        self._values = None
+
+    def from_event(self, event: TTree):
+        names, indices = resolve_string(self._name)
+
+        if indices[0] == "all":
+            self._values = [i.P4().Pz() for i in getattr(event, names[0])]
+        else:
+            combined_object = TLorentzVector()
+            for name, index in zip(names, indices):
+                branch = getattr(event, name)
+                if branch.GetEntries() <= index + 1:
+                    raise IndexError(
+                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
+                    )
+                combined_object += branch[index].P4()
+
+            self._values = [combined_object.Pz()]
+
+    def from_branch(self, branch: TClonesArray):
+        self._values = [i.P4().Pz() for i in branch]
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def values(self):
+        return np.array(self._values, dtype=np.float32)
+
+class E:
+    def __init__(self, name=""):
+        self._name = name
+        self._values = None
+
+    def from_event(self, event: TTree):
+        names, indices = resolve_string(self._name)
+
+        if indices[0] == "all":
+            self._values = [i.P4().E() for i in getattr(event, names[0])]
+        else:
+            combined_object = TLorentzVector()
+            for name, index in zip(names, indices):
+                branch = getattr(event, name)
+                if branch.GetEntries() <= index + 1:
+                    raise IndexError(
+                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
+                    )
+                combined_object += branch[index].P4()
+
+            self._values = [combined_object.E()]
+
+    def from_branch(self, branch: TClonesArray):
+        self._values = [i.P4().E() for i in branch]
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def values(self):
+        return np.array(self._values, dtype=np.float32)
