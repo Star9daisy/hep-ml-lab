@@ -2,7 +2,7 @@
 name = "hml"
 version = "0.1.0"
 description = "HML (HEP ML Lab) is a compact end-to-end framework for machine learning application in high energy physics."
-authors = ["star9daisy@outlook.com"]
+authors = ["Star9daisy", "star9daisy@outlook.com"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
