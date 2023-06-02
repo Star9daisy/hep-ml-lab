@@ -133,6 +133,10 @@ class Madgraph5:
                     print(last_status)
                 status = last_status
             time.sleep(1)
+        
+        # Remove py.py file
+        if Path("py.py").exists():
+            Path("py.py").unlink()
 
     def _params_to_cmds(self) -> list[str]:
         # Model
