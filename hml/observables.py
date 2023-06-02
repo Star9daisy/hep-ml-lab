@@ -43,7 +43,7 @@ class PT:
         names, indices = resolve_string(self._name)
 
         if indices[0] == "all":
-            self._values = [i.PT for i in getattr(event, names[0])]
+            self._values = [i.P4().Pt() for i in getattr(event, names[0])]
         else:
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
@@ -77,7 +77,7 @@ class Mass:
         names, indices = resolve_string(self._name)
 
         if indices[0] == "all":
-            self._values = [i.Mass for i in getattr(event, names[0])]
+            self._values = [i.P4().M() for i in getattr(event, names[0])]
         else:
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
@@ -111,7 +111,7 @@ class Eta:
         names, indices = resolve_string(self._name)
 
         if indices[0] == "all":
-            self._values = [i.Eta for i in getattr(event, names[0])]
+            self._values = [i.P4().Eta() for i in getattr(event, names[0])]
         else:
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
@@ -145,7 +145,7 @@ class Phi:
         names, indices = resolve_string(self._name)
 
         if indices[0] == "all":
-            self._values = [i.Phi for i in getattr(event, names[0])]
+            self._values = [i.P4().Phi() for i in getattr(event, names[0])]
         else:
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
@@ -168,7 +168,6 @@ class Phi:
     @property
     def values(self):
         return np.array(self._values, dtype=np.float32)
-
 
 
 class Px:
@@ -204,6 +203,7 @@ class Px:
     def values(self):
         return np.array(self._values, dtype=np.float32)
 
+
 class Py:
     def __init__(self, name=""):
         self._name = name
@@ -237,6 +237,7 @@ class Py:
     def values(self):
         return np.array(self._values, dtype=np.float32)
 
+
 class Pz:
     def __init__(self, name=""):
         self._name = name
@@ -269,6 +270,7 @@ class Pz:
     @property
     def values(self):
         return np.array(self._values, dtype=np.float32)
+
 
 class E:
     def __init__(self, name=""):
