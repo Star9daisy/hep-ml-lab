@@ -34,7 +34,7 @@ class Observable:
     pass
 
 
-class Px:
+class Px(Observable):
     def __init__(self, name=""):
         self._name = name
         self._values = None
@@ -68,7 +68,7 @@ class Px:
         return np.array(self._values, dtype=np.float32)
 
 
-class Py:
+class Py(Observable):
     def __init__(self, name=""):
         self._name = name
         self._values = None
@@ -102,7 +102,7 @@ class Py:
         return np.array(self._values, dtype=np.float32)
 
 
-class Pz:
+class Pz(Observable):
     def __init__(self, name=""):
         self._name = name
         self._values = None
@@ -136,7 +136,7 @@ class Pz:
         return np.array(self._values, dtype=np.float32)
 
 
-class E:
+class E(Observable):
     def __init__(self, name=""):
         self._name = name
         self._values = None
@@ -170,7 +170,7 @@ class E:
         return np.array(self._values, dtype=np.float32)
 
 
-class PT:
+class PT(Observable):
     def __init__(self, name=""):
         self._name = name
         self._values = None
@@ -204,7 +204,7 @@ class PT:
         return np.array(self._values, dtype=np.float32)
 
 
-class Eta:
+class Eta(Observable):
     def __init__(self, name=""):
         self._name = name
         self._values = None
@@ -238,7 +238,7 @@ class Eta:
         return np.array(self._values, dtype=np.float32)
 
 
-class Phi:
+class Phi(Observable):
     def __init__(self, name=""):
         self._name = name
         self._values = None
@@ -272,7 +272,7 @@ class Phi:
         return np.array(self._values, dtype=np.float32)
 
 
-class M:
+class M(Observable):
     def __init__(self, name=""):
         self._name = name
         self._values = None
