@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import re
+from itertools import product
 
 import numpy as np
 from ROOT import TClonesArray, TLorentzVector, TTree
 
 
-def resolve_string(s):
+def resolve_string(s, sep="+"):
     # split the string by '+'
-    elements = s.split("+")
+    elements = s.split(sep)
 
     # two lists to store elements and their corresponding numbers
     element_list = []
@@ -304,6 +305,44 @@ class M(Observable):
     @property
     def values(self):
         return np.array(self._values, dtype=np.float32)
+
+
+class DeltaR(Observable):
+    def __init__(self, name=""):
+        self._name = name
+        self._values = None
+
+    def from_event(self, event: TTree):
+        names, indices = resolve_string(self._name, sep="-")
+
+        objects = []
+        for name, index in zip(names, indices):
+            if index == "all":
+                objects.append([i.P4() for i in getattr(event, name)])
+            else:
+                objects.append([getattr(event, name)[index].P4()])
+
+        values = np.array([i.DeltaR(j) for i, j in product(*objects)], dtype=np.float32)
+        length1, length2 = len(objects[0]), len(objects[1])
+        self._values = values.reshape(length1, length2)
+
+    def from_branches(self, branches: list[TClonesArray]):
+        if len(branches) != 2:
+            raise ValueError("DeltaR observable requires exactly two branches")
+
+        array1 = [i.P4() for i in branches[0]]
+        array2 = [i.P4() for i in branches[1]]
+        values = np.array([i.DeltaR(j) for i, j in product(array1, array2)], dtype=np.float32)
+        length1, length2 = len(array1), len(array2)
+        self._values = values.reshape(length1, length2)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def values(self):
+        return self._values
 
 
 TransverseMomentum = PT
