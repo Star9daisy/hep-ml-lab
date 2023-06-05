@@ -49,7 +49,7 @@ class Px(Observable):
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
                 branch = getattr(event, name)
-                if branch.GetEntries() <= index + 1:
+                if branch.GetEntries() < index + 1:
                     raise IndexError(
                         f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
                     )
@@ -83,7 +83,7 @@ class Py(Observable):
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
                 branch = getattr(event, name)
-                if branch.GetEntries() <= index + 1:
+                if branch.GetEntries() < index + 1:
                     raise IndexError(
                         f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
                     )
@@ -117,7 +117,7 @@ class Pz(Observable):
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
                 branch = getattr(event, name)
-                if branch.GetEntries() <= index + 1:
+                if branch.GetEntries() < index + 1:
                     raise IndexError(
                         f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
                     )
@@ -151,7 +151,7 @@ class E(Observable):
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
                 branch = getattr(event, name)
-                if branch.GetEntries() <= index + 1:
+                if branch.GetEntries() < index + 1:
                     raise IndexError(
                         f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
                     )
@@ -185,7 +185,7 @@ class PT(Observable):
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
                 branch = getattr(event, name)
-                if branch.GetEntries() <= index + 1:
+                if branch.GetEntries() < index + 1:
                     raise IndexError(
                         f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
                     )
@@ -219,7 +219,7 @@ class Eta(Observable):
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
                 branch = getattr(event, name)
-                if branch.GetEntries() <= index + 1:
+                if branch.GetEntries() < index + 1:
                     raise IndexError(
                         f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
                     )
@@ -253,7 +253,7 @@ class Phi(Observable):
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
                 branch = getattr(event, name)
-                if branch.GetEntries() <= index + 1:
+                if branch.GetEntries() < index + 1:
                     raise IndexError(
                         f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
                     )
@@ -287,7 +287,7 @@ class M(Observable):
             combined_object = TLorentzVector()
             for name, index in zip(names, indices):
                 branch = getattr(event, name)
-                if branch.GetEntries() <= index + 1:
+                if branch.GetEntries() < index + 1:
                     raise IndexError(
                         f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
                     )
