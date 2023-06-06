@@ -1,351 +1,177 @@
 from __future__ import annotations
 
 import re
-from itertools import product
 
 import numpy as np
-from ROOT import TClonesArray, TLorentzVector, TTree
+from ROOT import TLorentzVector, TTree
 
 
-def resolve_string(s, sep="+"):
-    # split the string by '+'
-    elements = s.split(sep)
+def resolve_object_str(object_str: str) -> tuple[list[str], list[int]]:
+    """Turn object_str into branches and indices."""
+    # Split objects separated by "+", which means combine objects in different branches
+    object_strs = object_str.split("+")
 
-    # two lists to store elements and their corresponding numbers
-    element_list = []
-    number_list = []
-
-    for element in elements:
-        # regular expression to find number at the end of each element
-        match = re.match(r"([a-z]+)([0-9]*)", element, re.I)
+    # Resolve each object_str into branch and index
+    branches = []
+    indices = []
+    for object_str in object_strs:
+        # object_str is like "Jet0", "Jet1", "Jet2", etc.
+        match = re.match(r"([a-z]+)([0-9]*)", object_str, re.I)
         if match:
             items = match.groups()
-            element_list.append(items[0])
+            # First item is the branch name
+            branches.append(items[0])
 
-            # check if number exists, if not return "no number"
-            if items[1] != "":
-                number_list.append(int(items[1]))
+            if items[1]:
+                if int(items[1]) > 0:
+                    # Second item is the index + 1, so we need to subtract 1
+                    indices.append(int(items[1]) - 1)
+                elif int(items[1]) == 0:
+                    raise ValueError(f"Numbering of objects starts from 1, not 0")
             else:
-                number_list.append("all")
+                # If no index is given, use -1 to represent all objects in the branch
+                indices.append(-1)
+        else:
+            raise ValueError(f"Invalid object_str: {object_str}")
 
-    return element_list, number_list
+    return branches, indices
+
+
+def get_values(
+    event: TTree,
+    attribute: str,
+    branches: list[str],
+    indices: list[int],
+) -> list[float]:
+    """Get the values of attribute of objects in branch."""
+    if len(branches) != len(indices):
+        raise ValueError("branches and indices must have the same length")
+
+    values = []
+    # Get all attribute values in one branch
+    if len(indices) == 1 and indices[0] == -1:
+        for obj in getattr(event, branches[0]):
+            values.append(getattr(obj.P4(), attribute)())
+    else:
+        # Combine objects in different branches
+        combined_object = TLorentzVector()
+        for branch, index in zip(branches, indices):
+            root_branch = getattr(event, branch)
+            if root_branch.GetEntries() <= index:
+                raise IndexError(f"Index {index} out of range for branch {branch}")
+            combined_object += root_branch[index].P4()
+        values.append(getattr(combined_object, attribute)())
+
+    return np.array(values, dtype=np.float32)
 
 
 class Observable:
-    pass
+    def from_event(self, event: TTree):
+        pass
 
 
 class Px(Observable):
-    def __init__(self, name=""):
-        self._name = name
-        self._values = None
+    def __init__(self, object_str: str):
+        self._object_str = object_str
+        self.name = object_str + "_Px"
+        self.values = None
 
     def from_event(self, event: TTree):
-        names, indices = resolve_string(self._name)
-
-        if indices[0] == "all":
-            self._values = [i.P4().Px() for i in getattr(event, names[0])]
-        else:
-            combined_object = TLorentzVector()
-            for name, index in zip(names, indices):
-                branch = getattr(event, name)
-                if branch.GetEntries() < index + 1:
-                    raise IndexError(
-                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
-                    )
-                combined_object += branch[index].P4()
-
-            self._values = [combined_object.Px()]
-
-    def from_branch(self, branch: TClonesArray):
-        self._values = [i.P4().Px() for i in branch]
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def values(self):
-        return np.array(self._values, dtype=np.float32)
+        branches, indices = resolve_object_str(self._object_str)
+        self.values = get_values(event, "Px", branches, indices)
 
 
 class Py(Observable):
-    def __init__(self, name=""):
-        self._name = name
-        self._values = None
+    def __init__(self, object_str: str):
+        self._object_str = object_str
+        self.name = object_str + "_Py"
+        self.values = None
 
     def from_event(self, event: TTree):
-        names, indices = resolve_string(self._name)
-
-        if indices[0] == "all":
-            self._values = [i.P4().Py() for i in getattr(event, names[0])]
-        else:
-            combined_object = TLorentzVector()
-            for name, index in zip(names, indices):
-                branch = getattr(event, name)
-                if branch.GetEntries() < index + 1:
-                    raise IndexError(
-                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
-                    )
-                combined_object += branch[index].P4()
-
-            self._values = [combined_object.Py()]
-
-    def from_branch(self, branch: TClonesArray):
-        self._values = [i.P4().Py() for i in branch]
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def values(self):
-        return np.array(self._values, dtype=np.float32)
+        branches, indices = resolve_object_str(self._object_str)
+        self.values = get_values(event, "Py", branches, indices)
 
 
 class Pz(Observable):
-    def __init__(self, name=""):
-        self._name = name
-        self._values = None
+    def __init__(self, object_str: str):
+        self._object_str = object_str
+        self.name = object_str + "_Pz"
+        self.values = None
 
     def from_event(self, event: TTree):
-        names, indices = resolve_string(self._name)
-
-        if indices[0] == "all":
-            self._values = [i.P4().Pz() for i in getattr(event, names[0])]
-        else:
-            combined_object = TLorentzVector()
-            for name, index in zip(names, indices):
-                branch = getattr(event, name)
-                if branch.GetEntries() < index + 1:
-                    raise IndexError(
-                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
-                    )
-                combined_object += branch[index].P4()
-
-            self._values = [combined_object.Pz()]
-
-    def from_branch(self, branch: TClonesArray):
-        self._values = [i.P4().Pz() for i in branch]
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def values(self):
-        return np.array(self._values, dtype=np.float32)
+        branches, indices = resolve_object_str(self._object_str)
+        self.values = get_values(event, "Pz", branches, indices)
 
 
 class E(Observable):
-    def __init__(self, name=""):
-        self._name = name
-        self._values = None
+    def __init__(self, object_str: str):
+        self._object_str = object_str
+        self.name = object_str + "_E"
+        self.values = None
 
     def from_event(self, event: TTree):
-        names, indices = resolve_string(self._name)
-
-        if indices[0] == "all":
-            self._values = [i.P4().E() for i in getattr(event, names[0])]
-        else:
-            combined_object = TLorentzVector()
-            for name, index in zip(names, indices):
-                branch = getattr(event, name)
-                if branch.GetEntries() < index + 1:
-                    raise IndexError(
-                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
-                    )
-                combined_object += branch[index].P4()
-
-            self._values = [combined_object.E()]
-
-    def from_branch(self, branch: TClonesArray):
-        self._values = [i.P4().E() for i in branch]
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def values(self):
-        return np.array(self._values, dtype=np.float32)
+        branches, indices = resolve_object_str(self._object_str)
+        self.values = get_values(event, "E", branches, indices)
 
 
-class PT(Observable):
-    def __init__(self, name=""):
-        self._name = name
-        self._values = None
+class Pt(Observable):
+    def __init__(self, object_str: str):
+        self._object_str = object_str
+        self.name = object_str + "_Pt"
+        self.values = None
 
     def from_event(self, event: TTree):
-        names, indices = resolve_string(self._name)
-
-        if indices[0] == "all":
-            self._values = [i.P4().Pt() for i in getattr(event, names[0])]
-        else:
-            combined_object = TLorentzVector()
-            for name, index in zip(names, indices):
-                branch = getattr(event, name)
-                if branch.GetEntries() < index + 1:
-                    raise IndexError(
-                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
-                    )
-                combined_object += branch[index].P4()
-
-            self._values = [combined_object.Pt()]
-
-    def from_branch(self, branch: TClonesArray):
-        self._values = [i.P4().Pt() for i in branch]
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def values(self):
-        return np.array(self._values, dtype=np.float32)
+        branches, indices = resolve_object_str(self._object_str)
+        self.values = get_values(event, "Pt", branches, indices)
 
 
 class Eta(Observable):
-    def __init__(self, name=""):
-        self._name = name
-        self._values = None
+    def __init__(self, object_str: str):
+        self._object_str = object_str
+        self.name = object_str + "_Eta"
+        self.values = None
 
     def from_event(self, event: TTree):
-        names, indices = resolve_string(self._name)
-
-        if indices[0] == "all":
-            self._values = [i.P4().Eta() for i in getattr(event, names[0])]
-        else:
-            combined_object = TLorentzVector()
-            for name, index in zip(names, indices):
-                branch = getattr(event, name)
-                if branch.GetEntries() < index + 1:
-                    raise IndexError(
-                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
-                    )
-                combined_object += branch[index].P4()
-
-            self._values = [combined_object.Eta()]
-
-    def from_branch(self, branch: TClonesArray):
-        self._values = [i.P4().Eta() for i in branch]
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def values(self):
-        return np.array(self._values, dtype=np.float32)
+        branches, indices = resolve_object_str(self._object_str)
+        self.values = get_values(event, "Eta", branches, indices)
 
 
 class Phi(Observable):
-    def __init__(self, name=""):
-        self._name = name
-        self._values = None
+    def __init__(self, object_str: str):
+        self._object_str = object_str
+        self.name = object_str + "_Phi"
+        self.values = None
 
     def from_event(self, event: TTree):
-        names, indices = resolve_string(self._name)
-
-        if indices[0] == "all":
-            self._values = [i.P4().Phi() for i in getattr(event, names[0])]
-        else:
-            combined_object = TLorentzVector()
-            for name, index in zip(names, indices):
-                branch = getattr(event, name)
-                if branch.GetEntries() < index + 1:
-                    raise IndexError(
-                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
-                    )
-                combined_object += branch[index].P4()
-
-            self._values = [combined_object.Phi()]
-
-    def from_branch(self, branch: TClonesArray):
-        self._values = [i.P4().Phi() for i in branch]
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def values(self):
-        return np.array(self._values, dtype=np.float32)
+        branches, indices = resolve_object_str(self._object_str)
+        self.values = get_values(event, "Phi", branches, indices)
 
 
 class M(Observable):
-    def __init__(self, name=""):
-        self._name = name
-        self._values = None
+    def __init__(self, object_str: str):
+        self._object_str = object_str
+        self.name = object_str + "_M"
+        self.values = None
 
     def from_event(self, event: TTree):
-        names, indices = resolve_string(self._name)
-
-        if indices[0] == "all":
-            self._values = [i.P4().M() for i in getattr(event, names[0])]
-        else:
-            combined_object = TLorentzVector()
-            for name, index in zip(names, indices):
-                branch = getattr(event, name)
-                if branch.GetEntries() < index + 1:
-                    raise IndexError(
-                        f"Index {index} out of range for branch {name} with {branch.GetEntries()} entries"
-                    )
-                combined_object += branch[index].P4()
-
-            self._values = [combined_object.M()]
-
-    def from_branch(self, branch: TClonesArray):
-        self._values = [i.P4().M() for i in branch]
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def values(self):
-        return np.array(self._values, dtype=np.float32)
+        branches, indices = resolve_object_str(self._object_str)
+        self.values = get_values(event, "M", branches, indices)
 
 
 class DeltaR(Observable):
-    def __init__(self, name=""):
-        self._name = name
-        self._values = None
+    def __init__(self, object_str1: str, object_str2: str):
+        self._object_str1 = object_str1
+        self._object_str2 = object_str2
+        self.name = f"DeltaR({object_str1}, {object_str2})"
+        self.values = None
 
     def from_event(self, event: TTree):
-        names, indices = resolve_string(self._name, sep="-")
+        branches1, indices1 = resolve_object_str(self.object_str1)
+        eta1 = get_values(event, "Eta", branches1, indices1)
+        phi1 = get_values(event, "Phi", branches1, indices1)
 
-        objects = []
-        for name, index in zip(names, indices):
-            if index == "all":
-                objects.append([i.P4() for i in getattr(event, name)])
-            else:
-                objects.append([getattr(event, name)[index].P4()])
+        branches2, indices2 = resolve_object_str(self.object_str2)
+        eta2 = get_values(event, "Eta", branches2, indices2)
+        phi2 = get_values(event, "Phi", branches2, indices2)
 
-        values = np.array([i.DeltaR(j) for i, j in product(*objects)], dtype=np.float32)
-        length1, length2 = len(objects[0]), len(objects[1])
-        self._values = values.reshape(length1, length2)
-
-    def from_branches(self, branches: list[TClonesArray]):
-        if len(branches) != 2:
-            raise ValueError("DeltaR observable requires exactly two branches")
-
-        array1 = [i.P4() for i in branches[0]]
-        array2 = [i.P4() for i in branches[1]]
-        values = np.array([i.DeltaR(j) for i, j in product(array1, array2)], dtype=np.float32)
-        length1, length2 = len(array1), len(array2)
-        self._values = values.reshape(length1, length2)
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def values(self):
-        return self._values
-
-
-TransverseMomentum = PT
-PseudoRapidity = Eta
-AzimuthalAngle = Phi
-Mass = M
+        self.values = np.hypot(eta1 - eta2, phi1 - phi2)
