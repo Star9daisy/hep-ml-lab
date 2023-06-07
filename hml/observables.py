@@ -6,17 +6,19 @@ import numpy as np
 from ROOT import TLorentzVector, TTree
 
 
-def resolve_object_str(object_str: str) -> tuple[list[str], list[int]]:
-    """Turn object_str into branches and indices."""
-    # Split objects separated by "+", which means combine objects in different branches
-    object_strs = object_str.split("+")
+def resolve_shortname(shortname: str) -> tuple[list[str], list[int]]:
+    """Turn shortname into branches and indices.
 
-    # Resolve each object_str into branch and index
+    A shortname represents a indexed object in a branch, e.g. "Jet1", "Muon1", "Jet1+Muon1".
+    """
+    # Split shortname by "+" to get all single objects
+    shortnames = shortname.split("+")
+
+    # Resolve each shortname into branch and index
     branches = []
     indices = []
-    for object_str in object_strs:
-        # object_str is like "Jet0", "Jet1", "Jet2", etc.
-        match = re.match(r"([a-z]+)([0-9]*)", object_str, re.I)
+    for shortname in shortnames:
+        match = re.match(r"([a-z]+)([0-9]*)", shortname, re.I)
         if match:
             items = match.groups()
             # First item is the branch name
@@ -32,17 +34,17 @@ def resolve_object_str(object_str: str) -> tuple[list[str], list[int]]:
                 # If no index is given, use -1 to represent all objects in the branch
                 indices.append(-1)
         else:
-            raise ValueError(f"Invalid object_str: {object_str}")
+            raise ValueError(f"Invalid shortname: {shortname}")
 
     return branches, indices
 
 
-def get_values(
+def get_lorentzvector_values(
     event: TTree,
     attribute: str,
     branches: list[str],
     indices: list[int],
-) -> list[float]:
+) -> np.ndarray:
     """Get the values of attribute of objects in branch."""
     if len(branches) != len(indices):
         raise ValueError("branches and indices must have the same length")
@@ -71,107 +73,107 @@ class Observable:
 
 
 class Px(Observable):
-    def __init__(self, object_str: str):
-        self._object_str = object_str
-        self.name = object_str + "_Px"
+    def __init__(self, shortname: str):
+        self._shortname = shortname
+        self.name = shortname + "_Px"
         self.values = None
 
     def from_event(self, event: TTree):
-        branches, indices = resolve_object_str(self._object_str)
-        self.values = get_values(event, "Px", branches, indices)
+        branches, indices = resolve_shortname(self._shortname)
+        self.values = get_lorentzvector_values(event, "Px", branches, indices)
 
 
 class Py(Observable):
-    def __init__(self, object_str: str):
-        self._object_str = object_str
-        self.name = object_str + "_Py"
+    def __init__(self, shortname: str):
+        self._shortname = shortname
+        self.name = shortname + "_Py"
         self.values = None
 
     def from_event(self, event: TTree):
-        branches, indices = resolve_object_str(self._object_str)
-        self.values = get_values(event, "Py", branches, indices)
+        branches, indices = resolve_shortname(self._shortname)
+        self.values = get_lorentzvector_values(event, "Py", branches, indices)
 
 
 class Pz(Observable):
-    def __init__(self, object_str: str):
-        self._object_str = object_str
-        self.name = object_str + "_Pz"
+    def __init__(self, shortname: str):
+        self._shortname = shortname
+        self.name = shortname + "_Pz"
         self.values = None
 
     def from_event(self, event: TTree):
-        branches, indices = resolve_object_str(self._object_str)
-        self.values = get_values(event, "Pz", branches, indices)
+        branches, indices = resolve_shortname(self._shortname)
+        self.values = get_lorentzvector_values(event, "Pz", branches, indices)
 
 
 class E(Observable):
-    def __init__(self, object_str: str):
-        self._object_str = object_str
-        self.name = object_str + "_E"
+    def __init__(self, shortname: str):
+        self._shortname = shortname
+        self.name = shortname + "_E"
         self.values = None
 
     def from_event(self, event: TTree):
-        branches, indices = resolve_object_str(self._object_str)
-        self.values = get_values(event, "E", branches, indices)
+        branches, indices = resolve_shortname(self._shortname)
+        self.values = get_lorentzvector_values(event, "E", branches, indices)
 
 
 class Pt(Observable):
-    def __init__(self, object_str: str):
-        self._object_str = object_str
-        self.name = object_str + "_Pt"
+    def __init__(self, shortname: str):
+        self._shortname = shortname
+        self.name = shortname + "_Pt"
         self.values = None
 
     def from_event(self, event: TTree):
-        branches, indices = resolve_object_str(self._object_str)
-        self.values = get_values(event, "Pt", branches, indices)
+        branches, indices = resolve_shortname(self._shortname)
+        self.values = get_lorentzvector_values(event, "Pt", branches, indices)
 
 
 class Eta(Observable):
-    def __init__(self, object_str: str):
-        self._object_str = object_str
-        self.name = object_str + "_Eta"
+    def __init__(self, shortname: str):
+        self._shortname = shortname
+        self.name = shortname + "_Eta"
         self.values = None
 
     def from_event(self, event: TTree):
-        branches, indices = resolve_object_str(self._object_str)
-        self.values = get_values(event, "Eta", branches, indices)
+        branches, indices = resolve_shortname(self._shortname)
+        self.values = get_lorentzvector_values(event, "Eta", branches, indices)
 
 
 class Phi(Observable):
-    def __init__(self, object_str: str):
-        self._object_str = object_str
-        self.name = object_str + "_Phi"
+    def __init__(self, shortname: str):
+        self._shortname = shortname
+        self.name = shortname + "_Phi"
         self.values = None
 
     def from_event(self, event: TTree):
-        branches, indices = resolve_object_str(self._object_str)
-        self.values = get_values(event, "Phi", branches, indices)
+        branches, indices = resolve_shortname(self._shortname)
+        self.values = get_lorentzvector_values(event, "Phi", branches, indices)
 
 
 class M(Observable):
-    def __init__(self, object_str: str):
-        self._object_str = object_str
-        self.name = object_str + "_M"
+    def __init__(self, shortname: str):
+        self._shortname = shortname
+        self.name = shortname + "_M"
         self.values = None
 
     def from_event(self, event: TTree):
-        branches, indices = resolve_object_str(self._object_str)
-        self.values = get_values(event, "M", branches, indices)
+        branches, indices = resolve_shortname(self._shortname)
+        self.values = get_lorentzvector_values(event, "M", branches, indices)
 
 
 class DeltaR(Observable):
-    def __init__(self, object_str1: str, object_str2: str):
-        self._object_str1 = object_str1
-        self._object_str2 = object_str2
-        self.name = f"DeltaR({object_str1}, {object_str2})"
+    def __init__(self, shortname1: str, shortname2: str):
+        self._shortname1 = shortname1
+        self._shortname2 = shortname2
+        self.name = f"DeltaR({shortname1}, {shortname2})"
         self.values = None
 
     def from_event(self, event: TTree):
-        branches1, indices1 = resolve_object_str(self.object_str1)
-        eta1 = get_values(event, "Eta", branches1, indices1)
-        phi1 = get_values(event, "Phi", branches1, indices1)
+        branches1, indices1 = resolve_shortname(self.shortname1)
+        eta1 = get_lorentzvector_values(event, "Eta", branches1, indices1)
+        phi1 = get_lorentzvector_values(event, "Phi", branches1, indices1)
 
-        branches2, indices2 = resolve_object_str(self.object_str2)
-        eta2 = get_values(event, "Eta", branches2, indices2)
-        phi2 = get_values(event, "Phi", branches2, indices2)
+        branches2, indices2 = resolve_shortname(self.shortname2)
+        eta2 = get_lorentzvector_values(event, "Eta", branches2, indices2)
+        phi2 = get_lorentzvector_values(event, "Phi", branches2, indices2)
 
         self.values = np.hypot(eta1 - eta2, phi1 - phi2)
