@@ -32,7 +32,7 @@ class Dataset:
         np.savez(dirpath / "metadata.yml", data=self.data, target=self.target)
 
     @classmethod
-    def from_path(cls, dirpath: str) -> Dataset:
+    def load(cls, dirpath: str) -> Dataset:
         dirpath = Path(dirpath)
         with open(dirpath / "metadata.yml", "r") as f:
             metadata = yaml.safe_load(f)
