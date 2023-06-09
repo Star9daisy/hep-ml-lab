@@ -49,6 +49,12 @@ class BoostedDecisionTree:
         for parameter, value in self.model.get_params(deep=False).items():
             print(f"- {parameter}: {value}")
 
+    @property
+    def n_parameters(self):
+        max_nodes_per_tree = 2 ** (self.model.max_depth + 1) - 1
+        max_parameters = max_nodes_per_tree * self.model.n_estimators
+        return max_parameters
+
     def save(self, path: str, suffix: str = ".pkl"):
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
