@@ -13,18 +13,26 @@ ROOT.gSystem.Load("libDelphes")
 
 
 class Madgraph5:
-    """Simple API for Madgraph5
+    """Simple API for generating events via Madgraph5
 
     Parameters:
-        processes (str|list[str]): Processes to generate. Equal to the `generate` and `add process` commands in Madgraph5.
-        output_dir (str|None):Output directory for the generated files. Equal to the `output` command in Madgraph5.
-        model (str): Model to use. Equal to the `import model` command in Madgraph5.
-        definitions (dict[str, str]|None):Definitions to use. Equal to the `define` command in Madgraph5.
-        shower (str|None): Parton shower tool. Equal to the `shower` option in Madgraph5.
-        detector (str|None): Detector simulation tool. Equal to the `detector` option in Madgraph5.
-        settings (dict[str, Any]|None): Phase space and parameter settings. Equal to the `set` command in Madgraph5.
-        cards (list[str]|None): Shower and detector cards to use. Equal to enter the card paths in Madgraph5.
-    
+        processes: The processes to be generated corresponding to the `generate` and `add process`
+            commands in Madgraph5.
+        output_dir: The directory where the events will be outputted corresponding to the `output`
+            commands in Madgraph5.
+        model: The particle physics model to be used corresponding to the `import model` command in
+            Madgraph5.
+        definitions: The definitions of multiparticle corresponding to the `define` command in
+            Madgraph5.
+        shower: The parton shower tool to be used corresponding to the `shower` option in the first
+            menu after launching Madgraph5.
+        detector: The detector simulation tool to be used corresponding to the `detector` option in
+            the first menu after launching Madgraph5.
+        settings: The phase space and parameter settings corresponding to the `set` command in the
+            second menu after launching Madgraph5.
+        cards: Shower and detector configuration cards corresponding to entering card paths in the
+            second menu after launching Madgraph5.
+
     Examples:
         >>> from hml.generators import Madgraph5
         Welcome to JupyROOT 6.24/02
@@ -62,24 +70,25 @@ class Madgraph5:
 
     @property
     def cmds(self) -> list[str]:
-        """Commands in Madgraph5 converted from parameters"""
+        """All commands to be executed in Madgraph5"""
         return self._params_to_cmds()
 
     @property
     def runs(self) -> list[MG5Run]:
-        """All runs in the Events directory"""
+        """All runs in the `Events` directory"""
         all_run_dir = self.output_dir / "Events"
         run_dirs = all_run_dir.glob("run_*")
         mg5_runs = [MG5Run(i) for i in run_dirs]
         return mg5_runs
 
-    def launch(self, new_output=False, show_status=True) -> None:
+    def launch(self, new_output: bool = False, show_status: bool = True) -> None:
         """Launch Madgraph5
-        
+
         Parameters:
-            new_output (bool): Whether to delete the output directory and start a new run.
-            show_status (bool): Whether to print the status of the run.
+            new_output: Whether to delete the output directory and start a new run.
+            show_status: Whether to print the status of the run.
         """
+
         # Save cmds to a temporary file
         def _cmds_to_file(cmds: list[str]) -> str:
             with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
@@ -133,7 +142,7 @@ class Madgraph5:
                     print(last_status)
                 status = last_status
             time.sleep(1)
-        
+
         # Remove py.py file
         if Path("py.py").exists():
             Path("py.py").unlink()
@@ -183,9 +192,9 @@ class Madgraph5:
 
 class MG5Run:
     """A class to store information of a Madgraph5 run.
-    
+
     Parameters:
-        run_dir (str|Path): The path to the run directory.
+        run_dir: The path to the run directory.
     """
 
     def __init__(self, run_dir: str | Path) -> None:
