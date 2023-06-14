@@ -15,28 +15,31 @@ class Dataset:
     feature_names: list[str]
     target_names: list[str]
     description: str
-    dirpath: str
+    dataset_dir: str
 
     def save(self, exist_ok: bool = False):
-        dirpath = Path(self.dirpath)
-        dirpath.mkdir(parents=True, exist_ok=exist_ok)
+        dataset_dir = Path(self.dataset_dir)
+        dataset_dir.mkdir(parents=True, exist_ok=exist_ok)
 
+        # Pack metadata
         metadata = {
             "feature_names": self.feature_names,
             "target_names": self.target_names,
             "description": self.description,
-            "dirpath": self.dirpath,
+            "dirpath": self.dataset_dir,
         }
-        with open(dirpath / "metadata.yml", "w") as f:
+
+        # Save metadata as yaml and dataset as npz
+        with open(dataset_dir / "metadata.yml", "w") as f:
             yaml.dump(metadata, f)
-        np.savez(dirpath / "metadata.yml", data=self.data, target=self.target)
+        np.savez(dataset_dir / f"dataset.npz", data=self.data, target=self.target)
 
     @classmethod
-    def load(cls, dirpath: str) -> Dataset:
-        dirpath = Path(dirpath)
-        with open(dirpath / "metadata.yml", "r") as f:
+    def load(cls, dataset_dir: str) -> Dataset:
+        dataset_dir = Path(dataset_dir)
+        with open(dataset_dir / "metadata.yml", "r") as f:
             metadata = yaml.safe_load(f)
-        dataset = np.load(dirpath / "dataset.npz")
+        dataset = np.load(dataset_dir / "dataset.npz")
 
         return cls(
             data=dataset["data"],
@@ -44,5 +47,5 @@ class Dataset:
             feature_names=metadata["feature_names"],
             target_names=metadata["target_names"],
             description=metadata["description"],
-            dirpath=metadata["dirpath"],
+            dataset_dir=metadata["dataset_dir"],
         )
