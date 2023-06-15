@@ -8,7 +8,10 @@ plugins:
         python:
           options:
             show_source: false
+            show_root_heading: true
+            members_order: source
             docstring_style: numpy
+            separate_signature: true
 
 nav:
   - Introcution: index.md
