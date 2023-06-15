@@ -15,37 +15,39 @@ ROOT.gSystem.Load("libDelphes")
 class Madgraph5:
     """Simple API for generating events via Madgraph5
 
-    Parameters:
-        processes: The processes to be generated corresponding to the `generate` and `add process`
-            commands in Madgraph5.
-        output_dir: The directory where the events will be outputted corresponding to the `output`
-            commands in Madgraph5.
-        model: The particle physics model to be used corresponding to the `import model` command in
-            Madgraph5.
-        definitions: The definitions of multiparticle corresponding to the `define` command in
-            Madgraph5.
-        shower: The parton shower tool to be used corresponding to the `shower` option in the first
-            menu after launching Madgraph5.
-        detector: The detector simulation tool to be used corresponding to the `detector` option in
-            the first menu after launching Madgraph5.
-        settings: The phase space and parameter settings corresponding to the `set` command in the
-            second menu after launching Madgraph5.
-        cards: Shower and detector configuration cards corresponding to entering card paths in the
-            second menu after launching Madgraph5.
+    Parameters
+    ----------
+    processes:
+        The processes to be generated corresponding to the `generate` and `add process` commands in Madgraph5.
+    output_dir:
+        The directory where the events will be outputted corresponding to the `output` commands in Madgraph5.
+    model:
+        The particle physics model to be used corresponding to the `import model` command in Madgraph5.
+    definitions:
+        The definitions of multiparticle corresponding to the `define` command in Madgraph5.
+    shower:
+        The parton shower tool to be used corresponding to the `shower` option in the first menu after launching Madgraph5.
+    detector:
+        The detector simulation tool to be used corresponding to the `detector` option in the first menu after launching Madgraph5.
+    settings:
+        The phase space and parameter settings corresponding to the `set` command in the second menu after launching Madgraph5.
+    cards:
+        Shower and detector configuration cards corresponding to entering card paths in the second menu after launching Madgraph5.
 
-    Examples:
-        >>> from hml.generators import Madgraph5
-        Welcome to JupyROOT 6.24/02
-        >>> g = Madgraph5(
-                processes="p p > z j, z > j j",
-                output_dir="./data/pp2zjj",
-                shower="Pythia8",
-                detector="Delphes",
-                settings={"nevents": 1000, "iseed": 42}
-            )
-        Generating events...
-        Running Pythia8...
-        Running Delphes...
+    Examples
+    --------
+    >>> from hml.generators import Madgraph5
+    Welcome to JupyROOT 6.24/02
+    >>> g = Madgraph5(
+            processes="p p > z j, z > j j",
+            output_dir="./data/pp2zjj",
+            shower="Pythia8",
+            detector="Delphes",
+            settings={"nevents": 1000, "iseed": 42}
+        )
+    Generating events...
+    Running Pythia8...
+    Running Delphes...
     """
 
     def __init__(
@@ -85,8 +87,10 @@ class Madgraph5:
         """Launch Madgraph5
 
         Parameters:
-            new_output: Whether to delete the output directory and start a new run.
-            show_status: Whether to print the status of the run.
+            new_output:
+                Whether to delete the output directory and start a new run.
+            show_status:
+                Whether to print the status of the run.
         """
 
         # Save cmds to a temporary file
