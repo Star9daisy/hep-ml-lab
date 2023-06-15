@@ -197,8 +197,10 @@ class Madgraph5:
 class MG5Run:
     """A class to store information of a Madgraph5 run.
 
-    Parameters:
-        run_dir: The path to the run directory.
+    Parameters
+    ----------
+    run_dir:
+        The path to the run directory.
     """
 
     def __init__(self, run_dir: str | Path) -> None:
