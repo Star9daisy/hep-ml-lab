@@ -3,21 +3,41 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy
 import numpy as np
 import yaml
-from numpy import ndarray
 
 
 @dataclass
 class Dataset:
-    data: ndarray
-    target: ndarray
+    """Dataset class for storing data and metadata.
+
+    Parameters
+    ----------
+    data: numpy.ndarray
+        Data array.
+    target: array
+        Target array.
+    feature_names: list[str]
+        List of feature names.
+    target_names: list[str]
+        List of target names.
+    description: str
+        Description of dataset.
+    dataset_dir: str
+        Path to dataset directory.
+
+    """
+
+    data: numpy.ndarray
+    target: numpy.ndarray
     feature_names: list[str]
     target_names: list[str]
     description: str
     dataset_dir: str
 
     def save(self, exist_ok: bool = False):
+        """Save dataset to disk."""
         dataset_dir = Path(self.dataset_dir)
         dataset_dir.mkdir(parents=True, exist_ok=exist_ok)
 
@@ -36,6 +56,7 @@ class Dataset:
 
     @classmethod
     def load(cls, dataset_dir: str) -> Dataset:
+        """Load dataset from disk."""
         dataset_dir = Path(dataset_dir)
         with open(dataset_dir / "metadata.yml", "r") as f:
             metadata = yaml.safe_load(f)

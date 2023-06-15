@@ -1,15 +1,17 @@
 site_name: HEP ML Lab
 
-theme:
-  name: "material"
+theme: readthedocs
 
 plugins:
   - mkdocstrings:
       handlers:
-          python:
-            options:
-              show_source: false
+        python:
+          options:
+            show_source: false
+            docstring_style: numpy
 
 nav:
   - Introcution: index.md
-  - API: api.md
+  - API Reference:
+      - datasets: api-reference/datasets.md
+      - generators: api-reference/generators.md
