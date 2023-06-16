@@ -21,5 +21,5 @@ plugins:
 nav:
   - Introcution: index.md
   - API Reference:
-      - hml.generators: api-reference/generators.md
-      - hml.datasets: api-reference/datasets.md
+      - hml.generators: api-reference/hml.generators.md
+      - hml.datasets: api-reference/hml.datasets.md
