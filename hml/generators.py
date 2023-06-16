@@ -13,26 +13,44 @@ ROOT.gSystem.Load("libDelphes")
 
 
 class Madgraph5:
-    """Simple API for generating events via Madgraph5
+    """Wrapper of Madgraph5 CLI to simulate colliding events.
+
+    Madgraph5 is a wrapper class of Madgraph5 CLI. It mainly provides functionalities to generate
+    events, run parton shower and detector simulation, and access to the launched runs.
 
     Parameters
     ----------
     processes:
-        The processes to be generated corresponding to the `generate` and `add process` commands in Madgraph5.
+        The processes to be generated.
     output_dir:
-        The directory where the events will be outputted corresponding to the `output` commands in Madgraph5.
+        The directory where the events will be outputted.
     model:
-        The particle physics model to be used corresponding to the `import model` command in Madgraph5.
+        The particle physics model to be used.
     definitions:
-        The definitions of multiparticle corresponding to the `define` command in Madgraph5.
+        The definitions of multiparticle.
     shower:
-        The parton shower tool to be used corresponding to the `shower` option in the first menu after launching Madgraph5.
+        The parton shower tool to be used.
     detector:
-        The detector simulation tool to be used corresponding to the `detector` option in the first menu after launching Madgraph5.
+        The detector simulation tool to be used.
     settings:
-        The phase space and parameter settings corresponding to the `set` command in the second menu after launching Madgraph5.
+        The phase space and parameter settings.
     cards:
-        Shower and detector configuration cards corresponding to entering card paths in the second menu after launching Madgraph5.
+        Shower and detector configuration cards.
+
+    Parameters correspond to commands in Madgraph5 CLI or options after launching generation in
+    Madgraph5.
+
+    | Parameters  | Madgraph5 commands or options    |
+    |-------------|----------------------------------|
+    | processes   | generate & add process commands  |
+    | output_dir  | output command                   |
+    | model       | import model command             |
+    | definitions | define command                   |
+    | shower      | shower option                    |
+    | detector    | detector option                  |
+    | settings    | set command                      |
+    | cards       | paths of cards                   |
+
 
     Examples
     --------
@@ -45,6 +63,7 @@ class Madgraph5:
             detector="Delphes",
             settings={"nevents": 1000, "iseed": 42}
         )
+    >>> g.launch()
     Generating events...
     Running Pythia8...
     Running Delphes...
@@ -71,26 +90,28 @@ class Madgraph5:
         self.cards = [Path(card) for card in cards] if cards else None
 
     @property
-    def cmds(self) -> list[str]:
-        """All commands to be executed in Madgraph5"""
+    def commands(self) -> list[str]:
+        """Commands converted from parameters to be executed in Madgraph5."""
         return self._params_to_cmds()
 
     @property
     def runs(self) -> list[MG5Run]:
-        """All runs in the `Events` directory"""
+        """Madgraph5 runs after finishing event generation."""
         all_run_dir = self.output_dir / "Events"
         run_dirs = all_run_dir.glob("run_*")
         mg5_runs = [MG5Run(i) for i in run_dirs]
         return mg5_runs
 
     def launch(self, new_output: bool = False, show_status: bool = True) -> None:
-        """Launch Madgraph5
+        """Launch Madgraph5 to generate events.
 
-        Parameters:
-            new_output:
-                Whether to delete the output directory and start a new run.
-            show_status:
-                Whether to print the status of the run.
+        Parameters
+        ----------
+        new_output:
+            If True, remove the existing output directory and generate new events, else create a new
+            run.
+        show_status:
+            If True, print the status of the launched run, else launch silently.
         """
 
         # Save cmds to a temporary file
@@ -103,11 +124,11 @@ class Madgraph5:
         if self.output_dir.exists():
             if new_output:
                 shutil.rmtree(self.output_dir)
-                temp_file_path = _cmds_to_file(self.cmds)
+                temp_file_path = _cmds_to_file(self.commands)
             else:
                 temp_file_path = _cmds_to_file([f"launch {self.output_dir}"])
         else:
-            temp_file_path = _cmds_to_file(self.cmds)
+            temp_file_path = _cmds_to_file(self.commands)
 
         # Launch Madgraph5
         def _check_status(last_status: str) -> str:
@@ -195,7 +216,7 @@ class Madgraph5:
 
 
 class MG5Run:
-    """A class to store information of a Madgraph5 run.
+    """MG5Run stores the information of a Madgraph5 run.
 
     Parameters
     ----------
