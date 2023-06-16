@@ -1,20 +1,25 @@
 site_name: HEP ML Lab
 
-theme: readthedocs
+theme:
+  name: material
+  features:
+    - content.code.copy
+  palette:
+    primary: black
 
 plugins:
   - mkdocstrings:
       handlers:
         python:
           options:
-            show_source: false
-            show_root_heading: true
+            show_root_toc_entry: false
             members_order: source
             docstring_style: numpy
             separate_signature: true
+            docstring_section_style: spacy
 
 nav:
   - Introcution: index.md
   - API Reference:
-      - datasets: api-reference/datasets.md
-      - generators: api-reference/generators.md
+      - hml.generators: api-reference/generators.md
+      - hml.datasets: api-reference/datasets.md
