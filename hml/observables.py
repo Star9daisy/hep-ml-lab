@@ -168,11 +168,11 @@ class DeltaR(Observable):
         self.values = None
 
     def from_event(self, event: TTree):
-        branches1, indices1 = resolve_shortname(self.shortname1)
+        branches1, indices1 = resolve_shortname(self._shortname1)
         eta1 = get_lorentzvector_values(event, "Eta", branches1, indices1)
         phi1 = get_lorentzvector_values(event, "Phi", branches1, indices1)
 
-        branches2, indices2 = resolve_shortname(self.shortname2)
+        branches2, indices2 = resolve_shortname(self._shortname2)
         eta2 = get_lorentzvector_values(event, "Eta", branches2, indices2)
         phi2 = get_lorentzvector_values(event, "Phi", branches2, indices2)
 
