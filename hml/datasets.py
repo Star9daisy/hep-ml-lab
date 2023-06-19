@@ -46,7 +46,7 @@ class Dataset:
             "feature_names": self.feature_names,
             "target_names": self.target_names,
             "description": self.description,
-            "dirpath": self.dataset_dir,
+            "dataset_dir": self.dataset_dir,
         }
 
         # Save metadata as yaml and dataset as npz
