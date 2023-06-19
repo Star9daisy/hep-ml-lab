@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import reduce
 from itertools import product
 
 import matplotlib.pyplot as plt
@@ -38,6 +39,21 @@ class CutBasedAnalysis:
             self.signal_locations.append(signal_location)
             self.cuts.append(cut)
             self.best_accurcies.append(best_accuracy)
+
+    def predict(self, x: np.ndarray) -> np.ndarray:
+        cut_results = []
+        for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations)):
+            if location == "left":
+                result = x[:, i] < cut
+            elif location == "right":
+                result = x[:, i] > cut
+            elif location == "middle":
+                result = (cut[0] < x[:, i]) & (x[:, i] < cut[1])
+            elif location == "both_sides":
+                result = (x[:, i] < cut[0]) | (x[:, i] > cut[1])
+            cut_results.append(result)
+
+        return reduce(np.logical_and, cut_results).astype(np.int16)
 
 
 def find_best_cut(sig, bkg, bins=100):
