@@ -8,6 +8,10 @@ theme:
     primary: black
 
 plugins:
+  - exclude:
+      glob:
+        - examples/data/*
+  - mkdocs-jupyter
   - mkdocstrings:
       handlers:
         python:
@@ -20,6 +24,10 @@ plugins:
 
 nav:
   - Introcution: index.md
+  - Examples:
+      - Generate events: examples/generate_events.ipynb
+      - Create datasets: examples/create_datasets.ipynb
+      - Apply methods: examples/apply_methods.ipynb
   - API Reference:
       - hml.generators: api-reference/hml.generators.md
       - hml.datasets: api-reference/hml.datasets.md
