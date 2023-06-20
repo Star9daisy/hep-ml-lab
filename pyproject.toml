@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "hml"
 version = "0.1.0"
-description = "HML (HEP ML Lab) is a compact end-to-end framework for machine learning application in high energy physics."
+description = "An end-to-end framework for signal vs background analysis in high energy physics"
 authors = ["Star9daisy", "star9daisy@outlook.com"]
 readme = "README.md"
 
@@ -22,6 +22,8 @@ pytest = "^7.3.2"
 black = "^23.3.0"
 python-dotenv = "^1.0.0"
 deptry = "^0.12.0"
+mkdocs-jupyter = "^0.24.1"
+mkdocs-exclude = "^1.0.2"
 
 [build-system]
 requires = ["poetry-core"]
