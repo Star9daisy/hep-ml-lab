@@ -35,4 +35,7 @@ jobs:
     - name: Run tests
       run: |
         source root/bin/thisroot.sh
-        poetry run pytest --cov=hml tests
+        poetry run pytest --cov=hml --cov-report=xml tests
+    
+    - name: Upload coverage reports to Codecov with GitHub Action
+      uses: codecov/codecov-action@v3
