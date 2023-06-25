@@ -35,7 +35,9 @@ jobs:
     - name: Run tests
       run: |
         source root/bin/thisroot.sh
-        poetry run pytest --cov=hml --cov-report=xml tests
+        poetry run pytest --cov=hml --cov-report=xml
     
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN}}
