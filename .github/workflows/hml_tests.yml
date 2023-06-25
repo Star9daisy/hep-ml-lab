@@ -35,4 +35,4 @@ jobs:
     - name: Run tests
       run: |
         source root/bin/thisroot.sh
-        pytest --cov=hml tests
+        poetry run pytest --cov=hml tests
