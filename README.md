@@ -1,4 +1,6 @@
-# Introduction
+# HEP ML Lab (HML)
+[![codecov](https://codecov.io/gh/Star9daisy/hml/branch/main/graph/badge.svg?token=6VWJi5ct6c)](https://codecov.io/gh/Star9daisy/hml)
+## Introduction
 
 HML (HEP ML Lab) is a compact end-to-end framework for machine learning application in high energy physics. 
 
