@@ -3,4 +3,5 @@
 **/__pycache__
 **/site
 .env
-.coverage*
+*coverage*
+**/data/
