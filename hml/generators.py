@@ -23,6 +23,8 @@ class Madgraph5:
 
     Parameters
     ----------
+    executable:
+        The executable file of Madgraph5.
     processes:
         The processes to be generated.
     output_dir:
@@ -53,23 +55,6 @@ class Madgraph5:
     | detector    | detector option                  |
     | settings    | set command                      |
     | cards       | paths of cards                   |
-
-
-    Examples
-    --------
-    >>> from hml.generators import Madgraph5
-    Welcome to JupyROOT 6.24/02
-    >>> g = Madgraph5(
-            processes="p p > z j, z > j j",
-            output_dir="./data/pp2zjj",
-            shower="Pythia8",
-            detector="Delphes",
-            settings={"nevents": 1000, "iseed": 42}
-        )
-    >>> g.launch()
-    Generating events...
-    Running Pythia8...
-    Running Delphes...
     """
 
     def __init__(
@@ -97,7 +82,7 @@ class Madgraph5:
     @property
     def commands(self) -> list[str]:
         """Commands converted from parameters to be executed in Madgraph5."""
-        return self._params_to_cmds()
+        return self._parameters_to_commands()
 
     @property
     def runs(self) -> list[MG5Run]:
@@ -123,47 +108,18 @@ class Madgraph5:
         if not executable:
             raise EnvironmentError(f"No Madgraph executable file found for '{self.executable}'")
 
-        # Save cmds to a temporary file
-        def _cmds_to_file(cmds: list[str]) -> str:
-            with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-                temp_file.write("\n".join(cmds))
-                temp_file_path = temp_file.name
-            return temp_file_path
-
         if self.output_dir.exists():
             if new_output:
                 shutil.rmtree(self.output_dir)
                 self.output_dir.mkdir(parents=True)
-                temp_file_path = _cmds_to_file(self.commands)
+                temp_file_path = self._commands_to_file(self.commands)
             else:
-                temp_file_path = _cmds_to_file([f"launch {self.output_dir}"])
+                temp_file_path = self._commands_to_file([f"launch {self.output_dir}"])
         else:
             self.output_dir.mkdir(parents=True)
-            temp_file_path = _cmds_to_file(self.commands)
+            temp_file_path = self._commands_to_file(self.commands)
 
-        # Launch Madgraph5
-        def _check_status(last_status: str) -> str:
-            with open(f"{self.output_dir}.log", "r") as f:
-                contents = f.readlines()
-            for line in contents[::-1]:
-                if line.startswith("Generating"):
-                    last_status = "Generating events..."
-                    break
-                elif "Running Pythia8" in line:
-                    last_status = "Running Pythia8..."
-                    break
-                elif "Running Delphes" in line:
-                    last_status = "Running Delphes..."
-                    break
-                elif "INFO: storing files" in line:
-                    last_status = "Storing files..."
-                    break
-                elif line.startswith("INFO: Done"):
-                    last_status = "Done"
-                    break
-
-            return last_status
-
+        # Launch Madgraph5 and redirect output to a log file
         with open(f"{self.output_dir}.log", "w") as f:
             process = subprocess.Popen(
                 f"{executable} {temp_file_path}",
@@ -175,7 +131,7 @@ class Madgraph5:
         # Check and print status
         status = ""
         while status != "Done" or process.poll() is None:
-            last_status = _check_status(status)
+            last_status = self._check_status(status)
             if last_status != status:
                 if show_status and last_status != "":
                     print(last_status)
@@ -186,47 +142,78 @@ class Madgraph5:
         if Path("py.py").exists():
             Path("py.py").unlink()
 
-    def _params_to_cmds(self) -> list[str]:
+    def _commands_to_file(self, commands: list[str]) -> str:
+        """Write commands to a temporary file and return the path of the file."""
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+            temp_file.write("\n".join(commands))
+            temp_file_path = temp_file.name
+        return temp_file_path
+
+    def _check_status(self, last_status: str) -> str:
+        """Check the status of the launched run."""
+        with open(f"{self.output_dir}.log", "r") as f:
+            contents = f.readlines()
+        for line in contents[::-1]:
+            if line.startswith("Generating"):
+                last_status = "Generating events..."
+                break
+            elif "Running Pythia8" in line:
+                last_status = "Running Pythia8..."
+                break
+            elif "Running Delphes" in line:
+                last_status = "Running Delphes..."
+                break
+            elif "INFO: storing files" in line:
+                last_status = "Storing files..."
+                break
+            elif line.startswith("INFO: Done"):
+                last_status = "Done"
+                break
+
+        return last_status
+
+    def _parameters_to_commands(self) -> list[str]:
+        """Convert parameters to a list of Madgraph5 commands."""
         # Model
-        cmds = [f"import model {str(self.model)}"]
+        commands = [f"import model {str(self.model)}"]
 
         # Definitions
         if self.definitions:
-            cmds += [f"define {k} = {v}" for k, v in self.definitions.items()]
-            cmds += [""]
+            commands += [f"define {k} = {v}" for k, v in self.definitions.items()]
+            commands += [""]
 
         # Processes
         if isinstance(self.processes, str):
-            cmds += [f"generate {self.processes}"]
+            commands += [f"generate {self.processes}"]
         elif isinstance(self.processes, list):
-            cmds += [f"generate {self.processes[0]}"]
-            cmds += [f"add process {p}" for p in self.processes[1:]]
+            commands += [f"generate {self.processes[0]}"]
+            commands += [f"add process {p}" for p in self.processes[1:]]
         else:
             raise TypeError("processes must be str or list[str]")
 
         # Output
-        cmds += [f"output {Path(self.output_dir).absolute()}"]
+        commands += [f"output {Path(self.output_dir).absolute()}"]
 
         # Launch
-        cmds += ["launch"]
+        commands += ["launch"]
 
         # Shower
         if self.shower:
-            cmds += [f"    shower={self.shower}"]
+            commands += [f"    shower={self.shower}"]
 
         # Detector
         if self.detector:
-            cmds += [f"    detector={self.detector}"]
+            commands += [f"    detector={self.detector}"]
 
         # Settings
         if self.settings:
-            cmds += [f"    set {k} {v}" for k, v in self.settings.items()]
+            commands += [f"    set {k} {v}" for k, v in self.settings.items()]
 
         # Cards
         if self.cards:
-            cmds += [f"    {c.absolute()}" for c in self.cards]
+            commands += [f"    {c.absolute()}" for c in self.cards]
 
-        return cmds
+        return commands
 
 
 @dataclass
