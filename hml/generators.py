@@ -124,10 +124,12 @@ class Madgraph5:
         if self.output_dir.exists():
             if new_output:
                 shutil.rmtree(self.output_dir)
+                self.output_dir.mkdir(parents=True)
                 temp_file_path = _cmds_to_file(self.commands)
             else:
                 temp_file_path = _cmds_to_file([f"launch {self.output_dir}"])
         else:
+            self.output_dir.mkdir(parents=True)
             temp_file_path = _cmds_to_file(self.commands)
 
         # Launch Madgraph5
