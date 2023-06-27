@@ -155,8 +155,11 @@ class Madgraph5:
                 elif "Running Delphes" in line:
                     last_status = "Running Delphes..."
                     break
+                elif "INFO: storing files" in line:
+                    last_status = "Storing files..."
+                    break
                 elif line.startswith("INFO: Done"):
-                    last_status = ""
+                    last_status = "Done"
                     break
 
             return last_status
@@ -171,13 +174,13 @@ class Madgraph5:
 
         # Check and print status
         status = ""
-        while process.poll() is None:
+        while status != "Done" or process.poll() is None:
             last_status = _check_status(status)
             if last_status != status:
                 if show_status and last_status != "":
                     print(last_status)
                 status = last_status
-            time.sleep(1)
+            time.sleep(0.1)
 
         # Remove py.py file
         if Path("py.py").exists():
