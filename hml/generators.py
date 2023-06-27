@@ -74,6 +74,7 @@ class Madgraph5:
 
     def __init__(
         self,
+        executable: str,
         processes: str | list[str],
         output_dir: str | Path,
         model: str = "sm",
@@ -83,6 +84,7 @@ class Madgraph5:
         settings: dict[str, Any] | None = None,
         cards: list[str | Path] | None = None,
     ) -> None:
+        self.executable = executable
         self.processes = processes
         self.output_dir = Path(output_dir)
         self.model = model
@@ -116,6 +118,10 @@ class Madgraph5:
         show_status:
             If True, print the status of the launched run, else launch silently.
         """
+
+        executable = shutil.which(self.executable)
+        if not executable:
+            raise EnvironmentError(f"No Madgraph executable file found for '{self.executable}'")
 
         # Save cmds to a temporary file
         def _cmds_to_file(cmds: list[str]) -> str:
@@ -157,7 +163,7 @@ class Madgraph5:
 
         with open(f"{self.output_dir}.log", "w") as f:
             process = subprocess.Popen(
-                f"mg5_aMC {temp_file_path}",
+                f"{executable} {temp_file_path}",
                 shell=True,
                 stdout=f,
                 stderr=subprocess.STDOUT,
