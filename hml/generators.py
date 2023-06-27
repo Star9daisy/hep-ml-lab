@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import copy
 import shutil
 import subprocess
 import tempfile
 import time
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import cppyy
 import ROOT
 
 ROOT.gSystem.Load("libDelphes")
@@ -217,40 +220,48 @@ class Madgraph5:
         return cmds
 
 
+@dataclass
 class MG5Run:
     """MG5Run stores the information of a Madgraph5 run.
 
     Parameters
     ----------
     run_dir:
-        The path to the run directory.
+        The directory path to a run.
+    run_tag:
+        The tag of a run.
+    cross_section:
+        The cross section of the process in a run.
+    events:
+        The events generated in a run.
     """
 
-    def __init__(self, run_dir: str | Path) -> None:
-        self.run_dir = Path(run_dir)
-        self._load()
+    run_dir: str | Path
+    run_tag: str = field(init=False, default="tag_1")
+    cross_section: float = field(init=False)
+    events: cppyy.gbl.TTree = field(init=False)
 
-    def _load(self) -> None:
-        # Find banner file
+    def __post_init__(self):
+        self.run_dir = Path(self.run_dir)
+
+        # Search for the banner file
         banner_file = list(self.run_dir.glob("*banner.txt"))[0]
+
+        # Get the run tag from the banner file name and the run name
+        _prefix = self.run_dir.name + "_"
+        _suffix = "_banner.txt"
+        self.run_tag = banner_file.name.replace(_prefix, "").replace(_suffix, "")
+
+        # Search for cross section from the bottom of the banner file
         with open(banner_file, "r") as f:
             contents = f.readlines()
-
-        # Seach for run tag
-        self.run_tag = "tag_1"
-        for line in contents:
-            if "name of the run" in line:
-                self.run_tag = line.split("!")[0].split("=")[0].strip()
-                break
-
-        # Search for cross section
-        self.cross_section = 0
+        self.cross_section = 0.0
         for line in contents[::-1]:
             if line.startswith("#  Integrated weight (pb)"):
                 self.cross_section = float(line.split()[-1])
                 break
 
-        # Find event file and get events
-        self.event_file = list(self.run_dir.glob("*.root"))[0]
-        self.event_file = ROOT.TFile(str(self.event_file))
-        self.events = self.event_file.Get("Delphes")
+        # Read the events from the .root file via ROOT.TFile
+        event_file = self.run_dir / f"{self.run_tag}_delphes_events.root"
+        event_file = ROOT.TFile(str(event_file))
+        self.events = copy.deepcopy(event_file.Get("Delphes"))
