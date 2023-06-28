@@ -233,6 +233,7 @@ class MG5Run:
     """
 
     directory: str | Path
+    id: str = field(init=False, default="01")
     tag: str = field(init=False, default="tag_1")
     cross_section: float = field(init=False)
     events: cppyy.gbl.TTree = field(init=False)
@@ -240,6 +241,8 @@ class MG5Run:
     def __post_init__(self):
         self.directory = Path(self.directory)
 
+        # Get the run ID from the run directory name
+        self.id = self.directory.name.split("_")[-1]
 
         # Search for the banner file
         banner_file = list(self.directory.glob("*banner.txt"))[0]
