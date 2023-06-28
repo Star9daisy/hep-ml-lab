@@ -67,9 +67,9 @@ def test_Madgraph5():
     assert generator2.commands == expected2
     assert generator2.runs[0].cross_section != 0
 
-    run = MG5Run(run_dir=Path.cwd() / "tests/data/pp2wz/Events/run_01")
+    run = MG5Run(directory=Path.cwd() / "tests/data/pp2wz/Events/run_01")
     assert isinstance(run.events, cppyy.gbl.TTree)
-    assert run.run_tag == "tag_1"
+    assert run.tag == "tag_1"
     assert run.cross_section != 0
 
     # Clean up
