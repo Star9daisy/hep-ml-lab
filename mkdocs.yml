@@ -22,6 +22,10 @@ plugins:
             separate_signature: true
             docstring_section_style: spacy
 
+markdown_extensions:
+  - toc:
+      permalink: "#"
+
 nav:
   - Introcution: index.md
   - Examples:
