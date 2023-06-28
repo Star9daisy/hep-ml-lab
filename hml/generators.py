@@ -232,21 +232,22 @@ class MG5Run:
         The events generated in a run.
     """
 
-    run_dir: str | Path
-    run_tag: str = field(init=False, default="tag_1")
+    directory: str | Path
+    tag: str = field(init=False, default="tag_1")
     cross_section: float = field(init=False)
     events: cppyy.gbl.TTree = field(init=False)
 
     def __post_init__(self):
-        self.run_dir = Path(self.run_dir)
+        self.directory = Path(self.directory)
+
 
         # Search for the banner file
-        banner_file = list(self.run_dir.glob("*banner.txt"))[0]
+        banner_file = list(self.directory.glob("*banner.txt"))[0]
 
         # Get the run tag from the banner file name and the run name
-        _prefix = self.run_dir.name + "_"
+        _prefix = self.directory.name + "_"
         _suffix = "_banner.txt"
-        self.run_tag = banner_file.name.replace(_prefix, "").replace(_suffix, "")
+        self.tag = banner_file.name.replace(_prefix, "").replace(_suffix, "")
 
         # Search for cross section from the bottom of the banner file
         with open(banner_file, "r") as f:
@@ -258,6 +259,6 @@ class MG5Run:
                 break
 
         # Read the events from the .root file via ROOT.TFile
-        event_file = self.run_dir / f"{self.run_tag}_delphes_events.root"
+        event_file = self.directory / f"{self.tag}_delphes_events.root"
         event_file = ROOT.TFile(str(event_file))
         self.events = copy.deepcopy(event_file.Get("Delphes"))
