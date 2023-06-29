@@ -1,9 +1,12 @@
 [tool.poetry]
-name = "hml"
+name = "hep-ml-lab"
 version = "0.1.0"
-description = "An end-to-end framework for signal vs background analysis in high energy physics"
+description = "An end-to-end framework for applying machine learning to high-energy physics research."
 authors = ["Star9daisy", "star9daisy@outlook.com"]
 readme = "README.md"
+packages = [
+    { include = "hml" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
