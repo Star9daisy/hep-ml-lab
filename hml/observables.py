@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import re
+from typing import Protocol
 
 import numpy as np
 from ROOT import TLorentzVector, TTree
+from typing_extensions import runtime_checkable
 
 
 def resolve_shortname(shortname: str) -> tuple[list[str], list[int]]:
@@ -67,7 +69,8 @@ def get_lorentzvector_values(
     return np.array(values, dtype=np.float32)
 
 
-class Observable:
+@runtime_checkable
+class Observable(Protocol):
     def from_event(self, event: TTree):
         pass
 
