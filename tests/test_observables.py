@@ -1,0 +1,60 @@
+import pytest
+
+from hml.generators import MG5Run
+from hml.observables import (
+    DeltaR,
+    E,
+    Eta,
+    M,
+    Observable,
+    Phi,
+    Pt,
+    Px,
+    Py,
+    Pz,
+    get_lorentzvector_values,
+    resolve_shortname,
+)
+
+
+def test_resolve_shortname():
+    assert resolve_shortname("Jet") == (["Jet"], [-1])
+    assert resolve_shortname("Jet1") == (["Jet"], [0])
+    assert resolve_shortname("Muon1") == (["Muon"], [0])
+    assert resolve_shortname("Muon2") == (["Muon"], [1])
+    assert resolve_shortname("Jet1+Jet2") == (["Jet", "Jet"], [0, 1])
+    assert resolve_shortname("Jet1+Jet2+Jet3") == (["Jet", "Jet", "Jet"], [0, 1, 2])
+    assert resolve_shortname("Jet1+Muon1") == (["Jet", "Muon"], [0, 0])
+
+    with pytest.raises(ValueError):
+        resolve_shortname("Jet0")
+    with pytest.raises(ValueError):
+        resolve_shortname("*Jet")
+
+
+def test_observables():
+    run = MG5Run("tests/data/pp2zz/Events/run_01/")
+    event = next(iter(run.events))
+
+    for obs in [Pt, M, Eta, Phi, Px, Py, Pz, E]:
+        assert issubclass(obs, Observable)
+        for shortname in ["Jet", "Jet1", "Jet2"]:
+            a = obs(shortname)
+            a.from_event(event)
+            assert a.values is not None
+
+    assert issubclass(DeltaR, Observable)
+    obs = DeltaR("Jet1", "Jet2")
+    obs.from_event(event)
+    assert obs.values is not None
+
+
+def test_get_lorentzvector_values():
+    run = MG5Run("tests/data/pp2zz/Events/run_01/")
+    event = next(iter(run.events))
+
+    assert len(get_lorentzvector_values(event, "Pt", ["Jet"], [-1])) == event.Jet_size
+    with pytest.raises(ValueError):
+        get_lorentzvector_values(event, "Pt", ["Jet"], [1, 2])
+    with pytest.raises(IndexError):
+        get_lorentzvector_values(event, "Pt", ["Jet"], [event.Jet_size + 1])
