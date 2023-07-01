@@ -4,7 +4,7 @@ from hml.representations import Set
 
 
 def test_observables():
-    run = MG5Run("tests/data/pp2zz/Events/run_01/")
+    run = MG5Run("tests/data/pp2zj/Events/run_01/")
     representation = Set(
         [
             Pt("Jet1"),
@@ -17,7 +17,7 @@ def test_observables():
     )
 
     for event in run.events:
-        if event.FatJet.GetEntries() < 1:
+        if event.Jet.GetEntries() < 2:
             continue
 
         representation.from_event(event)
