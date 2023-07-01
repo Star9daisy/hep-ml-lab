@@ -237,15 +237,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#introduction-to-madgraph5" class="md-nav__link">
-    Introduction to Madgraph5
+  <a href="#what-is-madgraph5" class="md-nav__link">
+    What is Madgraph5?
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#madgraph5-apis-in-hml" class="md-nav__link">
-    Madgraph5 APIs in HML
+  <a href="#use-madgraph5-in-hml" class="md-nav__link">
+    Use Madgraph5 in HML
   </a>
   
 </li>
@@ -383,15 +383,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#introduction-to-madgraph5" class="md-nav__link">
-    Introduction to Madgraph5
+  <a href="#what-is-madgraph5" class="md-nav__link">
+    What is Madgraph5?
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#madgraph5-apis-in-hml" class="md-nav__link">
-    Madgraph5 APIs in HML
+  <a href="#use-madgraph5-in-hml" class="md-nav__link">
+    Use Madgraph5 in HML
   </a>
   
 </li>
@@ -1448,26 +1448,25 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="generate-events">Generate events<a class="anchor-link" href="#generate-events">&#182;</a></h1><p>This notebook shows how to generate events via Madgraph5 APIs in HML.</p>
-<h2 id="introduction-to-madgraph5">Introduction to Madgraph5<a class="anchor-link" href="#introduction-to-madgraph5">&#182;</a></h2><p><a href="https://launchpad.net/mg5amcnlo">Madgraph5</a> is a framework providing all the necessary elements for studies of collider phenomenology.
-It is able to generate events from a given model in UFO format, connect to a parton shower tool like
-Pythia8, and perform detector simulation via tools like Delphes. It is a powerful and popular tool
-in the high energy physics community.</p>
-<p>Users typically interact with it via a command line interface (CLI). The main commands in Madgraph5
-workflow are: <code>generate</code>, <code>output</code>, <code>launch</code>. <code>generate</code> is used to specify the process
-of interest that allowed in the given model. <code>output</code> is used to specify where the output
-files are stored. <code>launch</code> launches the generation. Then there comes two prompts: the
-first one provides options of tools to use like parton shower and detector simulation, and the second
-one provides related parameter cards allowing users to adjust. After the second enter or <code>done</code>, the
-generation starts.</p>
-<p>After a few tries among different parameters, a run script in plain text could be determined by users
-to automate every step of Madgraph5. It's a good practice to keep the run script for consistency and
-reproducibility. After reading this script, others could understand what you have done and easily
-reproduce the results.</p>
-<h2 id="madgraph5-apis-in-hml">Madgraph5 APIs in HML<a class="anchor-link" href="#madgraph5-apis-in-hml">&#182;</a></h2><p>While it's convenient to use the CLI, it contains a lot of jumps between the command line and the file
-browser. To make it easier to acess the output <code>.root</code> file and cross section information, HML provides
-<code>Madgraph5</code> class to integrate core functions of Madgraph5.</p>
-<p>To use it, let's first import the <code>Madgraph5</code> class from <code>hml.generators</code> module.</p>
+<h1 id="generate-events">Generate events<a class="anchor-link" href="#generate-events">&#182;</a></h1><p>This notebook shows how to generate events using Madgraph5 class in HML.</p>
+<h2 id="what-is-madgraph5">What is Madgraph5?<a class="anchor-link" href="#what-is-madgraph5">&#182;</a></h2><p><a href="https://launchpad.net/mg5amcnlo">Madgraph5</a> is a framework providing all the necessary elements for
+studies of collider phenomenology. It is able to generate events from a given model in UFO format,
+connect to a parton shower tool like Pythia8, and perform detector simulation via tools like Delphes.
+It is a powerful and popular tool in the high energy physics community.</p>
+<p>Usually, you work with Madgraph5 via its command line interface (CLI). The main commands are
+<code>generate</code>, <code>output</code>, <code>launch</code>. <code>generate</code> is used to specify the processes you want to study.
+<code>output</code> is used to decide where to store the output files. <code>launch</code> starts generating the events.
+After this, you get two prompts: the first one lets you choose extra tools for parton shower and
+detector simulation, and the second one lets you tweak the parameters of the current theory model
+and generation run. Once you are done with both prompts, the event generation begins.</p>
+<p>After some trial and error with different settings, you can make a run script in plain text to
+tell Madgraph5 exactly what to do, step by step. It is a good practice to keep this script because
+it makes your work reproducible and consistent. It's also beneficial for others to understand what
+you have done and repeat your work.</p>
+<h2 id="use-madgraph5-in-hml">Use Madgraph5 in HML<a class="anchor-link" href="#use-madgraph5-in-hml">&#182;</a></h2><p>While entering commands in the CLI is handy, it can be cumbersome to jump back and forth between
+the command line and the file browser. HML makes it easier to access the output data and other
+useful information.</p>
+<p>To start using it, let's first import the <code>Madgraph5</code> class from <code>hml.generators</code> module.</p>
 
 </div>
 </div>
@@ -1532,7 +1531,7 @@ browser. To make it easier to acess the output <code>.root</code> file and cross
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>As you can see, the <code>Madgraph5</code> class actually use <code>pyROOT</code> as the backend to operate on the <code>.root</code>
+<p>As you can see, the <code>Madgraph5</code> class actually use <code>PyROOT</code> as the backend to operate on the <code>.root</code>
 file. Move on, we'll see how to use it.</p>
 
 </div>
@@ -1560,8 +1559,9 @@ file. Move on, we'll see how to use it.</p>
                 </clipboard-copy>
             </div>
             <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">signal_generator</span> <span class="o">=</span> <span class="n">Madgraph5</span><span class="p">(</span>
-    <span class="n">processes</span><span class="o">=</span><span class="s2">&quot;p p &gt; z j, z &gt; j j&quot;</span><span class="p">,</span>
-    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./data/pp2zj&quot;</span><span class="p">,</span>
+    <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;mg5_aMC&quot;</span><span class="p">,</span>
+    <span class="n">processes</span><span class="o">=</span><span class="s2">&quot;p p &gt; z z, z &gt; j j, z &gt; ve ve~&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./data/pp2zz&quot;</span><span class="p">,</span>
     <span class="n">shower</span><span class="o">=</span><span class="s2">&quot;Pythia8&quot;</span><span class="p">,</span>
     <span class="n">detector</span><span class="o">=</span><span class="s2">&quot;Delphes&quot;</span><span class="p">,</span>
     <span class="n">settings</span><span class="o">=</span><span class="p">{</span>
@@ -1571,8 +1571,9 @@ file. Move on, we'll see how to use it.</p>
     <span class="p">},</span>
 <span class="p">)</span>
 <span class="n">background_generator</span> <span class="o">=</span> <span class="n">Madgraph5</span><span class="p">(</span>
-    <span class="n">processes</span><span class="o">=</span><span class="s2">&quot;p p &gt; j j j / z&quot;</span><span class="p">,</span>
-    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./data/qcd&quot;</span><span class="p">,</span>
+    <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;mg5_aMC&quot;</span><span class="p">,</span>
+    <span class="n">processes</span><span class="o">=</span><span class="s2">&quot;p p &gt; j j / z&quot;</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./data/pp2jj&quot;</span><span class="p">,</span>
     <span class="n">shower</span><span class="o">=</span><span class="s2">&quot;Pythia8&quot;</span><span class="p">,</span>
     <span class="n">detector</span><span class="o">=</span><span class="s2">&quot;Delphes&quot;</span><span class="p">,</span>
     <span class="n">settings</span><span class="o">=</span><span class="p">{</span>
@@ -1583,8 +1584,9 @@ file. Move on, we'll see how to use it.</p>
 <span class="p">)</span>
 </pre></div>
 <div id="cell-2" class="clipboard-copy-txt">signal_generator = Madgraph5(
-    processes="p p > z j, z > j j",
-    output_dir="./data/pp2zj",
+    executable="mg5_aMC",
+    processes="p p > z z, z > j j, z > ve ve~",
+    output_dir="./data/pp2zz",
     shower="Pythia8",
     detector="Delphes",
     settings={
@@ -1594,8 +1596,9 @@ file. Move on, we'll see how to use it.</p>
     },
 )
 background_generator = Madgraph5(
-    processes="p p > j j j / z",
-    output_dir="./data/qcd",
+    executable="mg5_aMC",
+    processes="p p > j j / z",
+    output_dir="./data/pp2jj",
     shower="Pythia8",
     detector="Delphes",
     settings={
@@ -1619,11 +1622,11 @@ background_generator = Madgraph5(
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>We assume that we want to classify Z jets from ordinary QCD background, so two generators are defined.</p>
-<p>The parameters of <code>Madgraph5</code> class are almost the same as the CLI. There are only name changes to
-make it more clear and easy to understand. For example, <code>define</code> and <code>set</code> commands in CLI are
-<code>definitions</code> and <code>settings</code> here.</p>
-<p>After setting up generators, we can launch them to start generating events.</p>
+<p>We presume that our objective is to distinguish Z jets from the usual QCD background, hence we
+establish two generators.</p>
+<p>The parameters of <code>Madgraph5</code> class closely mirror those of the CLI. For example, <code>define</code> and <code>set</code>
+commands in CLI are <code>definitions</code> and <code>settings</code> here.</p>
+<p>Once the generators are configured, we can start generating events with <code>launch</code> method.</p>
 
 </div>
 </div>
@@ -1676,9 +1679,13 @@ background_generator.launch()</div>
 <pre>Generating events...
 Running Pythia8...
 Running Delphes...
+Storing files...
+Done
 Generating events...
 Running Pythia8...
 Running Delphes...
+Storing files...
+Done
 </pre>
 </div>
 </div>
@@ -1695,10 +1702,10 @@ Running Delphes...
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Note that the <code>launch</code> method of <code>Madgraph5</code> class is different from the CLI. It doesn't launch the
-prompts for tools and parameter ajustment which are now parts of <code>Madgraph5</code> parameters. Instead, it
-will directly begin the generation which is more convenient for automation.</p>
-<p>After the generation, let's check what we have got.</p>
+<p>It's worth noting that the <code>launch</code> method in the <code>Madgraph5</code> class is different from that of the
+CLI. It doesn't launch the two prompts, as they are now parts of <code>Madgraph5</code> parameters. Instead,
+it will directly begin the generation which is more convenient for automation.</p>
+<p>After the generation is done, we can access the output files via the <code>output</code> attribute.</p>
 
 </div>
 </div>
@@ -1756,8 +1763,8 @@ print(f"number of events: {bkg_run.events.GetEntries()}")</div>
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>cross section (pb): 30.950499999999998
-cross section (pb): 171411.19611000002
+<pre>cross section (pb): 0.00077034
+cross section (pb): 56849.047629999994
 number of events: 10000
 number of events: 10000
 </pre>
@@ -1776,9 +1783,11 @@ number of events: 10000
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>As each launch is corresponding to a run directory in Madgraph5, <code>.runs</code> is a intuitively way to get
-all runs. Accessing cross setion is also simple via <code>.cross_section</code>. To access branches in the <code>.root</code>
-file, use <code>.events</code> to open the file and operate it with <code>pyROOT</code> APIs.</p>
+<p>Each launch in Madgraph5 corresponds to a specific run directory. The <code>.runs</code> attribute fetches all
+the runs in the output directory intuitively. Accessing cross section is also simple via the
+<code>.cross_section</code> attribute. To access branches in the <code>.root</code> file, use <code>.events</code> to read the file
+and operate it with <code>PyROOT</code> APIs. Here, we use <code>.GetEntries()</code> to get the number of events.</p>
+<p>To learn more about <code>Madgraph5</code> class, check out the <a href="../../api-reference/hml.generators#hml.generators.Madgraph5">API documentation</a>.</p>
 
 </div>
 </div>

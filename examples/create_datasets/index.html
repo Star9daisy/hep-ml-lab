@@ -1448,14 +1448,30 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="create-datasets">Create datasets<a class="anchor-link" href="#create-datasets">&#182;</a></h1><p>This notebook shows how to prepare data in different representations and create a dataset.</p>
-<h2 id="introduction-to-representations">Introduction to representations<a class="anchor-link" href="#introduction-to-representations">&#182;</a></h2><p>Before applying methods to analyze events, we need to represent them in a proper format.</p>
+<h1 id="create-datasets">Create datasets<a class="anchor-link" href="#create-datasets">&#182;</a></h1><p>This notebook shows how to convert events of ROOT branches into different representations to prepare
+a sample and collect them into a dataset.</p>
+<h2 id="introduction-to-representations">Introduction to representations<a class="anchor-link" href="#introduction-to-representations">&#182;</a></h2><p>Data representations are data structures to store data. There are usually three representations in
+high energy physics: Set, Image, and Graph.</p>
 <p>Set is a 1D representation of events, which contains a set of observables of physics objects.
 Observables are designed variables to refect the properties of events. For example, the invariant
 mass of dijet indicate the middle particle; N-subjettiness indicates the number of subjets in a jet.
-It's a straightforward way and actively used in a large number of analyses.</p>
-<p>! Need description of Image and Graph.</p>
-<h2 id="get-events-from-root-files">Get events from ROOT files<a class="anchor-link" href="#get-events-from-root-files">&#182;</a></h2><p>First, we need to read events from output <code>.root</code> file. Let's import nessary modules from HML.</p>
+Representing events in Set is actively used in a large number of phenomenological studies.
+Observables as high-level low-dimensional features are usually designed with physics insight and
+expertise. Set is usually used in traditional machine learning methods, such as cut-based analysis,
+decision tree, and so on.</p>
+<p>Image is a 2D (gray scale) or 3D (RGB) representation. From the aspect of detectors, they are like
+a giant camera to take pictures of final stable particles. Then these particles naturally form a 2D
+image whose pixel intensity is the energy deposit of particles or other particle-related features,
+and width and height are $\eta-\phi$ (pseudorapidity and azimuthal angle plane). Image could reflect
+the spatial characteristics of events, which is suitable for convolutional neural networks (CNNs).
+Its information is more complete than Set, but it is usually a sparse matrix, which is not storeage
+efficient.</p>
+<p>Graph is a 2D representation. A graph consists of nodes and edges. Here nodes are particles and
+edges are the relationship between particles (e.g. the distance between particles in $\eta-\phi$
+plane). Graph as a low-level high-dimensional representation, contains all the details of events,
+which makes it most suitable for fully exploring potential of new physics and machine learning
+techniques. Graph is usually used in graph neural networks (GNNs).</p>
+<h2 id="get-events-from-root-files">Get events from ROOT files<a class="anchor-link" href="#get-events-from-root-files">&#182;</a></h2><p>First, we need to read events from output <code>.root</code> file. Let's import necessary modules from HML.</p>
 
 </div>
 </div>
@@ -1555,11 +1571,11 @@ run directory to retrieve all useful information.</p>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">sig_run</span> <span class="o">=</span> <span class="n">MG5Run</span><span class="p">(</span><span class="s2">&quot;./data/pp2zj/Events/run_01/&quot;</span><span class="p">)</span>
-<span class="n">bkg_run</span> <span class="o">=</span> <span class="n">MG5Run</span><span class="p">(</span><span class="s2">&quot;./data/qcd/Events/run_01/&quot;</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">sig_run</span> <span class="o">=</span> <span class="n">MG5Run</span><span class="p">(</span><span class="s2">&quot;./data/pp2zz/Events/run_01/&quot;</span><span class="p">)</span>
+<span class="n">bkg_run</span> <span class="o">=</span> <span class="n">MG5Run</span><span class="p">(</span><span class="s2">&quot;./data/pp2jj/Events/run_01/&quot;</span><span class="p">)</span>
 </pre></div>
-<div id="cell-2" class="clipboard-copy-txt">sig_run = MG5Run("./data/pp2zj/Events/run_01/")
-bkg_run = MG5Run("./data/qcd/Events/run_01/")</div>
+<div id="cell-2" class="clipboard-copy-txt">sig_run = MG5Run("./data/pp2zz/Events/run_01/")
+bkg_run = MG5Run("./data/pp2jj/Events/run_01/")</div>
         
         </div>
     </div>
@@ -1625,7 +1641,7 @@ features one event; target is the integer label of each event. We create data an
 lists and fill them by looping over all events.</p>
 <p>To obtain the representation values, call <code>.from_event</code> method, then HML will do the rest to correctly
 get the values in the proper format. In event loop, you can add customed cuts to select events as the
-same way as in <code>pyROOT</code>.</p>
+same way as in <code>PyROOT</code>.</p>
 
 </div>
 </div>
@@ -1683,123 +1699,12 @@ for event in bkg_run.events:
         target.append(0)
 
 data = np.array(data, dtype=np.float32)
-target = np.array(target, dtype=np.int32)
-</div>
+target = np.array(target, dtype=np.int32)</div>
         
         </div>
     </div>
 
 </div>
-</div>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div  class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-5">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
-</pre></div>
-<div id="cell-5" class="clipboard-copy-txt">data.shape</div>
-        
-        </div>
-    </div>
-
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>(16289, 4)</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div  class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-6">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-<div id="cell-6" class="clipboard-copy-txt">np.unique(target, return_counts=True)</div>
-        
-        </div>
-    </div>
-
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>(array([0, 1], dtype=int32), array([7433, 8856]))</pre>
-</div>
-
-</div>
-
-</div>
-
 </div>
 
 </div>
@@ -1821,12 +1726,12 @@ target = np.array(target, dtype=np.int32)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
             <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-7">
+                <clipboard-copy for="cell-5">
                 <div>
                     <span class="notice" hidden>Copied!</span>
                     <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
@@ -1840,51 +1745,19 @@ target = np.array(target, dtype=np.int32)
     <span class="n">data</span><span class="p">,</span>
     <span class="n">target</span><span class="p">,</span>
     <span class="n">feature_names</span><span class="o">=</span><span class="n">representation</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
-    <span class="n">target_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;pp2wz&quot;</span><span class="p">,</span> <span class="s2">&quot;qcd&quot;</span><span class="p">],</span>
-    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;This is a demo dataset for HML. Classify pp2wz and qcd events.&quot;</span><span class="p">,</span>
+    <span class="n">target_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;pp2jj&quot;</span><span class="p">,</span> <span class="s2">&quot;pp2zz&quot;</span><span class="p">],</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;This is a demo dataset for HML. Classify Z jets and QCD jets.&quot;</span><span class="p">,</span>
     <span class="n">dataset_dir</span><span class="o">=</span><span class="s2">&quot;./data/z_vs_qcd&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
-<div id="cell-7" class="clipboard-copy-txt">dataset = Dataset(
+<div id="cell-5" class="clipboard-copy-txt">dataset = Dataset(
     data,
     target,
     feature_names=representation.names,
-    target_names=["pp2wz", "qcd"],
-    description="This is a demo dataset for HML. Classify pp2wz and qcd events.",
+    target_names=["pp2jj", "pp2zz"],
+    description="This is a demo dataset for HML. Classify Z jets and QCD jets.",
     dataset_dir="./data/z_vs_qcd",
 )</div>
-        
-        </div>
-    </div>
-
-</div>
-</div>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div  class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-8">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-</pre></div>
-<div id="cell-8" class="clipboard-copy-txt">dataset.save()</div>
         
         </div>
     </div>
@@ -1900,8 +1773,54 @@ target = np.array(target, dtype=np.int32)
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Finally, call <code>save</code> method to save the dataset to a directory where descriptive information is stored
-as metadata in a yaml file and data and target are stored in a npz file.</p>
+<p>Finally, call <code>save</code> method to save the dataset to a directory where descriptive information is
+stored as metadata in a yaml file and data and target are stored in a npz file. To learn more about
+<code>Dataset</code>, check out the <a href="../../api-reference/hml.datasets/#hml.datasets.Dataset">API documentation</a>.</p>
+
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div  class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-6">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<div id="cell-6" class="clipboard-copy-txt">dataset.save(exist_ok=True)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div>
+<div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>In the next notebook, we will see how to load a local dataset and use it to train a machine learning
+model.</p>
 
 </div>
 </div>
