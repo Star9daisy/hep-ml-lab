@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 from functools import reduce
 from itertools import product
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -54,6 +56,41 @@ class CutBasedAnalysis:
             cut_results.append(result)
 
         return reduce(np.logical_and, cut_results).astype(np.int16)
+
+    def summary(self) -> str:
+        output = [f"Model: {self.name}"]
+        for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations), start=1):
+            if location == "left":
+                output.append(f"Cut{i}: Feature < {cut[0]}")
+            elif location == "right":
+                output.append(f"Cut{i}: Feature > {cut[0]}")
+            elif location == "middle":
+                output.append(f"Cut{i}: {cut[0, 0]} < Feature < {cut[1, 0]}")
+            elif location == "both_sides":
+                output.append(f"Cut{i}: Feature < {cut[0, 0]} or Feature > {cut[1, 0]}")
+
+        return "\n".join(output)
+
+    def save(self, path: str, suffix: str = ".json"):
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        if path.suffix != suffix:
+            path = path.with_suffix(suffix)
+
+        output = {}
+        for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations), start=1):
+            if location == "left":
+                output[f"Cut{i}"] = f"Feature < {cut[0]}"
+            elif location == "right":
+                output[f"Cut{i}"] = f"Feature > {cut[0]}"
+            elif location == "middle":
+                output[f"Cut{i}"] = f"{cut[0, 0]} < Feature < {cut[1, 0]}"
+            elif location == "both_sides":
+                output[f"Cut{i}"] = f"Feature < {cut[0, 0]} or Feature > {cut[1, 0]}"
+
+        with open(path, "w") as f:
+            json.dump(output, f, indent=4)
 
 
 def find_best_cut(sig, bkg, bins=100):
