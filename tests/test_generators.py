@@ -72,10 +72,6 @@ def test_Madgraph5():
     assert run.tag == "tag_1"
     assert run.cross_section != 0
 
-    # Clean up
-    shutil.rmtree(Path.cwd() / "tests/data/pp2zj")
-    shutil.rmtree(Path.cwd() / "tests/data/pp2wz")
-
 
 def test_wrong_executable():
     with pytest.raises(EnvironmentError):
@@ -97,7 +93,3 @@ def test_wrong_executable():
             detector="Delphes",
         )
         generator.launch(new_output=True)
-
-    # Clean up
-    shutil.rmtree(Path.cwd() / "tests/data/pp2zj", ignore_errors=True)
-    shutil.rmtree(Path.cwd() / "tests/data/1111", ignore_errors=True)
