@@ -72,7 +72,7 @@ def get_lorentzvector_values(
 @runtime_checkable
 class Observable(Protocol):
     def from_event(self, event: TTree):
-        pass
+        pass # pragma: no cover
 
 
 class Px(Observable):
