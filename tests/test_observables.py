@@ -33,7 +33,7 @@ def test_resolve_shortname():
 
 
 def test_observables():
-    run = MG5Run("tests/data/pp2zz/Events/run_01/")
+    run = MG5Run("tests/data/pp2zj/Events/run_01/")
     event = next(iter(run.events))
 
     for obs in [Pt, M, Eta, Phi, Px, Py, Pz, E]:
@@ -50,7 +50,7 @@ def test_observables():
 
 
 def test_get_lorentzvector_values():
-    run = MG5Run("tests/data/pp2zz/Events/run_01/")
+    run = MG5Run("tests/data/pp2zj/Events/run_01/")
     event = next(iter(run.events))
 
     assert len(get_lorentzvector_values(event, "Pt", ["Jet"], [-1])) == event.Jet_size
