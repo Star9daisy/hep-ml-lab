@@ -228,6 +228,8 @@ class MG5Run:
         The tag of a run.
     cross_section:
         The cross section of the process in a run.
+    n_events:
+        The number of events generated in a run.
     events:
         The events generated in a run.
     """
@@ -236,7 +238,9 @@ class MG5Run:
     id: str = field(init=False, default="01")
     tag: str = field(init=False, default="tag_1")
     cross_section: float = field(init=False)
-    events: cppyy.gbl.TTree = field(init=False)
+    n_events: int = field(init=False)
+    events: cppyy.gbl.TTree = field(init=False, repr=False)
+    _event_file: cppyy.gbl.TFile = field(init=False, repr=False)
 
     def __post_init__(self):
         self.directory = Path(self.directory)
@@ -263,5 +267,6 @@ class MG5Run:
 
         # Read the events from the .root file via ROOT.TFile
         event_file = self.directory / f"{self.tag}_delphes_events.root"
-        event_file = ROOT.TFile(str(event_file))
-        self.events = copy.deepcopy(event_file.Get("Delphes"))
+        self._event_file = ROOT.TFile(str(event_file))
+        self.events = self._event_file.Get("Delphes")
+        self.n_events = self.events.GetEntries()

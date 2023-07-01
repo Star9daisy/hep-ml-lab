@@ -45,9 +45,10 @@ class BoostedDecisionTree:
         return self.model.predict_proba(x)
 
     def summary(self):
-        print("Model: {}".format(self.name))
+        output = ["Model: {}".format(self.name)]
         for parameter, value in self.model.get_params(deep=False).items():
-            print(f"- {parameter}: {value}")
+            output.append(f"- {parameter}: {value}")
+        return "\n".join(output)
 
     @property
     def n_parameters(self):
