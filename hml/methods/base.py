@@ -55,8 +55,8 @@ class KerasMethod:
     def n_parameters(self) -> int:
         return self.model.count_params()
 
-    def compile(self, *args, **kwargs) -> None:
-        self.model.compile(*args, **kwargs)
+    def compile(self, optimizer="rmsprop", loss=None, metrics=None, *args, **kwargs) -> None:
+        self.model.compile(optimizer, loss, metrics, *args, **kwargs)
 
     def fit(self, x: Any, y: Any, *args, **kwargs) -> dict:
         history = self.model.fit(x, y, *args, **kwargs)
