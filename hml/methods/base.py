@@ -76,14 +76,14 @@ class KerasMethod:
         sys.stdout = stdout
         return output_buffer.getvalue()
 
-    def save(self, file_path: str | Path, overwrite: bool = True, save_format: str = "h5") -> None:
+    def save(self, file_path: str | Path, overwrite: bool = True) -> None:
         file_path = Path(file_path)
-        if file_path.suffix != ".h5" and save_format == "h5":
+        if file_path.suffix != ".h5":
             file_path = file_path.with_suffix(".h5")
         self.model.save(
             filepath=file_path,
             overwrite=overwrite,
-            save_format=save_format,
+            save_format="h5",
         )
 
     @classmethod
