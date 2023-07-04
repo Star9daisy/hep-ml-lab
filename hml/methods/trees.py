@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pickle
 from pathlib import Path
+from typing import Any
 
 from numpy import ndarray
 from sklearn.ensemble import GradientBoostingClassifier
@@ -15,12 +16,22 @@ class BoostedDecisionTree:
         n_estimators: int = 100,
         **kwargs,
     ):
-        self.name = name
-        self.model = GradientBoostingClassifier
-
+        self._name = name
+        self.model = GradientBoostingClassifier(
+            learning_rate=learning_rate, n_estimators=n_estimators, **kwargs
+        )
         self.learning_rate = learning_rate
         self.n_estimators = n_estimators
-        self.other_params = kwargs
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def n_parameters(self) -> int:
+        max_nodes_per_tree = 2 ** (self.model.max_depth + 1) - 1
+        max_parameters = max_nodes_per_tree * self.model.n_estimators
+        return max_parameters
 
     def compile(
         self,
@@ -28,40 +39,44 @@ class BoostedDecisionTree:
         loss: str = "log_loss",
         metrics: None = None,
     ):
-        self.model = self.model(
-            loss=loss,
-            learning_rate=self.learning_rate,
-            n_estimators=self.n_estimators,
-            **self.other_params,
-        )
+        self.optimizer = optimizer
+        self.loss = loss
+        self.metrics = metrics
+        self.model.set_params(loss=loss)
 
-    def fit(self, x_train: ndarray, y_train: ndarray):
-        self.model.fit(x_train, y_train)
+    def fit(self, x: Any, y: Any, verbose: int = 1, *args, **kwargs) -> None:
+        self.model.set_params(verbose=verbose, *args, **kwargs)
+        self.model.fit(x, y)
 
-    def predict(self, x: ndarray) -> ndarray:
-        return self.model.predict(x)
-
-    def predict_proba(self, x: ndarray) -> ndarray:
+    def predict(self, x: Any) -> ndarray:
         return self.model.predict_proba(x)
 
-    def summary(self):
+    def summary(self) -> str:
         output = ["Model: {}".format(self.name)]
         for parameter, value in self.model.get_params(deep=False).items():
             output.append(f"- {parameter}: {value}")
         return "\n".join(output)
 
-    @property
-    def n_parameters(self):
-        max_nodes_per_tree = 2 ** (self.model.max_depth + 1) - 1
-        max_parameters = max_nodes_per_tree * self.model.n_estimators
-        return max_parameters
+    def save(self, file_path: str | Path, overwrite: bool = True) -> None:
+        file_path = Path(file_path)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def save(self, path: str, suffix: str = ".pkl"):
-        path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
+        if file_path.suffix != ".pkl":
+            file_path = file_path.with_suffix(".pkl")
 
-        if path.suffix != suffix:
-            path = path.with_suffix(suffix)
+        if file_path.exists() and not overwrite:
+            raise FileExistsError(f"Checkpoint {file_path} already exists.")
 
-        with open(path, "wb") as f:
+        with open(file_path, "wb") as f:
             pickle.dump(self.model, f)
+
+    @classmethod
+    def load(cls, file_path: str | Path, *args, **kwargs) -> BoostedDecisionTree:
+        file_path = Path(file_path)
+
+        if not file_path.exists():
+            raise FileNotFoundError(f"Checkpoint {file_path} does not exist.")
+
+        with open(file_path, "rb") as f:
+            model = pickle.load(f, *args, **kwargs)
+            return cls(model=model)
