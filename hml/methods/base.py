@@ -78,8 +78,14 @@ class KerasMethod:
 
     def save(self, file_path: str | Path, overwrite: bool = True) -> None:
         file_path = Path(file_path)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
         if file_path.suffix != ".h5":
             file_path = file_path.with_suffix(".h5")
+
+        if file_path.exists() and not overwrite:
+            raise FileExistsError(f"Checkpoint {file_path} already exists.")
+
         self.model.save(
             filepath=file_path,
             overwrite=overwrite,
@@ -87,10 +93,11 @@ class KerasMethod:
         )
 
     @classmethod
-    def load(cls, file_path: str | Path, **kwargs) -> KerasMethod:
+    def load(cls, file_path: str | Path, *args, **kwargs) -> KerasMethod:
         file_path = Path(file_path)
+
         if not file_path.exists():
-            raise FileNotFoundError(f"Saved model {file_path} does not exist.")
-        else:
-            model = load_model(filepath=file_path, **kwargs)
-            return cls(model=model)
+            raise FileNotFoundError(f"Checkpoint {file_path} does not exist.")
+
+        model = load_model(filepath=file_path, *args, **kwargs)
+        return cls(model=model)
