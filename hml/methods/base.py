@@ -35,7 +35,7 @@ class Method(Protocol):
     def summary(self) -> str:
         ...  # pragma: no cover
 
-    def save(self, file_path: str, overwrite: bool, save_format: str) -> None:
+    def save(self, file_path: str, overwrite: bool) -> None:
         ...  # pragma: no cover
 
     @classmethod
