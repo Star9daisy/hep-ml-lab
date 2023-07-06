@@ -68,13 +68,16 @@ class KerasMethod:
     def evaluate(self, x: Any, y: Any, *args, **kwargs) -> float | dict | list:
         return self.model.evaluate(x, y, *args, **kwargs)
 
-    def summary(self) -> str:
-        stdout = sys.stdout
-        output_buffer = StringIO()
-        sys.stdout = output_buffer
-        self.model.summary()
-        sys.stdout = stdout
-        return output_buffer.getvalue()
+    def summary(self, return_string: bool = False, **kwargs) -> str | None:
+        if return_string:
+            stdout = sys.stdout
+            output_buffer = StringIO()
+            sys.stdout = output_buffer
+            self.model.summary(**kwargs)
+            sys.stdout = stdout
+            return output_buffer.getvalue()
+        else:
+            self.model.summary(**kwargs)
 
     def save(self, file_path: str | Path, overwrite: bool = True) -> None:
         file_path = Path(file_path)
