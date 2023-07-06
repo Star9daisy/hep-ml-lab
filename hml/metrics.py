@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import tensorflow as tf
-from keras.metrics import Metric
+from keras.metrics import Metric, SpecificityAtSensitivity
 
 
 class MaxSignificance(Metric):
@@ -65,3 +65,36 @@ class MaxSignificance(Metric):
         for i in range(len(self.thresholds)):
             self.true_positives[i].assign(0.0)
             self.false_positives[i].assign(0.0)
+
+
+class RejectionAtEfficiency(Metric):
+    def __init__(
+        self,
+        efficiency: float,
+        num_thresholds: int = 200,
+        class_id: int = 1,
+        name: str = "rejection_at_efficiency",
+        dtype=None,
+    ):
+        super().__init__(
+            name=name,
+            dtype=dtype,
+        )
+        self.specificity_at_sensitivity = SpecificityAtSensitivity(
+            sensitivity=efficiency,
+            num_thresholds=num_thresholds,
+            class_id=class_id,
+            name=name,
+            dtype=dtype,
+        )
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        self.specificity_at_sensitivity.update_state(y_true, y_pred, sample_weight)
+
+    def result(self):
+        specificity = 1 - self.specificity_at_sensitivity.result()
+        rejection = 1 / (specificity + tf.keras.backend.epsilon())
+        return rejection
+
+    def reset_state(self):
+        self.specificity_at_sensitivity.reset_states()
