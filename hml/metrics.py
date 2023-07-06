@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import tensorflow as tf
 from keras.metrics import Metric
 
@@ -5,20 +7,33 @@ from keras.metrics import Metric
 class MaxSignificance(Metric):
     """Calculate the maximum significance of a model's predictions."""
 
-    def __init__(self, thresholds=[0.5], signal_output_index=0, name="significance", **kwargs):
-        super().__init__(name=name, **kwargs)
-        self.thresholds = thresholds
-        self.signal_output_index = signal_output_index
+    def __init__(
+        self,
+        thresholds: float | list | tuple = 0.5,
+        class_id: int = 1,
+        name: str = "max_significance",
+        dtype=None,
+    ):
+        super().__init__(name=name, dtype=dtype)
+
+        if isinstance(thresholds, (list, tuple)):
+            self.thresholds = thresholds
+        else:
+            self.thresholds = [thresholds]
+
+        self.class_id = class_id
         self.true_positives = [
-            self.add_weight(name=f"tp_{i}", initializer="zeros") for i, _ in enumerate(thresholds)
+            self.add_weight(name=f"tp_{i}", initializer="zeros")
+            for i, _ in enumerate(self.thresholds)
         ]
         self.false_positives = [
-            self.add_weight(name=f"fp_{i}", initializer="zeros") for i, _ in enumerate(thresholds)
+            self.add_weight(name=f"fp_{i}", initializer="zeros")
+            for i, _ in enumerate(self.thresholds)
         ]
 
     def update_state(self, y_true, y_pred, sample_weight=None):
-        y_true_signal = y_true[:, self.signal_output_index]
-        y_pred_signal = y_pred[:, self.signal_output_index]
+        y_true_signal = y_true[:, self.class_id]
+        y_pred_signal = y_pred[:, self.class_id]
         for i, threshold in enumerate(self.thresholds):
             y_pred_thresholded = tf.cast(tf.greater_equal(y_pred_signal, threshold), tf.float32)
             if sample_weight is not None:
