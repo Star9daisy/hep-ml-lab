@@ -35,6 +35,10 @@ class BoostedDecisionTree:
         max_parameters = max_nodes_per_tree * self.model.n_estimators
         return max_parameters
 
+    @property
+    def metrics_names(self) -> list[str]:
+        return ["loss"] + [metric.name for metric in self.metrics]
+
     def compile(
         self,
         optimizer: None = None,
@@ -46,8 +50,11 @@ class BoostedDecisionTree:
         self.loss = getattr(import_module("sklearn.metrics"), loss)
         self.metrics = metrics
 
-    def fit(self, x: Any, y: Any, verbose: int = 1, *args, **kwargs) -> None:
+    def fit(self, x: Any, y: Any, verbose: int = 1, *args, **kwargs) -> dict:
+        self._history = {"loss": []}
         if self.metrics is not None:
+            for metric in self.metrics:
+                self._history[metric.name] = []
 
             def _monitor(i, model, local_variables):
                 y_true = local_variables["y"]
@@ -56,13 +63,14 @@ class BoostedDecisionTree:
 
                 progress = f"Iter {i + 1}/{model.n_estimators}"
                 train_loss = (
-                    f"Loss: {model._loss(y_true, y_pred, local_variables['sample_weight']):.4f}"
+                    f"loss: {model._loss(y_true, y_pred, local_variables['sample_weight']):.4f}"
                 )
 
                 metric_results = []
                 for metric in self.metrics:
                     metric.update_state(y_true, y_prob)
                     metric_results.append(f"{metric.name}: {metric.result():.4f}")
+                    self._history[metric.name].append(metric.result().numpy())
 
                 if verbose > 0:
                     print(f"{progress} - {train_loss} - {' - '.join(metric_results)}")
@@ -71,6 +79,9 @@ class BoostedDecisionTree:
             self.model.fit(x, y, monitor=_monitor, *args, **kwargs)
         else:
             self.model.fit(x, y, *args, **kwargs)
+
+        self._history["loss"] = self.model.train_score_.tolist()
+        return self._history
 
     def predict(self, x: Any) -> ndarray:
         return self.model.predict_proba(x)
