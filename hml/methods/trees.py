@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pickle
+from importlib import import_module
 from pathlib import Path
 from typing import Any
 
@@ -41,9 +42,9 @@ class BoostedDecisionTree:
         metrics: None | list[Metric] = None,
     ):
         self.optimizer = optimizer
-        self.loss = loss
-        self.metrics = metrics
         self.model.set_params(loss=loss)
+        self.loss = getattr(import_module("sklearn.metrics"), loss)
+        self.metrics = metrics
 
     def fit(self, x: Any, y: Any, verbose: int = 1, *args, **kwargs) -> None:
         if self.metrics is not None:
@@ -73,6 +74,25 @@ class BoostedDecisionTree:
 
     def predict(self, x: Any) -> ndarray:
         return self.model.predict_proba(x)
+
+    def evaluate(self, x: ndarray, y: ndarray, verbose: int = 1) -> float | list[float]:
+        y_true = y
+        y_pred = self.predict(x)
+
+        results = {}
+        results["loss"] = self.loss(y_true, y_pred)
+        if self.metrics is not None:
+            for metric in self.metrics:
+                metric.update_state(y_true, y_pred)
+                results[metric.name] = metric.result().numpy()
+
+        if verbose > 0:
+            print(" - ".join([f"{k}: {v:.4f}" for k, v in results.items()]))
+
+        if len(results) == 1:
+            return results["loss"]
+        else:
+            return [v for v in results.values()]
 
     def summary(self) -> str:
         output = ["Model: {}".format(self.name)]
