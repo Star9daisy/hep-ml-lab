@@ -4,6 +4,7 @@ import pickle
 from pathlib import Path
 from typing import Any
 
+from keras.metrics import Metric
 from numpy import ndarray
 from sklearn.ensemble import GradientBoostingClassifier
 
@@ -37,7 +38,7 @@ class BoostedDecisionTree:
         self,
         optimizer: None = None,
         loss: str = "log_loss",
-        metrics: None = None,
+        metrics: None | list[Metric] = None,
     ):
         self.optimizer = optimizer
         self.loss = loss
@@ -45,8 +46,30 @@ class BoostedDecisionTree:
         self.model.set_params(loss=loss)
 
     def fit(self, x: Any, y: Any, verbose: int = 1, *args, **kwargs) -> None:
-        self.model.set_params(verbose=verbose, *args, **kwargs)
-        self.model.fit(x, y)
+        if self.metrics is not None:
+
+            def _monitor(i, model, local_variables):
+                y_true = local_variables["y"]
+                y_pred = local_variables["raw_predictions"]
+                y_prob = model._loss._raw_prediction_to_proba(y_pred)
+
+                progress = f"Iter {i + 1}/{model.n_estimators}"
+                train_loss = (
+                    f"Loss: {model._loss(y_true, y_pred, local_variables['sample_weight']):.4f}"
+                )
+
+                metric_results = []
+                for metric in self.metrics:
+                    metric.update_state(y_true, y_prob)
+                    metric_results.append(f"{metric.name}: {metric.result():.4f}")
+
+                if verbose > 0:
+                    print(f"{progress} - {train_loss} - {' - '.join(metric_results)}")
+                return False
+
+            self.model.fit(x, y, monitor=_monitor, *args, **kwargs)
+        else:
+            self.model.fit(x, y, *args, **kwargs)
 
     def predict(self, x: Any) -> ndarray:
         return self.model.predict_proba(x)
