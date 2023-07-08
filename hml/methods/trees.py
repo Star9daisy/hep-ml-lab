@@ -6,8 +6,11 @@ from pathlib import Path
 from typing import Any
 
 from keras.metrics import Metric
+from keras.utils import to_categorical
 from numpy import ndarray
 from sklearn.ensemble import GradientBoostingClassifier
+
+from ..preprocessing import is_categorical
 
 
 class BoostedDecisionTree:
@@ -51,6 +54,12 @@ class BoostedDecisionTree:
         self.metrics = metrics
 
     def fit(self, x: Any, y: Any, verbose: int = 1, *args, **kwargs) -> dict:
+        if is_categorical(y):
+            encoding = "one-hot"
+            y = y.argmax(axis=1)
+        else:
+            encoding = "ordinal"
+
         self._history = {"loss": []}
         if self.metrics is not None:
             for metric in self.metrics:
@@ -67,6 +76,8 @@ class BoostedDecisionTree:
                 )
 
                 metric_results = []
+                if encoding == "one-hot":
+                    y_true = to_categorical(y_true)
                 for metric in self.metrics:
                     metric.update_state(y_true, y_prob)
                     metric_results.append(f"{metric.name}: {metric.result():.4f}")
