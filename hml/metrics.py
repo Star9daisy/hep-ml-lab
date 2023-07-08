@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import numpy as np
 import tensorflow as tf
 from keras.metrics import Metric, SpecificityAtSensitivity
 
@@ -33,9 +34,23 @@ class MaxSignificance(Metric):
             for i, _ in enumerate(self.thresholds)
         ]
 
-    def update_state(self, y_true, y_pred, sample_weight=None):
+    def update_state(
+        self,
+        y_true: list | np.ndarray | tf.Tensor,
+        y_pred: list | np.ndarray | tf.Tensor,
+        sample_weight: list | np.ndarray | tf.Tensor | None = None,
+    ):
+        y_true = tf.convert_to_tensor(y_true)
+        y_pred = tf.convert_to_tensor(y_pred)
+        sample_weight = tf.convert_to_tensor(sample_weight) if sample_weight is not None else None
+
+        if len(y_true.shape) == 1:
+            n_classes = y_pred.shape[1]
+            y_true = tf.one_hot(y_true, n_classes)
+
         y_true_signal = y_true[:, self.class_id]
         y_pred_signal = y_pred[:, self.class_id]
+
         for i, threshold in enumerate(self.thresholds):
             y_pred_thresholded = tf.cast(tf.greater_equal(y_pred_signal, threshold), tf.float32)
             if sample_weight is not None:
@@ -51,7 +66,7 @@ class MaxSignificance(Metric):
                     tf.reduce_sum((1 - y_true_signal) * y_pred_thresholded)
                 )
 
-    def result(self):
+    def result(self) -> tf.Tensor:
         significances = [
             tp / tf.sqrt(fp + tf.keras.backend.epsilon())
             for tp, fp in zip(self.true_positives, self.false_positives)
@@ -62,7 +77,7 @@ class MaxSignificance(Metric):
         ]
         return tf.reduce_max(significances)
 
-    def reset_state(self):
+    def reset_state(self) -> None:
         # The state of the metric will be reset at the start of each epoch.
         for i in range(len(self.thresholds)):
             self.true_positives[i].assign(0.0)
@@ -72,8 +87,8 @@ class MaxSignificance(Metric):
 class RejectionAtEfficiency(Metric):
     def __init__(
         self,
-        efficiency: float,
-        num_thresholds: int = 200,
+        efficiency: float = 0.5,
+        n_thresholds: int = 201,
         class_id: int = 1,
         name: str = "rejection_at_efficiency",
         dtype=None,
@@ -84,19 +99,24 @@ class RejectionAtEfficiency(Metric):
         )
         self.specificity_at_sensitivity = SpecificityAtSensitivity(
             sensitivity=efficiency,
-            num_thresholds=num_thresholds,
+            num_thresholds=n_thresholds,
             class_id=class_id,
             name=name,
             dtype=dtype,
         )
 
-    def update_state(self, y_true, y_pred, sample_weight=None):
+    def update_state(
+        self,
+        y_true: list | np.ndarray | tf.Tensor,
+        y_pred: list | np.ndarray | tf.Tensor,
+        sample_weight: list | np.ndarray | tf.Tensor | None = None,
+    ):
         self.specificity_at_sensitivity.update_state(y_true, y_pred, sample_weight)
 
-    def result(self):
+    def result(self) -> tf.Tensor:
         specificity = 1 - self.specificity_at_sensitivity.result()
         rejection = 1 / (specificity + tf.keras.backend.epsilon())
         return rejection
 
-    def reset_state(self):
+    def reset_state(self) -> None:
         self.specificity_at_sensitivity.reset_states()
