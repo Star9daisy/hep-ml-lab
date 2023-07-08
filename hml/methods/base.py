@@ -5,7 +5,7 @@ from io import StringIO
 from pathlib import Path
 from typing import Any, Protocol
 
-import numpy
+import numpy as np
 from keras import Model
 from keras.engine.functional import Functional
 from keras.engine.sequential import Sequential
@@ -17,29 +17,30 @@ class Method(Protocol):
     def name(self) -> str:
         ...  # pragma: no cover
 
+    @property
     def n_parameters(self) -> int:
         ...  # pragma: no cover
 
-    def compile(self, optimizer: Any, loss: Any, metrics: Any) -> None:
+    def compile(self, optimizer: Any, loss: Any, metrics: Any, *args, **kwargs) -> None:
         ...  # pragma: no cover
 
     def fit(self, x: Any, y: Any, *args, **kwargs) -> dict:
         ...  # pragma: no cover
 
-    def predict(self, x: Any, *args, **kwargs) -> numpy.ndarray:
+    def predict(self, x: Any, *args, **kwargs) -> np.ndarray:
         ...  # pragma: no cover
 
-    def evaluate(self, x: Any, y: Any, *args, **kwargs) -> dict:
+    def evaluate(self, x: Any, y: Any, *args, **kwargs) -> Any:
         ...  # pragma: no cover
 
-    def summary(self) -> str:
+    def summary(self, *args, **kwargs) -> Any:
         ...  # pragma: no cover
 
-    def save(self, file_path: str, overwrite: bool) -> None:
+    def save(self, file_path: str, overwrite: bool, *args, **kwargs) -> None:
         ...  # pragma: no cover
 
     @classmethod
-    def load(cls, file_path: str) -> Method:
+    def load(cls, file_path: str, *args, **kwargs) -> Method:
         ...  # pragma: no cover
 
 
@@ -62,7 +63,7 @@ class KerasMethod:
         history = self.model.fit(x, y, *args, **kwargs)
         return history.history
 
-    def predict(self, x: Any, *args, **kwargs) -> numpy.ndarray:
+    def predict(self, x: Any, *args, **kwargs) -> np.ndarray:
         return self.model.predict(x, *args, **kwargs)
 
     def evaluate(self, x: Any, y: Any, *args, **kwargs) -> float | dict | list:
