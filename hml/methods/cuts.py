@@ -7,6 +7,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from keras.utils import to_categorical
 
 
 class CutBasedAnalysis:
@@ -44,9 +45,17 @@ class CutBasedAnalysis:
         self.loss = loss
         self.metrics = metrics
 
-    def fit(self, x_train: np.ndarray, y_train: np.ndarray) -> None:
-        signal = x_train[y_train == 1]
-        background = x_train[y_train == 0]
+    def fit(self, x: np.ndarray, y: np.ndarray, signal_id: int = 1, verbose: int = 1) -> dict:
+        if y.ndim == 2:
+            _y = y.argmax(axis=1)
+        else:
+            _y = y
+        signal = x[_y == signal_id]
+        background = x[_y != signal_id]
+        self._history = {"loss": []}
+        if self.metrics is not None:
+            for metric in self.metrics:
+                self._history[metric.name] = []
 
         for i in range(signal.shape[1]):
             signal_location, cut, best_accuracy = find_best_cut(
@@ -55,6 +64,22 @@ class CutBasedAnalysis:
             self.signal_locations.append(signal_location)
             self.cuts.append(cut)
             self.best_accurcies.append(best_accuracy)
+
+            progress = f"Cut {i + 1}/{signal.shape[1]}"
+            loss = f"loss: {self.loss(y, self.predict(x)):.4f}"
+            self._history["loss"].append(self.loss(y, self.predict(x)).numpy())
+
+            metric_results = []
+            if self.metrics is not None:
+                for metric in self.metrics:
+                    metric.update_state(y, self.predict(x))
+                    metric_results.append(f"{metric.name}: {metric.result():.4f}")
+                    self._history[metric.name].append(metric.result().numpy())
+
+            if verbose > 0:
+                print(" - ".join([progress, loss] + metric_results))
+
+        return self._history
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         cut_results = []
@@ -69,7 +94,27 @@ class CutBasedAnalysis:
                 result = (x[:, i] < cut[0]) | (x[:, i] > cut[1])
             cut_results.append(result)
 
-        return reduce(np.logical_and, cut_results).astype(np.int16)
+        y_pred_raw = reduce(np.logical_and, cut_results).astype(np.int16)
+        return to_categorical(y_pred_raw)
+
+    def evaluate(self, x: np.ndarray, y: np.ndarray, verbose: int = 1) -> float | list[float]:
+        y_true = y
+        y_pred = self.predict(x)
+
+        results = {}
+        results["loss"] = self.loss(y_true, y_pred).numpy()
+        if self.metrics is not None:
+            for metric in self.metrics:
+                metric.update_state(y_true, y_pred)
+                results[metric.name] = metric.result().numpy()
+
+        if verbose > 0:
+            print(" - ".join([f"{k}: {v:.4f}" for k, v in results.items()]))
+
+        if len(results) == 1:
+            return results["loss"]
+        else:
+            return [v for v in results.values()]
 
     def summary(self) -> str:
         output = [f"Model: {self.name}"]
