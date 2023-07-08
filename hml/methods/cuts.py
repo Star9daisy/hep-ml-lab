@@ -15,20 +15,34 @@ class CutBasedAnalysis:
         name: str = "cut_based_analysis",
         bins: int = 100,
     ):
-        self.name = name
+        self._name = name
         self.bins = bins
 
         self.signal_locations = []
         self.cuts = []
         self.best_accurcies = []
 
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def n_parameters(self) -> int:
+        return len(self.cuts)
+
+    @property
+    def metrics_names(self) -> list[str]:
+        return ["loss"] + [metric.name for metric in self.metrics]
+
     def compile(
         self,
-        optimizer: str = "auto",
+        optimizer: None = None,
         loss: None = None,
         metrics: None = None,
     ) -> None:
-        pass
+        self.optimizer = optimizer
+        self.loss = loss
+        self.metrics = metrics
 
     def fit(self, x_train: np.ndarray, y_train: np.ndarray) -> None:
         signal = x_train[y_train == 1]
