@@ -9,17 +9,19 @@ class MaxSignificance(Metric):
 
     def __init__(
         self,
-        thresholds: float | list | tuple = 0.5,
+        n_thresholds: int = 201,
         class_id: int = 1,
         name: str = "max_significance",
         dtype=None,
     ):
         super().__init__(name=name, dtype=dtype)
 
-        if isinstance(thresholds, (list, tuple)):
-            self.thresholds = thresholds
+        # Compute thresholds in [0, 1] range
+        if n_thresholds == 1:
+            self.thresholds = [0.5]
         else:
-            self.thresholds = [thresholds]
+            thresholds = [i / (n_thresholds - 1) for i in range(n_thresholds - 1)]
+            self.thresholds = [0.0] + thresholds + [1.0]
 
         self.class_id = class_id
         self.true_positives = [
