@@ -107,10 +107,13 @@ class BoostedDecisionTree:
         if verbose > 0:
             print(" - ".join([f"{k}: {v:.4f}" for k, v in results.items()]))
 
+        for k, v in results.items():
+            results[k] = [v]
+
         return results
 
     def summary(self, return_string: bool = False, deep=False, **kwargs) -> str | None:
-        output = ["Model: {}".format(self.name)]
+        output = ['Model: "{}"'.format(self.name)]
         for parameter, value in self.model.get_params(deep=deep, **kwargs).items():
             output.append(f"- {parameter}: {value}")
 
