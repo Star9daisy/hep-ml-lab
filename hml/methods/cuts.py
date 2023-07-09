@@ -122,7 +122,7 @@ class CutBasedAnalysis:
         return results
 
     def summary(self, return_string: bool = False) -> str | None:
-        output = [f"Model: {self.name}"]
+        output = [f'Model: "{self.name}"']
         for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations), start=1):
             if location == "left":
                 output.append(f"Cut{i}: Feature < {cut[0]}")
