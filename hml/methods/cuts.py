@@ -123,6 +123,7 @@ class CutBasedAnalysis:
 
         return results
 
+    def summary(self, return_string: bool = False) -> str | None:
         output = [f"Model: {self.name}"]
         for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations), start=1):
             if location == "left":
@@ -134,14 +135,20 @@ class CutBasedAnalysis:
             elif location == "both_sides":
                 output.append(f"Cut{i}: Feature < {cut[0, 0]} or Feature > {cut[1, 0]}")
 
-        return "\n".join(output)
+        if return_string:
+            return "\n".join(output)
+        else:
+            print("\n".join(output))
 
-    def save(self, path: str, suffix: str = ".json"):
-        path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
+    def save(self, file_path: str | Path, overwrite: bool = True) -> None:
+        file_path = Path(file_path)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        if path.suffix != suffix:
-            path = path.with_suffix(suffix)
+        if file_path.suffix != ".json":
+            file_path = file_path.with_suffix(".json")
+
+        if file_path.exists() and not overwrite:
+            raise FileExistsError(f"Checkpoint {file_path} already exists.")
 
         output = {}
         for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations), start=1):
@@ -154,7 +161,7 @@ class CutBasedAnalysis:
             elif location == "both_sides":
                 output[f"Cut{i}"] = f"Feature < {cut[0, 0]} or Feature > {cut[1, 0]}"
 
-        with open(path, "w") as f:
+        with open(file_path, "w") as f:
             json.dump(output, f, indent=4)
 
 
