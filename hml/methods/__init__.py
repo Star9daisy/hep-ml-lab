@@ -1,1 +1,1 @@
-from .base import KerasMethod
+from .base import Method
