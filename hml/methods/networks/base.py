@@ -12,7 +12,7 @@ from keras.models import load_model
 
 
 class KerasMethod:
-    def __init__(self, model: Sequential | Functional | Model) -> None:
+    def __init__(self, model: Sequential | Functional | Model):
         self.model = model
 
     @property
@@ -26,14 +26,14 @@ class KerasMethod:
     def compile(self, optimizer="rmsprop", loss=None, metrics=None, *args, **kwargs) -> None:
         self.model.compile(optimizer, loss, metrics, *args, **kwargs)
 
-    def fit(self, x: Any, y: Any, *args, **kwargs) -> dict:
+    def fit(self, x: Any, y: Any, *args, **kwargs) -> dict[str, list[float]]:
         history = self.model.fit(x, y, *args, **kwargs)
         return history.history
 
     def predict(self, x: Any, *args, **kwargs) -> Any:
         return self.model.predict(x, *args, **kwargs)
 
-    def evaluate(self, x: Any, y: Any, **kwargs) -> dict:
+    def evaluate(self, x: Any, y: Any, **kwargs) -> dict[str, list[float]]:
         results = self.model.evaluate(x, y, return_dict=True, **kwargs)
         for metric, value in results.items():
             results[metric] = [value]
