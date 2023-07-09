@@ -3,7 +3,6 @@ from __future__ import annotations
 import pickle
 from importlib import import_module
 from pathlib import Path
-from typing import Any
 
 from keras.metrics import Metric
 from keras.utils import to_categorical
