@@ -14,10 +14,10 @@ class CutBasedAnalysis:
     def __init__(
         self,
         name: str = "cut_based_analysis",
-        bins: int = 100,
+        n_bins: int = 100,
     ):
         self._name = name
-        self.bins = bins
+        self.n_bins = n_bins
 
         self.signal_locations = []
         self.cuts = []
@@ -59,7 +59,7 @@ class CutBasedAnalysis:
 
         for i in range(signal.shape[1]):
             signal_location, cut, best_accuracy = find_best_cut(
-                signal[:, i], background[:, i], bins=self.bins
+                signal[:, i], background[:, i], n_bins=self.n_bins
             )
             self.signal_locations.append(signal_location)
             self.cuts.append(cut)
@@ -152,8 +152,8 @@ class CutBasedAnalysis:
             json.dump(output, f, indent=4)
 
 
-def find_best_cut(sig, bkg, bins=100):
-    _, bins_edges = np.histogram(np.concatenate([sig, bkg]), bins=bins)
+def find_best_cut(sig: np.ndarray, bkg: np.ndarray, n_bins=100):
+    _, bins_edges = np.histogram(np.concatenate([sig, bkg]), bins=n_bins)
     cuts = bins_edges[..., None]
     sig = sig[None, ...]
     bkg = bkg[None, ...]
