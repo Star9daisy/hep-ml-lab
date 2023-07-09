@@ -23,7 +23,6 @@ class CutBasedAnalysis:
 
         self.signal_locations = []
         self.cuts = []
-        self.best_accurcies = []
 
     @property
     def name(self) -> str:
@@ -63,12 +62,13 @@ class CutBasedAnalysis:
                 self._history[metric.name] = []
 
         for i in range(signal.shape[1]):
+            # TODO: Add loss to find_best_cut
             signal_location, cut, best_accuracy = find_best_cut(
                 signal[:, i], background[:, i], n_bins=self.n_bins
             )
             self.signal_locations.append(signal_location)
             self.cuts.append(cut)
-            self.best_accurcies.append(best_accuracy)
+            # self.best_accurcies.append(best_accuracy)
 
             progress = f"Cut {i + 1}/{signal.shape[1]}"
             loss = f"loss: {self.loss(y, self.predict(x)):.4f}"
