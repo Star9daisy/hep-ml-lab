@@ -10,7 +10,7 @@ class MaxSignificance(Metric):
 
     def __init__(
         self,
-        n_thresholds: int = 201,
+        n_thresholds: int = 101,
         class_id: int = 1,
         name: str = "max_significance",
         dtype=None,
@@ -88,7 +88,7 @@ class RejectionAtEfficiency(Metric):
     def __init__(
         self,
         efficiency: float = 0.5,
-        n_thresholds: int = 201,
+        n_thresholds: int = 101,
         class_id: int = 1,
         name: str = "rejection_at_efficiency",
         dtype=None,
