@@ -66,9 +66,7 @@ class BoostedDecisionTree:
                 y_prob = model._loss._raw_prediction_to_proba(y_pred)
 
                 progress = f"Iter {i + 1}/{model.n_estimators}"
-                train_loss = (
-                    f"loss: {model._loss(y_true, y_pred, local_variables['sample_weight']):.4f}"
-                )
+                loss = f"loss: {model._loss(y_true, y_pred, local_variables['sample_weight']):.4f}"
 
                 metric_results = []
                 if encoding == "one-hot":
@@ -79,7 +77,7 @@ class BoostedDecisionTree:
                     self._history[metric.name].append(metric.result().numpy())
 
                 if verbose > 0:
-                    print(f"{progress} - {train_loss} - {' - '.join(metric_results)}")
+                    print(f"{progress} - {loss} - {' - '.join(metric_results)}")
                 return False
 
             self.model.fit(x, y, monitor=_monitor, **kwargs)
