@@ -104,7 +104,7 @@ class CutBasedAnalysis:
         y_pred_raw = reduce(np.logical_and, cut_results).astype(np.int16)
         return to_categorical(y_pred_raw)
 
-    def evaluate(self, x: np.ndarray, y: np.ndarray, verbose: int = 1) -> float | list[float]:
+    def evaluate(self, x: np.ndarray, y: np.ndarray, verbose: int = 1) -> dict[str, list[float]]:
         y_true = y
         y_pred = self.predict(x)
 
@@ -118,12 +118,11 @@ class CutBasedAnalysis:
         if verbose > 0:
             print(" - ".join([f"{k}: {v:.4f}" for k, v in results.items()]))
 
-        if len(results) == 1:
-            return results["loss"]
-        else:
-            return [v for v in results.values()]
+        for k, v in results.items():
+            results[k] = [v]
 
-    def summary(self) -> str:
+        return results
+
         output = [f"Model: {self.name}"]
         for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations), start=1):
             if location == "left":
