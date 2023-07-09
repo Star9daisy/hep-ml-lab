@@ -38,22 +38,18 @@ class BoostedDecisionTree:
         max_parameters = max_nodes_per_tree * self.model.n_estimators
         return max_parameters
 
-    @property
-    def metrics_names(self) -> list[str]:
-        return ["loss"] + [metric.name for metric in self.metrics]
-
     def compile(
         self,
         optimizer: None = None,
         loss: str = "log_loss",
         metrics: None | list[Metric] = None,
-    ):
+    ) -> None:
         self.optimizer = optimizer
         self.model.set_params(loss=loss)
         self.loss = getattr(import_module("sklearn.metrics"), loss)
         self.metrics = metrics
 
-    def fit(self, x: Any, y: Any, verbose: int = 1, *args, **kwargs) -> dict:
+    def fit(self, x: ndarray, y: ndarray, verbose: int = 1, **kwargs) -> dict[str, list[float]]:
         if is_categorical(y):
             encoding = "one-hot"
             y = y.argmax(axis=1)
@@ -87,17 +83,18 @@ class BoostedDecisionTree:
                     print(f"{progress} - {train_loss} - {' - '.join(metric_results)}")
                 return False
 
-            self.model.fit(x, y, monitor=_monitor, *args, **kwargs)
+            self.model.fit(x, y, monitor=_monitor, **kwargs)
+
         else:
-            self.model.fit(x, y, *args, **kwargs)
+            self.model.fit(x, y, **kwargs)
 
         self._history["loss"] = self.model.train_score_.tolist()
         return self._history
 
-    def predict(self, x: Any) -> ndarray:
+    def predict(self, x: ndarray) -> ndarray:
         return self.model.predict_proba(x)
 
-    def evaluate(self, x: ndarray, y: ndarray, verbose: int = 1) -> float | list[float]:
+    def evaluate(self, x: ndarray, y: ndarray, verbose: int = 1) -> dict[str, list[float]]:
         y_true = y
         y_pred = self.predict(x)
 
@@ -111,16 +108,17 @@ class BoostedDecisionTree:
         if verbose > 0:
             print(" - ".join([f"{k}: {v:.4f}" for k, v in results.items()]))
 
-        if len(results) == 1:
-            return results["loss"]
-        else:
-            return [v for v in results.values()]
+        return results
 
-    def summary(self) -> str:
+    def summary(self, return_string: bool = False, deep=False, **kwargs) -> str | None:
         output = ["Model: {}".format(self.name)]
-        for parameter, value in self.model.get_params(deep=False).items():
+        for parameter, value in self.model.get_params(deep=deep, **kwargs).items():
             output.append(f"- {parameter}: {value}")
-        return "\n".join(output)
+
+        if return_string:
+            return "\n".join(output)
+        else:
+            print("\n".join(output))
 
     def save(self, file_path: str | Path, overwrite: bool = True) -> None:
         file_path = Path(file_path)
