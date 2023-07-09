@@ -22,7 +22,8 @@ class MaxSignificance(Metric):
             self.thresholds = [0.5]
         else:
             thresholds = [i / (n_thresholds - 1) for i in range(n_thresholds - 1)]
-            self.thresholds = [0.0] + thresholds + [1.0]
+            thresholds = [0.0] + thresholds + [1.0]
+            self.thresholds = tf.convert_to_tensor(thresholds)
 
         self.class_id = class_id
         self.true_positives = [
@@ -48,8 +49,8 @@ class MaxSignificance(Metric):
             n_classes = y_pred.shape[1]
             y_true = tf.one_hot(y_true, n_classes)
 
-        y_true_signal = y_true[:, self.class_id]
-        y_pred_signal = y_pred[:, self.class_id]
+        y_true_signal = tf.gather(y_true, self.class_id, axis=1)
+        y_pred_signal = tf.gather(y_pred, self.class_id, axis=1)
 
         for i, threshold in enumerate(self.thresholds):
             y_pred_thresholded = tf.cast(tf.greater_equal(y_pred_signal, threshold), tf.float32)
@@ -72,10 +73,11 @@ class MaxSignificance(Metric):
             for tp, fp in zip(self.true_positives, self.false_positives)
         ]
         self.max_significance_threshold_index = tf.argmax(significances)
-        self.max_significance_threshold = tf.convert_to_tensor(self.thresholds)[
-            self.max_significance_threshold_index
-        ]
-        return tf.reduce_max(significances)
+        self.max_significance_threshold = tf.gather(
+            self.thresholds, self.max_significance_threshold_index
+        )
+        self.max_significance = tf.reduce_max(significances)
+        return self.max_significance
 
     def reset_state(self) -> None:
         # The state of the metric will be reset at the start of each epoch.
