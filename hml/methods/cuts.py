@@ -97,7 +97,7 @@ class CutBasedAnalysis:
                 result = x[:, i] > cut
             elif location == "middle":
                 result = (cut[0] < x[:, i]) & (x[:, i] < cut[1])
-            elif location == "both_sides":
+            else:
                 result = (x[:, i] < cut[0]) | (x[:, i] > cut[1])
             cut_results.append(result)
 
@@ -132,7 +132,7 @@ class CutBasedAnalysis:
                 output.append(f"Cut{i}: Feature > {cut[0]}")
             elif location == "middle":
                 output.append(f"Cut{i}: {cut[0, 0]} < Feature < {cut[1, 0]}")
-            elif location == "both_sides":
+            else:
                 output.append(f"Cut{i}: Feature < {cut[0, 0]} or Feature > {cut[1, 0]}")
 
         if return_string:
