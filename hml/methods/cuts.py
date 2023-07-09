@@ -148,19 +148,30 @@ class CutBasedAnalysis:
         if file_path.exists() and not overwrite:
             raise FileExistsError(f"Checkpoint {file_path} already exists.")
 
-        output = {}
-        for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations), start=1):
-            if location == "left":
-                output[f"Cut{i}"] = f"Feature < {cut[0]}"
-            elif location == "right":
-                output[f"Cut{i}"] = f"Feature > {cut[0]}"
-            elif location == "middle":
-                output[f"Cut{i}"] = f"{cut[0, 0]} < Feature < {cut[1, 0]}"
-            elif location == "both_sides":
-                output[f"Cut{i}"] = f"Feature < {cut[0, 0]} or Feature > {cut[1, 0]}"
+        output = {
+            "name": self.name,
+            "n_bins": self.n_bins,
+            "signal_locations": self.signal_locations,
+            "cuts": [cut.tolist() for cut in self.cuts],
+        }
 
         with open(file_path, "w") as f:
             json.dump(output, f, indent=4)
+
+    @classmethod
+    def load(cls, file_path: str | Path, *args, **kwargs) -> CutBasedAnalysis:
+        file_path = Path(file_path)
+
+        if not file_path.exists():
+            raise FileNotFoundError(f"Checkpoint {file_path} does not exist.")
+
+        with open(file_path, "r") as f:
+            parameters = json.load(f, *args, **kwargs)
+
+        model = cls(parameters["name"], parameters["n_bins"])
+        model.signal_locations = parameters["signal_locations"]
+        model.cuts = [np.array(cut) for cut in parameters["cuts"]]
+        return model
 
 
 def find_best_cut(sig: np.ndarray, bkg: np.ndarray, n_bins=100):
