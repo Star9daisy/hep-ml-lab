@@ -38,20 +38,27 @@ class CutBasedAnalysis:
     def compile(
         self,
         optimizer: None = None,
-        loss: None = None,
-        metrics: None = None,
+        loss: Loss | None = None,
+        metrics: None | list[Metric] = None,
     ) -> None:
         self.optimizer = optimizer
+
+        if loss is None:
+            raise ValueError("Loss function must be specified.")
+
         self.loss = loss
         self.metrics = metrics
 
-    def fit(self, x: np.ndarray, y: np.ndarray, signal_id: int = 1, verbose: int = 1) -> dict:
+    def fit(
+        self, x: np.ndarray, y: np.ndarray, signal_id: int = 1, verbose: int = 1
+    ) -> dict[str, list[float]]:
         if y.ndim == 2:
             _y = y.argmax(axis=1)
         else:
             _y = y
         signal = x[_y == signal_id]
         background = x[_y != signal_id]
+
         self._history = {"loss": []}
         if self.metrics is not None:
             for metric in self.metrics:
