@@ -7,6 +7,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from keras.losses import Loss
+from keras.metrics import Metric
 from keras.utils import to_categorical
 
 
@@ -30,10 +32,6 @@ class CutBasedAnalysis:
     @property
     def n_parameters(self) -> int:
         return len(self.cuts)
-
-    @property
-    def metrics_names(self) -> list[str]:
-        return ["loss"] + [metric.name for metric in self.metrics]
 
     def compile(
         self,
