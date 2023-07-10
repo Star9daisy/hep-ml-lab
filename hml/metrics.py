@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import keras
 import numpy as np
 import tensorflow as tf
 from keras.metrics import Metric, SpecificityAtSensitivity
 
 
+@tf.keras.utils.register_keras_serializable()
 class MaxSignificance(Metric):
     """Calculate the maximum significance of a model's predictions."""
 
@@ -52,7 +54,7 @@ class MaxSignificance(Metric):
         y_true_signal = tf.gather(y_true, self.class_id, axis=1)
         y_pred_signal = tf.gather(y_pred, self.class_id, axis=1)
 
-        for i, threshold in enumerate(self.thresholds):
+        for i, threshold in enumerate(self.thresholds.numpy()):
             y_pred_thresholded = tf.cast(tf.greater_equal(y_pred_signal, threshold), tf.float32)
             if sample_weight is not None:
                 self.true_positives[i].assign_add(
@@ -86,6 +88,7 @@ class MaxSignificance(Metric):
             self.false_positives[i].assign(0.0)
 
 
+@tf.keras.utils.register_keras_serializable()
 class RejectionAtEfficiency(Metric):
     def __init__(
         self,
