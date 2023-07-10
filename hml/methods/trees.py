@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import pickle
+import shutil
 from importlib import import_module
 from pathlib import Path
 
+import yaml
 from keras.metrics import Metric
 from keras.utils import to_categorical
 from numpy import ndarray
@@ -26,6 +28,14 @@ class BoostedDecisionTree:
         )
         self.learning_rate = learning_rate
         self.n_estimators = n_estimators
+        self.other_parameters = kwargs
+
+        self.metadata = {
+            "name": self.name,
+            "learning_rate": self.learning_rate,
+            "n_estimators": self.n_estimators,
+        }
+        self.metadata.update(self.other_parameters)
 
     @property
     def name(self) -> str:
@@ -120,26 +130,41 @@ class BoostedDecisionTree:
         else:
             print("\n".join(output))
 
-    def save(self, file_path: str | Path, overwrite: bool = True) -> None:
-        file_path = Path(file_path)
-        file_path.parent.mkdir(parents=True, exist_ok=True)
+    def save(self, dir_path: str | Path) -> None:
+        dir_path = Path(dir_path)
+        metadata_path = dir_path / "metadata.yml"
+        model_path = dir_path / "model.pkl"
 
-        if file_path.suffix != ".pkl":
-            file_path = file_path.with_suffix(".pkl")
+        if dir_path.exists():
+            shutil.rmtree(dir_path)
+        dir_path.mkdir(parents=True)
 
-        if file_path.exists() and not overwrite:
-            raise FileExistsError(f"Checkpoint {file_path} already exists.")
+        # Save metadata
+        with open(metadata_path, "w") as f:
+            yaml.dump(self.metadata, f, indent=2)
 
-        with open(file_path, "wb") as f:
+        # Save model
+        with open(model_path, "wb") as f:
             pickle.dump(self.model, f)
 
     @classmethod
-    def load(cls, file_path: str | Path, *args, **kwargs) -> BoostedDecisionTree:
-        file_path = Path(file_path)
+    def load(cls, dir_path: str | Path) -> BoostedDecisionTree:
+        dir_path = Path(dir_path)
+        metadata_path = dir_path / "metadata.yml"
+        model_path = dir_path / "model.pkl"
 
-        if not file_path.exists():
-            raise FileNotFoundError(f"Checkpoint {file_path} does not exist.")
+        if not dir_path.exists():
+            raise FileNotFoundError(f"Checkpoint {dir_path} does not exist.")
+        if not metadata_path.exists() or not model_path.exists():
+            raise TypeError(
+                f"Checkpoint {dir_path} is not a valid BoostedDecisionTree checkpoint or it has been corrupted."
+            )
 
-        with open(file_path, "rb") as f:
-            model = pickle.load(f, *args, **kwargs)
-            return cls(model=model)
+        with open(metadata_path, "r") as f:
+            metadata = yaml.safe_load(f)
+        with open(model_path, "rb") as f:
+            model = pickle.load(f)
+
+        method = cls(**metadata)
+        method.model = model
+        return method
