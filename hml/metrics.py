@@ -54,7 +54,7 @@ class MaxSignificance(Metric):
         else:
             thresholds = [i / (n_thresholds - 1) for i in range(n_thresholds - 1)]
             thresholds = [0.0] + thresholds + [1.0]
-            self.thresholds = tf.convert_to_tensor(thresholds)
+            self.thresholds = thresholds
 
         self.class_id = class_id
         self.true_positives = [
@@ -94,7 +94,7 @@ class MaxSignificance(Metric):
         y_true_signal = tf.gather(y_true, self.class_id, axis=1)
         y_pred_signal = tf.gather(y_pred, self.class_id, axis=1)
 
-        for i, threshold in enumerate(self.thresholds.numpy()):
+        for i, threshold in enumerate(self.thresholds):
             y_pred_thresholded = tf.cast(tf.greater_equal(y_pred_signal, threshold), tf.float32)
             if sample_weight is not None:
                 self.true_positives[i].assign_add(
