@@ -35,6 +35,39 @@ class MaxSignificance(Metric):
         Name of the metric. The default is "max_significance".
     dtype : tf.dtypes.DType, optional
         Data type of the metric. The default is tf.float32.
+
+    Attributes
+    ----------
+    thresholds : list[float]
+        List of thresholds used to compute the significance.
+    threshold : tf.Tensor
+        Threshold that gives the maximum significance.
+    threshold_index : tf.Tensor
+        Index of the threshold that gives the maximum significance.
+    max_significance : tf.Tensor
+        Maximum significance value.
+
+    Examples
+    --------
+    Standalone usage:
+    >>> m = MaxSignificance()
+    >>> m.update_state([0, 0, 1], [[0.8, 0.2], [0.3, 0.7], [0.4, 0.6]])
+    >>> m.result().numpy()
+    1.0
+    >>> m = MaxSignificance()
+    >>> m.update_state(
+    ...    [[1, 0], [1, 0], [0, 1]],
+    ...    [[0.8, 0.2], [0.3, 0.7], [0.4, 0.6]],
+    ... )
+    >>> m.result().numpy()
+    1.0
+
+    Usage with `compile` API:
+    ```python
+    model.compile(
+        metrics=[MaxSignificance()],
+    )
+    ```
     """
 
     def __init__(
@@ -100,9 +133,11 @@ class MaxSignificance(Metric):
         else:
             proper_y_true = tf.cast(y_true, self.dtype)
 
-        y_true_signal = tf.gather(y_true, self.class_id, axis=1)
+        # Get predicted values according to the signal class
+        y_true_signal = tf.gather(proper_y_true, self.class_id, axis=1)
         y_pred_signal = tf.gather(y_pred, self.class_id, axis=1)
 
+        # Compute true positives and false positives for each threshold
         for i, threshold in enumerate(self.thresholds):
             y_pred_thresholded = tf.cast(tf.greater_equal(y_pred_signal, threshold), tf.float32)
             if sample_weight is not None:
@@ -126,15 +161,19 @@ class MaxSignificance(Metric):
         tf.Tensor
             Maximum significance value.
         """
+        # Add epsilon to avoid division by zero
         significances = [
             tp / tf.sqrt(fp + tf.keras.backend.epsilon())
             for tp, fp in zip(self.true_positives, self.false_positives)
         ]
-        self.max_significance_threshold_index = tf.argmax(significances)
-        self.max_significance_threshold = tf.gather(
-            self.thresholds, self.max_significance_threshold_index
-        )
+
+        # Get the corresponding threshold and its index
+        self.threshold_index = tf.argmax(significances)
+        self.threshold = tf.gather(self.thresholds, self.threshold_index)
+
+        # Get the maximum significance
         self.max_significance = tf.reduce_max(significances)
+
         return self.max_significance
 
     def reset_state(self) -> None:
@@ -166,6 +205,17 @@ class RejectionAtEfficiency(Metric):
         Name of the metric. The default is "rejection_at_efficiency".
     dtype : tf.dtypes.DType, optional
         Data type of the metric. The default is tf.float32.
+
+    Examples
+    --------
+    Standalone usage:
+    >>> m = RejectionAtEfficiency()
+    >>> m.update_state(
+    ...    [[1, 0], [1, 0], [1, 0], [0, 1], [0, 1]],
+    ...    [[1, 0], [0.7, 0.3], [0.2, 0.8], [0.7, 0.3], [0.2, 0.8]],
+    >>> )
+    >>> m.result().numpy()
+    2.9999993
     """
 
     def __init__(
@@ -212,6 +262,10 @@ class RejectionAtEfficiency(Metric):
         tf.Tensor
             Background rejection.
         """
+        # Specificity is the true negative rate: tn / (tn + fp).
+        # Sensitivity is the true positive rate: tp / (tp + fn).
+        # Background rejection is the inverse of 1 - specificity.
+        # Signal efficiency is the same as sensitivity.
         specificity = 1 - self.specificity_at_sensitivity.result()
         rejection = 1 / (specificity + tf.keras.backend.epsilon())
         return rejection
