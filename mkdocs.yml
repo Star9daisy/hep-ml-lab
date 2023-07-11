@@ -41,5 +41,12 @@ nav:
       - Apply methods: examples/apply_methods.ipynb
   - API Reference:
       - hml.generators: api-reference/hml.generators.md
+      - hml.observables: api-reference/hml.observables.md
+      - hml.representations: api-reference/hml.representations.md
       - hml.datasets: api-reference/hml.datasets.md
+      - hml.preprocessing: api-reference/hml.preprocessing.md
+      - hml.methods:
+          - api-reference/hml.methods/cuts.md
+          - api-reference/hml.methods/trees.md
+          - api-reference/hml.methods/networks.md
       - hml.metrics: api-reference/hml.metrics.md
