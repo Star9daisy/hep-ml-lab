@@ -15,7 +15,7 @@ class MaxSignificance(Metric):
         n_thresholds: int = 101,
         class_id: int = 1,
         name: str = "max_significance",
-        dtype=None,
+        dtype: tf.dtypes.DType = tf.float32,
     ):
         super().__init__(name=name, dtype=dtype)
 
@@ -96,12 +96,9 @@ class RejectionAtEfficiency(Metric):
         n_thresholds: int = 101,
         class_id: int = 1,
         name: str = "rejection_at_efficiency",
-        dtype=None,
+        dtype: tf.dtypes.DType = tf.float32,
     ):
-        super().__init__(
-            name=name,
-            dtype=dtype,
-        )
+        super().__init__(name=name, dtype=dtype)
         self.specificity_at_sensitivity = SpecificityAtSensitivity(
             sensitivity=efficiency,
             num_thresholds=n_thresholds,
