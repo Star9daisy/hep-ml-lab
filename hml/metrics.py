@@ -83,13 +83,22 @@ class MaxSignificance(Metric):
         sample_weight : list | np.ndarray | tf.Tensor | None, optional
             Sample weights. The default is None.
         """
-        y_true = tf.convert_to_tensor(y_true)
-        y_pred = tf.convert_to_tensor(y_pred)
-        sample_weight = tf.convert_to_tensor(sample_weight) if sample_weight is not None else None
+        # Convert inputs to tensors
+        # y_true should be a tensor of integers
+        # y_pred and sample_weight follows self.dtype
+        y_true = tf.convert_to_tensor(y_true, tf.int32)
+        y_pred = tf.convert_to_tensor(y_pred, self.dtype)
 
+        if sample_weight is not None:
+            sample_weight = tf.convert_to_tensor(sample_weight, self.dtype)
+
+        # Convert true labels to one-hot encoding if necessary
+        # and ensure that the data type is the same as the predicted values
         if len(y_true.shape) == 1:
             n_classes = y_pred.shape[1]
-            y_true = tf.one_hot(y_true, n_classes)
+            proper_y_true = tf.one_hot(y_true, n_classes, dtype=self.dtype)
+        else:
+            proper_y_true = tf.cast(y_true, self.dtype)
 
         y_true_signal = tf.gather(y_true, self.class_id, axis=1)
         y_pred_signal = tf.gather(y_pred, self.class_id, axis=1)
