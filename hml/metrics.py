@@ -14,7 +14,7 @@ class MaxSignificance(Metric):
     background events (tagged as signal). The formula taken here is:
 
     $$
-    significance = \frac{S}{\sqrt{B}}
+    \\mathrm{significance} = \\frac{S}{\\sqrt{B}}
     $$
 
     where $S$ is the number of correctly identified signal events (true positive) and $B$ is the
