@@ -1,5 +1,5 @@
 # HEP ML Lab (HML)
-[![codecov](https://codecov.io/gh/Star9daisy/hml/branch/main/graph/badge.svg?token=6VWJi5ct6c)](https://codecov.io/gh/Star9daisy/hml)
+[![codecov](https://codecov.io/gh/Star9daisy/hep-ml-lab/branch/main/graph/badge.svg?token=6VWJi5ct6c)](https://codecov.io/gh/Star9daisy/hml)
 
 ❗ This framework is currently undergoing **rapid iteration**. Any comments and suggestions are welcome.
 
