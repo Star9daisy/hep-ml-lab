@@ -55,7 +55,7 @@ class Dataset:
         np.savez(dataset_dir / f"dataset.npz", data=self.data, target=self.target)
 
     @classmethod
-    def load(cls, dataset_dir: str) -> Dataset:
+    def load(cls, dataset_dir: str | Path) -> Dataset:
         """Load dataset from disk."""
         dataset_dir = Path(dataset_dir)
         with open(dataset_dir / "metadata.yml", "r") as f:
