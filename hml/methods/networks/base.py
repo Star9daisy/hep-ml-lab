@@ -38,6 +38,9 @@ class KerasMethod:
 
     def evaluate(self, x: Any, y: Any, **kwargs) -> dict[str, list[float]]:
         results = self.model.evaluate(x, y, return_dict=True, **kwargs)
+        if not isinstance(results, dict):
+            raise TypeError(f"Expected dict, got {type(results)}")
+
         for metric, value in results.items():
             results[metric] = [value]
         return results
