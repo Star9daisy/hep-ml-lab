@@ -4,7 +4,7 @@ from hml.representations import Set
 
 
 def test_observables():
-    run = MG5Run("tests/data/pp2zj/Events/run_01/")
+    run = MG5Run("tests/data/pp2zj_/Events/run_01/")
     representation = Set(
         [
             Pt("Jet1"),
