@@ -14,7 +14,7 @@ class MaxSignificance(Metric):
     background events (tagged as signal). The formula taken here is:
 
     $$
-    \\mathrm{significance} = \\frac{S}{\\sqrt{B}}
+    \\mathrm{significance} = \\sqrt{2 \\left( (S + B) \\ln \\left( 1 + \\frac{S}{B} \\right) - S \\right)}
     $$
 
     where $S$ is the number of correctly identified signal events (true positive) and $B$ is the
@@ -53,14 +53,14 @@ class MaxSignificance(Metric):
     >>> m = MaxSignificance()
     >>> m.update_state([0, 0, 1], [[0.8, 0.2], [0.3, 0.7], [0.4, 0.6]])
     >>> m.result().numpy()
-    1.0
+    0.87897015
     >>> m = MaxSignificance()
     >>> m.update_state(
     ...    [[1, 0], [1, 0], [0, 1]],
     ...    [[0.8, 0.2], [0.3, 0.7], [0.4, 0.6]],
     ... )
     >>> m.result().numpy()
-    1.0
+    0.87897015
 
     Usage with `compile` API:
     ```python
@@ -163,8 +163,8 @@ class MaxSignificance(Metric):
         """
         # Add epsilon to avoid division by zero
         significances = [
-            tp / tf.sqrt(fp + tf.keras.backend.epsilon())
-            for tp, fp in zip(self.true_positives, self.false_positives)
+            tf.sqrt(2 * ((s + b) * tf.math.log(1 + s / (b + 1e-7)) - s))
+            for s, b in zip(self.true_positives, self.false_positives)
         ]
 
         # Get the corresponding threshold and its index
