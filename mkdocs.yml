@@ -48,5 +48,6 @@ nav:
       - hml.methods:
           - api-reference/hml.methods/cuts.md
           - api-reference/hml.methods/trees.md
-          - api-reference/hml.methods/networks.md
+          - Networks:
+              - MLP: api-reference/hml.methods/networks/mlps.md
       - hml.metrics: api-reference/hml.metrics.md
