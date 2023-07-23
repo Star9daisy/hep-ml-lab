@@ -7,6 +7,8 @@ from .base import KerasMethod
 
 
 class ToyMLP(KerasMethod):
+    """Toy MLP model for testing purposes."""
+
     def __init__(self, input_shape: tuple | list, name: str = "toy_mlp"):
         # Define model structure
         inputs = Input(shape=input_shape)
