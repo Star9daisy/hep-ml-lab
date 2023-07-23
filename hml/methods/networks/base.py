@@ -7,14 +7,12 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from keras import Model
-from keras.engine.functional import Functional
-from keras.engine.sequential import Sequential
+from keras import Model, Sequential
 from keras.models import load_model
 
 
 class KerasMethod:
-    def __init__(self, metadata: dict[str, Any], model: Sequential | Functional | Model):
+    def __init__(self, metadata: dict[str, Any], model: Sequential | Model):
         self.metadata = metadata
         self.model = model
 
