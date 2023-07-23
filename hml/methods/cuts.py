@@ -15,6 +15,43 @@ from keras.utils import to_categorical
 
 
 class CutAndCount:
+    """Cut and count method.
+
+    This method is used to find the optimal cut for each feature. The optimal cut is defined as the
+    cut that maximizes the accuracy of the classifier.
+
+    For each feature, it first bins data into a given number of bins. Then, it tries to find the
+    optimal cut by comparing the accuracy of the classifier for each bin edge and for four different
+    cases:
+
+    - left: signal < cut
+    - right: signal > cut
+    - middle: cut[0] < signal < cut[1]
+    - both_sides: signal < cut[0] or signal > cut[1]
+
+    Parameters
+    ----------
+    name : str, optional
+        Name of the method. Default is "cut_and_count".
+    n_bins : int, optional
+        Number of bins to use for the cut and count method. Default is 100.
+
+    Attributes
+    ----------
+    name : str
+        Name of the method.
+    n_parameters : int
+        Number of parameters of the method.
+    signal_locations : list[str]
+        Location of the signal for each feature. Can be "left", "right", "middle", or "both_sides".
+    cuts : list[list[float]]
+        Optimal cut for each feature.
+    metadata : dict
+        Metadata of the method.
+    model : dict
+        Model of the method.
+    """
+
     def __init__(
         self,
         name: str = "cut_and_count",

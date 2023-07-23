@@ -15,6 +15,20 @@ from ..preprocessing import is_categorical
 
 
 class BoostedDecisionTree:
+    """A wrapper around sklearn's GradientBoostingClassifier.
+
+    Parameters
+    ----------
+    name : str, optional
+        Name of the model. Default is "boosted_decision_tree".
+    learning_rate : float, optional
+        Learning rate shrinks the contribution of each tree.
+    n_estimators : int, optional
+        The number of boosting stages to perform. Default is 100.
+    **kwargs
+        Other parameters to pass to the GradientBoostingClassifier.
+    """
+
     def __init__(
         self,
         name: str = "boosted_decision_tree",
