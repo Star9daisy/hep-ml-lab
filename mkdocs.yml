@@ -25,6 +25,13 @@ plugins:
 markdown_extensions:
   - toc:
       permalink: "#"
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 nav:
   - Introcution: index.md
@@ -34,4 +41,13 @@ nav:
       - Apply methods: examples/apply_methods.ipynb
   - API Reference:
       - hml.generators: api-reference/hml.generators.md
+      - hml.observables: api-reference/hml.observables.md
+      - hml.representations: api-reference/hml.representations.md
       - hml.datasets: api-reference/hml.datasets.md
+      - hml.preprocessing: api-reference/hml.preprocessing.md
+      - hml.methods:
+          - api-reference/hml.methods/cuts.md
+          - api-reference/hml.methods/trees.md
+          - Networks:
+              - MLP: api-reference/hml.methods/networks/mlps.md
+      - hml.metrics: api-reference/hml.metrics.md
