@@ -1,46 +1,138 @@
 from __future__ import annotations
 
 import json
+import shutil
 from functools import reduce
 from itertools import product
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import yaml
+from keras.losses import Loss
+from keras.metrics import Metric
+from keras.utils import to_categorical
 
 
-class CutBasedAnalysis:
+class CutAndCount:
+    """Cut and count method.
+
+    This method is used to find the optimal cut for each feature. The optimal cut is defined as the
+    cut that maximizes the accuracy of the classifier.
+
+    For each feature, it first bins data into a given number of bins. Then, it tries to find the
+    optimal cut by comparing the accuracy of the classifier for each bin edge and for four different
+    cases:
+
+    - left: signal < cut
+    - right: signal > cut
+    - middle: cut[0] < signal < cut[1]
+    - both_sides: signal < cut[0] or signal > cut[1]
+
+    Parameters
+    ----------
+    name : str, optional
+        Name of the method. Default is "cut_and_count".
+    n_bins : int, optional
+        Number of bins to use for the cut and count method. Default is 100.
+
+    Attributes
+    ----------
+    name : str
+        Name of the method.
+    n_parameters : int
+        Number of parameters of the method.
+    signal_locations : list[str]
+        Location of the signal for each feature. Can be "left", "right", "middle", or "both_sides".
+    cuts : list[list[float]]
+        Optimal cut for each feature.
+    metadata : dict
+        Metadata of the method.
+    model : dict
+        Model of the method.
+    """
+
     def __init__(
         self,
-        name: str = "cut_based_analysis",
-        bins: int = 100,
+        name: str = "cut_and_count",
+        n_bins: int = 100,
     ):
-        self.name = name
-        self.bins = bins
+        self._name = name
+        self.n_bins = n_bins
 
         self.signal_locations = []
         self.cuts = []
-        self.best_accurcies = []
+
+        self.metadata = {
+            "name": self.name,
+            "n_bins": self.n_bins,
+        }
+        self.model = {
+            "signal_locations": self.signal_locations,
+            "cuts": self.cuts,
+        }
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def n_parameters(self) -> int:
+        return len(self.cuts)
 
     def compile(
         self,
-        optimizer: str = "auto",
-        loss: None = None,
-        metrics: None = None,
+        optimizer: None = None,
+        loss: Loss | None = None,
+        metrics: None | list[Metric] = None,
     ) -> None:
-        pass
+        self.optimizer = optimizer
 
-    def fit(self, x_train: np.ndarray, y_train: np.ndarray) -> None:
-        signal = x_train[y_train == 1]
-        background = x_train[y_train == 0]
+        if loss is None:
+            raise ValueError("Loss function must be specified.")
+
+        self.loss = loss
+        self.metrics = metrics
+
+    def fit(
+        self, x: np.ndarray, y: np.ndarray, signal_id: int = 1, verbose: int = 1
+    ) -> dict[str, list[float]]:
+        if y.ndim == 2:
+            _y = y.argmax(axis=1)
+        else:
+            _y = y
+        signal = x[_y == signal_id]
+        background = x[_y != signal_id]
+
+        self._history = {"loss": []}
+        if self.metrics is not None:
+            for metric in self.metrics:
+                self._history[metric.name] = []
 
         for i in range(signal.shape[1]):
+            # TODO: Add loss to find_best_cut
             signal_location, cut, best_accuracy = find_best_cut(
-                signal[:, i], background[:, i], bins=self.bins
+                signal[:, i], background[:, i], n_bins=self.n_bins
             )
             self.signal_locations.append(signal_location)
             self.cuts.append(cut)
-            self.best_accurcies.append(best_accuracy)
+            # self.best_accurcies.append(best_accuracy)
+
+            progress = f"Cut {i + 1}/{signal.shape[1]}"
+            loss = f"loss: {self.loss(y, self.predict(x)):.4f}"
+            self._history["loss"].append(self.loss(y, self.predict(x)).numpy())
+
+            metric_results = []
+            if self.metrics is not None:
+                for metric in self.metrics:
+                    metric.update_state(y, self.predict(x))
+                    metric_results.append(f"{metric.name}: {metric.result():.4f}")
+                    self._history[metric.name].append(metric.result().numpy())
+
+            if verbose > 0:
+                print(" - ".join([progress, loss] + metric_results))
+
+        return self._history
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         cut_results = []
@@ -51,50 +143,92 @@ class CutBasedAnalysis:
                 result = x[:, i] > cut
             elif location == "middle":
                 result = (cut[0] < x[:, i]) & (x[:, i] < cut[1])
-            elif location == "both_sides":
+            else:
                 result = (x[:, i] < cut[0]) | (x[:, i] > cut[1])
             cut_results.append(result)
 
-        return reduce(np.logical_and, cut_results).astype(np.int16)
+        y_pred_raw = reduce(np.logical_and, cut_results).astype(np.int16)
+        return to_categorical(y_pred_raw)
 
-    def summary(self) -> str:
-        output = [f"Model: {self.name}"]
+    def evaluate(self, x: np.ndarray, y: np.ndarray, verbose: int = 1) -> dict[str, list[float]]:
+        y_true = y
+        y_pred = self.predict(x)
+
+        results = {}
+        results["loss"] = self.loss(y_true, y_pred).numpy()
+        if self.metrics is not None:
+            for metric in self.metrics:
+                metric.update_state(y_true, y_pred)
+                results[metric.name] = metric.result().numpy()
+
+        if verbose > 0:
+            print(" - ".join([f"{k}: {v:.4f}" for k, v in results.items()]))
+
+        for k, v in results.items():
+            results[k] = [v]
+
+        return results
+
+    def summary(self, return_string: bool = False) -> str | None:
+        output = [f'Model: "{self.name}"']
         for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations), start=1):
             if location == "left":
                 output.append(f"Cut{i}: Feature < {cut[0]}")
             elif location == "right":
                 output.append(f"Cut{i}: Feature > {cut[0]}")
             elif location == "middle":
-                output.append(f"Cut{i}: {cut[0, 0]} < Feature < {cut[1, 0]}")
-            elif location == "both_sides":
-                output.append(f"Cut{i}: Feature < {cut[0, 0]} or Feature > {cut[1, 0]}")
+                output.append(f"Cut{i}: {cut[0][0]} < Feature < {cut[1][0]}")
+            else:
+                output.append(f"Cut{i}: Feature < {cut[0][0]} or Feature > {cut[1][0]}")
 
-        return "\n".join(output)
+        if return_string:
+            return "\n".join(output)
+        else:
+            print("\n".join(output))
 
-    def save(self, path: str, suffix: str = ".json"):
-        path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
+    def save(self, dir_path: str | Path) -> None:
+        dir_path = Path(dir_path)
+        metadata_path = dir_path / "metadata.yml"
+        model_path = dir_path / "model.json"
 
-        if path.suffix != suffix:
-            path = path.with_suffix(suffix)
+        if dir_path.exists():
+            shutil.rmtree(dir_path)
+        dir_path.mkdir(parents=True)
 
-        output = {}
-        for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations), start=1):
-            if location == "left":
-                output[f"Cut{i}"] = f"Feature < {cut[0]}"
-            elif location == "right":
-                output[f"Cut{i}"] = f"Feature > {cut[0]}"
-            elif location == "middle":
-                output[f"Cut{i}"] = f"{cut[0, 0]} < Feature < {cut[1, 0]}"
-            elif location == "both_sides":
-                output[f"Cut{i}"] = f"Feature < {cut[0, 0]} or Feature > {cut[1, 0]}"
+        # Save metadata
+        with open(metadata_path, "w") as f:
+            yaml.dump(self.metadata, f, indent=2)
 
-        with open(path, "w") as f:
-            json.dump(output, f, indent=4)
+        # Save model
+        with open(model_path, "w") as f:
+            json.dump(self.model, f, indent=4)
+
+    @classmethod
+    def load(cls, dir_path: str | Path) -> CutAndCount:
+        dir_path = Path(dir_path)
+        metadata_path = dir_path / "metadata.yml"
+        model_path = dir_path / "model.json"
+
+        if not dir_path.exists():
+            raise FileNotFoundError(f"Checkpoint {dir_path} does not exist.")
+        if not metadata_path.exists() or not model_path.exists():
+            raise TypeError(
+                f"Checkpoint {dir_path} is not a valid CutAndCount checkpoint or it has been corrupted."
+            )
+
+        with open(metadata_path, "r") as f:
+            metadata = yaml.safe_load(f)
+        with open(model_path, "r") as f:
+            model = json.load(f)
+
+        method = cls(metadata["name"], metadata["n_bins"])
+        method.signal_locations = model["signal_locations"]
+        method.cuts = model["cuts"]
+        return method
 
 
-def find_best_cut(sig, bkg, bins=100):
-    _, bins_edges = np.histogram(np.concatenate([sig, bkg]), bins=bins)
+def find_best_cut(sig: np.ndarray, bkg: np.ndarray, n_bins=100):
+    _, bins_edges = np.histogram(np.concatenate([sig, bkg]), bins=n_bins)
     cuts = bins_edges[..., None]
     sig = sig[None, ...]
     bkg = bkg[None, ...]
@@ -150,6 +284,7 @@ def find_best_cut(sig, bkg, bins=100):
     location = ["left", "right", "middle", "both_sides"][best_index]
     best_accuracy = [accuracy_left, accuracy_right, accuracy_middle, accuracy_both][best_index]
     best_cut = [cut_left, cut_right, cut_middle, cut_both][best_index]
+    best_cut = best_cut.tolist()
 
     return location, best_cut, best_accuracy
 

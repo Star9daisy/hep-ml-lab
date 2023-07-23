@@ -1,6 +1,9 @@
+import shutil
+from pathlib import Path
+
 import pytest
 
-from hml.generators import MG5Run
+from hml.generators import Madgraph5, MG5Run
 from hml.observables import (
     DeltaR,
     E,
@@ -32,8 +35,20 @@ def test_resolve_shortname():
         resolve_shortname("*Jet")
 
 
+event_name = "pp2zj_"
+generator = Madgraph5(
+    executable="mg5_aMC",
+    processes="p p > z j, z > j j",
+    output_dir=f"./tests/data/{event_name}",
+    shower="Pythia8",
+    detector="Delphes",
+    settings={"nevents": 10, "iseed": 42},
+)
+generator.launch()
+
+
 def test_observables():
-    run = MG5Run("tests/data/pp2zj/Events/run_01/")
+    run = MG5Run(f"tests/data/{event_name}/Events/run_01/")
     event = next(iter(run.events))
 
     for obs in [Pt, M, Eta, Phi, Px, Py, Pz, E]:
@@ -50,7 +65,7 @@ def test_observables():
 
 
 def test_get_lorentzvector_values():
-    run = MG5Run("tests/data/pp2zj/Events/run_01/")
+    run = MG5Run(f"tests/data/{event_name}/Events/run_01/")
     event = next(iter(run.events))
 
     assert len(get_lorentzvector_values(event, "Pt", ["Jet"], [-1])) == event.Jet_size
