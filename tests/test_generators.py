@@ -8,19 +8,21 @@ from hml.generators import Madgraph5, MG5Run
 
 
 def test_Madgraph5():
+    event_name1 = "pp2zj"
     generator1 = Madgraph5(
         executable="mg5_aMC",
         processes="p p > z j, z > j j",
-        output_dir="./tests/data/pp2zj",
+        output_dir=f"./tests/data/{event_name1}",
         shower="Pythia8",
         detector="Delphes",
         settings={"nevents": 10, "iseed": 42},
     )
+    event_name2 = "pp2wz"
     generator2 = Madgraph5(
         executable="mg5_aMC",
         definitions={"p": "p b b~", "j": "j b b~"},
         processes=["p p > w+ z, w+ > j j, z > ve ve~", "p p > w- z, w- > j j, z > ve ve~"],
-        output_dir="./tests/data/pp2wz",
+        output_dir=f"./tests/data/{event_name2}",
         shower="Pythia8",
         detector="Delphes",
         settings={"nevents": 10, "iseed": 42, "htjmin": 400},
@@ -67,29 +69,43 @@ def test_Madgraph5():
     assert generator2.commands == expected2
     assert generator2.runs[0].cross_section != 0
 
-    run = MG5Run(directory=Path.cwd() / "tests/data/pp2wz/Events/run_01")
+    run = MG5Run(directory=Path.cwd() / f"tests/data/{event_name2}/Events/run_01")
     assert isinstance(run.events, cppyy.gbl.TTree)
     assert run.tag == "tag_1"
     assert run.cross_section != 0
 
+    # Remove the output directories and log files
+    shutil.rmtree(Path.cwd() / f"tests/data/{event_name1}", ignore_errors=True)
+    Path.unlink(Path.cwd() / f"tests/data/{event_name1}.log", missing_ok=True)
+    shutil.rmtree(Path.cwd() / f"tests/data/{event_name2}", ignore_errors=True)
+    Path.unlink(Path.cwd() / f"tests/data/{event_name2}.log", missing_ok=True)
+
 
 def test_wrong_executable():
+    event_name1 = "pp2zj"
     with pytest.raises(EnvironmentError):
         generator = Madgraph5(
             executable="wrong_executable",
             processes="p p > z j, z > j j",
-            output_dir="./tests/data/pp2zj",
+            output_dir=f"./tests/data/{event_name1}",
             shower="Pythia8",
             detector="Delphes",
         )
         generator.launch(new_output=True)
 
+    event_name2 = 1111
     with pytest.raises(TypeError):
         generator = Madgraph5(
             executable="mg5_aMC",
             processes=1111,
-            output_dir="./tests/data/1111",
+            output_dir=f"./tests/data/{event_name2}",
             shower="Pythia8",
             detector="Delphes",
         )
         generator.launch(new_output=True)
+
+    # Remove the output directories and log files
+    shutil.rmtree(Path.cwd() / f"tests/data/{event_name1}", ignore_errors=True)
+    Path.unlink(Path.cwd() / f"tests/data/{event_name1}.log", missing_ok=True)
+    shutil.rmtree(Path.cwd() / f"tests/data/{event_name2}", ignore_errors=True)
+    Path.unlink(Path.cwd() / f"tests/data/{event_name2}.log", missing_ok=True)

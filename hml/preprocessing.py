@@ -20,15 +20,15 @@ def is_categorical(labels: np.ndarray) -> bool:
     Examples
     --------
     >>> labels = np.array([[0, 1], [1, 0], [1, 0], [0, 1]])
-    >>> print(is_one_hot_encoded(labels))
+    >>> print(is_categorical(labels))
     True
 
     >>> labels = np.array([[0, 2], [1, 0], [1, 0], [0, 1]])
-    >>> print(is_one_hot_encoded(labels))
+    >>> print(is_categorical(labels))
     False
 
     >>> labels = np.array([[0, 0], [1, 0], [1, 0], [0, 1]])
-    >>> print(is_one_hot_encoded(labels))
+    >>> print(is_categorical(labels))
     False
     """
     # each row (the label of a sample) should have exactly one '1' and the rest '0's

@@ -1,21 +1,60 @@
 from __future__ import annotations
 
 import json
+import shutil
 from functools import reduce
 from itertools import product
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import yaml
 from keras.losses import Loss
 from keras.metrics import Metric
 from keras.utils import to_categorical
 
 
-class CutBasedAnalysis:
+class CutAndCount:
+    """Cut and count method.
+
+    This method is used to find the optimal cut for each feature. The optimal cut is defined as the
+    cut that maximizes the accuracy of the classifier.
+
+    For each feature, it first bins data into a given number of bins. Then, it tries to find the
+    optimal cut by comparing the accuracy of the classifier for each bin edge and for four different
+    cases:
+
+    - left: signal < cut
+    - right: signal > cut
+    - middle: cut[0] < signal < cut[1]
+    - both_sides: signal < cut[0] or signal > cut[1]
+
+    Parameters
+    ----------
+    name : str, optional
+        Name of the method. Default is "cut_and_count".
+    n_bins : int, optional
+        Number of bins to use for the cut and count method. Default is 100.
+
+    Attributes
+    ----------
+    name : str
+        Name of the method.
+    n_parameters : int
+        Number of parameters of the method.
+    signal_locations : list[str]
+        Location of the signal for each feature. Can be "left", "right", "middle", or "both_sides".
+    cuts : list[list[float]]
+        Optimal cut for each feature.
+    metadata : dict
+        Metadata of the method.
+    model : dict
+        Model of the method.
+    """
+
     def __init__(
         self,
-        name: str = "cut_based_analysis",
+        name: str = "cut_and_count",
         n_bins: int = 100,
     ):
         self._name = name
@@ -23,6 +62,15 @@ class CutBasedAnalysis:
 
         self.signal_locations = []
         self.cuts = []
+
+        self.metadata = {
+            "name": self.name,
+            "n_bins": self.n_bins,
+        }
+        self.model = {
+            "signal_locations": self.signal_locations,
+            "cuts": self.cuts,
+        }
 
     @property
     def name(self) -> str:
@@ -129,49 +177,54 @@ class CutBasedAnalysis:
             elif location == "right":
                 output.append(f"Cut{i}: Feature > {cut[0]}")
             elif location == "middle":
-                output.append(f"Cut{i}: {cut[0, 0]} < Feature < {cut[1, 0]}")
+                output.append(f"Cut{i}: {cut[0][0]} < Feature < {cut[1][0]}")
             else:
-                output.append(f"Cut{i}: Feature < {cut[0, 0]} or Feature > {cut[1, 0]}")
+                output.append(f"Cut{i}: Feature < {cut[0][0]} or Feature > {cut[1][0]}")
 
         if return_string:
             return "\n".join(output)
         else:
             print("\n".join(output))
 
-    def save(self, file_path: str | Path, overwrite: bool = True) -> None:
-        file_path = Path(file_path)
-        file_path.parent.mkdir(parents=True, exist_ok=True)
+    def save(self, dir_path: str | Path) -> None:
+        dir_path = Path(dir_path)
+        metadata_path = dir_path / "metadata.yml"
+        model_path = dir_path / "model.json"
 
-        if file_path.suffix != ".json":
-            file_path = file_path.with_suffix(".json")
+        if dir_path.exists():
+            shutil.rmtree(dir_path)
+        dir_path.mkdir(parents=True)
 
-        if file_path.exists() and not overwrite:
-            raise FileExistsError(f"Checkpoint {file_path} already exists.")
+        # Save metadata
+        with open(metadata_path, "w") as f:
+            yaml.dump(self.metadata, f, indent=2)
 
-        output = {
-            "name": self.name,
-            "n_bins": self.n_bins,
-            "signal_locations": self.signal_locations,
-            "cuts": [cut.tolist() for cut in self.cuts],
-        }
-
-        with open(file_path, "w") as f:
-            json.dump(output, f, indent=4)
+        # Save model
+        with open(model_path, "w") as f:
+            json.dump(self.model, f, indent=4)
 
     @classmethod
-    def load(cls, file_path: str | Path, *args, **kwargs) -> CutBasedAnalysis:
-        file_path = Path(file_path)
+    def load(cls, dir_path: str | Path) -> CutAndCount:
+        dir_path = Path(dir_path)
+        metadata_path = dir_path / "metadata.yml"
+        model_path = dir_path / "model.json"
 
-        if not file_path.exists():
-            raise FileNotFoundError(f"Checkpoint {file_path} does not exist.")
+        if not dir_path.exists():
+            raise FileNotFoundError(f"Checkpoint {dir_path} does not exist.")
+        if not metadata_path.exists() or not model_path.exists():
+            raise TypeError(
+                f"Checkpoint {dir_path} is not a valid CutAndCount checkpoint or it has been corrupted."
+            )
 
-        with open(file_path, "r") as f:
-            parameters = json.load(f, *args, **kwargs)
+        with open(metadata_path, "r") as f:
+            metadata = yaml.safe_load(f)
+        with open(model_path, "r") as f:
+            model = json.load(f)
 
-        model = cls(parameters["name"], parameters["n_bins"])
-        model.signal_locations = parameters["signal_locations"]
-        model.cuts = [np.array(cut) for cut in parameters["cuts"]]
-        return model
+        method = cls(metadata["name"], metadata["n_bins"])
+        method.signal_locations = model["signal_locations"]
+        method.cuts = model["cuts"]
+        return method
 
 
 def find_best_cut(sig: np.ndarray, bkg: np.ndarray, n_bins=100):
@@ -231,6 +284,7 @@ def find_best_cut(sig: np.ndarray, bkg: np.ndarray, n_bins=100):
     location = ["left", "right", "middle", "both_sides"][best_index]
     best_accuracy = [accuracy_left, accuracy_right, accuracy_middle, accuracy_both][best_index]
     best_cut = [cut_left, cut_right, cut_middle, cut_both][best_index]
+    best_cut = best_cut.tolist()
 
     return location, best_cut, best_accuracy
 
