@@ -271,6 +271,27 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#load-the-dataset" class="md-nav__link">
+    Load the dataset
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apply-methods_1" class="md-nav__link">
+    Apply methods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compare-the-performance" class="md-nav__link">
+    Compare the performance
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -335,8 +356,174 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api-reference/hml.observables/" class="md-nav__link">
+        hml.observables
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-reference/hml.representations/" class="md-nav__link">
+        hml.representations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api-reference/hml.datasets/" class="md-nav__link">
         hml.datasets
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-reference/hml.preprocessing/" class="md-nav__link">
+        hml.preprocessing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+          hml.methods
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_6">
+          <span class="md-nav__icon md-icon"></span>
+          hml.methods
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-reference/hml.methods/cuts/" class="md-nav__link">
+        Cuts
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-reference/hml.methods/trees/" class="md-nav__link">
+        Trees
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_6_3" id="__nav_3_6_3_label" tabindex="0">
+          Networks
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_6_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3_6_3">
+          <span class="md-nav__icon md-icon"></span>
+          Networks
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-reference/hml.methods/networks/mlps/" class="md-nav__link">
+        MLP
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-reference/hml.metrics/" class="md-nav__link">
+        hml.metrics
       </a>
     </li>
   
@@ -378,6 +565,27 @@
         <li class="md-nav__item">
   <a href="#introduction-to-built-in-methods" class="md-nav__link">
     Introduction to built-in methods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#load-the-dataset" class="md-nav__link">
+    Load the dataset
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#apply-methods_1" class="md-nav__link">
+    Apply methods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compare-the-performance" class="md-nav__link">
+    Compare the performance
   </a>
   
 </li>
@@ -1434,117 +1642,20 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="apply-methods">Apply methods<a class="anchor-link" href="#apply-methods">&#182;</a></h1><p>In this notebook we will show how to load dataset saved in the previous notebook and apply cut-based
-analysis and boosted decision tree on it. Finally we use accuracy to evaluate their performance.</p>
-<h2 id="introduction-to-built-in-methods">Introduction to built-in methods<a class="anchor-link" href="#introduction-to-built-in-methods">&#182;</a></h2><p>Currently there're three categories of built-in methods: cuts, trees, and (neural) networks.</p>
-<p>In a cut-based analysis, we apply a series of cuts on the input data to select as many signal events
-and as few background events as possible. Each cut reduces the number of background events and
-inevitably also signal events. The goal usually is to find a set of cuts that maximizes the significance
-$s/\sqrt{s+b}$, where $s$ and $b$ are the number of remaining signal and background events, respectively.</p>
-<p>The boosted decision tree is one of trees methods. It is a machine learning method commonly used in
-high energy physics. The name &quot;boosted&quot; comes from the idea to combine weak classifiers into a strong
-one.</p>
-<p>There are also neural networks methods. They will be covered in the next version.</p>
-<p>First import necessary packages.</p>
-
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div  class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-1">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">hml.datasets</span> <span class="kn">import</span> <span class="n">Dataset</span>
-<span class="kn">from</span> <span class="nn">hml.methods.cuts</span> <span class="kn">import</span> <span class="n">CutBasedAnalysis</span>
-<span class="kn">from</span> <span class="nn">hml.methods.trees</span> <span class="kn">import</span> <span class="n">BoostedDecisionTree</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
-</pre></div>
-<div id="cell-1" class="clipboard-copy-txt">from hml.datasets import Dataset
-from hml.methods.cuts import CutBasedAnalysis
-from hml.methods.trees import BoostedDecisionTree
-import numpy as np
-from sklearn.metrics import accuracy_score</div>
-        
-        </div>
-    </div>
-
-</div>
-</div>
-
-</div>
-</div>
-<div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>To load dataset, we use the class method <code>load</code> of <code>Dataset</code> class. The method takes the dataset
-directory as input and returns a <code>Dataset</code> object.</p>
-
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div  class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-        
-        
-        <div class="CodeMirror cm-s-jupyter">
-            <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-2">
-                <div>
-                    <span class="notice" hidden>Copied!</span>
-                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
-                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
-                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
-                    </svg>
-                    </div>
-                </clipboard-copy>
-            </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;./data/z_vs_qcd&quot;</span><span class="p">)</span>
-</pre></div>
-<div id="cell-2" class="clipboard-copy-txt">dataset = Dataset.load("./data/z_vs_qcd")</div>
-        
-        </div>
-    </div>
-
-</div>
-</div>
-
-</div>
-</div>
-<div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Then we apply a boosted decision tree. It comes from <code>scikit-learn</code> package originally. The <code>compile</code>
-method takes loss function name, optimizer name, and a list of metrics as input. Here we use default
-parameters as in <code>scikit-learn</code>.</p>
+<h1 id="apply-methods">Apply methods<a class="anchor-link" href="#apply-methods">&#182;</a></h1><p>In this notebook we will show how to load dataset saved in the previous notebook
+and apply built-in methods on it. Finally we summarize their performance into a
+table</p>
+<h2 id="introduction-to-built-in-methods">Introduction to built-in methods<a class="anchor-link" href="#introduction-to-built-in-methods">&#182;</a></h2><p>Currently <code>hml</code> have three types of methods: cuts, trees, and (neural) networks.</p>
+<p>With <code>hml.methods.cuts.CutAndCount</code>, we apply a series of cuts on the input data
+to select as many signal events and as few background events as possible. Each
+cut reduces the number of background events and inevitably also signal events.
+The goal usually is to find a set of cuts that maximizes the significance.</p>
+<p>The boosted decision tree is one of trees methods. It is a machine learning
+method commonly used in high energy physics. The name &quot;boosted&quot; comes from the
+idea to combine weak classifiers into a strong one.</p>
+<p>The neural network now only contains a simple fully connected neural network
+named <code>ToyMLP</code>.</p>
+<h2 id="load-the-dataset">Load the dataset<a class="anchor-link" href="#load-the-dataset">&#182;</a></h2><p>First we load the dataset from the previous notebook.</p>
 
 </div>
 </div>
@@ -1560,7 +1671,7 @@ parameters as in <code>scikit-learn</code>.</p>
         
         <div class="CodeMirror cm-s-jupyter">
             <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-3">
+                <clipboard-copy for="cell-1">
                 <div>
                     <span class="notice" hidden>Copied!</span>
                     <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
@@ -1570,13 +1681,13 @@ parameters as in <code>scikit-learn</code>.</p>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">method1</span> <span class="o">=</span> <span class="n">BoostedDecisionTree</span><span class="p">()</span>
-<span class="n">method1</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
-<span class="n">method1</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">hml.datasets</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">keras.utils</span> <span class="kn">import</span> <span class="n">to_categorical</span>
 </pre></div>
-<div id="cell-3" class="clipboard-copy-txt">method1 = BoostedDecisionTree()
-method1.compile()
-method1.fit(dataset.data, dataset.target)</div>
+<div id="cell-1" class="clipboard-copy-txt">from hml.datasets import Dataset
+from sklearn.model_selection import train_test_split
+from keras.utils import to_categorical</div>
         
         </div>
     </div>
@@ -1585,18 +1696,31 @@ method1.fit(dataset.data, dataset.target)</div>
 </div>
 
 </div>
+</div>
+<div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>To load dataset, we use the class method <code>load</code> of <code>Dataset</code> class. The method
+takes the dataset directory as input and returns a <code>Dataset</code> object.</p>
+
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div  class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
             <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-4">
+                <clipboard-copy for="cell-2">
                 <div>
                     <span class="notice" hidden>Copied!</span>
                     <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
@@ -1606,13 +1730,39 @@ method1.fit(dataset.data, dataset.target)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">y_true</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">target</span>
-<span class="n">y_pred</span> <span class="o">=</span> <span class="n">method1</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-<span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="c1"># Split the data into training and testing sets</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;./data/z_vs_qcd&quot;</span><span class="p">)</span>
+
+<span class="n">x_train</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span>
+<span class="p">)</span>
+
+<span class="c1"># Convert the labels to categorical</span>
+<span class="n">y_train</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
+<span class="n">y_test</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span>
+
+<span class="c1"># Show the shape of the training and testing sets</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; Train and test shapes:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x_train shape:&quot;</span><span class="p">,</span> <span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;y_train shape:&quot;</span><span class="p">,</span> <span class="n">y_train</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x_test shape:&quot;</span><span class="p">,</span> <span class="n">x_test</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;y_test shape:&quot;</span><span class="p">,</span> <span class="n">y_test</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&gt; target names: </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">target_names</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
-<div id="cell-4" class="clipboard-copy-txt">y_true = dataset.target
-y_pred = method1.predict(dataset.data)
-accuracy_score(y_true, y_pred)</div>
+<div id="cell-2" class="clipboard-copy-txt"># Split the data into training and testing sets
+dataset = Dataset.load("./data/z_vs_qcd")
+
+x_train, x_test, y_train, y_test = train_test_split(
+    dataset.data, dataset.target, test_size=0.2, random_state=42
+)
+
+# Convert the labels to categorical
+y_train = to_categorical(y_train, dtype="int32")
+y_test = to_categorical(y_test, dtype="int32")
+
+# Show the shape of the training and testing sets
+print("> Train and test shapes:")
+print("x_train shape:", x_train.shape, "y_train shape:", y_train.shape)
+print("x_test shape:", x_test.shape, "y_test shape:", y_test.shape)
+print(f"> target names: {dataset.target_names}")</div>
         
         </div>
     </div>
@@ -1626,17 +1776,18 @@ accuracy_score(y_true, y_pred)</div>
 
 
 <div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputArea-child">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>0.9834353173867358</pre>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>&gt; Train and test shapes:
+x_train shape: (12943, 4) y_train shape: (12943, 2)
+x_test shape: (3236, 4) y_test shape: (3236, 2)
+&gt; target names: [&#39;pp2jj&#39;, &#39;pp2zz&#39;]
+</pre>
 </div>
-
 </div>
 
 </div>
@@ -1651,7 +1802,9 @@ accuracy_score(y_true, y_pred)</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>For a cut-based method, we use <code>CutBasedAnalysis</code> class. The same workflow goes here as well.</p>
+<h2 id="apply-methods">Apply methods<a class="anchor-link" href="#apply-methods">&#182;</a></h2><p>Then we apply a boosted decision tree. It comes from <code>scikit-learn</code> package
+originally. The <code>compile</code> method takes loss function name, optimizer name, and a
+list of metrics as input. Here we use default parameters as in <code>scikit-learn</code>.</p>
 
 </div>
 </div>
@@ -1662,12 +1815,12 @@ accuracy_score(y_true, y_pred)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
             <div class="zeroclipboard-container">
-                <clipboard-copy for="cell-5">
+                <clipboard-copy for="cell-3">
                 <div>
                     <span class="notice" hidden>Copied!</span>
                     <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
@@ -1677,13 +1830,15 @@ accuracy_score(y_true, y_pred)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">method2</span> <span class="o">=</span> <span class="n">CutBasedAnalysis</span><span class="p">()</span>
-<span class="n">method2</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
-<span class="n">method2</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">hml.methods</span> <span class="kn">import</span> <span class="n">CutAndCount</span><span class="p">,</span> <span class="n">BoostedDecisionTree</span><span class="p">,</span> <span class="n">ToyMLP</span>
+<span class="kn">from</span> <span class="nn">keras.losses</span> <span class="kn">import</span> <span class="n">CategoricalCrossentropy</span>
+<span class="kn">from</span> <span class="nn">keras.metrics</span> <span class="kn">import</span> <span class="n">CategoricalAccuracy</span>
+<span class="kn">from</span> <span class="nn">hml.metrics</span> <span class="kn">import</span> <span class="n">MaxSignificance</span><span class="p">,</span> <span class="n">RejectionAtEfficiency</span>
 </pre></div>
-<div id="cell-5" class="clipboard-copy-txt">method2 = CutBasedAnalysis()
-method2.compile()
-method2.fit(dataset.data, dataset.target)</div>
+<div id="cell-3" class="clipboard-copy-txt">from hml.methods import CutAndCount, BoostedDecisionTree, ToyMLP
+from keras.losses import CategoricalCrossentropy
+from keras.metrics import CategoricalAccuracy
+from hml.metrics import MaxSignificance, RejectionAtEfficiency</div>
         
         </div>
     </div>
@@ -1698,7 +1853,167 @@ method2.fit(dataset.data, dataset.target)</div>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-4">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">method1</span> <span class="o">=</span> <span class="n">BoostedDecisionTree</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">method1</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">CategoricalAccuracy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;acc&quot;</span><span class="p">),</span>
+        <span class="n">MaxSignificance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;max_sig&quot;</span><span class="p">),</span>
+        <span class="n">RejectionAtEfficiency</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;r50&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; Training model:&quot;</span><span class="p">)</span>
+<span class="n">history</span> <span class="o">=</span> <span class="n">method1</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+<div id="cell-4" class="clipboard-copy-txt">method1 = BoostedDecisionTree(n_estimators=10)
+method1.compile(
+    metrics=[
+        CategoricalAccuracy(name="acc"),
+        MaxSignificance(name="max_sig"),
+        RejectionAtEfficiency(name="r50"),
+    ]
+)
+
+print("> Training model:")
+history = method1.fit(x_train, y_train)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>&gt; Training model:
+Iter 1/10 - loss: 1.2112 - acc: 0.8960 - max_sig: 188.1243 - r50: 187.9428
+Iter 2/10 - loss: 1.0756 - acc: 0.9256 - max_sig: 430.6300 - r50: 158.7088
+Iter 3/10 - loss: 0.9628 - acc: 0.9376 - max_sig: 440.3328 - r50: 824.0009
+Iter 4/10 - loss: 0.8664 - acc: 0.9435 - max_sig: 443.3213 - r50: 391.3265
+Iter 5/10 - loss: 0.7844 - acc: 0.9492 - max_sig: 442.3824 - r50: 595.1335
+Iter 6/10 - loss: 0.7132 - acc: 0.9531 - max_sig: 640.1672 - r50: 556.4827
+Iter 7/10 - loss: 0.6516 - acc: 0.9554 - max_sig: 642.4824 - r50: 510.1214
+Iter 8/10 - loss: 0.5973 - acc: 0.9577 - max_sig: 651.5129 - r50: 714.1466
+Iter 9/10 - loss: 0.5500 - acc: 0.9594 - max_sig: 640.4816 - r50: 573.8807
+Iter 10/10 - loss: 0.5070 - acc: 0.9610 - max_sig: 646.3892 - r50: 811.5255
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div  class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-5">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">method2</span> <span class="o">=</span> <span class="n">CutAndCount</span><span class="p">()</span>
+<span class="n">method2</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">CategoricalCrossentropy</span><span class="p">(),</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">CategoricalAccuracy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;acc&quot;</span><span class="p">),</span>
+        <span class="n">MaxSignificance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;max_sig&quot;</span><span class="p">),</span>
+        <span class="n">RejectionAtEfficiency</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;r50&quot;</span><span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; Training model:&quot;</span><span class="p">)</span>
+<span class="n">history</span> <span class="o">=</span> <span class="n">method2</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+<div id="cell-5" class="clipboard-copy-txt">method2 = CutAndCount()
+method2.compile(
+    loss=CategoricalCrossentropy(),
+    metrics=[
+        CategoricalAccuracy(name="acc"),
+        MaxSignificance(name="max_sig"),
+        RejectionAtEfficiency(name="r50"),
+    ],
+)
+print("> Training model:")
+history = method2.fit(x_train, y_train)</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>&gt; Training model:
+Cut 1/4 - loss: 1.9140 - acc: 0.8812 - max_sig: 114.3669 - r50: 8.5635
+Cut 2/4 - loss: 2.1843 - acc: 0.8729 - max_sig: 175.8987 - r50: 16.6093
+Cut 3/4 - loss: 3.7870 - acc: 0.8369 - max_sig: 212.5988 - r50: 24.9139
+Cut 4/4 - loss: 4.3486 - acc: 0.8102 - max_sig: 240.9536 - r50: 33.2185
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div  class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
         
         
         <div class="CodeMirror cm-s-jupyter">
@@ -1713,13 +2028,31 @@ method2.fit(dataset.data, dataset.target)</div>
                     </div>
                 </clipboard-copy>
             </div>
-            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">y_true</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">target</span>
-<span class="n">y_pred</span> <span class="o">=</span> <span class="n">method2</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-<span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">method3</span> <span class="o">=</span> <span class="n">ToyMLP</span><span class="p">(</span><span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],))</span>
+<span class="n">method3</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">CategoricalCrossentropy</span><span class="p">(),</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">CategoricalAccuracy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;acc&quot;</span><span class="p">),</span>
+        <span class="n">MaxSignificance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;max_sig&quot;</span><span class="p">),</span>
+        <span class="n">RejectionAtEfficiency</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;r50&quot;</span><span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; Training model:&quot;</span><span class="p">)</span>
+<span class="n">history</span> <span class="o">=</span> <span class="n">method3</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
-<div id="cell-6" class="clipboard-copy-txt">y_true = dataset.target
-y_pred = method2.predict(dataset.data)
-accuracy_score(y_true, y_pred)</div>
+<div id="cell-6" class="clipboard-copy-txt">method3 = ToyMLP(input_shape=(x_train.shape[1],))
+method3.compile(
+    loss=CategoricalCrossentropy(),
+    metrics=[
+        CategoricalAccuracy(name="acc"),
+        MaxSignificance(name="max_sig"),
+        RejectionAtEfficiency(name="r50"),
+    ],
+)
+
+print("> Training model:")
+history = method3.fit(x_train, y_train, epochs=10, batch_size=256, verbose=2)</div>
         
         </div>
     </div>
@@ -1733,17 +2066,165 @@ accuracy_score(y_true, y_pred)</div>
 
 
 <div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputArea-child">
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>0.7319364608443043</pre>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>&gt; Training model:
+Epoch 1/10
+51/51 - 6s - loss: 1.2039 - acc: 0.8699 - max_sig: 151.3282 - r50: 15.6967 - 6s/epoch - 117ms/step
+Epoch 2/10
+51/51 - 1s - loss: 0.8593 - acc: 0.8857 - max_sig: 221.7106 - r50: 32.6118 - 1s/epoch - 23ms/step
+Epoch 3/10
+51/51 - 1s - loss: 0.8083 - acc: 0.8883 - max_sig: 216.4992 - r50: 33.3737 - 1s/epoch - 23ms/step
+Epoch 4/10
+51/51 - 1s - loss: 0.8024 - acc: 0.8968 - max_sig: 216.4713 - r50: 37.9892 - 1s/epoch - 24ms/step
+Epoch 5/10
+51/51 - 1s - loss: 0.7807 - acc: 0.8884 - max_sig: 214.3831 - r50: 44.6373 - 1s/epoch - 23ms/step
+Epoch 6/10
+51/51 - 1s - loss: 0.6410 - acc: 0.9088 - max_sig: 218.3920 - r50: 51.3810 - 1s/epoch - 24ms/step
+Epoch 7/10
+51/51 - 1s - loss: 0.6488 - acc: 0.9068 - max_sig: 222.0505 - r50: 57.5965 - 1s/epoch - 23ms/step
+Epoch 8/10
+51/51 - 1s - loss: 0.6380 - acc: 0.9013 - max_sig: 222.8664 - r50: 51.0140 - 1s/epoch - 22ms/step
+Epoch 9/10
+51/51 - 1s - loss: 0.6653 - acc: 0.9111 - max_sig: 219.5327 - r50: 61.5685 - 1s/epoch - 22ms/step
+Epoch 10/10
+51/51 - 1s - loss: 0.6338 - acc: 0.9074 - max_sig: 221.6101 - r50: 59.5163 - 1s/epoch - 22ms/step
+</pre>
+</div>
 </div>
 
+</div>
+
+</div>
+
+</div>
+</div>
+<div  class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="compare-the-performance">Compare the performance<a class="anchor-link" href="#compare-the-performance">&#182;</a></h2><p>Finally we compare the performance of the three methods. We use the <code>evaluate</code>
+to evaluate the performance via the loss and metrics we specified in the
+<code>compile</code> method. The <code>evaluate</code> method returns a dictionary of the loss and
+metrics.</p>
+<p>Here we use the <code>tabulate</code> function from <code>tabulate</code> package to summarize the
+performance into a table.</p>
+
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div  class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-7">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+</pre></div>
+<div id="cell-7" class="clipboard-copy-txt">from tabulate import tabulate</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div  class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+        
+        
+        <div class="CodeMirror cm-s-jupyter">
+            <div class="zeroclipboard-container">
+                <clipboard-copy for="cell-8">
+                <div>
+                    <span class="notice" hidden>Copied!</span>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" version="1.1"  data-view-component="true" class="clipboard-copy-icon">
+                        <path fill="currentColor" fill-rule="evenodd" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"></path>
+                        <path fill="currentColor" fill-rule="evenodd" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"></path>
+                    </svg>
+                    </div>
+                </clipboard-copy>
+            </div>
+            <div class="highlight-ipynb hl-python "><pre><span></span><span class="n">results1</span> <span class="o">=</span> <span class="n">method1</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="n">results2</span> <span class="o">=</span> <span class="n">method2</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="n">results3</span> <span class="o">=</span> <span class="n">method3</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="n">results</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">method1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">method2</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">method3</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">results1</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="n">results</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">results1</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="n">results2</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="n">results3</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt; Results:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">&quot;keys&quot;</span><span class="p">,</span> <span class="n">floatfmt</span><span class="o">=</span><span class="s2">&quot;.4f&quot;</span><span class="p">))</span>
+</pre></div>
+<div id="cell-8" class="clipboard-copy-txt">results1 = method1.evaluate(x_test, y_test)
+results2 = method2.evaluate(x_test, y_test)
+results3 = method3.evaluate(x_test, y_test, verbose=2)
+results = {}
+
+results['name'] = [method1.name, method2.name, method3.name]
+for k in results1.keys():
+    results[k] = results1[k] + results2[k] + results3[k]
+
+print("> Results:")
+print(tabulate(results, headers="keys", floatfmt=".4f"))</div>
+        
+        </div>
+    </div>
+
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>loss: 0.2529 - acc: 0.9618 - max_sig: 616.9097 - r50: 835.0746
+loss: 4.3782 - acc: 0.7973 - max_sig: 260.2736 - r50: 39.5114
+102/102 - 2s - loss: 3.5197 - acc: 0.4425 - max_sig: 86.3768 - r50: 1.5445 - 2s/epoch - 22ms/step
+&gt; Results:
+name                     loss     acc    max_sig       r50
+---------------------  ------  ------  ---------  --------
+boosted_decision_tree  0.2529  0.9618   616.9097  835.0746
+cut_and_count          4.3782  0.7973   260.2736   39.5114
+toy_mlp                3.5197  0.4425    86.3768    1.5445
+</pre>
+</div>
 </div>
 
 </div>
@@ -1796,6 +2277,12 @@ accuracy_score(y_true, y_pred)</div>
     
     
       <script src="../../assets/javascripts/bundle.b4d07000.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>
