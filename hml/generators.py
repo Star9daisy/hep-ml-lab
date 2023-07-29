@@ -181,7 +181,11 @@ class Madgraph5:
         mg5_runs = [MG5Run(i) for i in run_dirs]
         return mg5_runs
 
-    def launch(self, new_output: bool = False, show_status: bool = True) -> None:
+    def launch(
+        self,
+        new_output: bool = False,
+        show_status: bool = True,
+    ) -> None:
         """Launch Madgraph5 to generate events.
 
         Parameters
@@ -204,7 +208,7 @@ class Madgraph5:
         temp_file_path = self._commands_to_file(self.commands)
 
         # Launch Madgraph5 and redirect output to a log file
-        with open(f"{self.output_dir}.log", "w") as f:
+        with open(f"{self.output}.log", "a") as f:
             process = subprocess.Popen(
                 f"{executable} {temp_file_path}",
                 shell=True,
@@ -235,7 +239,7 @@ class Madgraph5:
 
     def _check_status(self, last_status: str) -> str:
         """Check the status of the launched run."""
-        with open(f"{self.output_dir}.log", "r") as f:
+        with open(f"{self.output}.log", "r") as f:
             contents = f.readlines()
         for line in contents[::-1]:
             if line.startswith("Generating"):
