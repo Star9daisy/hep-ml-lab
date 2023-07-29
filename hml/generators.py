@@ -197,16 +197,11 @@ class Madgraph5:
         if not executable:
             raise EnvironmentError(f"No Madgraph executable file found for '{self.executable}'")
 
-        if self.output_dir.exists():
-            if new_output:
-                shutil.rmtree(self.output_dir)
-                self.output_dir.mkdir(parents=True)
-                temp_file_path = self._commands_to_file(self.commands)
-            else:
-                temp_file_path = self._commands_to_file([f"launch {self.output_dir}"])
-        else:
-            self.output_dir.mkdir(parents=True)
-            temp_file_path = self._commands_to_file(self.commands)
+        if new_output and self.output.exists():
+            shutil.rmtree(self.output)
+            self.output.mkdir(parents=True)
+
+        temp_file_path = self._commands_to_file(self.commands)
 
         # Launch Madgraph5 and redirect output to a log file
         with open(f"{self.output_dir}.log", "w") as f:
