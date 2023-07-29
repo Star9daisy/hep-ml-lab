@@ -59,25 +59,55 @@ class Madgraph5:
 
     def __init__(
         self,
-        executable: str,
-        processes: str | list[str],
-        output_dir: str | Path,
+        executable: str | Path,
+        output: str | Path,
         model: str = "sm",
-        definitions: dict[str, str] | None = None,
-        shower: str | None = None,
-        detector: str | None = None,
-        settings: dict[str, Any] | None = None,
-        cards: list[str | Path] | None = None,
+        definitions: dict[str, str] = {},
+        processes: str | list[str] = "",
+        shower: str = "Pythia8",
+        detector: str = "Delphes",
+        settings: dict[str, Any] = {},
+        cards: list[str | Path] = [],
     ) -> None:
-        self.executable = executable
-        self.processes = processes
-        self.output_dir = Path(output_dir)
-        self.model = model
-        self.definitions = definitions
+        self._executable = Path(executable)
+        self._output = Path(output)
+        self._model = model
+        self._definitions = definitions
+
+        if isinstance(processes, list):
+            self._processes = processes
+        else:
+            self._processes = [processes]
+
         self.shower = shower
         self.detector = detector
         self.settings = settings
-        self.cards = [Path(card) for card in cards] if cards else None
+        self.cards = [Path(card) for card in cards]
+
+    @property
+    def executable(self) -> Path:
+        """The executable file of Madgraph5."""
+        return self._executable
+
+    @property
+    def output(self) -> Path:
+        """The directory where all generation information is stored."""
+        return self._output
+
+    @property
+    def model(self) -> str:
+        """The particle physics theory model to be used."""
+        return self._model
+
+    @property
+    def definitions(self) -> dict[str, str]:
+        """The definitions of multiparticle."""
+        return self._definitions
+
+    @property
+    def processes(self) -> list[str]:
+        """The processes to be generated."""
+        return self._processes
 
     @property
     def commands(self) -> list[str]:
