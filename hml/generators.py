@@ -176,10 +176,29 @@ class Madgraph5:
     @property
     def runs(self) -> list[MG5Run]:
         """Madgraph5 runs after finishing event generation."""
-        all_run_dir = self.output_dir / "Events"
-        run_dirs = all_run_dir.glob("run_*")
-        mg5_runs = [MG5Run(i) for i in run_dirs]
-        return mg5_runs
+        events_dir = self.output / "Events"
+        run_dirs = events_dir.glob("run_*")
+        run_dirs = [i for i in run_dirs if i.name.count("_") == 1]
+        runs = [MG5Run(i) for i in run_dirs]
+        return runs
+
+    def summary(self) -> None:
+        console = Console()
+        table = Table(title=f"Summary from {self.output}")
+        table.add_column("Run")
+        table.add_column("Tag")
+        table.add_column("Cross section (pb)")
+        table.add_column("Number of events")
+
+        for run in self.runs:
+            table.add_row(
+                run.directory.name,
+                run.tag,
+                f"{run.cross_section:.5e}",
+                f"{run.n_events}",
+            )
+
+        console.print(table)
 
     def launch(
         self,
