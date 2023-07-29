@@ -222,51 +222,51 @@ class MG5Run:
 
     Parameters
     ----------
-    run_dir:
+    directory: str | Path
         The directory path to a run.
-    run_tag:
+
+    Attributes
+    ----------
+    directory: Path
+        The directory path to a run.
+    banner: Path
+        The path to the banner file of a run.
+    tag: str
         The tag of a run.
-    cross_section:
-        The cross section of the process in a run.
-    n_events:
+    cross_section: float
+        The cross section of a run.
+    n_events: int
         The number of events generated in a run.
-    events:
+    n_subruns: int
+        The number of subruns in a run.
+    events: TCahin
         The events generated in a run.
     """
 
     directory: str | Path
-    id: str = field(init=False, default="01")
-    tag: str = field(init=False, default="tag_1")
-    cross_section: float = field(init=False)
-    n_events: int = field(init=False)
-    events: cppyy.gbl.TTree = field(init=False, repr=False)
-    _event_file: cppyy.gbl.TFile = field(init=False, repr=False)
+    banner: Path = field(default_factory=Path, init=False, repr=False)
+    tag: str = field(default="", init=False)
+    cross_section: float = field(default=0.0, init=False)
+    n_events: int = field(default=0, init=False)
+    n_subruns: int = field(default=0, init=False, repr=False)
+    events: cppyy.gbl.TChain = field(init=False, repr=False)
 
     def __post_init__(self):
         self.directory = Path(self.directory)
+        self.banner = self.directory.parent / f"{self.directory.name}_banner.txt"
 
-        # Get the run ID from the run directory name
-        self.id = self.directory.name.split("_")[-1]
+        self.events = ROOT.TChain("Delphes")
+        for file in self.directory.parent.glob(f"{self.directory.name}*/*.root"):
+            self.n_subruns += 1
+            self.events.Add(file.as_posix())
 
-        # Search for the banner file
-        banner_file = list(self.directory.glob("*banner.txt"))[0]
-
-        # Get the run tag from the banner file name and the run name
-        _prefix = self.directory.name + "_"
-        _suffix = "_banner.txt"
-        self.tag = banner_file.name.replace(_prefix, "").replace(_suffix, "")
-
-        # Search for cross section from the bottom of the banner file
-        with open(banner_file, "r") as f:
-            contents = f.readlines()
-        self.cross_section = 0.0
+        with open(self.banner) as file:
+            contents = file.readlines()
+        for line in contents:
+            if line.endswith("name of the run \n"):
+                self.tag = line.split()[0]
         for line in contents[::-1]:
-            if line.startswith("#  Integrated weight (pb)"):
+            if line.startswith("#  Number of Events"):
+                self.n_events = int(line.split()[-1])
+            if line.startswith("#  Integrated weight"):
                 self.cross_section = float(line.split()[-1])
-                break
-
-        # Read the events from the .root file via ROOT.TFile
-        event_file = self.directory / f"{self.tag}_delphes_events.root"
-        self._event_file = ROOT.TFile(str(event_file))
-        self.events = self._event_file.Get("Delphes")
-        self.n_events = self.events.GetEntries()
