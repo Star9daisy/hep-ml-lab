@@ -11,6 +11,8 @@ from typing import Any
 
 import cppyy
 import ROOT
+from rich.console import Console
+from rich.table import Table
 
 ROOT.gSystem.Load("libDelphes")
 
