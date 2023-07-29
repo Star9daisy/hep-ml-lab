@@ -68,6 +68,7 @@ class Madgraph5:
         detector: str = "Delphes",
         settings: dict[str, Any] = {},
         cards: list[str | Path] = [],
+        n_events_per_subrun: int = 100000,
     ) -> None:
         self._executable = Path(executable)
         self._output = Path(output)
@@ -83,6 +84,7 @@ class Madgraph5:
         self.detector = detector
         self.settings = settings
         self.cards = [Path(card) for card in cards]
+        self.n_events_per_subrun = n_events_per_subrun
 
     @property
     def executable(self) -> Path:
@@ -112,7 +114,64 @@ class Madgraph5:
     @property
     def commands(self) -> list[str]:
         """Commands converted from parameters to be executed in Madgraph5."""
-        return self._parameters_to_commands()
+        commands = []
+        if not self.output.exists():
+            # Model
+            commands += [f"import model {str(self.model)}"]
+
+            # Definitions
+            if self.definitions:
+                commands += [f"define {k} = {v}" for k, v in self.definitions.items()]
+                commands += [""]
+
+            # Processes
+            if len(self.processes) == 1:
+                commands += [f"generate {self.processes}"]
+            else:
+                commands += [f"generate {self.processes[0]}"]
+                commands += [f"add process {p}" for p in self.processes[1:]]
+
+            # Output
+            commands += [f"output {Path(self.output).absolute()}"]
+
+        # Launch
+        commands += [f"launch -i {Path(self.output).absolute()}"]
+
+        # Multi run
+        n_events = self.settings.get("nevents", 10000)
+        n_subruns = n_events // self.n_events_per_subrun
+        rest_runs = n_events % self.n_events_per_subrun
+        if n_subruns == 0 and rest_runs != 0:
+            n_subruns = rest_runs
+        elif n_subruns != 0 and rest_runs != 0:
+            n_subruns += 1
+
+        commands += [f"multi_run {n_subruns}"]
+
+        # Shower
+        if self.shower:
+            commands += [f"shower={self.shower}"]
+
+        # Detector
+        if self.detector:
+            commands += [f"detector={self.detector}"]
+
+        # Settings
+        if self.settings:
+            for k, v in self.settings.items():
+                if k == "nevents":
+                    v = self.n_events_per_subrun
+                commands += [f"set {k} {v}"]
+
+        # Cards
+        if self.cards:
+            commands += [f"{c.absolute()}" for c in self.cards]
+
+        return commands
+
+    @commands.setter
+    def commands(self, new_commands: list[str]) -> list[str]:
+        return new_commands
 
     @property
     def runs(self) -> list[MG5Run]:
@@ -201,49 +260,6 @@ class Madgraph5:
                 break
 
         return last_status
-
-    def _parameters_to_commands(self) -> list[str]:
-        """Convert parameters to a list of Madgraph5 commands."""
-        # Model
-        commands = [f"import model {str(self.model)}"]
-
-        # Definitions
-        if self.definitions:
-            commands += [f"define {k} = {v}" for k, v in self.definitions.items()]
-            commands += [""]
-
-        # Processes
-        if isinstance(self.processes, str):
-            commands += [f"generate {self.processes}"]
-        elif isinstance(self.processes, list):
-            commands += [f"generate {self.processes[0]}"]
-            commands += [f"add process {p}" for p in self.processes[1:]]
-        else:
-            raise TypeError("processes must be str or list[str]")
-
-        # Output
-        commands += [f"output {Path(self.output_dir).absolute()}"]
-
-        # Launch
-        commands += ["launch"]
-
-        # Shower
-        if self.shower:
-            commands += [f"    shower={self.shower}"]
-
-        # Detector
-        if self.detector:
-            commands += [f"    detector={self.detector}"]
-
-        # Settings
-        if self.settings:
-            commands += [f"    set {k} {v}" for k, v in self.settings.items()]
-
-        # Cards
-        if self.cards:
-            commands += [f"    {c.absolute()}" for c in self.cards]
-
-        return commands
 
 
 @dataclass
