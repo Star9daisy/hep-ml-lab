@@ -261,7 +261,10 @@ class Madgraph5:
         with open(f"{self.output}.log", "r") as f:
             contents = f.readlines()
         for line in contents[::-1]:
-            if line.startswith("Generating"):
+            if line.startswith("quit"):
+                time.sleep(0.1)
+                break
+            elif line.startswith("Generating"):
                 last_status = "Generating events..."
                 break
             elif "Running Pythia8" in line:
