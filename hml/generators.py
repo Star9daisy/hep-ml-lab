@@ -128,7 +128,6 @@ class Madgraph5:
             # Definitions
             if self.definitions:
                 commands += [f"define {k} = {v}" for k, v in self.definitions.items()]
-                commands += [""]
 
             # Processes
             if len(self.processes) == 1:
@@ -192,7 +191,7 @@ class Madgraph5:
         events_dir = self.output / "Events"
         run_dirs = events_dir.glob("run_*")
         run_dirs = [i for i in run_dirs if i.name.count("_") == 1]
-        runs = [MG5Run(i) for i in run_dirs]
+        runs = [MG5Run(i) for i in sorted(run_dirs)]
         return runs
 
     def summary(self) -> None:
