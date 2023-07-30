@@ -240,22 +240,24 @@ class Madgraph5:
         temp_file_path = self._commands_to_file(self.commands)
 
         # Launch Madgraph5 and redirect output to a log file
-        with open(f"{self.output}.log", "a") as f:
+        with open(f"{self.output}.log", "w") as f:
             process = subprocess.Popen(
                 f"{executable} {temp_file_path}",
                 shell=True,
                 stdout=f,
-                stderr=subprocess.STDOUT,
+                stderr=subprocess.PIPE,
             )
 
         # Check and print status
         status = ""
-        while status != "Done" or process.poll() is None:
+        while (status != "Done") or process.poll() is None:
             last_status = self._check_status(status)
             if last_status != status:
                 if show_status and last_status != "":
                     print(last_status)
                 status = last_status
+            if status == "Failed":
+                raise RuntimeError(process.stderr.readline().decode().strip())
             time.sleep(0.1)
 
         # Remove py.py file
@@ -269,15 +271,14 @@ class Madgraph5:
             temp_file_path = temp_file.name
         return temp_file_path
 
-    def _check_status(self, last_status: str) -> str:
+    def _check_status(self, current_status: str) -> str:
         """Check the status of the launched run."""
         with open(f"{self.output}.log", "r") as f:
             contents = f.readlines()
+
+        last_status = ""
         for line in contents[::-1]:
-            if line.startswith("quit"):
-                time.sleep(0.1)
-                break
-            elif line.startswith("Generating"):
+            if line.startswith("Generating"):
                 last_status = "Generating events..."
                 break
             elif "Running Pythia8" in line:
@@ -291,6 +292,9 @@ class Madgraph5:
                 break
             elif line.startswith("INFO: Done"):
                 last_status = "Done"
+                break
+            elif line.startswith("quit") and current_status != "Done":
+                last_status = "Failed"
                 break
 
         return last_status
