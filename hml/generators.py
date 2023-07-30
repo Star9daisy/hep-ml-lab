@@ -257,6 +257,7 @@ class Madgraph5:
             if status == "Failed":
                 stderr = process.stderr.readline().decode().strip()
                 if "stty" in stderr or stderr == "":
+                    status = "Done"
                     continue
                 else:
                     raise RuntimeError(stderr)
