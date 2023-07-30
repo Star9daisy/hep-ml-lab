@@ -231,8 +231,6 @@ class Madgraph5:
         """
 
         executable = shutil.which(self.executable)
-        if not executable:
-            raise EnvironmentError(f"No Madgraph executable file found for '{self.executable}'")
 
         if new_output and self.output.exists():
             shutil.rmtree(self.output)
