@@ -234,7 +234,6 @@ class Madgraph5:
 
         if new_output and self.output.exists():
             shutil.rmtree(self.output)
-            self.output.mkdir(parents=True)
 
         temp_file_path = self._commands_to_file(self.commands)
 
