@@ -60,7 +60,7 @@ class Madgraph5:
 
     def __init__(
         self,
-        executable: str | Path,
+        executable: str,
         output: str | Path,
         model: str = "sm",
         definitions: dict[str, str] = {},
@@ -71,7 +71,9 @@ class Madgraph5:
         cards: list[str | Path] = [],
         n_events_per_subrun: int = 100000,
     ) -> None:
-        self._executable = Path(executable)
+        self._executable = shutil.which(executable)
+        if not self._executable:
+            raise FileNotFoundError(f"{executable} does not exist.")
         self._output = Path(output)
         self._model = model
         self._definitions = definitions
@@ -85,6 +87,9 @@ class Madgraph5:
         self.detector = detector
         self.settings = settings
         self.cards = [Path(card) for card in cards]
+        for card in self.cards:
+            if not card.exists():
+                raise FileNotFoundError(f"{card} does not exist.")
         self.n_events_per_subrun = n_events_per_subrun
 
     @property
