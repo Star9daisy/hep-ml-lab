@@ -139,11 +139,18 @@ class Madgraph5:
         commands += [f"launch -i {Path(self.output).absolute()}"]
 
         # Multi run
+        # Assuming n_events_per_subrun is 100, (n_subruns x 100):
+        # n_events = 10000 -> 10 x 100
+        # n_events = 10001 -> 11 x 100
+        # n_events = 10    -> 1 x 10
         n_events = self.settings.get("nevents", 10000)
         n_subruns = n_events // self.n_events_per_subrun
         rest_runs = n_events % self.n_events_per_subrun
+        # n_events < n_events_per_subrun
         if n_subruns == 0 and rest_runs != 0:
-            n_subruns = rest_runs
+            n_subruns = 1
+            self.n_events_per_subrun = n_events
+        # n_events > n_events_per_subrun
         elif n_subruns != 0 and rest_runs != 0:
             n_subruns += 1
 
