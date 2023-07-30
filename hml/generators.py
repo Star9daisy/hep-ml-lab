@@ -257,7 +257,11 @@ class Madgraph5:
                     print(last_status)
                 status = last_status
             if status == "Failed":
-                raise RuntimeError(process.stderr.readline().decode().strip())
+                stderr = process.stderr.readline().decode().strip()
+                if "stty" in stderr or stderr == "":
+                    continue
+                else:
+                    raise RuntimeError(stderr)
             time.sleep(0.1)
 
         # Remove py.py file
