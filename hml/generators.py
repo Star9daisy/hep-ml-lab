@@ -127,7 +127,7 @@ class Madgraph5:
 
             # Processes
             if len(self.processes) == 1:
-                commands += [f"generate {self.processes}"]
+                commands += [f"generate {self.processes[0]}"]
             else:
                 commands += [f"generate {self.processes[0]}"]
                 commands += [f"add process {p}" for p in self.processes[1:]]
