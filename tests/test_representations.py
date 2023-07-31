@@ -1,10 +1,24 @@
-from hml.generators import MG5Run
+import shutil
+from pathlib import Path
+
+from hml.generators import Madgraph5, MG5Run
 from hml.observables import M, Pt
 from hml.representations import Set
 
 
 def test_observables():
-    run = MG5Run("tests/data/pp2zj_/Events/run_01/")
+    event_name = "pp2zj_"
+    generator = Madgraph5(
+        executable="mg5_aMC",
+        processes="p p > z j, z > j j",
+        output=f"./tests/data/{event_name}",
+        shower="Pythia8",
+        detector="Delphes",
+        settings={"nevents": 10, "iseed": 42},
+    )
+
+    generator.launch()
+    run = MG5Run(f"tests/data/{event_name}/Events/run_01/")
     representation = Set(
         [
             Pt("Jet1"),
@@ -25,3 +39,7 @@ def test_observables():
 
     assert representation.values is not None
     assert representation.values.shape == (6,)
+
+    # Clean up
+    shutil.rmtree(Path.cwd() / f"tests/data/{event_name}", ignore_errors=True)
+    Path.unlink(Path.cwd() / f"tests/data/{event_name}.log", missing_ok=True)

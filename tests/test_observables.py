@@ -35,19 +35,18 @@ def test_resolve_shortname():
         resolve_shortname("*Jet")
 
 
-event_name = "pp2zj_"
-generator = Madgraph5(
-    executable="mg5_aMC",
-    processes="p p > z j, z > j j",
-    output_dir=f"./tests/data/{event_name}",
-    shower="Pythia8",
-    detector="Delphes",
-    settings={"nevents": 10, "iseed": 42},
-)
-generator.launch()
-
-
 def test_observables():
+    event_name = "pp2zj_"
+    generator = Madgraph5(
+        executable="mg5_aMC",
+        processes="p p > z j, z > j j",
+        output=f"./tests/data/{event_name}",
+        shower="Pythia8",
+        detector="Delphes",
+        settings={"nevents": 10, "iseed": 42},
+    )
+    generator.launch()
+
     run = MG5Run(f"tests/data/{event_name}/Events/run_01/")
     event = next(iter(run.events))
 
@@ -63,13 +62,12 @@ def test_observables():
     obs.from_event(event)
     assert obs.values is not None
 
-
-def test_get_lorentzvector_values():
-    run = MG5Run(f"tests/data/{event_name}/Events/run_01/")
-    event = next(iter(run.events))
-
     assert len(get_lorentzvector_values(event, "Pt", ["Jet"], [-1])) == event.Jet_size
     with pytest.raises(ValueError):
         get_lorentzvector_values(event, "Pt", ["Jet"], [1, 2])
     with pytest.raises(IndexError):
         get_lorentzvector_values(event, "Pt", ["Jet"], [event.Jet_size + 1])
+
+    # Clean up
+    shutil.rmtree(Path.cwd() / f"tests/data/{event_name}", ignore_errors=True)
+    Path.unlink(Path.cwd() / f"tests/data/{event_name}.log", missing_ok=True)
