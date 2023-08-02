@@ -197,18 +197,24 @@ class Madgraph5:
 
     def summary(self) -> None:
         console = Console()
-        table = Table(title=f"Summary from {self.output}")
-        table.add_column("Run")
-        table.add_column("Tag")
-        table.add_column("Cross section (pb)")
-        table.add_column("Number of events")
+        table = Table(
+            title=f"Processes: {self.processes}",
+            caption=f"Output: {self.output.absolute().relative_to(Path.cwd())}",
+        )
 
-        for run in self.runs:
+        table.add_column("#", justify="right")
+        table.add_column("Name (N subruns)")
+        table.add_column("Tag")
+        table.add_column("Cross section +- Error pb", justify="center")
+        table.add_column("N events", justify="right")
+
+        for i, run in enumerate(self.runs):
             table.add_row(
-                run.directory.name,
-                run.tag,
-                f"{run.cross_section:.5e}",
-                f"{run.n_events}",
+                f"{i}",
+                f"{run.directory.name} ({run.n_subruns})",
+                f"{run.tag}",
+                f"{run.cross_section:.5e} +- 0",
+                f"{run.n_events:,}",
             )
 
         console.print(table)
