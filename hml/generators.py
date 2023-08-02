@@ -260,7 +260,6 @@ class Madgraph5:
                     continue
                 else:
                     raise RuntimeError(stderr)
-            time.sleep(0.1)
 
         # Remove py.py file
         if Path("py.py").exists():
