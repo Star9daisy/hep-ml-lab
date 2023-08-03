@@ -217,9 +217,9 @@ class Madgraph5:
         for i, run in enumerate(self.runs):
             table.add_row(
                 f"{i}",
-                f"{run.directory.name} ({run.n_subruns})",
+                f"{run.name} ({run.n_subruns})",
                 f"{run.tag}",
-                f"{run.cross_section:.5e} +- 0",
+                f"{run.cross_section:.5e} +- {run.error:.5e}",
                 f"{run.n_events:,}",
             )
 
