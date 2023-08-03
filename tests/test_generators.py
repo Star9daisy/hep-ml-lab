@@ -36,7 +36,7 @@ def test_Madgraph5():
     ]
     generator1 = Madgraph5(
         executable="mg5_aMC",
-        processes="p p > z j, z > j j",
+        processes=["p p > z j, z > j j"],
         output=f"./tests/data/{event_name1}",
         shower="Pythia8",
         detector="Delphes",
@@ -57,7 +57,10 @@ def test_Madgraph5():
     generator2 = Madgraph5(
         executable="mg5_aMC",
         definitions={"p": "p b b~", "j": "j b b~"},
-        processes=["p p > w+ z, w+ > j j, z > ve ve~", "p p > w- z, w- > j j, z > ve ve~"],
+        processes=[
+            "p p > w+ z, w+ > j j, z > ve ve~",
+            "p p > w- z, w- > j j, z > ve ve~",
+        ],
         output=f"./tests/data/{event_name2}",
         shower="Pythia8",
         detector="Delphes",
