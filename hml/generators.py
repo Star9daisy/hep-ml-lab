@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 import cppyy
 import ROOT
@@ -14,6 +15,8 @@ from rich.console import Console
 from rich.table import Table
 
 ROOT.gSystem.Load("libDelphes")
+
+PathLike = Union[str, Path, os.PathLike]
 
 
 class Madgraph5:
@@ -60,31 +63,34 @@ class Madgraph5:
 
     def __init__(
         self,
-        executable: str | Path,
-        output: str | Path,
-        model: str = "sm",
+        executable: PathLike,
+        output: PathLike,
+        model: PathLike = "sm",
         definitions: dict[str, str] = {},
-        processes: str | list[str] = "",
+        processes: list[str] = [],
         shower: str = "Pythia8",
         detector: str = "Delphes",
         settings: dict[str, Any] = {},
-        cards: list[str | Path] = [],
+        cards: list[PathLike] = [],
         n_events_per_subrun: int = 100000,
     ) -> None:
+        # Data validation ---------------------------------------------------- #
         _executable = shutil.which(executable)
         if _executable is None:
             raise EnvironmentError(f"{executable} does not exist.")
-        else:
-            self._executable = Path(_executable)
+        self._executable = Path(_executable).resolve()
+
         self._output = Path(output)
-        self._model = model
-        self._definitions = definitions
 
-        if isinstance(processes, list):
-            self._processes = processes
+        if Path(model).exists():
+            self._model = Path(model)
+        elif (self._executable.parent.parent / f"models/{model}").exists():
+            self._model = model
         else:
-            self._processes = [processes]
+            raise FileNotFoundError(f"Model {model} does not exist.")
 
+        self._definitions = definitions
+        self._processes = processes
         self.shower = shower
         self.detector = detector
         self.settings = settings
@@ -105,7 +111,7 @@ class Madgraph5:
         return self._output
 
     @property
-    def model(self) -> str:
+    def model(self) -> PathLike:
         """The particle physics theory model to be used."""
         return self._model
 
@@ -128,15 +134,13 @@ class Madgraph5:
             commands += [f"import model {str(self.model)}"]
 
             # Definitions
-            if self.definitions:
-                commands += [f"define {k} = {v}" for k, v in self.definitions.items()]
+            commands += [f"define {k} = {v}" for k, v in self.definitions.items()]
 
             # Processes
-            if len(self.processes) == 1:
-                commands += [f"generate {self.processes[0]}"]
-            else:
-                commands += [f"generate {self.processes[0]}"]
-                commands += [f"add process {p}" for p in self.processes[1:]]
+            commands += [
+                f"generate {process}" if i == 0 else f"add process {process}"
+                for i, process in enumerate(self.processes)
+            ]
 
             # Output
             commands += [f"output {Path(self.output).absolute()}"]
@@ -150,8 +154,7 @@ class Madgraph5:
         # n_events = 10001 -> 11 x 100
         # n_events = 10    -> 1 x 10
         n_events = self.settings.get("nevents", 10000)
-        n_subruns = n_events // self.n_events_per_subrun
-        rest_runs = n_events % self.n_events_per_subrun
+        n_subruns, rest_runs = divmod(n_events, self.n_events_per_subrun)
         # n_events < n_events_per_subrun
         if n_subruns == 0 and rest_runs != 0:
             n_subruns = 1
@@ -162,23 +165,19 @@ class Madgraph5:
         commands += [f"multi_run {n_subruns}"]
 
         # Shower
-        if self.shower:
-            commands += [f"shower={self.shower}"]
+        commands += [f"shower={self.shower}"]
 
         # Detector
-        if self.detector:
-            commands += [f"detector={self.detector}"]
+        commands += [f"detector={self.detector}"]
 
         # Settings
-        if self.settings:
-            for k, v in self.settings.items():
-                if k == "nevents":
-                    v = self.n_events_per_subrun
-                commands += [f"set {k} {v}"]
+        commands += [
+            f"set {k} {self.n_events_per_subrun}" if k == "nevents" else f"set {k} {v}"
+            for k, v in self.settings.items()
+        ]
 
         # Cards
-        if self.cards:
-            commands += [f"{c.absolute()}" for c in self.cards]
+        commands += [f"{c.absolute()}" for c in self.cards]
 
         return commands
 
