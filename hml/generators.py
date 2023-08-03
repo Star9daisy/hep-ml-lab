@@ -340,30 +340,60 @@ class MG5Run:
         The events generated in a run.
     """
 
-    directory: str | Path
-    banner: Path = field(default_factory=Path, init=False, repr=False)
-    tag: str = field(default="", init=False)
-    cross_section: float = field(default=0.0, init=False)
-    n_events: int = field(default=0, init=False)
-    n_subruns: int = field(default=0, init=False, repr=False)
-    events: cppyy.gbl.TChain = field(init=False, repr=False)
+    def __init__(self, dir: PathLike):
+        _dir = Path(dir)
+        if not _dir.exists():
+            raise FileNotFoundError(f"Directory {_dir} does not exist.")
+        self._dir = _dir
+        self._name = _dir.name
 
-    def __post_init__(self):
-        self.directory = Path(self.directory)
-        self.banner = self.directory.parent / f"{self.directory.name}_banner.txt"
+        self._events = ROOT.TChain("Delphes")
+        self._n_subruns = 0
+        for file in self.dir.parent.glob(f"{self.dir.name}*/*.root"):
+            self._n_subruns += 1
+            self._events.Add(file.as_posix())
 
-        self.events = ROOT.TChain("Delphes")
-        for file in self.directory.parent.glob(f"{self.directory.name}*/*.root"):
-            self.n_subruns += 1
-            self.events.Add(file.as_posix())
+        results = self.dir.parent.parent / "results.txt"
+        with open(results, "r") as f:
+            for line in f:
+                query_name = self._name if self._n_subruns > 1 else self._name + "_0"
+                if line.startswith(query_name):
+                    result = line.split()
+                    break
 
-        with open(self.banner) as file:
-            contents = file.readlines()
-        for line in contents:
-            if line.endswith("name of the run \n"):
-                self.tag = line.split()[0]
-        for line in contents[::-1]:
-            if line.startswith("#  Number of Events"):
-                self.n_events = int(line.split()[-1])
-            if line.startswith("#  Integrated weight"):
-                self.cross_section = float(line.split()[-1])
+        self._tag = result[1]
+        self._cross_section = float(result[2])
+        self._error = float(result[3])
+        self._n_events = int(result[4])
+
+    @property
+    def dir(self) -> Path:
+        return self._dir
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def tag(self) -> str:
+        return self._tag
+
+    @property
+    def cross_section(self) -> float:
+        return self._cross_section
+
+    @property
+    def error(self) -> float:
+        return self._error
+
+    @property
+    def n_events(self) -> int:
+        return self._n_events
+
+    @property
+    def n_subruns(self) -> int:
+        return self._n_subruns
+
+    @property
+    def events(self) -> TChain:
+        return self._events
