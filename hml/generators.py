@@ -143,10 +143,10 @@ class Madgraph5:
             ]
 
             # Output
-            commands += [f"output {Path(self.output).absolute()}"]
+            commands += [f"output {self.output.absolute()}"]
 
         # Launch
-        commands += [f"launch -i {Path(self.output).absolute()}"]
+        commands += [f"launch -i {self.output.absolute()}"]
 
         # Multi run
         # Assuming n_events_per_subrun is 100, (n_subruns x 100):
