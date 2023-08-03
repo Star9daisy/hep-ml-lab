@@ -277,6 +277,30 @@ class Madgraph5:
         if Path("py.py").exists():
             Path("py.py").unlink()
 
+    def remove(self, run_name: str) -> None:
+        """Remove one or more runs."""
+        paths = (self.output / "Events").glob(f"{run_name}*")
+        run_dirs = [i for i in paths if i.is_dir()]
+        banner_path = self.output / f"Events/{run_name}_banner.txt"
+
+        commands = [
+            f"launch -i {self.output.absolute()}",
+            *[f"remove {i.name} all banner -f" for i in run_dirs],
+        ]
+        temp_file_path = self._commands_to_file(commands)
+        subprocess.run(
+            f"{self.executable} {temp_file_path}",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        banner_path.unlink(missing_ok=True)
+
+    def clean(self) -> None:
+        """Clean and remove output directory."""
+        shutil.rmtree(self.output, ignore_errors=True)
+        self.output.with_suffix(".log").unlink(missing_ok=True)
+
     def _commands_to_file(self, commands: list[str]) -> str:
         """Write commands to a temporary file and return the path of the file."""
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
