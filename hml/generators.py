@@ -179,6 +179,13 @@ class Madgraph5:
         # Cards
         commands += [f"{c.absolute()}" for c in self.cards]
 
+        # Print results
+        commands += [
+            f"print_results"
+            f" --path={self.output.absolute()}/results.txt"
+            f" --format=short"
+        ]
+
         return commands
 
     @commands.setter
