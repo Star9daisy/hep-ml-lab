@@ -24,6 +24,7 @@ def test_Madgraph5():
         "set nevents 10",
         "set iseed 42",
         f"{Path.cwd()}/tests/scripts/delphes_card_eflow.dat",
+        f"print_results --path={Path.cwd()}/tests/data/{event_name1}/results.txt --format=short",
     ]
     expected_commands_run_02 = [
         f"launch -i {Path.cwd()}/tests/data/{event_name1}",
@@ -33,6 +34,7 @@ def test_Madgraph5():
         "set nevents 10",
         "set iseed 42",
         f"{Path.cwd()}/tests/scripts/delphes_card_eflow.dat",
+        f"print_results --path={Path.cwd()}/tests/data/{event_name1}/results.txt --format=short",
     ]
     generator1 = Madgraph5(
         executable="mg5_aMC",
