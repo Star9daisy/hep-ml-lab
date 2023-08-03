@@ -39,7 +39,7 @@ def test_observables():
     event_name = "pp2zj_"
     generator = Madgraph5(
         executable="mg5_aMC",
-        processes="p p > z j, z > j j",
+        processes=["p p > z j, z > j j"],
         output=f"./tests/data/{event_name}",
         shower="Pythia8",
         detector="Delphes",
