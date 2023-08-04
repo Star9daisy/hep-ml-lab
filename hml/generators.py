@@ -85,7 +85,7 @@ class Madgraph5:
         if Path(model).exists():
             self._model = Path(model)
         elif (self._executable.parent.parent / f"models/{model}").exists():
-            self._model = model
+            self._model = self._executable.parent.parent / f"models/{model}"
         else:
             raise FileNotFoundError(f"Model {model} does not exist.")
 
@@ -187,10 +187,6 @@ class Madgraph5:
         ]
 
         return commands
-
-    @commands.setter
-    def commands(self, new_commands: list[str]) -> list[str]:
-        return new_commands
 
     @property
     def runs(self) -> list[MG5Run]:
