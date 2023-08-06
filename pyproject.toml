@@ -11,18 +11,19 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
 pyyaml = "^6.0"
-numpy = "^1.24.3"
+numpy = "^1.22"
 scikit-learn = "^1.2.2"
 matplotlib = "^3.7.1"
 tensorflow = "^2.11.0"
 rich = "^13.4.2"
+pytest = "^7.3.2"
+h5py = "^3.6.0"
 
 
 [tool.poetry.group.dev.dependencies]
 mkdocs = "^1.4.3"
 mkdocstrings = {extras = ["python"], version = "^0.22.0"}
 mkdocs-material = "^9.1.15"
-pytest = "^7.3.2"
 black = "^23.3.0"
 python-dotenv = "^1.0.0"
 deptry = "^0.12.0"
