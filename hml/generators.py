@@ -120,7 +120,7 @@ class Madgraph5:
         return self._output
 
     @property
-    def model(self) -> PathLike:
+    def model(self) -> Path:
         """The theory model to be used."""
         return self._model
 
