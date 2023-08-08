@@ -140,7 +140,7 @@ class Madgraph5:
         commands = []
         if not self.output.exists():
             # Model
-            commands += [f"import model {str(self.model)}"]
+            commands += [f"import model {self.model.absolute()}"]
 
             # Definitions
             commands += [f"define {k} = {v}" for k, v in self.definitions.items()]
