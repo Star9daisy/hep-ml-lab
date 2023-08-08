@@ -13,7 +13,7 @@
         <link rel="next" href="examples/generate_events/">
       
       <link rel="icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -21,7 +21,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="assets/stylesheets/palette.ecc896b0.min.css">
@@ -198,9 +198,43 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#module-overview" class="md-nav__link">
     Module overview
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updates" class="md-nav__link">
+    Updates
+  </a>
+  
+    <nav class="md-nav" aria-label="Updates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v021" class="md-nav__link">
+    v0.2.1
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -552,9 +586,43 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#module-overview" class="md-nav__link">
     Module overview
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updates" class="md-nav__link">
+    Updates
+  </a>
+  
+    <nav class="md-nav" aria-label="Updates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v021" class="md-nav__link">
+    v0.2.1
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -574,14 +642,18 @@
 
 
 <h1 id="hep-ml-lab-hml">HEP ML Lab (HML)<a class="headerlink" href="#hep-ml-lab-hml" title="Permanent link">#</a></h1>
-<p><a href="https://codecov.io/gh/Star9daisy/hml"><img alt="codecov" src="https://codecov.io/gh/Star9daisy/hep-ml-lab/branch/main/graph/badge.svg?token=6VWJi5ct6c" /></a></p>
+<p><img alt="codecov" src="https://codecov.io/gh/Star9daisy/hep-ml-lab/branch/main/graph/badge.svg?token=6VWJi5ct6c" /></p>
 <p>❗ This framework is currently undergoing <strong>rapid iteration</strong>. Any comments and suggestions are welcome.</p>
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">#</a></h2>
-<p>HEP ML Lab (HML) is an end-to-end framework for applying machine learning (ML) to high energy physics (HEP)
-research. It provides a set of interfaces for data generation, model training and evaluation. It is designed to
-be modular and extensible so that you can easily customize it for your own research.</p>
+<p>HEP ML Lab (HML) is an end-to-end framework for applying machine learning (ML)
+to high energy physics (HEP) research. It provides a set of interfaces for data generation, model training and evaluation. It is designed to be modular and
+extensible so that you can easily customize it for your own research.</p>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
+<pre><code class="language-python">pip install hep-ml-lab
+</code></pre>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
+<p>Check out the <a href="https://star9daisy.github.io/hep-ml-lab/">documents</a>.</p>
 <h2 id="module-overview">Module overview<a class="headerlink" href="#module-overview" title="Permanent link">#</a></h2>
-<p>Here is a brief overview of the modules in HML:</p>
 <ul>
 <li><code>hml.generators</code>: API of Madgraph5 for simulating colliding events;</li>
 <li><code>hml.theories</code>: Particle physics models;</li>
@@ -590,6 +662,13 @@ be modular and extensible so that you can easily customize it for your own resea
 <li><code>hml.datasets</code>: Existing datasets and helper classes for creating new datasets;</li>
 <li><code>hml.methods</code>: Cuts, trees and networks for classification;</li>
 <li><code>hml.metrics</code>: Metrics used in classical signal vs background analysis;</li>
+</ul>
+<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">#</a></h2>
+<h3 id="v021">v0.2.1<a class="headerlink" href="#v021" title="Permanent link">#</a></h3>
+<ul>
+<li>Add <code>summary</code> to <code>hml.generators.Madgraph5</code> to print a summary of all run.</li>
+<li>Add <code>remove</code> to <code>hml.generators.Madgraph5</code> to remove a run.</li>
+<li>Add <code>clean</code> to <code>hml.generators.Madgraph5</code> to remove the output directory.</li>
 </ul>
 
 
@@ -628,16 +707,22 @@ be modular and extensible so that you can easily customize it for your own resea
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.copy"], "search": "assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.copy"], "search": "assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="assets/javascripts/bundle.b4d07000.min.js"></script>
+      <script src="assets/javascripts/bundle.220ee61c.min.js"></script>
       
-        <script src="javascripts/mathjax.js"></script>
+        
+          <script src="javascripts/mathjax.js"></script>
+        
       
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
+          <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
+          <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
       
     
   </body>

@@ -13,7 +13,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -21,7 +21,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -701,15 +701,15 @@
 
 
 <h2 id="hml.metrics.MaxSignificance" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">MaxSignificance</span>
+          <span class="doc doc-object-name doc-class-name">MaxSignificance</span>
 
 
 <a href="#hml.metrics.MaxSignificance" class="headerlink" title="Permanent link">#</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="keras.metrics.Metric">Metric</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="keras.metrics.Metric">Metric</span></code></p>
 
   
       <p>Calculate the maximum significance of a model's predictions.</p>
@@ -725,23 +725,27 @@ background. As a result, one threshold corresponds to one significance value. Th
 metric is called <code>MaxSignificance</code>: it calculates the maximum significance value among all the
 thresholds.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
         <tr>
           <td><code>n_thresholds</code></td>
           <td class="doc-param-details">
-            <p>Number of thresholds to use to compute the significance. The thresholds are uniformly
+            <div class="doc-md-description">
+              <p>Number of thresholds to use to compute the significance. The thresholds are uniformly
 distributed in the [0, 1] range. The default is 101.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>int, optional</code>
+                    <code>int</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -753,11 +757,13 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>class_id</code></td>
           <td class="doc-param-details">
-            <p>Class ID of the signal class. The default is 1.</p>
+            <div class="doc-md-description">
+              <p>Class ID of the signal class. The default is 1.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>int, optional</code>
+                    <code>int</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -769,11 +775,13 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>name</code></td>
           <td class="doc-param-details">
-            <p>Name of the metric. The default is "max_significance".</p>
+            <div class="doc-md-description">
+              <p>Name of the metric. The default is "max_significance".</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>str, optional</code>
+                    <code>str</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -785,21 +793,25 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>dtype</code></td>
           <td class="doc-param-details">
-            <p>Data type of the metric. The default is tf.float32.</p>
+            <div class="doc-md-description">
+              <p>Data type of the metric. The default is tf.float32.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><span title="tensorflow">tf</span>.<span title="tensorflow.dtypes">dtypes</span>.<span title="tensorflow.dtypes.DType">DType</span>, optional</code>
+                    <code><span title="tensorflow">tf</span>.<span title="tensorflow.dtypes">dtypes</span>.<span title="tensorflow.dtypes.DType">DType</span></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
-                    <code>tf.float32</code>
+                    <code><span title="tensorflow">tf</span>.<span title="tensorflow.float32">float32</span></code>
                 </span>
             </p>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -812,7 +824,9 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>thresholds</code></td>
           <td class="doc-attribute-details">
-            <p>List of thresholds used to compute the significance.</p>
+            <div class="doc-md-description">
+              <p>List of thresholds used to compute the significance.</p>
+            </div>
             <p>
                 <span class="doc-attribute-annotation">
                   <b>TYPE:</b>
@@ -824,7 +838,9 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>threshold</code></td>
           <td class="doc-attribute-details">
-            <p>Threshold that gives the maximum significance.</p>
+            <div class="doc-md-description">
+              <p>Threshold that gives the maximum significance.</p>
+            </div>
             <p>
                 <span class="doc-attribute-annotation">
                   <b>TYPE:</b>
@@ -836,7 +852,9 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>threshold_index</code></td>
           <td class="doc-attribute-details">
-            <p>Index of the threshold that gives the maximum significance.</p>
+            <div class="doc-md-description">
+              <p>Index of the threshold that gives the maximum significance.</p>
+            </div>
             <p>
                 <span class="doc-attribute-annotation">
                   <b>TYPE:</b>
@@ -848,7 +866,9 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>max_significance</code></td>
           <td class="doc-attribute-details">
-            <p>Maximum significance value.</p>
+            <div class="doc-md-description">
+              <p>Maximum significance value.</p>
+            </div>
             <p>
                 <span class="doc-attribute-annotation">
                   <b>TYPE:</b>
@@ -859,6 +879,8 @@ distributed in the [0, 1] range. The default is 101.</p>
         </tr>
     </tbody>
   </table>
+
+
 
 <p><strong>Examples:</strong></p>
     <p>Standalone usage:</p>
@@ -880,10 +902,9 @@ distributed in the [0, 1] range. The default is 101.</p>
 )
 </code></pre>
 
-
-        <details class="quote">
-          <summary>Source code in <code>hml/metrics.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  9</span>
+            <details class="quote">
+              <summary>Source code in <code>hml/metrics.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  9</span>
 <span class="normal"> 10</span>
 <span class="normal"> 11</span>
 <span class="normal"> 12</span>
@@ -1233,11 +1254,12 @@ distributed in the [0, 1] range. The default is 101.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">true_positives</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">false_positives</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1252,7 +1274,7 @@ distributed in the [0, 1] range. The default is 101.</p>
 
 
 <h3 id="hml.metrics.MaxSignificance.update_state" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">update_state</span>
+          <span class="doc doc-object-name doc-function-name">update_state</span>
 
 
 <a href="#hml.metrics.MaxSignificance.update_state" class="headerlink" title="Permanent link">#</a></h3>
@@ -1263,18 +1285,22 @@ distributed in the [0, 1] range. The default is 101.</p>
   
       <p>Update the state of the metric in a batch-wise fashion.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
         <tr>
           <td><code>y_true</code></td>
           <td class="doc-param-details">
-            <p>True labels.</p>
+            <div class="doc-md-description">
+              <p>True labels.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
@@ -1286,7 +1312,9 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>y_pred</code></td>
           <td class="doc-param-details">
-            <p>Predicted values (probabilities).</p>
+            <div class="doc-md-description">
+              <p>Predicted values (probabilities).</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
@@ -1298,11 +1326,13 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>sample_weight</code></td>
           <td class="doc-param-details">
-            <p>Sample weights. The default is None.</p>
+            <div class="doc-md-description">
+              <p>Sample weights. The default is None.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>list | <span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span> | <span title="tensorflow">tf</span>.<span title="tensorflow.Tensor">Tensor</span> | None, optional</code>
+                    <code>list | <span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span> | <span title="tensorflow">tf</span>.<span title="tensorflow.Tensor">Tensor</span> | None</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -1314,9 +1344,9 @@ distributed in the [0, 1] range. The default is 101.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>hml/metrics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
+          <details class="quote">
+            <summary>Source code in <code>hml/metrics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
@@ -1422,17 +1452,18 @@ distributed in the [0, 1] range. The default is 101.</p>
                 <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y_true_signal</span><span class="p">)</span> <span class="o">*</span> <span class="n">y_pred_thresholded</span><span class="p">)</span>
             <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="hml.metrics.MaxSignificance.result" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">result</span>
+          <span class="doc doc-object-name doc-function-name">result</span>
 
 
 <a href="#hml.metrics.MaxSignificance.result" class="headerlink" title="Permanent link">#</a></h3>
@@ -1442,6 +1473,8 @@ distributed in the [0, 1] range. The default is 101.</p>
   <div class="doc doc-contents ">
   
       <p>Return the maximum significance value.</p>
+
+
 
   <table>
     <thead>
@@ -1458,15 +1491,17 @@ distributed in the [0, 1] range. The default is 101.</p>
               </span>
           </td>
           <td class="doc-returns-details">
-            <p>Maximum significance value.</p>
+            <div class="doc-md-description">
+              <p>Maximum significance value.</p>
+            </div>
           </td>
         </tr>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>hml/metrics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">156</span>
+          <details class="quote">
+            <summary>Source code in <code>hml/metrics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
 <span class="normal">159</span>
@@ -1510,17 +1545,18 @@ distributed in the [0, 1] range. The default is 101.</p>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_significance</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="hml.metrics.MaxSignificance.reset_state" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">reset_state</span>
+          <span class="doc doc-object-name doc-function-name">reset_state</span>
 
 
 <a href="#hml.metrics.MaxSignificance.reset_state" class="headerlink" title="Permanent link">#</a></h3>
@@ -1531,9 +1567,9 @@ distributed in the [0, 1] range. The default is 101.</p>
   
       <p>Reset the state of the metric for a new batch.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>hml/metrics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">179</span>
+          <details class="quote">
+            <summary>Source code in <code>hml/metrics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">179</span>
 <span class="normal">180</span>
 <span class="normal">181</span>
 <span class="normal">182</span>
@@ -1543,7 +1579,7 @@ distributed in the [0, 1] range. The default is 101.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">true_positives</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">false_positives</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1561,15 +1597,15 @@ distributed in the [0, 1] range. The default is 101.</p>
 
 
 <h2 id="hml.metrics.RejectionAtEfficiency" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">RejectionAtEfficiency</span>
+          <span class="doc doc-object-name doc-class-name">RejectionAtEfficiency</span>
 
 
 <a href="#hml.metrics.RejectionAtEfficiency" class="headerlink" title="Permanent link">#</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="keras.metrics.Metric">Metric</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="keras.metrics.Metric">Metric</span></code></p>
 
   
       <p>Calculate the background rejection at a given signial efficiency.</p>
@@ -1578,22 +1614,26 @@ the mistag rate, which is the fraction of background events that are incorrectly
 signal. The signal efficiency is the fraction of signal events that are correctly identified as
 signal. The signal efficiency and the mistag rate are true positive and false positive rates.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
         <tr>
           <td><code>efficiency</code></td>
           <td class="doc-param-details">
-            <p>Signal efficiency. The default is 0.5.</p>
+            <div class="doc-md-description">
+              <p>Signal efficiency. The default is 0.5.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>float, optional</code>
+                    <code>float</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -1605,12 +1645,14 @@ signal. The signal efficiency and the mistag rate are true positive and false po
         <tr>
           <td><code>n_thresholds</code></td>
           <td class="doc-param-details">
-            <p>Number of thresholds to use to compute the rejection. The thresholds are uniformly
+            <div class="doc-md-description">
+              <p>Number of thresholds to use to compute the rejection. The thresholds are uniformly
 distributed in the [0, 1] range. The default is 101.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>int, optional</code>
+                    <code>int</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -1622,11 +1664,13 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>class_id</code></td>
           <td class="doc-param-details">
-            <p>Class ID of the signal class. The default is 1.</p>
+            <div class="doc-md-description">
+              <p>Class ID of the signal class. The default is 1.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>int, optional</code>
+                    <code>int</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -1638,11 +1682,13 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>name</code></td>
           <td class="doc-param-details">
-            <p>Name of the metric. The default is "rejection_at_efficiency".</p>
+            <div class="doc-md-description">
+              <p>Name of the metric. The default is "rejection_at_efficiency".</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>str, optional</code>
+                    <code>str</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -1654,21 +1700,25 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>dtype</code></td>
           <td class="doc-param-details">
-            <p>Data type of the metric. The default is tf.float32.</p>
+            <div class="doc-md-description">
+              <p>Data type of the metric. The default is tf.float32.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code><span title="tensorflow">tf</span>.<span title="tensorflow.dtypes">dtypes</span>.<span title="tensorflow.dtypes.DType">DType</span>, optional</code>
+                    <code><span title="tensorflow">tf</span>.<span title="tensorflow.dtypes">dtypes</span>.<span title="tensorflow.dtypes.DType">DType</span></code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
-                    <code>tf.float32</code>
+                    <code><span title="tensorflow">tf</span>.<span title="tensorflow.float32">float32</span></code>
                 </span>
             </p>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
 <p><strong>Examples:</strong></p>
     <p>Standalone usage:</p>
@@ -1681,10 +1731,9 @@ distributed in the [0, 1] range. The default is 101.</p>
 <span class="go">2.9999993</span>
 </code></pre></div>
 
-
-        <details class="quote">
-          <summary>Source code in <code>hml/metrics.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">186</span>
+            <details class="quote">
+              <summary>Source code in <code>hml/metrics.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">186</span>
 <span class="normal">187</span>
 <span class="normal">188</span>
 <span class="normal">189</span>
@@ -1864,11 +1913,12 @@ distributed in the [0, 1] range. The default is 101.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the state of the metric for a new batch.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">specificity_at_sensitivity</span><span class="o">.</span><span class="n">reset_states</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1883,7 +1933,7 @@ distributed in the [0, 1] range. The default is 101.</p>
 
 
 <h3 id="hml.metrics.RejectionAtEfficiency.update_state" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">update_state</span>
+          <span class="doc doc-object-name doc-function-name">update_state</span>
 
 
 <a href="#hml.metrics.RejectionAtEfficiency.update_state" class="headerlink" title="Permanent link">#</a></h3>
@@ -1894,18 +1944,22 @@ distributed in the [0, 1] range. The default is 101.</p>
   
       <p>Update the state of the metric in a batch-wise fashion.</p>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
         <tr>
           <td><code>y_true</code></td>
           <td class="doc-param-details">
-            <p>True labels.</p>
+            <div class="doc-md-description">
+              <p>True labels.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
@@ -1917,7 +1971,9 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>y_pred</code></td>
           <td class="doc-param-details">
-            <p>Predicted values (probabilities).</p>
+            <div class="doc-md-description">
+              <p>Predicted values (probabilities).</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
@@ -1929,11 +1985,13 @@ distributed in the [0, 1] range. The default is 101.</p>
         <tr>
           <td><code>sample_weight</code></td>
           <td class="doc-param-details">
-            <p>Sample weights. The default is None.</p>
+            <div class="doc-md-description">
+              <p>Sample weights. The default is None.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>list | <span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span> | <span title="tensorflow">tf</span>.<span title="tensorflow.Tensor">Tensor</span> | None, optional</code>
+                    <code>list | <span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span> | <span title="tensorflow">tf</span>.<span title="tensorflow.Tensor">Tensor</span> | None</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -1945,9 +2003,9 @@ distributed in the [0, 1] range. The default is 101.</p>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>hml/metrics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">238</span>
+          <details class="quote">
+            <summary>Source code in <code>hml/metrics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">238</span>
 <span class="normal">239</span>
 <span class="normal">240</span>
 <span class="normal">241</span>
@@ -1983,17 +2041,18 @@ distributed in the [0, 1] range. The default is 101.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">specificity_at_sensitivity</span><span class="o">.</span><span class="n">update_state</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="hml.metrics.RejectionAtEfficiency.result" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">result</span>
+          <span class="doc doc-object-name doc-function-name">result</span>
 
 
 <a href="#hml.metrics.RejectionAtEfficiency.result" class="headerlink" title="Permanent link">#</a></h3>
@@ -2003,6 +2062,8 @@ distributed in the [0, 1] range. The default is 101.</p>
   <div class="doc doc-contents ">
   
       <p>Return the background rejection at the given signal efficiency.</p>
+
+
 
   <table>
     <thead>
@@ -2019,15 +2080,17 @@ distributed in the [0, 1] range. The default is 101.</p>
               </span>
           </td>
           <td class="doc-returns-details">
-            <p>Background rejection.</p>
+            <div class="doc-md-description">
+              <p>Background rejection.</p>
+            </div>
           </td>
         </tr>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>hml/metrics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
+          <details class="quote">
+            <summary>Source code in <code>hml/metrics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span>
 <span class="normal">260</span>
@@ -2057,17 +2120,18 @@ distributed in the [0, 1] range. The default is 101.</p>
     <span class="n">rejection</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">specificity</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">epsilon</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">rejection</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 <div class="doc doc-object doc-function">
 
 
 
 <h3 id="hml.metrics.RejectionAtEfficiency.reset_state" class="doc doc-heading">
-        <span class="doc doc-object-name doc-function-name">reset_state</span>
+          <span class="doc doc-object-name doc-function-name">reset_state</span>
 
 
 <a href="#hml.metrics.RejectionAtEfficiency.reset_state" class="headerlink" title="Permanent link">#</a></h3>
@@ -2078,15 +2142,15 @@ distributed in the [0, 1] range. The default is 101.</p>
   
       <p>Reset the state of the metric for a new batch.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>hml/metrics.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">273</span>
+          <details class="quote">
+            <summary>Source code in <code>hml/metrics.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">273</span>
 <span class="normal">274</span>
 <span class="normal">275</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">reset_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reset the state of the metric for a new batch.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">specificity_at_sensitivity</span><span class="o">.</span><span class="n">reset_states</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2144,16 +2208,22 @@ distributed in the [0, 1] range. The default is 101.</p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.copy"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.b4d07000.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
-        <script src="../../javascripts/mathjax.js"></script>
+        
+          <script src="../../javascripts/mathjax.js"></script>
+        
       
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
+          <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
+          <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
       
     
   </body>

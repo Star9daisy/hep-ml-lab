@@ -15,7 +15,7 @@
         <link rel="next" href="../trees/">
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.15">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -23,7 +23,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
@@ -583,7 +583,7 @@
 
 
 <h2 id="hml.methods.cuts.CutAndCount" class="doc doc-heading">
-        <span class="doc doc-object-name doc-class-name">CutAndCount</span>
+          <span class="doc doc-object-name doc-class-name">CutAndCount</span>
 
 
 <a href="#hml.methods.cuts.CutAndCount" class="headerlink" title="Permanent link">#</a></h2>
@@ -605,22 +605,26 @@ cases:</p>
 <li>both_sides: signal &lt; cut[0] or signal &gt; cut[1]</li>
 </ul>
 
+
+
   <table>
     <thead>
       <tr>
         <th><b>PARAMETER</b></th>
-        <th><b>DESCRIPTION</b></th>
+        <th><b> DESCRIPTION</b></th>
       </tr>
     </thead>
     <tbody>
         <tr>
           <td><code>name</code></td>
           <td class="doc-param-details">
-            <p>Name of the method. Default is "cut_and_count".</p>
+            <div class="doc-md-description">
+              <p>Name of the method. Default is "cut_and_count".</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>str, optional</code>
+                    <code>str</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -632,11 +636,13 @@ cases:</p>
         <tr>
           <td><code>n_bins</code></td>
           <td class="doc-param-details">
-            <p>Number of bins to use for the cut and count method. Default is 100.</p>
+            <div class="doc-md-description">
+              <p>Number of bins to use for the cut and count method. Default is 100.</p>
+            </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>int, optional</code>
+                    <code>int</code>
                 </span>
                 <span class="doc-param-default">
                   <b>DEFAULT:</b> 
@@ -647,6 +653,8 @@ cases:</p>
         </tr>
     </tbody>
   </table>
+
+
 
   <table>
     <thead>
@@ -659,7 +667,9 @@ cases:</p>
         <tr>
           <td><code>name</code></td>
           <td class="doc-attribute-details">
-            <p>Name of the method.</p>
+            <div class="doc-md-description">
+              <p>Name of the method.</p>
+            </div>
             <p>
                 <span class="doc-attribute-annotation">
                   <b>TYPE:</b>
@@ -671,7 +681,9 @@ cases:</p>
         <tr>
           <td><code>n_parameters</code></td>
           <td class="doc-attribute-details">
-            <p>Number of parameters of the method.</p>
+            <div class="doc-md-description">
+              <p>Number of parameters of the method.</p>
+            </div>
             <p>
                 <span class="doc-attribute-annotation">
                   <b>TYPE:</b>
@@ -683,7 +695,9 @@ cases:</p>
         <tr>
           <td><code>signal_locations</code></td>
           <td class="doc-attribute-details">
-            <p>Location of the signal for each feature. Can be "left", "right", "middle", or "both_sides".</p>
+            <div class="doc-md-description">
+              <p>Location of the signal for each feature. Can be "left", "right", "middle", or "both_sides".</p>
+            </div>
             <p>
                 <span class="doc-attribute-annotation">
                   <b>TYPE:</b>
@@ -695,7 +709,9 @@ cases:</p>
         <tr>
           <td><code>cuts</code></td>
           <td class="doc-attribute-details">
-            <p>Optimal cut for each feature.</p>
+            <div class="doc-md-description">
+              <p>Optimal cut for each feature.</p>
+            </div>
             <p>
                 <span class="doc-attribute-annotation">
                   <b>TYPE:</b>
@@ -707,7 +723,9 @@ cases:</p>
         <tr>
           <td><code>metadata</code></td>
           <td class="doc-attribute-details">
-            <p>Metadata of the method.</p>
+            <div class="doc-md-description">
+              <p>Metadata of the method.</p>
+            </div>
             <p>
                 <span class="doc-attribute-annotation">
                   <b>TYPE:</b>
@@ -719,7 +737,9 @@ cases:</p>
         <tr>
           <td><code>model</code></td>
           <td class="doc-attribute-details">
-            <p>Model of the method.</p>
+            <div class="doc-md-description">
+              <p>Model of the method.</p>
+            </div>
             <p>
                 <span class="doc-attribute-annotation">
                   <b>TYPE:</b>
@@ -731,10 +751,9 @@ cases:</p>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>hml/methods/cuts.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 17</span>
+            <details class="quote">
+              <summary>Source code in <code>hml/methods/cuts.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 17</span>
 <span class="normal"> 18</span>
 <span class="normal"> 19</span>
 <span class="normal"> 20</span>
@@ -1156,7 +1175,7 @@ cases:</p>
         <span class="n">method</span><span class="o">.</span><span class="n">cuts</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="s2">&quot;cuts&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">method</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -1223,16 +1242,22 @@ cases:</p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.code.copy"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["content.code.copy"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.b4d07000.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
-        <script src="../../../javascripts/mathjax.js"></script>
+        
+          <script src="../../../javascripts/mathjax.js"></script>
+        
       
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
+          <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
+          <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        
       
     
   </body>
