@@ -365,18 +365,41 @@ class MG5Run:
             self._n_subruns += 1
             self._events.Add(file.as_posix())
 
+        # results.txt are updated each time a generator finishes running.
+        # New run results are appended to the end of the file.
+        # So we need to read the line that the run_name is exactly the same with
+        # the run name of the instance.
         results = self.dir.parent.parent / "results.txt"
+        info = []
         with open(results, "r") as f:
-            for line in f:
-                query_name = self._name if self._n_subruns > 1 else self._name + "_0"
-                if line.startswith(query_name):
-                    result = line.split()
-                    break
+            for result in f:
+                # When generating events using `multi_run 1`,
+                # runs are:
+                # - run_01
+                # - run_01_0
+                # Sometimes, the cross section of run_01 is not recorded, so
+                # we need to resolve information from run_01_0.
+                if self._n_subruns > 1:
+                    query_name = self._name
+                else:
+                    query_name = self._name + "_0"
 
-        self._tag = result[1]
-        self._cross_section = float(result[2])
-        self._error = float(result[3])
-        self._n_events = int(result[4])
+                # The first five columes in results.txt are:
+                # run_name tag cross error Nb_event
+                # In HML, they are renamed to: name, tag, cross_section, error,
+                # n_events. As "name" is also the name of run directory (e.g.
+                # the run_01 is the "run_name" and also the run directory), here
+                # we only catch the four columns after run_name.
+                if result.startswith(query_name):
+                    info = result.split()
+                    break
+        if not info:
+            raise RuntimeError(f"Info of {self._name} not found in {results}.")
+
+        self._tag = info[1]
+        self._cross_section = float(info[2])
+        self._error = float(info[3])
+        self._n_events = int(info[4])
 
     @property
     def dir(self) -> Path:
