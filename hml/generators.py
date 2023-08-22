@@ -377,9 +377,14 @@ class MG5Run:
                 # runs are:
                 # - run_01
                 # - run_01_0
-                # Sometimes, the cross section of run_01 is not recorded, so
-                # we need to resolve information from run_01_0.
-                query_name = "run_01"
+                # It's ok to use `print_results` command to get the info.
+                # But if we `launch -i` the same output to generate run_02 and
+                # its subruns, the `print_results` command will correctly print
+                # the info of run_02, but the info of run_01 will be lost except
+                # the info of run_01_0.
+                # Since we refactor the output structure since v0.2.2 and one
+                # output only contains one run, we can safely search for the
+                # info via `run_01`
 
                 # The first five columes in results.txt are:
                 # run_name tag cross error Nb_event
@@ -387,7 +392,7 @@ class MG5Run:
                 # n_events. As "name" is also the name of run directory (e.g.
                 # the run_01 is the "run_name" and also the run directory), here
                 # we only catch the four columns after run_name.
-                if result.startswith(query_name):
+                if result.startswith("run_01"):
                     info = result.split()
                     break
         if not info:
