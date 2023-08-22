@@ -286,24 +286,14 @@ class Madgraph5:
                 else:
                     raise RuntimeError(stderr)
 
-    def remove(self, run_name: str) -> None:
+    def remove(self, name: str) -> None:
         """Remove one run."""
-        paths = (self.output / "Events").glob(f"{run_name}*")
-        run_dirs = [i for i in paths if i.is_dir()]
-        banner_path = self.output / f"Events/{run_name}_banner.txt"
-
-        commands = [
-            f"launch -i {self.output.absolute()}",
-            *[f"remove {i.name} all banner -f" for i in run_dirs],
-        ]
-        temp_file_path = self._commands_to_file(commands)
-        subprocess.run(
-            f"{self.executable} {temp_file_path}",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        banner_path.unlink(missing_ok=True)
+        paths = self.output.glob(name + "*")
+        for i in paths:
+            if i.is_dir():
+                shutil.rmtree(i)
+            else:
+                i.unlink()
 
     def clean(self) -> None:
         """Remove the output directory."""
