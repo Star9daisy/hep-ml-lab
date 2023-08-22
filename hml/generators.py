@@ -207,10 +207,7 @@ class Madgraph5:
     @property
     def runs(self) -> list[MG5Run]:
         """Madgraph5 runs of all launches."""
-        events_dir = self.output / "Events"
-        run_dirs = events_dir.glob("run_*")
-        run_dirs = [i for i in run_dirs if i.name.count("_") == 1]
-        runs = [MG5Run(i) for i in sorted(run_dirs)]
+        runs = [MG5Run(i) for i in sorted(self.output.glob("madevent_*"))]
         return runs
 
     def summary(self) -> None:
@@ -364,7 +361,7 @@ class MG5Run:
 
         self._events = ROOT.TChain("Delphes")
         self._n_subruns = 0
-        for file in self.dir.parent.glob(f"{self.dir.name}*/*.root"):
+        for file in (self.dir / "Events").glob("**/*.root"):
             self._n_subruns += 1
             self._events.Add(file.as_posix())
 
@@ -372,7 +369,7 @@ class MG5Run:
         # New run results are appended to the end of the file.
         # So we need to read the line that the run_name is exactly the same with
         # the run name of the instance.
-        results = self.dir.parent.parent / "results.txt"
+        results = self.dir / "results.txt"
         info = []
         with open(results, "r") as f:
             for result in f:
@@ -382,10 +379,7 @@ class MG5Run:
                 # - run_01_0
                 # Sometimes, the cross section of run_01 is not recorded, so
                 # we need to resolve information from run_01_0.
-                if self._n_subruns > 1:
-                    query_name = self._name
-                else:
-                    query_name = self._name + "_0"
+                query_name = "run_01"
 
                 # The first five columes in results.txt are:
                 # run_name tag cross error Nb_event
