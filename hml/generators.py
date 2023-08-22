@@ -134,7 +134,6 @@ class Madgraph5:
         """The processes to be generated."""
         return self._processes
 
-    @property
     def commands(self, new_output: bool = False) -> list[str]:
         """Commands converted from parameters to be executed in Madgraph5."""
         commands = []
@@ -153,16 +152,12 @@ class Madgraph5:
         # Output
         if new_output or not self.output.exists():
             shutil.rmtree(self.output, ignore_errors=True)
-            self.output.mkdir(parents=True)
-            madevent_dir = self.output / "madevent_1"
-        else:
-            n_madevents = len(list(self.output.glob("madevent_*")))
-            madevent_dir = self.output / f"madevent_{n_madevents + 1}"
+            self.output.mkdir(parents=True, exist_ok=True)
 
-        commands += [f"output {madevent_dir.absolute()}"]
+        commands += [f"output {self.madevent_dir.absolute()}"]
 
         # Launch
-        commands += [f"launch -i {madevent_dir.absolute()}"]
+        commands += [f"launch -i {self.madevent_dir.absolute()}"]
 
         # Multi run
         # Assuming n_events_per_subrun is 100, (n_subruns x 100):
@@ -198,7 +193,7 @@ class Madgraph5:
         # Print results
         commands += [
             f"print_results"
-            f" --path={madevent_dir.absolute()}/results.txt"
+            f" --path={self.madevent_dir.absolute()}/results.txt"
             f" --format=short"
         ]
 
@@ -237,18 +232,21 @@ class Madgraph5:
 
     def launch(
         self,
+        new_output: bool = False,
         show_status: bool = True,
     ) -> None:
         """Launch Madgraph5 to generate events.
 
         Parameters
         ----------
-        show_status:
+        new_output: bool
+            If True, remove the existing output directory and create a new one.
+        show_status: bool
             If True, print the status of the launched run, else launch silently.
         """
 
         executable = shutil.which(self.executable)
-        temp_file_path = self._commands_to_file(self.commands)
+        temp_file_path = self._commands_to_file(self.commands(new_output))
 
         # Launch Madgraph5 and redirect output to a log file
         with open(f"{self.output}.log", "w") as f:
