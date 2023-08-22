@@ -259,6 +259,10 @@ class Madgraph5:
                 stderr=subprocess.PIPE,
             )
 
+        # Remove py.py file right after launching Madgraph5
+        if Path("py.py").exists():
+            Path("py.py").unlink()
+
         # Check and print status
         status = ""
         while (status != "Done") or process.poll() is None:
@@ -274,10 +278,6 @@ class Madgraph5:
                     continue
                 else:
                     raise RuntimeError(stderr)
-
-        # Remove py.py file
-        if Path("py.py").exists():
-            Path("py.py").unlink()
 
     def remove(self, run_name: str) -> None:
         """Remove one run."""
