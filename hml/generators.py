@@ -135,27 +135,34 @@ class Madgraph5:
         return self._processes
 
     @property
-    def commands(self) -> list[str]:
+    def commands(self, new_output: bool = False) -> list[str]:
         """Commands converted from parameters to be executed in Madgraph5."""
         commands = []
-        if not self.output.exists():
-            # Model
-            commands += [f"import model {self.model.absolute()}"]
+        # Model
+        commands += [f"import model {self.model.absolute()}"]
 
-            # Definitions
-            commands += [f"define {k} = {v}" for k, v in self.definitions.items()]
+        # Definitions
+        commands += [f"define {k} = {v}" for k, v in self.definitions.items()]
 
-            # Processes
-            commands += [
-                f"generate {process}" if i == 0 else f"add process {process}"
-                for i, process in enumerate(self.processes)
-            ]
+        # Processes
+        commands += [
+            f"generate {process}" if i == 0 else f"add process {process}"
+            for i, process in enumerate(self.processes)
+        ]
 
-            # Output
-            commands += [f"output {self.output.absolute()}"]
+        # Output
+        if new_output or not self.output.exists():
+            shutil.rmtree(self.output, ignore_errors=True)
+            self.output.mkdir(parents=True)
+            madevent_dir = self.output / "madevent_1"
+        else:
+            n_madevents = len(list(self.output.glob("madevent_*")))
+            madevent_dir = self.output / f"madevent_{n_madevents + 1}"
+
+        commands += [f"output {madevent_dir.absolute()}"]
 
         # Launch
-        commands += [f"launch -i {self.output.absolute()}"]
+        commands += [f"launch -i {madevent_dir.absolute()}"]
 
         # Multi run
         # Assuming n_events_per_subrun is 100, (n_subruns x 100):
@@ -191,7 +198,7 @@ class Madgraph5:
         # Print results
         commands += [
             f"print_results"
-            f" --path={self.output.absolute()}/results.txt"
+            f" --path={madevent_dir.absolute()}/results.txt"
             f" --format=short"
         ]
 
@@ -248,10 +255,6 @@ class Madgraph5:
         """
 
         executable = shutil.which(self.executable)
-
-        if new_output and self.output.exists():
-            shutil.rmtree(self.output)
-
         temp_file_path = self._commands_to_file(self.commands)
 
         # Launch Madgraph5 and redirect output to a log file
