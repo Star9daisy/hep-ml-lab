@@ -120,6 +120,14 @@ class Madgraph5:
         return self._output
 
     @property
+    def madevent_dir(self) -> Path:
+        """The output directory of events."""
+        all_dirs = [i for i in self.output.glob("madevent_*") if i.is_dir()]
+        n_madevents = len(all_dirs)
+        madevent_dir = self.output / f"madevent_{n_madevents + 1}"
+        return madevent_dir
+
+    @property
     def model(self) -> Path:
         """The theory model to be used."""
         return self._model
@@ -202,7 +210,7 @@ class Madgraph5:
     @property
     def runs(self) -> list[MG5Run]:
         """Madgraph5 runs of all launches."""
-        runs = [MG5Run(i) for i in sorted(self.output.glob("madevent_*"))]
+        runs = [MG5Run(i) for i in sorted(self.output.glob("madevent_*")) if i.is_dir()]
         return runs
 
     def summary(self) -> None:
@@ -249,7 +257,8 @@ class Madgraph5:
         temp_file_path = self._commands_to_file(self.commands(new_output))
 
         # Launch Madgraph5 and redirect output to a log file
-        with open(f"{self.output}.log", "w") as f:
+        log = self.madevent_dir.with_suffix(".log")
+        with open(log, "w") as f:
             process = subprocess.Popen(
                 f"{executable} {temp_file_path}",
                 shell=True,
@@ -264,7 +273,7 @@ class Madgraph5:
         # Check and print status
         status = ""
         while (status != "Done") or process.poll() is None:
-            last_status = self._check_status(status)
+            last_status = self._check_status(log, status)
             if last_status != status:
                 if show_status and last_status != "":
                     print(last_status)
@@ -308,9 +317,9 @@ class Madgraph5:
             temp_file_path = temp_file.name
         return temp_file_path
 
-    def _check_status(self, current_status: str) -> str:
+    def _check_status(self, log, current_status: str) -> str:
         """Check the status of the launched run."""
-        with open(f"{self.output}.log", "r") as f:
+        with open(log, "r") as f:
             contents = f.readlines()
 
         last_status = ""
