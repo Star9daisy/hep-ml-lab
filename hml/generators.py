@@ -237,16 +237,12 @@ class Madgraph5:
 
     def launch(
         self,
-        new_output: bool = False,
         show_status: bool = True,
     ) -> None:
         """Launch Madgraph5 to generate events.
 
         Parameters
         ----------
-        new_output:
-            If True, remove the existing output directory and generate new
-            events, else create a new run.
         show_status:
             If True, print the status of the launched run, else launch silently.
         """
