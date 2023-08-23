@@ -297,8 +297,14 @@ class Madgraph5:
 
     def clean(self) -> None:
         """Remove the output directory."""
-        shutil.rmtree(self.output, ignore_errors=True)
-        self.output.with_suffix(".log").unlink(missing_ok=True)
+        for run in self.runs:
+            run.events.Reset()
+
+        shutil.rmtree(self.output)
+
+    def __del__(self):
+        for run in self.runs:
+            del run
 
     def _commands_to_file(self, commands: list[str]) -> str:
         """Write commands to a temporary file and return the path of the file."""
@@ -435,3 +441,6 @@ class MG5Run:
     def events(self) -> TChain:
         """Events read by PyROOT of a run."""
         return self._events
+
+    def __del__(self):
+        self.events.Reset()
