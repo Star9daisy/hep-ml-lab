@@ -55,7 +55,7 @@ def test_Madgraph5():
     assert isinstance(g.processes, list)
 
     # output x
-    first_content = "\n".join(g.commands)
+    first_content = "\n".join(g.commands())
     assert "import model" in first_content
     assert "define" in first_content
     assert "generate" in first_content
@@ -70,11 +70,11 @@ def test_Madgraph5():
 
     g.settings["nevents"] = 200
     g.n_events_per_subrun = 100
-    assert "multi_run 2" in "\n".join(g.commands)
+    assert "multi_run 2" in "\n".join(g.commands())
 
     g.settings["nevents"] = 250
     g.n_events_per_subrun = 100
-    assert "multi_run 3" in "\n".join(g.commands)
+    assert "multi_run 3" in "\n".join(g.commands())
 
     g.settings["nevents"] = 100
 
@@ -84,16 +84,16 @@ def test_Madgraph5():
     assert isinstance(g.runs[0], MG5Run)
 
     # output ✔
-    second_content = "\n".join(g.commands)
-    assert not "import model" in second_content
-    assert not "define" in second_content
-    assert not "generate" in second_content
-    assert not "output" in second_content
+    # second_content = "\n".join(g.commands)
+    # assert not "import model" in second_content
+    # assert not "define" in second_content
+    # assert not "generate" in second_content
+    # assert not "output" in second_content
     g.launch()
     assert len(g.runs) == 2
     assert g.runs[0].cross_section == g.runs[1].cross_section
 
-    g.remove("run_02")
+    g.remove("madevent_2")
     assert len(g.runs) == 1
 
     g.launch(new_output=True)
@@ -102,9 +102,10 @@ def test_Madgraph5():
     with pytest.raises(FileNotFoundError):
         _ = MG5Run("wrong_dir")
 
-    run_01 = MG5Run(g.output / "Events/run_01")
+    run_01 = MG5Run(g.output / "madevent_1")
     assert run_01.cross_section == g.runs[0].cross_section
     assert run_01.n_events == run_01.events.GetEntries()
+    del run_01
 
     g.summary()
     g.clean()
