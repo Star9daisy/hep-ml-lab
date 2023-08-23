@@ -266,13 +266,14 @@ class Madgraph5:
                 stderr=subprocess.PIPE,
             )
 
-        # Remove py.py file right after launching Madgraph5
-        if Path("py.py").exists():
-            Path("py.py").unlink()
-
         # Check and print status
         status = ""
         while (status != "Done") or process.poll() is None:
+            # Madgraph5 generate py.py not only at the beginning but also the
+            # middle of launching.
+            if Path("py.py").exists():
+                Path("py.py").unlink()
+
             last_status = self._check_status(log, status)
             if last_status != status:
                 if show_status and last_status != "":
