@@ -361,7 +361,11 @@ class MG5Run:
 
         self._events = ROOT.TChain("Delphes")
         self._n_subruns = 0
-        for file in (self.dir / "Events").glob("**/*.root"):
+
+        root_files = (self.dir / "Events").glob("**/*.root")
+        if len(root_files) == 0:
+            raise FileNotFoundError(f"No root file found in {self.dir}.")
+        for file in root_files:
             self._n_subruns += 1
             self._events.Add(file.as_posix())
 
