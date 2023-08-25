@@ -4,8 +4,6 @@ import os
 import shutil
 import subprocess
 import tempfile
-import time
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Union
 
@@ -84,14 +82,14 @@ class Madgraph5:
         random_seed: int = 42,
         n_events_per_subrun: int = 100000,
     ) -> None:
-        # Data validation ---------------------------------------------------- #
-        _executable = shutil.which(executable)
-        if _executable is None:
+        # Before output ------------------------------------------------------ #
+        # Check if the executable exists
+        if shutil.which(executable) is not None:
+            self._executable = Path(executable).resolve()
+        else:
             raise EnvironmentError(f"{executable} does not exist.")
-        self._executable = Path(_executable).resolve()
 
-        self._output = Path(output)
-
+        # Check if the model exists
         if Path(model).exists():
             self._model = Path(model)
         elif (self._executable.parent.parent / f"models/{model}").exists():
@@ -101,20 +99,46 @@ class Madgraph5:
 
         self._definitions = definitions
         self._processes = processes
+        self._output = Path(output)
+
+        # After output ------------------------------------------------------- #
         self.shower = shower
         self.detector = detector
         self.settings = settings
         self.cards = [Path(card) for card in cards]
+        self.random_seed = random_seed
+        self.settings["iseed"] = random_seed
+
+        # Multi run
+        # Assuming n_events_per_subrun is 100, (n_subruns x 100):
+        # n_events = 10000 -> 10 x 100
+        # n_events = 10001 -> 11 x 100
+        # n_events = 10    -> 1 x 10
+        n_events = self.settings.get("nevents", 10000)
+        n_subruns, rest_runs = divmod(n_events, self.n_events_per_subrun)
+        # n_events < n_events_per_subrun
+        if n_subruns == 0 and rest_runs != 0:
+            n_subruns = 1
+            self.n_events_per_subrun = n_events
+        # n_events > n_events_per_subrun
+        elif n_subruns != 0 and rest_runs != 0:
+            n_subruns += 1
+        self.n_events_per_subrun = n_events_per_subrun
+        self.n_subruns = n_subruns
+
         for card in self.cards:
+            # Check if the card exists
             if not card.exists():
                 raise FileNotFoundError(f"{card} does not exist.")
 
-        self.random_seed = random_seed
-        for card in self.cards:
+            # If it is a pythia8 card, set the random seed
             if card.name.startswith("pythia8"):
                 with card.open() as f:
                     lines = f.readlines()
 
+                # For pythia8 cards, it's required two settings for random seed:
+                # 1. Random:setSeed = on
+                # 2. Random:seed = <an integer>
                 set_seed = False
                 found_seed = False
                 for i, line in enumerate(lines):
@@ -130,12 +154,22 @@ class Madgraph5:
                 elif not found_seed:
                     lines.append(f"Random:seed = {random_seed}\n")
 
+                # Write back with the new random seed
                 with card.open("w") as f:
                     f.writelines(lines)
+
+            # If it is a delphes card, set the random seed
             elif card.name.startswith("delphes"):
                 with card.open() as f:
                     lines = f.readlines()
 
+                # For delphes cards, there's no way in official documentation to
+                # set the random seed. However, I found some examples in its
+                # GitHub repository: check the following folder in the repository:
+                # 1. cards/delphes_card_CLD.tcl
+                # 2. cards/FCC/scenarios/FCChh_I.tcl
+                # It seems like `set RandomSeed <an integer>` at the beginning
+                # is a way to set the random seed. This is what we do here.
                 found_seed = False
                 for i, line in enumerate(lines):
                     if line.startswith("set RandomSeed"):
@@ -145,28 +179,14 @@ class Madgraph5:
                 if not found_seed:
                     lines = [f"set RandomSeed {random_seed}\n"] + lines
 
+                # Write back with the new random seed
                 with card.open("w") as f:
                     f.writelines(lines)
-
-        self.n_events_per_subrun = n_events_per_subrun
 
     @property
     def executable(self) -> Path:
         """The executable file path of Madgraph5."""
         return self._executable
-
-    @property
-    def output(self) -> Path:
-        """The output directory of events."""
-        return self._output
-
-    @property
-    def madevent_dir(self) -> Path:
-        """The output directory of events."""
-        all_dirs = [i for i in self.output.glob("madevent_*") if i.is_dir()]
-        n_madevents = len(all_dirs)
-        madevent_dir = self.output / f"madevent_{n_madevents + 1}"
-        return madevent_dir
 
     @property
     def model(self) -> Path:
@@ -183,67 +203,45 @@ class Madgraph5:
         """The processes to be generated."""
         return self._processes
 
+    @property
+    def output(self) -> Path:
+        """The output directory of events."""
+        return self._output
+
+    @property
+    def madevent_dir(self) -> Path:
+        """The output directory of events."""
+        all_dirs = [i for i in self.output.glob("madevent_*") if i.is_dir()]
+        n_madevents = len(all_dirs)
+        madevent_dir = self.output / f"madevent_{n_madevents + 1}"
+        return madevent_dir
+
     def commands(self, new_output: bool = False) -> list[str]:
         """Commands converted from parameters to be executed in Madgraph5."""
-        commands = []
-        # Model
-        commands += [f"import model {self.model.absolute()}"]
-
-        # Definitions
-        commands += [f"define {k} = {v}" for k, v in self.definitions.items()]
-
-        # Processes
-        commands += [
-            f"generate {process}" if i == 0 else f"add process {process}"
-            for i, process in enumerate(self.processes)
-        ]
-
-        # Output
         if new_output or not self.output.exists():
             shutil.rmtree(self.output, ignore_errors=True)
             self.output.mkdir(parents=True, exist_ok=True)
 
-        commands += [f"output {self.madevent_dir.absolute()}"]
+        settings = self.settings.copy()
+        settings["nevents"] = self.n_events_per_subrun
 
-        # Launch
-        commands += [f"launch -i {self.madevent_dir.absolute()}"]
-
-        # Multi run
-        # Assuming n_events_per_subrun is 100, (n_subruns x 100):
-        # n_events = 10000 -> 10 x 100
-        # n_events = 10001 -> 11 x 100
-        # n_events = 10    -> 1 x 10
-        n_events = self.settings.get("nevents", 10000)
-        n_subruns, rest_runs = divmod(n_events, self.n_events_per_subrun)
-        # n_events < n_events_per_subrun
-        if n_subruns == 0 and rest_runs != 0:
-            n_subruns = 1
-            self.n_events_per_subrun = n_events
-        # n_events > n_events_per_subrun
-        elif n_subruns != 0 and rest_runs != 0:
-            n_subruns += 1
-        commands += [f"multi_run {n_subruns}"]
-
-        # Shower
-        commands += [f"shower={self.shower}"]
-
-        # Detector
-        commands += [f"detector={self.detector}"]
-
-        # Settings
-        commands += [
-            f"set {k} {self.n_events_per_subrun}" if k == "nevents" else f"set {k} {v}"
-            for k, v in self.settings.items()
-        ]
-
-        # Cards
-        commands += [f"{c.absolute()}" for c in self.cards]
-
-        # Print results
-        commands += [
-            f"print_results"
-            f" --path={self.madevent_dir.absolute()}/results.txt"
-            f" --format=short"
+        commands = [
+            *[f"import model {self.model.absolute()}"],
+            *[f"define {k} = {v}" for k, v in self.definitions.items()],
+            *[f"generate {self.processes[0]}"],
+            *[f"add process {p}" for p in self.processes[1:]],
+            *[f"output {self.madevent_dir.absolute()}"],
+            *[f"launch -i {self.madevent_dir.absolute()}"],
+            *[f"multi_run {self.n_subruns}"],
+            *[f"shower={self.shower}"],
+            *[f"detector={self.detector}"],
+            *[f"set {k} {v}" for k, v in settings.items()],
+            *[f"{c.absolute()}" for c in self.cards],
+            *[
+                f"print_results"
+                f" --path={self.madevent_dir.absolute()}/results.txt"
+                f" --format=short"
+            ],
         ]
 
         return commands
@@ -480,6 +478,6 @@ class MG5Run:
         return self._n_subruns
 
     @property
-    def events(self) -> TChain:
+    def events(self) -> cppyy.gbl.TChain:
         """Events read by PyROOT of a run."""
         return self._events
