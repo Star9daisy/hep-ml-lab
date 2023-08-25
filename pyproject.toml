@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hep-ml-lab"
-version = "0.2.1"
+version = "0.2.2"
 description = "An end-to-end framework for applying machine learning to high-energy physics research."
 authors = ["Star9daisy", "star9daisy@outlook.com"]
 readme = "README.md"
