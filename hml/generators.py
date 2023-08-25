@@ -81,6 +81,7 @@ class Madgraph5:
         detector: str = "Delphes",
         settings: dict[str, Any] = {},
         cards: list[PathLike] = [],
+        random_seed: int = 42,
         n_events_per_subrun: int = 100000,
     ) -> None:
         # Data validation ---------------------------------------------------- #
@@ -107,6 +108,46 @@ class Madgraph5:
         for card in self.cards:
             if not card.exists():
                 raise FileNotFoundError(f"{card} does not exist.")
+
+        self.random_seed = random_seed
+        for card in self.cards:
+            if card.name.startswith("pythia8"):
+                with card.open() as f:
+                    lines = f.readlines()
+
+                set_seed = False
+                found_seed = False
+                for i, line in enumerate(lines):
+                    if line.startswith("Random:setSeed = on"):
+                        set_seed = True
+                    if line.startswith("Random:seed"):
+                        found_seed = True
+                        lines[i] = f"Random:seed = {random_seed}\n"
+
+                if not set_seed:
+                    lines.append("Random:setSeed = on\n")
+                    lines.append(f"Random:seed = {random_seed}\n")
+                elif not found_seed:
+                    lines.append(f"Random:seed = {random_seed}\n")
+
+                with card.open("w") as f:
+                    f.writelines(lines)
+            elif card.name.startswith("delphes"):
+                with card.open() as f:
+                    lines = f.readlines()
+
+                found_seed = False
+                for i, line in enumerate(lines):
+                    if line.startswith("set RandomSeed"):
+                        lines[i] = f"set RandomSeed {random_seed}\n"
+                        found_seed = True
+
+                if not found_seed:
+                    lines = [f"set RandomSeed {random_seed}\n"] + lines
+
+                with card.open("w") as f:
+                    f.writelines(lines)
+
         self.n_events_per_subrun = n_events_per_subrun
 
     @property
