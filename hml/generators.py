@@ -9,8 +9,11 @@ from typing import Any, Union
 
 import cppyy
 import ROOT
+import yaml
 from rich.console import Console
 from rich.table import Table
+
+import hml
 
 ROOT.gSystem.Load("libDelphes")
 
@@ -90,10 +93,22 @@ class Madgraph5:
             raise EnvironmentError(f"{executable} does not exist.")
 
         # Check if the model exists
-        if Path(model).exists():
-            self._model = Path(model)
-        elif (self._executable.parent.parent / f"models/{model}").exists():
-            self._model = self._executable.parent.parent / f"models/{model}"
+        # Case 1: user provides the built-in model name that locates in the
+        #         theories directory of hml
+        if (_model_dir := Path(list(hml.__path__)[0]) / f"theories/{model}").exists():
+            with (_model_dir / "metadata.yml").open() as f:
+                metadata = yaml.safe_load(f)
+            _model_path = _model_dir / metadata["file"]
+            self._model = _model_path
+        # Case 2: user provides the model path
+        elif (_model_file := Path(model)).exists():
+            self._model = _model_file
+        # Case 3: user provides the model name that locates in the Madgraph5
+        elif (
+            _model_file := self._executable.parent.parent / f"models/{model}"
+        ).exists():
+            self._model = _model_file
+        # Other cases: raise error
         else:
             raise FileNotFoundError(f"Model {model} does not exist.")
 
