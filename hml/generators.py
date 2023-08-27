@@ -84,8 +84,8 @@ class Madgraph5:
     ) -> None:
         # Before output ------------------------------------------------------ #
         # Check if the executable exists
-        if shutil.which(executable) is not None:
-            self._executable = Path(executable).resolve()
+        if (_executable := shutil.which(executable)) is not None:
+            self._executable = Path(_executable).resolve()
         else:
             raise EnvironmentError(f"{executable} does not exist.")
 
