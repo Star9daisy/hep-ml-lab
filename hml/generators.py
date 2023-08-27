@@ -115,7 +115,7 @@ class Madgraph5:
         # n_events = 10001 -> 11 x 100
         # n_events = 10    -> 1 x 10
         n_events = self.settings.get("nevents", 10000)
-        n_subruns, rest_runs = divmod(n_events, self.n_events_per_subrun)
+        n_subruns, rest_runs = divmod(n_events, n_events_per_subrun)
         # n_events < n_events_per_subrun
         if n_subruns == 0 and rest_runs != 0:
             n_subruns = 1
@@ -123,7 +123,7 @@ class Madgraph5:
         # n_events > n_events_per_subrun
         elif n_subruns != 0 and rest_runs != 0:
             n_subruns += 1
-        self.n_events_per_subrun = n_events_per_subrun
+            self.n_events_per_subrun = n_events_per_subrun
         self.n_subruns = n_subruns
 
         for card in self.cards:
