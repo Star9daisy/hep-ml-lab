@@ -311,7 +311,7 @@ class Madgraph5:
             # Madgraph5 generate py.py not only at the beginning but also the
             # middle of launching.
             if Path("py.py").exists():
-                Path("py.py").unlink()
+                Path("py.py").unlink(missing_ok=True)
 
             last_status = self._check_status(log, status)
             if last_status != status:
