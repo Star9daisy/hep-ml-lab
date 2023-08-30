@@ -92,7 +92,7 @@ class Madgraph5:
         # Check if the executable exists
         if (_executable := shutil.which(executable)) is not None:
             self._executable = Path(_executable).resolve()
-            _mg5_dir = self._executable.parent.parent
+            self._mg5_dir = self._executable.parent.parent
         else:
             raise EnvironmentError(f"{executable} does not exist.")
 
@@ -107,7 +107,7 @@ class Madgraph5:
         elif (_model_file := Path(model)).exists():
             self._model = _model_file.resolve()
         # Case 3: it's a model provided by Madgraph5 (i.e. models in mg5/models)
-        elif (_model_file := _mg5_dir / f"models/{model}").exists():
+        elif (_model_file := self._mg5_dir / f"models/{model}").exists():
             self._model = _model_file.resolve()
         # Otherwise, raise FileNotFoundError
         else:
