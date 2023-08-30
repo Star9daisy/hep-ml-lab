@@ -123,32 +123,112 @@ class Madgraph5:
         self.shower = shower
         self.detector = detector
         self.settings = settings
-        self.cards = [Path(card) for card in cards]
+        self.cards = cards
         self.random_seed = random_seed
+        self.n_events_per_subrun = n_events_per_subrun
+
+    @property
+    def executable(self) -> Path:
+        """The executable file path of Madgraph5."""
+        return self._executable
+
+    @property
+    def model(self) -> Path:
+        """The theory model to be used."""
+        return self._model
+
+    @property
+    def definitions(self) -> dict[str, str]:
+        """The definitions of multiparticle."""
+        return self._definitions
+
+    @property
+    def processes(self) -> list[str]:
+        """The processes to be generated."""
+        return self._processes
+
+    @property
+    def output(self) -> Path:
+        """The output directory of events."""
+        return self._output
+
+    @property
+    def shower(self) -> str:
+        """The parton shower tool to be used."""
+        return self._shower
+
+    @shower.setter
+    def shower(self, shower: str) -> None:
+        if shower.lower() not in ["off", "pythia8"]:
+            raise ValueError(f"Shower {shower} is not supported.")
+        self._shower = shower
+
+    @property
+    def detector(self) -> str:
+        """The detector simulation tool to be used."""
+        return self._detector
+
+    @detector.setter
+    def detector(self, detector: str) -> None:
+        if detector.lower() not in ["off", "delphes"]:
+            raise ValueError(f"Detector {detector} is not supported.")
+        self._detector = detector
+
+    @property
+    def settings(self) -> dict[str, Any]:
+        """The phase space and parameter settings."""
+        return self._settings
+
+    @settings.setter
+    def settings(self, settings: dict[str, Any]) -> None:
+        self._settings = settings
+
+    @property
+    def cards(self) -> list[Path]:
+        """The shower and detector configuration cards to be used."""
+        return self._cards
+
+    @cards.setter
+    def cards(self, cards: list[PathLike]) -> None:
+        self._cards = []
+        _cards = [Path(card).resolve() for card in cards]
+        for card in _cards:
+            if not card.exists():
+                raise FileNotFoundError(f"Card {card} does not exist.")
+
+        if self.shower == "Pythia8":
+            use_default_pythia8_card = True
+            for card in _cards:
+                if "pythia8" in card.name:
+                    use_default_pythia8_card = False
+                    self.cards.append(card)
+            if use_default_pythia8_card:
+                self.cards.append(
+                    self._mg5_dir / "Template/LO/Cards/pythia8_card_default.dat"
+                )
+
+        if self.detector == "Delphes":
+            use_default_delphes_card = True
+            for card in _cards:
+                if "delphes" in card.name:
+                    use_default_delphes_card = False
+                    self.cards.append(card)
+            if use_default_delphes_card:
+                self.cards.append(
+                    self._mg5_dir / "Template/Common/Cards/delphes_card_default.dat"
+                )
+
+    @property
+    def random_seed(self) -> int:
+        """The random seed."""
+        return self._random_seed
+
+    @random_seed.setter
+    def random_seed(self, random_seed: int) -> None:
+        self._random_seed = random_seed
         self.settings["iseed"] = random_seed
 
-        # Multi run
-        # Assuming n_events_per_subrun is 100, (n_subruns x 100):
-        # n_events = 10000 -> 10 x 100
-        # n_events = 10001 -> 11 x 100
-        # n_events = 10    -> 1 x 10
-        n_events = self.settings.get("nevents", 10000)
-        n_subruns, rest_runs = divmod(n_events, n_events_per_subrun)
-        # n_events < n_events_per_subrun
-        if n_subruns == 0 and rest_runs != 0:
-            n_subruns = 1
-            self.n_events_per_subrun = n_events
-        # n_events > n_events_per_subrun
-        elif n_subruns != 0 and rest_runs != 0:
-            n_subruns += 1
-            self.n_events_per_subrun = n_events_per_subrun
-        self.n_subruns = n_subruns
-
         for card in self.cards:
-            # Check if the card exists
-            if not card.exists():
-                raise FileNotFoundError(f"{card} does not exist.")
-
             # If it is a pythia8 card, set the random seed
             if card.name.startswith("pythia8"):
                 with card.open() as f:
@@ -202,29 +282,30 @@ class Madgraph5:
                     f.writelines(lines)
 
     @property
-    def executable(self) -> Path:
-        """The executable file path of Madgraph5."""
-        return self._executable
+    def n_events_per_subrun(self) -> int:
+        """The number of events per subrun."""
+        return self._n_events_per_subrun
+
+    @n_events_per_subrun.setter
+    def n_events_per_subrun(self, n_events_per_subrun: int) -> None:
+        n_events = self.settings.get("nevents", 10000)
+        if n_events_per_subrun > n_events:
+            self._n_events_per_subrun = n_events
+        else:
+            self._n_events_per_subrun = n_events_per_subrun
 
     @property
-    def model(self) -> Path:
-        """The theory model to be used."""
-        return self._model
+    def n_subruns(self) -> int:
+        """The number of subruns."""
+        n_events = self.settings.get("nevents", 10000)
+        if self.n_events_per_subrun >= n_events:
+            return 1
 
-    @property
-    def definitions(self) -> dict[str, str]:
-        """The definitions of multiparticle."""
-        return self._definitions
-
-    @property
-    def processes(self) -> list[str]:
-        """The processes to be generated."""
-        return self._processes
-
-    @property
-    def output(self) -> Path:
-        """The output directory of events."""
-        return self._output
+        n_subruns, rest_runs = divmod(n_events, self.n_events_per_subrun)
+        if rest_runs != 0:
+            return n_subruns + 1
+        else:
+            return n_subruns
 
     @property
     def madevent_dir(self) -> Path:
