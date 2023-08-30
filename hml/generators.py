@@ -89,26 +89,24 @@ class Madgraph5:
         # Check if the executable exists
         if (_executable := shutil.which(executable)) is not None:
             self._executable = Path(_executable).resolve()
+            _mg5_dir = self._executable.parent.parent
         else:
             raise EnvironmentError(f"{executable} does not exist.")
 
         # Check if the model exists
-        # Case 1: user provides the built-in model name that locates in the
-        #         theories directory of hml
-        if (_model_dir := Path(list(hml.__path__)[0]) / f"theories/{model}").exists():
+        # Case 1: it's a model provided by HML (i.e. models in hml/theories)
+        _hml_dir = Path(list(hml.__path__)[0])
+        if (_model_dir := _hml_dir / f"theories/{model}").exists():
             with (_model_dir / "metadata.yml").open() as f:
                 metadata = yaml.safe_load(f)
-            _model_path = _model_dir / metadata["file"]
-            self._model = _model_path
-        # Case 2: user provides the model path
+            self._model = (_model_dir / metadata["file"]).resolve()
+        # Case 2: it's a model path provided by user (i.e. absolute path)
         elif (_model_file := Path(model)).exists():
-            self._model = _model_file
-        # Case 3: user provides the model name that locates in the Madgraph5
-        elif (
-            _model_file := self._executable.parent.parent / f"models/{model}"
-        ).exists():
-            self._model = _model_file
-        # Other cases: raise error
+            self._model = _model_file.resolve()
+        # Case 3: it's a model provided by Madgraph5 (i.e. models in mg5/models)
+        elif (_model_file := _mg5_dir / f"models/{model}").exists():
+            self._model = _model_file.resolve()
+        # Otherwise, raise FileNotFoundError
         else:
             raise FileNotFoundError(f"Model {model} does not exist.")
 
