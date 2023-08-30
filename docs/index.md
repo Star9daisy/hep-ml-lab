@@ -1,1 +1,1 @@
-/root/workspace/16T/Projects/hep-ml-lab/README.md
+/root/workspace_ssd/projects/hep-ml-lab/README.md
