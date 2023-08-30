@@ -115,7 +115,7 @@ class Madgraph5:
 
         self._definitions = definitions
         self._processes = processes
-        self._output = Path(output)
+        self._output = Path(output).resolve()
 
         # After output ------------------------------------------------------- #
         # These parameters can be changed when launching a new run.
