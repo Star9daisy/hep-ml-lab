@@ -86,6 +86,9 @@ class Madgraph5:
         n_events_per_subrun: int = 100000,
     ) -> None:
         # Before output ------------------------------------------------------ #
+        # These parameters are required to be set once for all runs of the same
+        # processes. So they cannot be changed after creating a generator.
+
         # Check if the executable exists
         if (_executable := shutil.which(executable)) is not None:
             self._executable = Path(_executable).resolve()
@@ -115,6 +118,8 @@ class Madgraph5:
         self._output = Path(output)
 
         # After output ------------------------------------------------------- #
+        # These parameters can be changed when launching a new run.
+
         self.shower = shower
         self.detector = detector
         self.settings = settings
