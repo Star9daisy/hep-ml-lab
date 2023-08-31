@@ -228,59 +228,6 @@ class Madgraph5:
         self._random_seed = random_seed
         self.settings["iseed"] = random_seed
 
-        for card in self.cards:
-            # If it is a pythia8 card, set the random seed
-            if card.name.startswith("pythia8"):
-                with card.open() as f:
-                    lines = f.readlines()
-
-                # For pythia8 cards, it's required two settings for random seed:
-                # 1. Random:setSeed = on
-                # 2. Random:seed = <an integer>
-                set_seed = False
-                found_seed = False
-                for i, line in enumerate(lines):
-                    if line.startswith("Random:setSeed = on"):
-                        set_seed = True
-                    if line.startswith("Random:seed"):
-                        found_seed = True
-                        lines[i] = f"Random:seed = {random_seed}\n"
-
-                if not set_seed:
-                    lines.append("Random:setSeed = on\n")
-                    lines.append(f"Random:seed = {random_seed}\n")
-                elif not found_seed:
-                    lines.append(f"Random:seed = {random_seed}\n")
-
-                # Write back with the new random seed
-                with card.open("w") as f:
-                    f.writelines(lines)
-
-            # If it is a delphes card, set the random seed
-            elif card.name.startswith("delphes"):
-                with card.open() as f:
-                    lines = f.readlines()
-
-                # For delphes cards, there's no way in official documentation to
-                # set the random seed. However, I found some examples in its
-                # GitHub repository: check the following folder in the repository:
-                # 1. cards/delphes_card_CLD.tcl
-                # 2. cards/FCC/scenarios/FCChh_I.tcl
-                # It seems like `set RandomSeed <an integer>` at the beginning
-                # is a way to set the random seed. This is what we do here.
-                found_seed = False
-                for i, line in enumerate(lines):
-                    if line.startswith("set RandomSeed"):
-                        lines[i] = f"set RandomSeed {random_seed}\n"
-                        found_seed = True
-
-                if not found_seed:
-                    lines = [f"set RandomSeed {random_seed}\n"] + lines
-
-                # Write back with the new random seed
-                with card.open("w") as f:
-                    f.writelines(lines)
-
     @property
     def n_events_per_subrun(self) -> int:
         """The number of events per subrun."""
@@ -406,8 +353,61 @@ class Madgraph5:
             f.write("\n".join(self.commands))
         cards_dir = run_dir / "cards"
         cards_dir.mkdir()
-        for card in self.cards:
-            shutil.copy(card, cards_dir)
+
+        for i, card in enumerate(self.cards):
+            actual_card_path = Path(shutil.copy(card, cards_dir))
+            self.cards[i] = actual_card_path
+            # If it is a pythia8 card, set the random seed
+            if actual_card_path.name.startswith("pythia8"):
+                with actual_card_path.open() as f:
+                    lines = f.readlines()
+
+                # For pythia8 cards, it's required two settings for random seed:
+                # 1. Random:setSeed = on
+                # 2. Random:seed = <an integer>
+                set_seed = False
+                found_seed = False
+                for i, line in enumerate(lines):
+                    if line.startswith("Random:setSeed = on"):
+                        set_seed = True
+                    if line.startswith("Random:seed"):
+                        found_seed = True
+                        lines[i] = f"Random:seed = {self.random_seed}\n"
+
+                if not set_seed:
+                    lines.append("Random:setSeed = on\n")
+                    lines.append(f"Random:seed = {self.random_seed}\n")
+                elif not found_seed:
+                    lines.append(f"Random:seed = {self.random_seed}\n")
+
+                # Write back with the new random seed
+                with actual_card_path.open("w") as f:
+                    f.writelines(lines)
+
+            # If it is a delphes card, set the random seed
+            elif actual_card_path.name.startswith("delphes"):
+                with actual_card_path.open() as f:
+                    lines = f.readlines()
+
+                # For delphes cards, there's no way in official documentation to
+                # set the random seed. However, I found some examples in its
+                # GitHub repository: check the following folder in the repository:
+                # 1. cards/delphes_card_CLD.tcl
+                # 2. cards/FCC/scenarios/FCChh_I.tcl
+                # It seems like `set RandomSeed <an integer>` at the beginning
+                # is a way to set the random seed. This is what we do here.
+                found_seed = False
+                for i, line in enumerate(lines):
+                    if line.startswith("set RandomSeed"):
+                        lines[i] = f"set RandomSeed {self.random_seed}\n"
+                        found_seed = True
+
+                if not found_seed:
+                    lines = [f"set RandomSeed {self.random_seed}\n"] + lines
+
+                # Write back with the new random seed
+                with actual_card_path.open("w") as f:
+                    f.writelines(lines)
 
         # Launch Madgraph5 and redirect output to the log file
         with log_path.open("w") as f:
