@@ -364,16 +364,16 @@ class Madgraph5:
         run_dir.mkdir()
         log_path = run_dir / "run.log"
         commands_path = run_dir / "commands"
-        with commands_path.open("w") as f:
-            f.write("\n".join(self.commands))
         cards_dir = run_dir / "cards"
         cards_dir.mkdir()
 
+        pythia8_card = None
+        delphes_card = None
         for i, card in enumerate(self.cards):
             actual_card_path = Path(shutil.copy(card, cards_dir))
-            self.cards[i] = actual_card_path
             # If it is a pythia8 card, set the random seed
             if actual_card_path.name.startswith("pythia8"):
+                pythia8_card = actual_card_path
                 with actual_card_path.open() as f:
                     lines = f.readlines()
 
@@ -401,6 +401,7 @@ class Madgraph5:
 
             # If it is a delphes card, set the random seed
             elif actual_card_path.name.startswith("delphes"):
+                delphes_card = actual_card_path
                 with actual_card_path.open() as f:
                     lines = f.readlines()
 
@@ -423,6 +424,17 @@ class Madgraph5:
                 # Write back with the new random seed
                 with actual_card_path.open("w") as f:
                     f.writelines(lines)
+
+        actual_commands = self.commands.copy()
+        for i, line in enumerate(actual_commands):
+            if len(line.split(" ")) == 1:
+                if "pythia8" in line and pythia8_card:
+                    actual_commands[i] = pythia8_card.as_posix()
+                if "delphes" in line and delphes_card:
+                    actual_commands[i] = delphes_card.as_posix()
+
+        with commands_path.open("w") as f:
+            f.write("\n".join(actual_commands))
 
         # Launch Madgraph5 and redirect output to the log file
         with log_path.open("w") as f:
