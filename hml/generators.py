@@ -289,23 +289,25 @@ class Madgraph5:
         """Summary of all runs."""
         console = Console()
         table = Table(
-            title=f"Processes: {self.processes}",
+            title="\n".join(self.processes),
             caption=f"Output: {self.output.absolute().relative_to(Path.cwd())}",
         )
 
         table.add_column("#", justify="right")
-        table.add_column("Name (N subruns)")
-        table.add_column("Tag")
-        table.add_column("Cross section +- Error pb", justify="center")
+        table.add_column("Name")
+        table.add_column("Tags")
+        table.add_column("Cross section (pb)", justify="center")
         table.add_column("N events", justify="right")
+        table.add_column("Seed", justify="right")
 
         for i, run in enumerate(self.runs):
             table.add_row(
                 f"{i}",
-                f"{run.name} ({run.n_subruns})",
+                f"{run.name}[{run.n_subruns}]",
                 f"{run.tag}",
-                f"{run.cross_section:.5e} +- {run.error:.5e}",
+                f"{run.cross_section:.3e} +- {run.error:.3e}",
                 f"{run.n_events:,}",
+                f"{self.random_seed}",
             )
 
         console.print(table)
