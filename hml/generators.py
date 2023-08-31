@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
-import tempfile
 from pathlib import Path
 from typing import Any, Union
 
@@ -281,14 +280,14 @@ class Madgraph5:
             *[f"define {k} = {v}" for k, v in self.definitions.items()],
             *[f"generate {self.processes[0]}"],
             *[f"add process {p}" for p in self.processes[1:]],
-            *[f"output mg5_output"],
-            *[f"launch -i"],
+            *["output mg5_output"],
+            *["launch -i"],
             *[f"multi_run {self.n_subruns}"],
             *[f"shower={self.shower}"],
             *[f"detector={self.detector}"],
             *[f"set {k} {v}" for k, v in settings.items()],
             *[f"{card}" for card in self.cards],
-            *[f"print_results --path=results --format=short"],
+            *["print_results --path=results --format=short"],
         ]
 
         return commands
