@@ -308,39 +308,26 @@ class Madgraph5:
             return n_subruns
 
     @property
-    def madevent_dir(self) -> Path:
-        """The output directory of events."""
-        all_dirs = [i for i in self.output.glob("madevent_*") if i.is_dir()]
-        n_madevents = len(all_dirs)
-        madevent_dir = self.output / f"madevent_{n_madevents + 1}"
-        return madevent_dir
-
-    def commands(self, new_output: bool = False) -> list[str]:
+    def commands(self) -> list[str]:
         """Commands converted from parameters to be executed in Madgraph5."""
-        if new_output or not self.output.exists():
-            shutil.rmtree(self.output, ignore_errors=True)
-            self.output.mkdir(parents=True, exist_ok=True)
-
         settings = self.settings.copy()
         settings["nevents"] = self.n_events_per_subrun
 
+        # The commands will be executed in the run directory so all paths are
+        # the current directory.
         commands = [
             *[f"import model {self.model.absolute()}"],
             *[f"define {k} = {v}" for k, v in self.definitions.items()],
             *[f"generate {self.processes[0]}"],
             *[f"add process {p}" for p in self.processes[1:]],
-            *[f"output {self.madevent_dir.absolute()}"],
-            *[f"launch -i {self.madevent_dir.absolute()}"],
+            *[f"output mg5_output"],
+            *[f"launch -i"],
             *[f"multi_run {self.n_subruns}"],
             *[f"shower={self.shower}"],
             *[f"detector={self.detector}"],
             *[f"set {k} {v}" for k, v in settings.items()],
-            *[f"{c.absolute()}" for c in self.cards],
-            *[
-                f"print_results"
-                f" --path={self.madevent_dir.absolute()}/results.txt"
-                f" --format=short"
-            ],
+            *[f"{card}" for card in self.cards],
+            *[f"print_results --path=results --format=short"],
         ]
 
         return commands
@@ -348,7 +335,7 @@ class Madgraph5:
     @property
     def runs(self) -> list[MG5Run]:
         """Madgraph5 runs of all launches."""
-        runs = [MG5Run(i) for i in sorted(self.output.glob("madevent_*")) if i.is_dir()]
+        runs = [MG5Run(i) for i in sorted(self.output.glob("run_*")) if i.is_dir()]
         return runs
 
     def summary(self) -> None:
@@ -390,15 +377,43 @@ class Madgraph5:
         show_status: bool
             If True, print the status of the launched run, else launch silently.
         """
+        # The structure of the output directory is:
+        # <output>/
+        #     run_1/
+        #         madevent/Events/run_01/tag_1_delphes_events.root
+        #         run.log
+        #         commands
+        #         tag
+        #         cards
+        #         results
+        #     ...
+        # The madevent directory is the one that Madgraph5 actually outputs.
+        # Here we mainly restrict one madevent only contains one run so that
+        # we can safely reproduce this run.
+        # This kind of structure is now called one run.
 
-        executable = shutil.which(self.executable)
-        temp_file_path = self._commands_to_file(self.commands(new_output))
+        # Prepare the output directory
+        if new_output or not self.output.exists():
+            shutil.rmtree(self.output, ignore_errors=True)
+            self.output.mkdir(parents=True, exist_ok=True)
 
-        # Launch Madgraph5 and redirect output to a log file
-        log = self.madevent_dir.with_suffix(".log")
-        with open(log, "w") as f:
+        # Check the current run number
+        run_dir = self._get_next_run_dir()
+        run_dir.mkdir()
+        log_path = run_dir / "run.log"
+        commands_path = run_dir / "commands"
+        with commands_path.open("w") as f:
+            f.write("\n".join(self.commands))
+        cards_dir = run_dir / "cards"
+        cards_dir.mkdir()
+        for card in self.cards:
+            shutil.copy(card, cards_dir)
+
+        # Launch Madgraph5 and redirect output to the log file
+        with log_path.open("w") as f:
             process = subprocess.Popen(
-                f"{executable} {temp_file_path}",
+                f"{self.executable} {commands_path}",
+                cwd=run_dir,
                 shell=True,
                 stdout=f,
                 stderr=subprocess.PIPE,
@@ -409,16 +424,20 @@ class Madgraph5:
         while (status != "Done") or process.poll() is None:
             # Madgraph5 generate py.py not only at the beginning but also the
             # middle of launching.
-            if Path("py.py").exists():
-                Path("py.py").unlink(missing_ok=True)
+            if (redundant_path := Path(run_dir / "py.py")).exists():
+                redundant_path.unlink(missing_ok=True)
 
-            last_status = self._check_status(log, status)
+            last_status = self._check_status(log_path, status)
             if last_status != status:
                 if show_status and last_status != "":
                     print(last_status)
                 status = last_status
             if status == "Failed":
-                stderr = process.stderr.readline().decode().strip()
+                stderr = (
+                    process.stderr.readline().decode().strip()
+                    if process.stderr is not None
+                    else ""
+                )
                 if "stty" in stderr or stderr == "":
                     status = "Done"
                     continue
@@ -441,12 +460,12 @@ class Madgraph5:
 
         shutil.rmtree(self.output)
 
-    def _commands_to_file(self, commands: list[str]) -> str:
-        """Write commands to a temporary file and return the path of the file."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-            temp_file.write("\n".join(commands))
-            temp_file_path = temp_file.name
-        return temp_file_path
+    def _get_next_run_dir(self) -> Path:
+        """The next run directory."""
+        all_dirs = [i for i in self.output.glob("run_*") if i.is_dir()]
+        n_runs = len(all_dirs)
+        run_dir = self.output / f"run_{n_runs + 1}"
+        return run_dir
 
     def _check_status(self, log, current_status: str) -> str:
         """Check the status of the launched run."""
@@ -496,9 +515,9 @@ class MG5Run:
         self._events = ROOT.TChain("Delphes")
         self._n_subruns = 0
 
-        root_files = list((self.dir / "Events").glob("**/*.root"))
-        if len(root_files) == 0:
-            raise FileNotFoundError(f"No root file found in {self.dir}.")
+        root_files = list((self.dir / "mg5_output/Events").glob("**/*.root"))
+        # if len(root_files) == 0:
+        #     raise FileNotFoundError(f"No root file found in {self.dir}.")
         for file in root_files:
             self._n_subruns += 1
             self._events.Add(file.as_posix())
@@ -507,7 +526,7 @@ class MG5Run:
         # New run results are appended to the end of the file.
         # So we need to read the line that the run_name is exactly the same with
         # the run name of the instance.
-        results = self.dir / "results.txt"
+        results = self.dir / "results"
         info = []
         with open(results, "r") as f:
             for result in f:
