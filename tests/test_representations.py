@@ -18,7 +18,7 @@ def test_observables():
     )
 
     generator.launch()
-    run = MG5Run(f"tests/data/{event_name}/madevent_1")
+    run = MG5Run(f"tests/data/{event_name}/run_1")
     representation = Set(
         [
             Pt("Jet1"),
@@ -41,5 +41,5 @@ def test_observables():
     assert representation.values.shape == (6,)
 
     # Clean up
-    del run
+    run.events.Reset()
     generator.clean()

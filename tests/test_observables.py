@@ -47,7 +47,7 @@ def test_observables():
     )
     generator.launch()
 
-    run = MG5Run(f"tests/data/{event_name}/madevent_1")
+    run = MG5Run(f"tests/data/{event_name}/run_1")
     event = next(iter(run.events))
 
     for obs in [Pt, M, Eta, Phi, Px, Py, Pz, E]:
@@ -69,5 +69,5 @@ def test_observables():
         get_lorentzvector_values(event, "Pt", ["Jet"], [event.Jet_size + 1])
 
     # Clean up
-    del run
+    run.events.Reset()
     generator.clean()
