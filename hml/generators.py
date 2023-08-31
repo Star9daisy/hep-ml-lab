@@ -83,6 +83,7 @@ class Madgraph5:
         settings: dict[str, Any] = {},
         cards: list[PathLike] = [],
         random_seed: int = 42,
+        tags: list[str] = [],
         n_events_per_subrun: int = 100000,
     ) -> None:
         # Before output ------------------------------------------------------ #
@@ -125,6 +126,7 @@ class Madgraph5:
         self.settings = settings
         self.cards = cards
         self.random_seed = random_seed
+        self.tags = tags
         self.n_events_per_subrun = n_events_per_subrun
 
     @property
@@ -227,6 +229,18 @@ class Madgraph5:
     def random_seed(self, random_seed: int) -> None:
         self._random_seed = random_seed
         self.settings["iseed"] = random_seed
+
+    @property
+    def tags(self) -> list[str]:
+        """The tags of runs."""
+        return self._tags
+
+    @tags.setter
+    def tags(self, tags: list[str]) -> None:
+        if len(tags) == 0:
+            tags = ["no_tags"]
+        self._tags = tags
+        self.settings["run_tag"] = ",".join(tags)
 
     @property
     def n_events_per_subrun(self) -> int:
