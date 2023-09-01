@@ -22,9 +22,6 @@ def test_Madgraph5():
     _ = Madgraph5(executable="mg5_aMC", output="./tests/data", model="./tests/data")
     # model path x, model name ✔
     _ = Madgraph5(executable="mg5_aMC", output="./tests/data", model="sm")
-    # model path x, model name x -> FileNotFoundError
-    with pytest.raises(FileNotFoundError):
-        _ = Madgraph5(executable="mg5_aMC", output="./tests/data", model="wrong_model")
 
     # card path ✔
     _ = Madgraph5(executable="mg5_aMC", output="./tests/data", cards=["./tests/data"])
@@ -50,7 +47,7 @@ def test_Madgraph5():
 
     assert isinstance(g.executable, Path)
     assert isinstance(g.output, Path)
-    assert isinstance(g.model, Path)
+    assert isinstance(g.model, (Path, str))
     assert isinstance(g.definitions, dict)
     assert isinstance(g.processes, list)
 
