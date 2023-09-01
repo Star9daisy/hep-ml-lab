@@ -106,12 +106,15 @@ class Madgraph5:
         # Case 2: it's a model path provided by user (i.e. absolute path)
         elif (_model_file := Path(model)).exists():
             self._model = _model_file.resolve()
-        # Case 3: it's a model provided by Madgraph5 (i.e. models in mg5/models)
-        elif (_model_file := self._mg5_dir / f"models/{model}").exists():
-            self._model = _model_file.resolve()
-        # Otherwise, raise FileNotFoundError
+        # Case 3: it's a model provided by Madgraph5
+        # There're three sources of models in Madgraph5:
+        # 1. from the models directory
+        # 2. from MG5aMC server
+        # 3. from FeynRules website
+        # Currently, these case are handled by Madgraph5 CLI so no error would
+        # be raised here.
         else:
-            raise FileNotFoundError(f"Model {model} does not exist.")
+            self._model = model
 
         self._definitions = definitions
         self._processes = processes
@@ -134,7 +137,7 @@ class Madgraph5:
         return self._executable
 
     @property
-    def model(self) -> Path:
+    def model(self) -> PathLike:
         """The theory model to be used."""
         return self._model
 
@@ -276,7 +279,7 @@ class Madgraph5:
         # The commands will be executed in the run directory so all paths are
         # the current directory.
         commands = [
-            *[f"import model {self.model.absolute()}"],
+            *[f"import model {self.model}"],
             *[f"define {k} = {v}" for k, v in self.definitions.items()],
             *[f"generate {self.processes[0]}"],
             *[f"add process {p}" for p in self.processes[1:]],
