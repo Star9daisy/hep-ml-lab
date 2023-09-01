@@ -298,7 +298,9 @@ class Madgraph5:
     @property
     def runs(self) -> list[MG5Run]:
         """Madgraph5 runs of all launches."""
-        runs = [MG5Run(i) for i in sorted(self.output.glob("run_*")) if i.is_dir()]
+        run_dirs = [i for i in self.output.glob("run_*") if i.is_dir()]
+        run_dirs = sorted(run_dirs, key=lambda x: int(x.name.split("_")[1]))
+        runs = [MG5Run(i) for i in run_dirs]
         return runs
 
     def summary(self) -> None:
