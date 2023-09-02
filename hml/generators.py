@@ -81,7 +81,7 @@ class Madgraph5:
         detector: str = "off",
         settings: dict[str, Any] = {},
         cards: list[PathLike] = [],
-        random_seed: int = 42,
+        seed: int = 42,
         tags: list[str] = [],
         n_events_per_subrun: int = 100000,
     ) -> None:
@@ -127,7 +127,7 @@ class Madgraph5:
         self.detector = detector
         self.settings = settings
         self.cards = cards
-        self.random_seed = random_seed
+        self.seed = seed
         self.tags = tags
         self.n_events_per_subrun = n_events_per_subrun
 
@@ -223,14 +223,14 @@ class Madgraph5:
                 )
 
     @property
-    def random_seed(self) -> int:
+    def seed(self) -> int:
         """The random seed."""
-        return self._random_seed
+        return self._seed
 
-    @random_seed.setter
-    def random_seed(self, random_seed: int) -> None:
-        self._random_seed = random_seed
-        self.settings["iseed"] = random_seed
+    @seed.setter
+    def seed(self, seed: int) -> None:
+        self._seed = seed
+        self.settings["iseed"] = seed
 
     @property
     def tags(self) -> list[str]:
@@ -325,7 +325,7 @@ class Madgraph5:
                 f"{run.tag}",
                 f"{run.cross_section:.3e} +- {run.error:.3e}",
                 f"{run.n_events:,}",
-                f"{self.random_seed}",
+                f"{run.seed}",
             )
 
         console.print(table)
@@ -368,6 +368,10 @@ class Madgraph5:
         run_dir = self._get_next_run_dir()
         run_dir.mkdir()
         log_path = run_dir / "run.log"
+        seed_path = run_dir / "seed"
+        with seed_path.open("w") as f:
+            f.write(f"{self.seed}")
+
         commands_path = run_dir / "commands"
         cards_dir = run_dir / "cards"
         cards_dir.mkdir()
@@ -392,13 +396,13 @@ class Madgraph5:
                         set_seed = True
                     if line.startswith("Random:seed"):
                         found_seed = True
-                        lines[i] = f"Random:seed = {self.random_seed}\n"
+                        lines[i] = f"Random:seed = {self.seed}\n"
 
                 if not set_seed:
                     lines.append("Random:setSeed = on\n")
-                    lines.append(f"Random:seed = {self.random_seed}\n")
+                    lines.append(f"Random:seed = {self.seed}\n")
                 elif not found_seed:
-                    lines.append(f"Random:seed = {self.random_seed}\n")
+                    lines.append(f"Random:seed = {self.seed}\n")
 
                 # Write back with the new random seed
                 with actual_card_path.open("w") as f:
@@ -420,11 +424,11 @@ class Madgraph5:
                 found_seed = False
                 for i, line in enumerate(lines):
                     if line.startswith("set RandomSeed"):
-                        lines[i] = f"set RandomSeed {self.random_seed}\n"
+                        lines[i] = f"set RandomSeed {self.seed}\n"
                         found_seed = True
 
                 if not found_seed:
-                    lines = [f"set RandomSeed {self.random_seed}\n"] + lines
+                    lines = [f"set RandomSeed {self.seed}\n"] + lines
 
                 # Write back with the new random seed
                 with actual_card_path.open("w") as f:
@@ -543,6 +547,7 @@ class MG5Run:
             raise FileNotFoundError(f"Directory {_dir} does not exist.")
         self._dir = _dir
         self._name = _dir.name
+        self._seed = int((_dir / "seed").read_text())
 
         self._events = ROOT.TChain("Delphes")
         self._n_subruns = 0
@@ -631,3 +636,8 @@ class MG5Run:
     def events(self) -> cppyy.gbl.TChain:
         """Events read by PyROOT of a run."""
         return self._events
+
+    @property
+    def seed(self) -> int:
+        """The random seed of a run."""
+        return self._seed
