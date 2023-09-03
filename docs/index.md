@@ -1,1 +1,0 @@
-/root/workspace_ssd/projects/hep-ml-lab/README.md
