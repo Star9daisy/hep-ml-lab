@@ -81,6 +81,7 @@ class Madgraph5:
         detector: str = "off",
         settings: dict[str, Any] = {},
         cards: list[PathLike] = [],
+        n_events: int = 10000,
         seed: int = 42,
         tags: list[str] = [],
         n_events_per_subrun: int = 100000,
@@ -127,6 +128,7 @@ class Madgraph5:
         self.detector = detector
         self.settings = settings
         self.cards = cards
+        self.n_events = n_events
         self.seed = seed
         self.tags = tags
         self.n_events_per_subrun = n_events_per_subrun
@@ -221,6 +223,16 @@ class Madgraph5:
                 self.cards.append(
                     self._mg5_dir / "Template/Common/Cards/delphes_card_default.dat"
                 )
+
+    @property
+    def n_events(self) -> int:
+        """The number of events."""
+        return self._n_events
+
+    @n_events.setter
+    def n_events(self, n_events: int) -> None:
+        self._n_events = n_events
+        self.settings["nevents"] = n_events
 
     @property
     def seed(self) -> int:
