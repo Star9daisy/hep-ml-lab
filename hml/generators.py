@@ -285,7 +285,6 @@ class Madgraph5:
     def commands(self) -> list[str]:
         """Commands converted from parameters to be executed in Madgraph5."""
         settings = self.settings.copy()
-        settings["nevents"] = self.n_events_per_subrun
 
         # The commands will be executed in the run directory so all paths are
         # the current directory.
