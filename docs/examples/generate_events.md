@@ -183,21 +183,71 @@ Seed: 42
 </div>
 
 ## Change settings and launch again
-When you’re ready to change some settings in different cards when launching a
-run (run_card, params_card, pythia8_card, delphes_card), HML Madgraph5 API
-behaves almost like the Madgraph5 itself.
+Next we want to change some settings and launch again. For example, we want to
+generate 10000 events and change the minimum pt and the maximum eta of jets.
 
-``` title="MG5 CLI"
-# in run_card.dat
-10000 = nevents -> 1000 = nevents # less events to be generated
-20.0  = ptj     -> 10.0 = ptj # jets with broader pt range
+### Use MG5
+For MG5, we could change these settings via its CLI or modify the run_card.dat,
+or write all commands into a script file:
+
+``` py title="two_runs_from_mg5.mad"
+generate p p > z z, z > j j, z > vl vl~
+output data/two_runs_from_mg5
+launch -i
+generate_events
+    set nevents 1000 #(1)!
+    set iseed 42
+generate_events
+   set nevents 10000 #(2)!
+   set iseed 42
+   set ptj 10.0
+   set etaj 2.4
+   set run_tag ptj=10,etaj=2.4 #(3)!
+print_results --path=data/two_runs_from_mg5_results --format=short
 ```
 
-``` py title="HML jupyter notebook"
-g.n_events = 1000
+1. The indentation is not necessary but it's better to make the script more
+   readable.
+3. The default value of `nevents` is exactly 10000. So it's ok to drop this line.
+4. It's a good practice to add a tag to the run. Tags will show up in the results
+   file and help us identify the run.
+
+<div class="result" markdown>
+
+``` title="data/two_runs_from_mg5_results"
+# run_name tag cross error Nb_event cross_after_matching nb_event_after matching
+run_01 tag_1 1.9892400000000001 0.013241815989130797 1000
+run_02 ptj=10,etaj=2.4 1.96801 0.006981887808465559 10000
+```
+
+</div>
+
+### Use HML
+For HML, as `settings` is a dictionary, we could change the settings directly:
+
+``` py title="one_run_from_hml.ipynb"
+g.n_events = 10000
 g.settings["ptj"] = 10.0
 g.settings["etaj"] = 2.4
+g.tags = ["ptj=10", "etaj=2.4"]
+
+g.launch()
 ```
+
+<div class="result" markdown>
+
+```
+                       p p > z z, z > j j, z > vl vl~                        
+┏━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ # ┃ Name     ┃ Tags            ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┡━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 0 │ run_1[1] │ no_tags         │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
+│ 1 │ run_2[1] │ ptj=10,etaj=2.4 │ 1.976e+00 +- 6.010e-03 │   10,000 │   42 │
+└───┴──────────┴─────────────────┴────────────────────────┴──────────┴──────┘
+                       Output: data/all_runs_from_hml                        
+```
+
+</div>
 
 ## What's the difference between HML and MG5 CLI?
 Then launches as the same as the first run. After some try, you could specify
