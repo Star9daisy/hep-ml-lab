@@ -249,11 +249,15 @@ g.launch()
 
 </div>
 
-## What's the difference between HML and MG5 CLI?
-Then launches as the same as the first run. After some try, you could specify
-some settings are needed, so you output a new folder. However, you may notice
-that results differ from each other when they have different order in a roll,
-even we have set the same random seed!
+## What's the difference between HML and MG5?
+During we try some launches, by accident we find that MG5 may generate events
+with different results even we have set the same random seed. We always test
+HML with `n_events=1000` and `seed=42`, and the results are not consistent.
+
+!!! warning
+    As we try more runs, we find that this inconsistency only happens when the
+    `n_events=1000` and the run is the first one. We'll change back to the
+    original Madgraph5 output structure in the later version of HML.
 
 <figure markdown>
   ![Image title](../images/mg5_output_structure.png){ width="200" }
