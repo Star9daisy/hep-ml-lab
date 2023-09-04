@@ -263,10 +263,11 @@ class Madgraph5:
 
     @n_events_per_subrun.setter
     def n_events_per_subrun(self, n_events_per_subrun: int) -> None:
+        self._n_events_per_subrun = n_events_per_subrun
         if n_events_per_subrun > self.n_events:
-            self._n_events_per_subrun = self.n_events
+            self.settings["nevents"] = self.n_events
         else:
-            self._n_events_per_subrun = n_events_per_subrun
+            self.settings["nevents"] = n_events_per_subrun
 
     @property
     def n_subruns(self) -> int:
