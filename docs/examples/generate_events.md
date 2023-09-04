@@ -55,7 +55,8 @@ g = Madgraph5(
 )
 ```
 
-HML convert the parameters to MG5 commands internally. Let's check this:
+HML convert the parameters to MG5 commands internally. Let's examine this to
+make sure everything is going well:
 
 ``` py title="one_run_from_hml.ipynb"
 g.commands
@@ -63,12 +64,12 @@ g.commands
 
 <div class="result" markdown>
 
-```
+``` py
 ['import model sm',
  'generate p p > z z, z > j j, z > vl vl~',
  'output mg5_output',
  'launch -i',
- 'multi_run 1',
+ 'multi_run 1', #(1)!
  'shower=off',
  'detector=off',
  'set nevents 1000',
@@ -76,6 +77,17 @@ g.commands
  'set run_tag no_tags',
  'print_results --path=results --format=short']
 ```
+
+1. HML uses `multi_run` to generate multiple runs, which is not optimal as MG5
+   indicates. However, it's a not good solution to keep all launched runs in the
+   same structure considering both small number of events and large ones for
+   training machine learning models.
+
+!!! note
+    The output `mg5_output` and `results` in `print_results` are placed in the
+    "current" directory which is one folder inside data/one_run_from_hml. HML
+    changes the output structure for better reproducibility. We'll
+    discuss this later.
 
 </div>
 
@@ -97,14 +109,35 @@ Done
 </div>
 
 ## Check results of generation
+It's crucial to get the information like cross section and error everytime we
+have finished a run.
 
-It’s just the same as the left commands we type into MG5 CLI. To check cross
-section, let’s do this:
+### Use MG5
+To check these information in MG5 workflow, we could read it directly from the
+console output such as:
 
-``` title="data/results"
-# run_name tag cross error Nb_event cross_after_matching nb_event_after matching
-run_01 tag_1 1.9892400000000003 0.013241815989130797 1000
+``` title="MG5 CLI"
+...
+INFO:  
+  === Results Summary for run: run_01 tag: tag_1 ===
+
+     Cross-section :   1.989 +- 0.01324 pb
+     Nb of events :  1000
+...
 ```
+
+But it's better to save it to a file and access it later. We have done this in
+the previous section using the command `print_results`:
+
+``` title="data/one_run_from_mg5_results"
+# run_name tag cross error Nb_event cross_after_matching nb_event_after matching
+run_01 tag_1 1.9892400000000001 0.013241815989130797 1000
+```
+
+### Use HML
+From `g.commands` we can see that HML has saved the results to a file as well.
+It helps read the file and parse the information. Use `summary()` to show the
+results:
 
 ``` py title="one_run_from_hml.ipynb"
 g.summary()
@@ -124,9 +157,7 @@ g.summary()
 
 </div>
 
-To access the cross section, for the results file you may write a little script
-to resolve it and retrieve the value. For HML, Madgraph5 API has done this for
-you.
+Of course, we can also access every single value in the summary:
 
 ``` py title="one_run_from_hml.ipynb"
 for i, run in enumerate(g.runs):
@@ -150,8 +181,6 @@ Seed: 42
 ```
 
 </div>
-
-All info shown in `summary` could be retrieved via HML Madgraph5 API.
 
 ## Change settings and launch again
 When you’re ready to change some settings in different cards when launching a
