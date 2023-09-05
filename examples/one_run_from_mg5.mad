@@ -4,4 +4,4 @@ launch -i
 generate_events
 set nevents 1000
 set iseed 42
-print_results --path=data/one_run_from_mg5_results --format=short
+print_results --path=data/one_run_from_mg5/results --format=short
