@@ -22,7 +22,7 @@ launch -i #(2)!
 generate_events #(3)!
 set nevents 1000
 set iseed 42
-print_results --path=data/one_run_from_mg5_results --format=short #(4)!
+print_results --path=data/one_run_from_mg5/results --format=short #(4)!
 ```
 
 1. Remember to `mkdir data` before running the script.
@@ -129,7 +129,7 @@ INFO:
 But it's better to save it to a file and access it later. We have done this in
 the previous section using the command `print_results`:
 
-``` title="data/one_run_from_mg5_results"
+``` title="data/one_run_from_mg5/results"
 # run_name tag cross error Nb_event cross_after_matching nb_event_after matching
 run_01 tag_1 1.9892400000000001 0.013241815989130797 1000
 ```
@@ -198,11 +198,11 @@ generate_events
     set nevents 1000 #(1)!
     set iseed 42
 generate_events
-   set nevents 10000 #(2)!
-   set iseed 42
-   set ptj 10.0
-   set etaj 2.4
-   set run_tag ptj=10,etaj=2.4 #(3)!
+    set nevents 10000 #(2)!
+    set iseed 42
+    set ptj 10.0
+    set etaj 2.4
+    set run_tag ptj=10,etaj=2.4 #(3)!
 print_results --path=data/two_runs_from_mg5_results --format=short
 ```
 
@@ -212,7 +212,7 @@ print_results --path=data/two_runs_from_mg5_results --format=short
 4. It's a good practice to add a tag to the run. Tags will show up in the results
    file and help us identify the run.
 
-``` title="data/two_runs_from_mg5_results"
+``` title="data/two_runs_from_mg5/results"
 # run_name tag cross error Nb_event cross_after_matching nb_event_after matching
 run_01 tag_1 1.9892400000000001 0.013241815989130797 1000
 run_02 ptj=10,etaj=2.4 1.96801 0.006981887808465559 10000
@@ -288,16 +288,12 @@ generate_events
 print_results --path=data/three_same_runs_from_mg5/results --format=short
 ```
 
-<div class="result" markdown>
-
-```
+``` title="data/three_same_runs_from_mg5/results"
 # run_name tag cross error Nb_event cross_after_matching nb_event_after matching
 run_01 tag_1 1.9892400000000001 0.013241815989130797 1000
 run_02 tag_1 1.95144 0.013508039407700881 1000
 run_03 tag_1 1.95144 0.013508039407700881 1000
 ```
-</div>
-
 
 ``` py title="all_runs_from_hml.ipynb"
 g.n_events = 1000
