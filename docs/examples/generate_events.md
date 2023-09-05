@@ -256,8 +256,9 @@ HML with `n_events=1000` and `seed=42`, and the results are not consistent.
 
 !!! warning
     As we try more runs, we find that this inconsistency only happens when the
-    `n_events=1000` and the run is the first one. We'll change back to the
-    original Madgraph5 output structure in the later version of HML.
+    `n_events=1000` and This situation will only occur in the first run.. We'll
+    change back to the original Madgraph5 output structure in the later version
+    of HML.
 
 <figure markdown>
   ![Image title](../images/mg5_output_structure.png){ width="200" }
