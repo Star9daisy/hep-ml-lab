@@ -251,7 +251,7 @@ class Madgraph5:
 
     @tag.setter
     def tag(self, tag: str) -> None:
-        self._tags = tag
+        self._tag = tag
         self.settings["run_tag"] = tag
 
     @property
