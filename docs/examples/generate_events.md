@@ -43,13 +43,13 @@ print_results --path=data/one_run_from_mg5_results --format=short #(4)!
 To use HML, we use a jupyter notebook for demonstration. You can also write a
 python script for normal usage.
 
-``` py title="one_run_from_hml.ipynb"
+``` py title="all_runs_from_hml.ipynb"
 from hml.generators import Madgraph5
 
 g = Madgraph5(
     executable="mg5_aMC",
     processes=["p p > z z, z > j j, z > vl vl~"],
-    output="data/one_run_from_hml",
+    output="data/all_runs_from_hml",
     n_events=1000,
     seed=42,
 )
@@ -58,7 +58,7 @@ g = Madgraph5(
 HML convert the parameters to MG5 commands internally. Let's examine this to
 make sure everything is going well:
 
-``` py title="one_run_from_hml.ipynb"
+``` py title="all_runs_from_hml.ipynb"
 g.commands
 ```
 
@@ -83,17 +83,17 @@ g.commands
    same structure considering both small number of events and large ones for
    training machine learning models.
 
+</div>
+
 !!! note
     The output `mg5_output` and `results` in `print_results` are placed in the
-    "current" directory which is one folder inside data/one_run_from_hml. HML
+    "current" directory which is one folder inside data/all_runs_from_hml. HML
     changes the output structure for better reproducibility. We'll
     discuss this later.
 
-</div>
-
 Now we can move on confidently:
 
-``` py title="one_run_from_hml.ipynb"
+``` py title="all_runs_from_hml.ipynb"
 ...
 g.launch()
 ```
@@ -139,7 +139,7 @@ From `g.commands` we can see that HML has saved the results to a file as well.
 It helps read the file and parse the information. Use `summary()` to show the
 results:
 
-``` py title="one_run_from_hml.ipynb"
+``` py title="all_runs_from_hml.ipynb"
 g.summary()
 ```
 
@@ -152,14 +152,14 @@ g.summary()
 ┡━━━╇━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
 │ 0 │ run_1[1] │ no_tags │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
 └───┴──────────┴─────────┴────────────────────────┴──────────┴──────┘
-                    Output: data/one_run_from_hml                    
+                    Output: data/all_runs_from_hml                    
 ```
 
 </div>
 
 Of course, we can also access every single value in the summary:
 
-``` py title="one_run_from_hml.ipynb"
+``` py title="all_runs_from_hml.ipynb"
 for i, run in enumerate(g.runs):
     print(f"# {i}")
     print(f"Name: {run.name}[{run.n_subruns}]")
@@ -212,20 +212,16 @@ print_results --path=data/two_runs_from_mg5_results --format=short
 4. It's a good practice to add a tag to the run. Tags will show up in the results
    file and help us identify the run.
 
-<div class="result" markdown>
-
 ``` title="data/two_runs_from_mg5_results"
 # run_name tag cross error Nb_event cross_after_matching nb_event_after matching
 run_01 tag_1 1.9892400000000001 0.013241815989130797 1000
 run_02 ptj=10,etaj=2.4 1.96801 0.006981887808465559 10000
 ```
 
-</div>
-
 ### Use HML
 For HML, as `settings` is a dictionary, we could change the settings directly:
 
-``` py title="one_run_from_hml.ipynb"
+``` py title="all_runs_from_hml.ipynb"
 g.n_events = 10000
 g.settings["ptj"] = 10.0
 g.settings["etaj"] = 2.4
@@ -261,7 +257,7 @@ output every time you change settings so that each output contains only one run.
 So HML reorganize the output structure as follows:
 
 <figure markdown>
-  ![Image title](../images/test.png){ width="500" }
+  ![Image title](../images/structure_comparison_bewteen_mg5&hml.png){width="500"}
   <figcaption>Image caption</figcaption>
 </figure>
 
@@ -300,10 +296,15 @@ run_01 tag_1 1.9892400000000001 0.013241815989130797 1000
 run_02 tag_1 1.95144 0.013508039407700881 1000
 run_03 tag_1 1.95144 0.013508039407700881 1000
 ```
+</div>
 
-</dev>
 
-``` py title="one_run_from_hml.ipynb"
+``` py title="all_runs_from_hml.ipynb"
+g.n_events = 1000
+del g.settings["ptj"]
+del g.settings["etaj"]
+g.tags = []
+
 for i in range(3):
     g.launch()
 
