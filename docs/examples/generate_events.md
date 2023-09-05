@@ -254,44 +254,42 @@ During we try some launches, by accident we find that MG5 may generate events
 with different results even we have set the same random seed. We always test
 HML with `n_events=1000` and `seed=42`, and the results are not consistent.
 
-!!! warning
-    As we try more runs, we find that this inconsistency only happens when the
-    `n_events=1000` and This situation will only occur in the first run.. We'll
-    change back to the original Madgraph5 output structure in the later version
-    of HML.
-
-<figure markdown>
-  ![Image title](../images/mg5_output_structure.png){ width="200" }
-  <figcaption>Image caption</figcaption>
-</figure>
-
-<figure markdown>
-  ![Image title](../images/hml_output_structure.png){ width="200" }
-  <figcaption>Image caption</figcaption>
-</figure>
-
 This is pretty confusing as the two runs have exactly the same settings but
 result in different cross section and error. To avoid this, the best practice is
 output every time you change settings so that each output contains only one run.
 
 So HML reorganize the output structure as follows:
 
+<figure markdown>
+  ![Image title](../images/test.png){ width="500" }
+  <figcaption>Image caption</figcaption>
+</figure>
+
+!!! warning
+    As we try more runs, we find that this inconsistency only happens when the
+    `n_events=1000` and This situation will only occur in the first run. We'll
+    change back to the original Madgraph5 output structure in the later version
+    of HML.
+
 Let’s launch a run with the same settings multiple times to demonstrate we truly
 make the results fixed.
 
-``` title="Madgraph5"
-import model sm
+``` title="three_same_runs_from_mg5.mad"
 generate p p > z z, z > j j, z > vl vl~
-output data/mg5_run_3_times
+output data/three_same_runs_from_mg5
 launch -i
-    generate_events
+generate_events
+    set nevents 1000
+    set iseed 42
+    
+generate_events
     set nevents 1000
     set iseed 42
 
-    generate_events
-    generate_events
-    
-    print_results --path=results --format=short
+generate_events
+    set nevents 1000
+    set iseed 42
+print_results --path=data/three_same_runs_from_mg5/results --format=short
 ```
 
 <div class="result" markdown>
@@ -299,13 +297,13 @@ launch -i
 ```
 # run_name tag cross error Nb_event cross_after_matching nb_event_after matching
 run_01 tag_1 1.9892400000000001 0.013241815989130797 1000
-run_02 tag_1 1.96681 0.013548581768214708 1000
-run_03 tag_1 1.97885 0.015050913552339605 1000
+run_02 tag_1 1.95144 0.013508039407700881 1000
+run_03 tag_1 1.95144 0.013508039407700881 1000
 ```
 
 </dev>
 
-``` py title="HML API"
+``` py title="one_run_from_hml.ipynb"
 for i in range(3):
     g.launch()
 
@@ -315,15 +313,17 @@ g.summary()
 <div class="result" markdown>
 
 ```
-p p > z z, z > j j, z > vl vl~                    
-┏━━━┳━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
-┃ # ┃ Name     ┃ Tags    ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
-┡━━━╇━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
-│ 0 │ run_1[1] │ no_tags │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
-│ 1 │ run_2[1] │ no_tags │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
-│ 2 │ run_3[1] │ no_tags │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
-└───┴──────────┴─────────┴────────────────────────┴──────────┴──────┘
-                   Output: data/pp2zz_z2jj_z2vlvl
+                       p p > z z, z > j j, z > vl vl~                        
+┏━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ # ┃ Name     ┃ Tags            ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┡━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 0 │ run_1[1] │ no_tags         │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
+│ 1 │ run_2[1] │ ptj=10,etaj=2.4 │ 1.976e+00 +- 6.010e-03 │   10,000 │   42 │
+│ 2 │ run_3[1] │ no_tags         │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
+│ 3 │ run_4[1] │ no_tags         │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
+│ 4 │ run_5[1] │ no_tags         │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
+└───┴──────────┴─────────────────┴────────────────────────┴──────────┴──────┘
+                       Output: data/all_runs_from_hml                        
 ```
 
 </div>
