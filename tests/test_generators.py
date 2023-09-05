@@ -42,7 +42,8 @@ def test_Madgraph5():
         shower="Pythia8",
         detector="Delphes",
         cards=["./tests/scripts/delphes_card_eflow.dat"],
-        settings={"nevents": 100, "iseed": 42},
+        n_events=100,
+        seed=42,
     )
 
     assert isinstance(g.executable, Path)
@@ -65,15 +66,15 @@ def test_Madgraph5():
     assert "set iseed 42" in first_content
     assert "print_results" in first_content
 
-    g.settings["nevents"] = 200
+    g.n_events = 200
     g.n_events_per_subrun = 100
     assert "multi_run 2" in "\n".join(g.commands)
 
-    g.settings["nevents"] = 250
+    g.n_events = 250
     g.n_events_per_subrun = 100
     assert "multi_run 3" in "\n".join(g.commands)
 
-    g.settings["nevents"] = 100
+    g.n_events = 100
 
     g.launch()
     assert isinstance(g.runs, list)
