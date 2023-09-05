@@ -83,7 +83,7 @@ class Madgraph5:
         cards: list[PathLike] = [],
         n_events: int = 10000,
         seed: int = 42,
-        tags: list[str] = [],
+        tag: str = "",
         n_events_per_subrun: int = 100000,
     ) -> None:
         # Before output ------------------------------------------------------ #
@@ -130,7 +130,7 @@ class Madgraph5:
         self.cards = cards
         self.n_events = n_events
         self.seed = seed
-        self.tags = tags
+        self.tag = tag
         self.n_events_per_subrun = n_events_per_subrun
 
     @property
@@ -245,16 +245,14 @@ class Madgraph5:
         self.settings["iseed"] = seed
 
     @property
-    def tags(self) -> list[str]:
+    def tag(self) -> str:
         """The tags of runs."""
-        return self._tags
+        return self._tag
 
-    @tags.setter
-    def tags(self, tags: list[str]) -> None:
-        if len(tags) == 0:
-            tags = ["no_tags"]
-        self._tags = tags
-        self.settings["run_tag"] = ",".join(tags)
+    @tag.setter
+    def tag(self, tag: str) -> None:
+        self._tags = tag
+        self.settings["run_tag"] = tag
 
     @property
     def n_events_per_subrun(self) -> int:
@@ -323,7 +321,7 @@ class Madgraph5:
 
         table.add_column("#", justify="right")
         table.add_column("Name")
-        table.add_column("Tags")
+        table.add_column("Tag")
         table.add_column("Cross section (pb)", justify="center")
         table.add_column("N events", justify="right")
         table.add_column("Seed", justify="right")
