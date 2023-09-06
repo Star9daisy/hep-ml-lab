@@ -19,6 +19,8 @@ g = Madgraph5(
         "ptj": 10,
         "etaj": 2.4,
     },
+    shower="Pythia8",
+    detector="Delphes",
     n_events=1000,
     seed=42,
     tag="ptj=10,etaj=2.4",
@@ -43,6 +45,8 @@ g.launch()
 
 ```
 Generating events...
+Running Pythia8...
+Running Delphes...
 Storing files...
 Done
 ```
@@ -129,6 +133,29 @@ Seed: 123
 ```
 
 </div>
+
+To read the events from Delphes output, use the `events` method of a run:
+
+``` py title="notebook.ipynb"
+for event in run.events:
+    print(f"n_jets: {event.Jet_size}")
+    print(f"n_fat_jets: {event.FatJet_size}")
+    break
+```
+
+<div class="result" markdown>
+
+```
+n_jets: 3
+n_fat_jets: 0
+```
+
+</div>
+
+!!! note
+    1. Behind the scenes, the `events` method uses `PyROOT` as the backend to
+    read the events.
+    2. Right inside this event loop, users can apply cuts to filter events.
 
 ## Remove and clean runs
 
