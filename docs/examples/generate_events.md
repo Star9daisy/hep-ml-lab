@@ -69,7 +69,7 @@ g.summary()
 
 </div>
 
-## Change parameters and launch the second run
+## Change parameters
 
 Users can assign new values to parameters of the `Madgraph5` object to change
 the configurations for the next run::
@@ -100,7 +100,7 @@ g.summary()
 
 </div>
 
-## Check the information of any run
+## Check the run information
 
 The values in the `summary` table are accessible via the `runs` attribute. Take
 the second one as an example:
