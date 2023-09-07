@@ -534,9 +534,11 @@ class Madgraph5:
 
     def _get_next_run_dir(self) -> Path:
         """The next run directory."""
-        all_dirs = [i for i in self.output.glob("run_*") if i.is_dir()]
-        n_runs = len(all_dirs)
-        run_dir = self.output / f"run_{n_runs + 1}"
+        if len(self.runs) > 0:
+            current_run_number = int(self.runs[-1].name.split("_")[-1])
+        else:
+            current_run_number = 0
+        run_dir = self.output / f"run_{current_run_number + 1}"
         return run_dir
 
     def _check_status(self, log, current_status: str) -> str:
