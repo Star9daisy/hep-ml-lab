@@ -7,23 +7,17 @@ information of each run and manage all the runs.
 ## Launch the first run
 
 Unlike the MG5 command line interface (**CLI**) which requires users to modify
-configurations interactively, the HML MG5 API specify them as uses create the
+configurations interactively, the HML MG5 API specify them when users create a
 `Madgraph5` object:
 
 ``` py title="notebook.ipynb"
 g = Madgraph5(
     executable="mg5_aMC",
     processes=["p p > z z, z > j j, z > vl vl~"],
-    output="data/pp2zz_z2jj_z2vvlv",
-    settings={
-        "ptj": 10,
-        "etaj": 2.4,
-    },
+    output="data/pp2zz_z2jj_z2vlvl",
     shower="Pythia8",
     detector="Delphes",
     n_events=1000,
-    seed=42,
-    tag="ptj=10,etaj=2.4",
 )
 ```
 
@@ -62,13 +56,13 @@ g.summary()
 <div class="result" markdown>
 
 ```
-                       p p > z z, z > j j, z > vl vl~                        
-┏━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
-┃ # ┃ Name     ┃ Tag             ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
-┡━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
-│ 0 │ run_1[1] │ ptj=10,etaj=2.4 │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
-└───┴──────────┴─────────────────┴────────────────────────┴──────────┴──────┘
-                       Output: data/pp2zz_z2jj_z2vvlv                        
+                  p p > z z, z > j j, z > vl vl~                   
+┏━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ # ┃ Name     ┃ Tag   ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┡━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 0 │ run_1[1] │ tag_1 │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
+└───┴──────────┴───────┴────────────────────────┴──────────┴──────┘
+                  Output: data/pp2zz_z2jj_z2vlvl                   
 ```
 
 </div>
@@ -80,10 +74,9 @@ the configurations for the next run::
 
 ``` py title="notebook.ipynb"
 g.seed = 123
-g.tag = "no_cuts"
-
-del g.settings["ptj"] # remove this setting
-del g.settings["etaj"] # remove this setting
+g.tag = "ptj=10,etaj=2.4"
+g.settings["ptj"] = 10
+g.settings["etaj"] = 2.4
 
 g.launch(show_status=False)
 g.summary()
@@ -96,13 +89,17 @@ g.summary()
 ┏━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
 ┃ # ┃ Name     ┃ Tag             ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
 ┡━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
-│ 0 │ run_1[1] │ ptj=10,etaj=2.4 │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
-│ 1 │ run_2[1] │ no_cuts         │ 1.956e+00 +- 1.537e-02 │    1,000 │  123 │
+│ 0 │ run_1[1] │ tag_1           │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
+│ 1 │ run_2[1] │ ptj=10,etaj=2.4 │ 1.956e+00 +- 1.537e-02 │    1,000 │  123 │
 └───┴──────────┴─────────────────┴────────────────────────┴──────────┴──────┘
-                       Output: data/pp2zz_z2jj_z2vvlv                        
+                       Output: data/pp2zz_z2jj_z2vlvl                        
 ```
 
 </div>
+
+!!! note
+    The value in `[]` is the number of subruns, which is calculated by the
+    `n_events` and `n_events_per_subrun` of the generator.
 
 ## Check the run information
 
@@ -125,7 +122,7 @@ print("Seed:", run.seed)
 ```
 Name: run_2
 N Subruns: 1
-Tag: no_cuts
+Tag: ptj=10,etaj=2.4
 Cross section: 1.95604
 Error: 0.015374662254501723
 N events: 1000
@@ -180,8 +177,10 @@ g.summary()
 
 </div>
 
+The `clean` method removes all the runs and the output directory itself:
+
 ``` py title="notebook.ipynb"
-g.clean() # remove the output directory
+g.clean()
 ```
 
 ---
