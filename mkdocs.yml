@@ -54,7 +54,7 @@ nav:
   - Introcution: index.md
   - Examples:
       - Generate events: examples/generate_events.md
-      - Create datasets: examples/create_datasets.ipynb
+      - Create datasets: examples/create_datasets.md
       - Apply methods: examples/apply_methods.ipynb
   - API Reference:
       - hml.generators: api-reference/hml.generators.md
