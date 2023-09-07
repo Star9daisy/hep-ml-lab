@@ -79,6 +79,8 @@ background_generator.summary()
                         Output: data/pp2jj                         
 ```
 
+</div>
+
 ## Loop over events
 
 Madgraph5 of HML has `runs` attribute and each `run` has `events` attribute to
@@ -158,3 +160,8 @@ Save the dataset to `./data/z_vs_qcd`:
 ```py title="notebook.ipynb"
 dataset.save()
 ```
+
+---
+
+Check [datasets](../../api-reference/hml.datasets) and
+[representations](../../api-reference/hml.representations) for more details.

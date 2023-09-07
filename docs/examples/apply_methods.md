@@ -218,3 +218,9 @@ toy_mlp                3.5514  0.4471    92.3069    1.2307
 ```
 
 </div>
+
+---
+
+Check [cuts](../../api-reference/hml.methods/cuts),
+[trees](../../api-reference/hml.methods/trees), and
+[mlps](../../api-reference/hml.methods/networks/mlps) for more details.
