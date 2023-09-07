@@ -14,7 +14,7 @@ from rich.table import Table
 
 import hml
 
-ROOT.gSystem.Load("libDelphes")
+ROOT.gSystem.Load("libDelphes")  # type: ignore
 
 PathLike = Union[str, Path, os.PathLike]
 
@@ -591,7 +591,7 @@ class MG5Run:
         self._seed = int((_dir / "seed").read_text())
 
         # Read events and count subruns
-        self._events = ROOT.TChain("Delphes")
+        self._events = ROOT.TChain("Delphes")  # type: ignore
         self._n_subruns = 0
         for i in self.dir.glob("mg5_output/Events/run_01_*"):
             if i.is_dir():
