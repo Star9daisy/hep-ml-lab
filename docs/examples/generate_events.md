@@ -182,5 +182,5 @@ g.clean()
 
 ---
 
-Check [Madgraph5](../../api-reference/hml.generators#hml.generators.Madgraph5)
+Check [Madgraph5](../api-reference/hml.generators.md#hml.generators.Madgraph5)
 for more details.
