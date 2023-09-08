@@ -233,6 +233,6 @@ table
 
 ---
 
-Check [cuts](../../api-reference/hml.methods/cuts),
-[trees](../../api-reference/hml.methods/trees), and
-[mlps](../../api-reference/hml.methods/networks/mlps) for more details.
+Check [cuts](../api-reference/hml.methods/cuts.md),
+[trees](../api-reference/hml.methods/trees.md), and
+[mlps](../api-reference/hml.methods/networks/mlps.md) for more details.

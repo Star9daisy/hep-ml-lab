@@ -164,5 +164,5 @@ dataset.save()
 
 ---
 
-Check [datasets](../../api-reference/hml.datasets) and
-[representations](../../api-reference/hml.representations) for more details.
+Check [datasets](../api-reference/hml.datasets.md) and
+[representations](../api-reference/hml.representations.md) for more details.
