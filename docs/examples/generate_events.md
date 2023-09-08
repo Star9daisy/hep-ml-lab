@@ -55,15 +55,14 @@ g.summary()
 
 <div class="result" markdown>
 
-```
-                  p p > z z, z > j j, z > vl vl~                   
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-style: italic">                  p p &gt; z z, z &gt; j j, z &gt; vl vl~                   </span>
 ┏━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
-┃ # ┃ Name     ┃ Tag   ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┃<span style="font-weight: bold"> # </span>┃<span style="font-weight: bold"> Name     </span>┃<span style="font-weight: bold"> Tag   </span>┃<span style="font-weight: bold">   Cross section (pb)   </span>┃<span style="font-weight: bold"> N events </span>┃<span style="font-weight: bold"> Seed </span>┃
 ┡━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
 │ 0 │ run_1[1] │ tag_1 │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
 └───┴──────────┴───────┴────────────────────────┴──────────┴──────┘
-                  Output: data/pp2zz_z2jj_z2vlvl                   
-```
+<span style="color: #7f7f7f; text-decoration-color: #7f7f7f; font-style: italic">                  Output: data/pp2zz_z2jj_z2vlvl                   </span>
+</pre>
 
 </div>
 
@@ -84,16 +83,15 @@ g.summary()
 
 <div class="result" markdown>
 
-```
-                       p p > z z, z > j j, z > vl vl~                        
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-style: italic">                       p p &gt; z z, z &gt; j j, z &gt; vl vl~                        </span>
 ┏━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
-┃ # ┃ Name     ┃ Tag             ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┃<span style="font-weight: bold"> # </span>┃<span style="font-weight: bold"> Name     </span>┃<span style="font-weight: bold"> Tag             </span>┃<span style="font-weight: bold">   Cross section (pb)   </span>┃<span style="font-weight: bold"> N events </span>┃<span style="font-weight: bold"> Seed </span>┃
 ┡━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
 │ 0 │ run_1[1] │ tag_1           │ 1.989e+00 +- 1.324e-02 │    1,000 │   42 │
 │ 1 │ run_2[1] │ ptj=10,etaj=2.4 │ 1.956e+00 +- 1.537e-02 │    1,000 │  123 │
 └───┴──────────┴─────────────────┴────────────────────────┴──────────┴──────┘
-                       Output: data/pp2zz_z2jj_z2vlvl                        
-```
+<span style="color: #7f7f7f; text-decoration-color: #7f7f7f; font-style: italic">                       Output: data/pp2zz_z2jj_z2vlvl                        </span>
+</pre>
 
 </div>
 
@@ -165,15 +163,14 @@ g.summary()
 
 <div class="result" markdown>
 
-```
-                   p p > z z, z > j j, z > vl vl~                    
-┏━━━┳━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
-┃ # ┃ Name     ┃ Tag     ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
-┡━━━╇━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
-│ 0 │ run_2[1] │ no_cuts │ 1.956e+00 +- 1.537e-02 │    1,000 │  123 │
-└───┴──────────┴─────────┴────────────────────────┴──────────┴──────┘
-                   Output: data/pp2zz_z2jj_z2vvlv                    
-```
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-style: italic">                       p p &gt; z z, z &gt; j j, z &gt; vl vl~                        </span>
+┏━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃<span style="font-weight: bold"> # </span>┃<span style="font-weight: bold"> Name     </span>┃<span style="font-weight: bold"> Tag             </span>┃<span style="font-weight: bold">   Cross section (pb)   </span>┃<span style="font-weight: bold"> N events </span>┃<span style="font-weight: bold"> Seed </span>┃
+┡━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 0 │ run_2[1] │ ptj=10,etaj=2.4 │ 1.956e+00 +- 1.537e-02 │    1,000 │  123 │
+└───┴──────────┴─────────────────┴────────────────────────┴──────────┴──────┘
+<span style="color: #7f7f7f; text-decoration-color: #7f7f7f; font-style: italic">                       Output: data/pp2zz_z2jj_z2vlvl                        </span>
+</pre>
 
 </div>
 
