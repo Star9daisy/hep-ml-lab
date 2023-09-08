@@ -154,25 +154,26 @@ history = method3.fit(x_train, y_train, epochs=10, batch_size=256, verbose=2)
 ```
 > Training model:
 Epoch 1/10
-51/51 - 6s - loss: 3.5999 - acc: 0.8404 - max_sig: 148.5871 - r50: 19.1179 - 6s/epoch - 117ms/step
+51/51 - 6s - loss: 1.4079 - acc: 0.8544 - max_sig: 125.3569 - r50: 17.0191 - 6s/epoch - 114ms/step
 Epoch 2/10
-51/51 - 1s - loss: 0.8697 - acc: 0.8880 - max_sig: 204.6640 - r50: 22.9292 - 890ms/epoch - 17ms/step
+51/51 - 1s - loss: 0.7214 - acc: 0.8857 - max_sig: 212.3330 - r50: 37.1405 - 888ms/epoch - 17ms/step
 Epoch 3/10
-51/51 - 1s - loss: 0.7783 - acc: 0.8925 - max_sig: 205.9824 - r50: 40.2879 - 914ms/epoch - 18ms/step
+51/51 - 1s - loss: 0.7479 - acc: 0.8806 - max_sig: 232.3429 - r50: 34.9558 - 841ms/epoch - 16ms/step
 Epoch 4/10
-51/51 - 1s - loss: 0.7782 - acc: 0.8917 - max_sig: 204.7205 - r50: 29.8367 - 909ms/epoch - 18ms/step
+51/51 - 1s - loss: 0.6934 - acc: 0.8820 - max_sig: 224.1893 - r50: 52.4336 - 882ms/epoch - 17ms/step
 Epoch 5/10
-51/51 - 1s - loss: 0.8271 - acc: 0.8844 - max_sig: 216.8438 - r50: 29.9621 - 911ms/epoch - 18ms/step
+51/51 - 1s - loss: 0.5860 - acc: 0.8959 - max_sig: 243.3809 - r50: 68.5670 - 874ms/epoch - 17ms/step
 Epoch 6/10
-51/51 - 1s - loss: 0.6507 - acc: 0.8993 - max_sig: 224.2558 - r50: 47.2250 - 916ms/epoch - 18ms/step
+51/51 - 1s - loss: 0.6265 - acc: 0.8904 - max_sig: 223.1910 - r50: 72.7648 - 847ms/epoch - 17ms/step
 Epoch 7/10
-51/51 - 1s - loss: 0.6414 - acc: 0.8984 - max_sig: 228.0864 - r50: 45.7113 - 909ms/epoch - 18ms/step
+51/51 - 1s - loss: 0.5457 - acc: 0.9022 - max_sig: 216.2077 - r50: 79.2329 - 830ms/epoch - 16ms/step
 Epoch 8/10
-51/51 - 1s - loss: 0.6198 - acc: 0.9009 - max_sig: 230.9593 - r50: 52.4336 - 910ms/epoch - 18ms/step
+51/51 - 1s - loss: 0.5250 - acc: 0.9019 - max_sig: 230.6327 - r50: 100.4355 - 860ms/epoch - 17ms/step
 Epoch 9/10
-51/51 - 1s - loss: 0.6494 - acc: 0.9006 - max_sig: 225.9335 - r50: 35.6549 - 919ms/epoch - 18ms/step
+51/51 - 1s - loss: 0.4902 - acc: 0.9090 - max_sig: 243.8243 - r50: 113.1893 - 858ms/epoch - 17ms/step
 Epoch 10/10
-51/51 - 1s - loss: 0.5166 - acc: 0.9062 - max_sig: 226.5588 - r50: 64.2429 - 913ms/epoch - 18ms/step
+51/51 - 1s - loss: 0.4611 - acc: 0.9078 - max_sig: 246.4039 - r50: 99.0404 - 851ms/epoch - 17ms/step
+
 ```
 
 </div>
@@ -194,28 +195,39 @@ results1 = method1.evaluate(x_test, y_test)
 results2 = method2.evaluate(x_test, y_test)
 results3 = method3.evaluate(x_test, y_test, verbose=2)
 results = {}
-
-results['name'] = [method1.name, method2.name, method3.name]
-for k in results1.keys():
-    results[k] = results1[k] + results2[k] + results3[k]
-
-print("> Results:")
-print(tabulate(results, headers="keys", floatfmt=".4f"))
 ```
 
 <div class="result" markdown>
 
 ```
-loss: 0.2572 - acc: 0.9561 - max_sig: 564.3209 - r50: 507.5595
-loss: 4.4158 - acc: 0.8019 - max_sig: 237.7650 - r50: 30.1252
-101/101 - 4s - loss: 3.5514 - acc: 0.4471 - max_sig: 92.3069 - r50: 1.2307 - 4s/epoch - 39ms/step
-> Results:
-name                     loss     acc    max_sig       r50
----------------------  ------  ------  ---------  --------
-boosted_decision_tree  0.2572  0.9561   564.3209  507.5595
-cut_and_count          4.4158  0.8019   237.7650   30.1252
-toy_mlp                3.5514  0.4471    92.3069    1.2307
+loss: 0.2572 - acc: 0.9568 - max_sig: 580.2705 - r50: 491.3567
+loss: 4.4158 - acc: 0.7977 - max_sig: 244.1590 - r50: 31.8965
+101/101 - 2s - loss: 0.2068 - acc: 0.9383 - max_sig: 112.4101 - r50: 161.9975 - 2s/epoch - 16ms/step
 ```
+
+</div>
+
+``` py title="notebook.ipynb"
+from rich.table import Table
+
+table = Table("name", "loss", "acc", "max_sig", "r50")
+names = ["BDT", "CutAndCount", "ToyMLP"]
+for res, name in zip([results1, results2, results3], names):
+    table.add_row(name, *[f"{v[0]:.4f}" for v in res.values()])
+
+table
+```
+
+<div class="result" markdown>
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">┏━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓
+┃<span style="font-weight: bold"> name        </span>┃<span style="font-weight: bold"> loss   </span>┃<span style="font-weight: bold"> acc    </span>┃<span style="font-weight: bold"> max_sig  </span>┃<span style="font-weight: bold"> r50      </span>┃
+┡━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━┩
+│ BDT         │ 0.2572 │ 0.9568 │ 580.2705 │ 491.3567 │
+│ CutAndCount │ 4.4158 │ 0.7977 │ 244.1590 │ 31.8965  │
+│ ToyMLP      │ 0.2068 │ 0.9383 │ 112.4101 │ 161.9975 │
+└─────────────┴────────┴────────┴──────────┴──────────┘
+</pre>
 
 </div>
 

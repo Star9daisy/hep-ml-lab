@@ -62,22 +62,23 @@ background_generator.summary()
 
 <div class="result" markdown>
 
-```
-                  p p > z z, z > j j, z > ve ve~                   
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-style: italic">                  p p &gt; z z, z &gt; j j, z &gt; ve ve~                   </span>
 ┏━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
-┃ # ┃ Name     ┃ Tag   ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┃<span style="font-weight: bold"> # </span>┃<span style="font-weight: bold"> Name     </span>┃<span style="font-weight: bold"> Tag   </span>┃<span style="font-weight: bold">   Cross section (pb)   </span>┃<span style="font-weight: bold"> N events </span>┃<span style="font-weight: bold"> Seed </span>┃
 ┡━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
 │ 0 │ run_1[1] │ tag_1 │ 7.703e-04 +- 3.118e-06 │   10,000 │   42 │
 └───┴──────────┴───────┴────────────────────────┴──────────┴──────┘
-                        Output: data/pp2zz                         
-                           p p > j j / z                           
+<span style="color: #7f7f7f; text-decoration-color: #7f7f7f; font-style: italic">                        Output: data/pp2zz                         </span>
+</pre>
+
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-style: italic">                           p p &gt; j j / z                           </span>
 ┏━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
-┃ # ┃ Name     ┃ Tag   ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┃<span style="font-weight: bold"> # </span>┃<span style="font-weight: bold"> Name     </span>┃<span style="font-weight: bold"> Tag   </span>┃<span style="font-weight: bold">   Cross section (pb)   </span>┃<span style="font-weight: bold"> N events </span>┃<span style="font-weight: bold"> Seed </span>┃
 ┡━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
 │ 0 │ run_1[1] │ tag_1 │ 5.685e+04 +- 1.283e+02 │   10,000 │   42 │
 └───┴──────────┴───────┴────────────────────────┴──────────┴──────┘
-                        Output: data/pp2jj                         
-```
+<span style="color: #7f7f7f; text-decoration-color: #7f7f7f; font-style: italic">                        Output: data/pp2jj                         </span>
+</pre>
 
 </div>
 
