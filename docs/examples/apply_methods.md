@@ -231,6 +231,46 @@ table
 
 </div>
 
+With trained methods, ROC curves can be plotted as follows.
+
+``` py title="notebook.ipynb"
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
+
+method1_proba = method1.predict(x_test)
+method2_proba = method2.predict(x_test)
+method3_proba = method3.predict(x_test)
+
+i = 1
+fpr_bdt, tpr_bdt, _ = roc_curve(y_test[:, i], method1_proba[:, i])
+roc_auc_bdt = auc(fpr_bdt, tpr_bdt)
+fpr_cut, tpr_cut, _ = roc_curve(y_test[:, i], method2_proba[:, i])
+roc_auc_cut = auc(fpr_cut, tpr_cut)
+fpr_mlp, tpr_mlp, _ = roc_curve(y_test[:, i], method3_proba[:, i])
+roc_auc_mlp = auc(fpr_mlp, tpr_mlp)
+
+# Plotting
+plt.plot(fpr_bdt, tpr_bdt, label=f"BDT (AUC={roc_auc_bdt:0.2f})")
+plt.plot(fpr_cut, tpr_cut, label=f"Cut (AUC={roc_auc_cut:0.2f})")
+plt.plot(fpr_mlp, tpr_mlp, label=f"MLP (AUC={roc_auc_mlp:0.2f})")
+
+plt.plot([0, 1], [0, 1], ls="--", color="gray", lw=2)
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC curves")
+plt.legend(loc="lower right")
+plt.savefig("roc_curves.png", bbox_inches='tight')
+plt.show()
+```
+
+<div class="result" markdown>
+
+![roc_curves.png](../images/roc_curves.png)
+
+</div>
+
 ---
 
 Check [cuts](../api-reference/hml.methods/cuts.md),
