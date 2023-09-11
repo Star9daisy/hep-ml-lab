@@ -1,4 +1,7 @@
 site_name: HEP ML Lab
+repo_url: https://github.com/star9daisy/hep-ml-lab
+repo_name: hep-ml-lab
+
 
 theme:
   name: material
@@ -7,6 +10,8 @@ theme:
     - content.code.annotate
   palette:
     primary: black
+  icon:
+    repo: fontawesome/brands/git-alt 
 
 plugins:
   - exclude:
