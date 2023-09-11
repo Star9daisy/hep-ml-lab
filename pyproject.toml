@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "hep-ml-lab"
 version = "0.2.2"
-description = "HEP-ML-Lab is an end-to-end framework used for research combining high-energy physics phenomenology with machine learning."
+description = "An end-to-end framework used for research combining high-energy physics phenomenology with machine learning."
 authors = ["Star9daisy", "star9daisy@outlook.com"]
 readme = "README.md"
 packages = [
