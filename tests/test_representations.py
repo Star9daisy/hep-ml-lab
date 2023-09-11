@@ -18,7 +18,7 @@ def test_observables():
     )
 
     generator.launch()
-    run = MG5Run(f"tests/data/{event_name}/Events/run_01/")
+    run = MG5Run(f"tests/data/{event_name}/run_1")
     representation = Set(
         [
             Pt("Jet1"),
@@ -41,5 +41,5 @@ def test_observables():
     assert representation.values.shape == (6,)
 
     # Clean up
-    shutil.rmtree(Path.cwd() / f"tests/data/{event_name}", ignore_errors=True)
-    Path.unlink(Path.cwd() / f"tests/data/{event_name}.log", missing_ok=True)
+    run.events.Reset()
+    generator.clean()

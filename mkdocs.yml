@@ -1,17 +1,22 @@
 site_name: HEP ML Lab
+repo_url: https://github.com/star9daisy/hep-ml-lab
+repo_name: hep-ml-lab
+
 
 theme:
   name: material
   features:
     - content.code.copy
+    - content.code.annotate
   palette:
     primary: black
+  icon:
+    repo: fontawesome/brands/git-alt 
 
 plugins:
   - exclude:
       glob:
         - examples/data/*
-  - mkdocs-jupyter
   - mkdocstrings:
       handlers:
         python:
@@ -27,6 +32,19 @@ markdown_extensions:
       permalink: "#"
   - pymdownx.arithmatex:
       generic: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  
 
 extra_javascript:
   - javascripts/mathjax.js
@@ -36,9 +54,9 @@ extra_javascript:
 nav:
   - Introcution: index.md
   - Examples:
-      - Generate events: examples/generate_events.ipynb
-      - Create datasets: examples/create_datasets.ipynb
-      - Apply methods: examples/apply_methods.ipynb
+      - Generate events: examples/generate_events.md
+      - Create datasets: examples/create_datasets.md
+      - Apply methods: examples/apply_methods.md
   - API Reference:
       - hml.generators: api-reference/hml.generators.md
       - hml.observables: api-reference/hml.observables.md

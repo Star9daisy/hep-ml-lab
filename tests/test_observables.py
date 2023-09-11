@@ -43,12 +43,16 @@ def test_observables():
         output=f"./tests/data/{event_name}",
         shower="Pythia8",
         detector="Delphes",
-        settings={"nevents": 10, "iseed": 42},
+        n_events=10,
+        seed=42,
+        cards=["./tests/scripts/delphes_card_eflow.dat"],
     )
     generator.launch()
 
-    run = MG5Run(f"tests/data/{event_name}/Events/run_01/")
-    event = next(iter(run.events))
+    run = MG5Run(f"tests/data/{event_name}/run_1")
+    for event in run.events:
+        if event.Jet_size >= 2:
+            break
 
     for obs in [Pt, M, Eta, Phi, Px, Py, Pz, E]:
         assert issubclass(obs, Observable)
@@ -69,5 +73,5 @@ def test_observables():
         get_lorentzvector_values(event, "Pt", ["Jet"], [event.Jet_size + 1])
 
     # Clean up
-    shutil.rmtree(Path.cwd() / f"tests/data/{event_name}", ignore_errors=True)
-    Path.unlink(Path.cwd() / f"tests/data/{event_name}.log", missing_ok=True)
+    run.events.Reset()
+    generator.clean()

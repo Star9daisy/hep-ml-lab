@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "hep-ml-lab"
-version = "0.2.1"
-description = "An end-to-end framework for applying machine learning to high-energy physics research."
+version = "0.2.2"
+description = "An end-to-end framework used for research combining high-energy physics phenomenology with machine learning."
 authors = ["Star9daisy", "star9daisy@outlook.com"]
 readme = "README.md"
 packages = [
@@ -9,12 +9,12 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.8,<=3.10"
 pyyaml = "^6.0"
 numpy = "^1.22"
 scikit-learn = "^1.2.2"
 matplotlib = "^3.7.1"
-tensorflow = "^2.11.0"
+tensorflow = ">=2.8.0,<=2.11.0"
 rich = "^13.4.2"
 pytest = "^7.3.2"
 h5py = "^3.6.0"
@@ -27,9 +27,9 @@ mkdocs-material = "^9.1.15"
 black = "^23.3.0"
 python-dotenv = "^1.0.0"
 deptry = "^0.12.0"
-mkdocs-jupyter = "^0.24.1"
 mkdocs-exclude = "^1.0.2"
 pytest-cov = "^4.1.0"
+pygments = "^2.16.1"
 
 [build-system]
 requires = ["poetry-core"]
