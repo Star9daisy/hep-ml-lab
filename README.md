@@ -9,10 +9,10 @@
 have significant differences as versions change.
 
 ## Introduction
-HEP-ML-Lab is an end-to-end data analysis framework used for phenomenological
-research in high energy physics. It covers the generation of simulated data,
-data representation conversion, and the application of analysis methods, these
-three main parts.
+HEP-ML-Lab is an end-to-end framework used for research combining high-energy
+physics phenomenology with machine learning. It covers three main parts: the
+generation of simulated data, the conversion of data representation, and the
+application of analysis methods.
 
 With HML, researchers can easily compare the performance between traditional
 methods and modern machine learning, and obtain robust and reproducible results.
