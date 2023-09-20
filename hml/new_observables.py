@@ -1,111 +1,255 @@
 from __future__ import annotations
 
-import numpy as np
+from abc import ABC, abstractmethod
+from itertools import product
+from typing import Any
+
 from ROOT import TTree  # type: ignore
 
 
-class Observable:
+def get_observable(name: str, **kwargs) -> Observable:
+    if len(parts := name.split(".")) == 1:
+        shortcut, classname = "", parts[0]
+    else:
+        shortcut, classname = parts
+
+    if classname not in Observable.all_observables:
+        raise ValueError(f"Observable {classname} not found")
+
+    return Observable.all_observables[classname](shortcut, **kwargs)
+
+
+class Observable(ABC):
     all_observables = {}
 
     def __init__(
         self,
-        name: str | None = None,
-        value: float | list[float] | None = None,
-        **kwargs,
-    ):
-        self._name = name
-        self._value = value
-        self.other_params = kwargs
+        shortcut: str | None = None,
+        object_pairs: list[tuple[str, int | None]] | None = None,
+    ) -> None:
+        self._name = self.__class__.__name__
+        self._value = None
+        self._separator_between_branch_name_and_index = "_"
+        self._separator_between_objects = "-"
 
-    def __init_subclass__(cls, **kwargs) -> None:
-        super().__init_subclass__(**kwargs)
-        Observable.all_observables.update({cls.__name__: cls})
-
-    @classmethod
-    def register(cls, name: str) -> None:
-        Observable.all_observables.update({name: cls})
+        if shortcut:
+            self.object_pairs = self.parse_shortcut(shortcut)
+        elif object_pairs:
+            self.object_pairs = object_pairs
+        else:
+            raise ValueError("Must provide either shortcut or object_pairs")
 
     @property
-    def name(self) -> str | None:
+    def name(self) -> str:
         return self._name
 
     @property
-    def value(self) -> float | list[float] | None:
+    def value(self) -> Any:
         return self._value
 
-    def to_numpy(self) -> np.ndarray:
-        return np.atleast_1d(np.array(self.value))
-
-    def update(self, event: TTree) -> Observable:
-        if (parts := self.resolve_name()) is None:
-            return self
-
-        branch_name, leaf_name, index = parts
-        self.branch = getattr(event, branch_name)
-        self.leaf_names = [i.GetName() for i in event.GetListOfLeaves()]
-
-        # Check if the observable is already defined in this file
-        if leaf_name in Observable.all_observables:
-            obs = Observable.all_observables[leaf_name](**self.other_params)
-            obs.update(event)
-            self._value = obs.value
-            return self
-
-        # Check if the leaf_name exists in the leaf names
-        if f"{branch_name}.{leaf_name}" in self.leaf_names:
-            if index is None:
-                self._value = [getattr(i, leaf_name) for i in self.branch]
-            else:
-                self._value = getattr(self.branch[index], leaf_name)
-        else:
-            if index is None:
-                lorentz = [i.P4() for i in self.branch]
-                self._value = [getattr(i, leaf_name)() for i in lorentz]
-            else:
-                lorentz = self.branch[index].P4()
-                self._value = getattr(lorentz, leaf_name)()
-        return self
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.name}: {self.value}"
 
-    def resolve_name(self):
-        if self.name is None:
-            return
+    def read(self, event: TTree) -> Observable:
+        self.objects = []
+        for branch_name, index in self.object_pairs:
+            if branch_name not in event.GetListOfBranches():
+                raise ValueError(f"Branch {branch_name} not found in event")
 
-        prefices, leaf_name = self.name.split(".")
+            branch = getattr(event, branch_name)
+            if index is None:
+                self.objects.append([i for i in branch])
+            else:
+                if index >= branch.GetEntries():
+                    raise ValueError(
+                        f"Index {index} out of range for branch {branch_name}"
+                    )
+                else:
+                    self.objects.append(branch[index])
 
-        if len(parts := prefices.split("_")) == 1:
-            branch_name = parts[0]
-            index = None
-        elif len(parts) == 2:
-            branch_name, index = parts
-            index = int(index)
+        return self
+
+    @abstractmethod
+    def update(self) -> Observable:
+        return self
+
+    def parse_shortcut(self, shortcut: str) -> list[tuple[str, int | None]]:
+        object_pairs = []
+        objects = shortcut.split(self._separator_between_objects)
+        for obj in objects:
+            if "_" in obj:
+                branch_name, index = obj.split(
+                    self._separator_between_branch_name_and_index
+                )
+                index = int(index)
+            else:
+                branch_name, index = obj, None
+
+            object_pairs.append((branch_name, index))
+        return object_pairs
+
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+        Observable.all_observables[cls.__name__] = cls
+
+    @classmethod
+    def add_alias(cls, *alias: str) -> None:
+        for i in alias:
+            Observable.all_observables[i] = cls
+
+
+class Px(Observable):
+    def update(self) -> Px:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            self._value = [i.P4().Px() for i in obj]
         else:
-            raise ValueError("Invalid observable name")
+            self._value = obj.P4().Px()
 
-        return branch_name, leaf_name, index
+        return self
 
 
-class Tau21(Observable):
-    def __init__(self):
-        super().__init__("Tau21")
+class Py(Observable):
+    def update(self) -> Py:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            self._value = [i.P4().Py() for i in obj]
+        else:
+            self._value = obj.P4().Py()
 
-    def update(self, event: TTree) -> Observable:
-        self._value = event.FatJet[0].Tau[1] / event.FatJet[0].Tau[0]
+        return self
+
+
+class Pz(Observable):
+    def update(self) -> Pz:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            self._value = [i.P4().Pz() for i in obj]
+        else:
+            self._value = obj.P4().Pz()
+
+        return self
+
+
+class E(Observable):
+    def update(self) -> E:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            self._value = [i.P4().E() for i in obj]
+        else:
+            self._value = obj.P4().E()
+
+        return self
+
+
+class Eta(Observable):
+    def update(self) -> Eta:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            self._value = [i.P4().Eta() for i in obj]
+        else:
+            self._value = obj.P4().Eta()
+
+        return self
+
+
+class Phi(Observable):
+    def update(self) -> Phi:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            self._value = [i.P4().Phi() for i in obj]
+        else:
+            self._value = obj.P4().Phi()
+
+        return self
+
+
+class Pt(Observable):
+    def update(self) -> Pt:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            self._value = [i.P4().Pt() for i in obj]
+        else:
+            self._value = obj.P4().Pt()
+
+        return self
+
+
+class M(Observable):
+    def update(self) -> M:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            self._value = [i.P4().M() for i in obj]
+        else:
+            self._value = obj.P4().M()
+
+        return self
+
+
+class DeltaR(Observable):
+    def update(self) -> Observable:
+        obj1, obj2 = self.objects[:2]
+        obj1 = [obj1] if not isinstance(obj1, list) else obj1
+        obj2 = [obj2] if not isinstance(obj2, list) else obj2
+
+        distances = []
+        for i, j in product(obj1, obj2):
+            distances.append(i.P4().DeltaR(j.P4()))
+
+        self._value = distances[0] if len(distances) == 1 else distances
+
+        return self
+
+
+class NSubjettiness(Observable):
+    def __init__(
+        self,
+        shortcut: str | None = None,
+        object_pairs: list[tuple[str, int | None]] | None = None,
+        n: int = 1,
+    ) -> None:
+        super().__init__(shortcut, object_pairs)
+        self.n = n
+
+    def update(self) -> Observable:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            self._value = [i.Tau[self.n - 1] for i in obj]
+        else:
+            self._value = obj.Tau[self.n - 1]
+
         return self
 
 
 class NSubjettinessRatio(Observable):
-    def __init__(self, m, n):
-        super().__init__(f"Tau{m}{n}")
+    def __init__(
+        self,
+        shortcut: str | None = None,
+        object_pairs: list[tuple[str, int | None]] | None = None,
+        m: int = 2,
+        n: int = 1,
+    ) -> None:
+        super().__init__(shortcut, object_pairs)
         self.m = m
         self.n = n
 
-    def update(self, event: TTree) -> Observable:
-        self._value = event.FatJet[0].Tau[self.m - 1] / event.FatJet[0].Tau[self.n - 1]
+    def update(self) -> Observable:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            self._value = [i.Tau[self.m - 1] / i.Tau[self.n - 1] for i in obj]
+        else:
+            self._value = obj.Tau[self.m - 1] / obj.Tau[self.n - 1]
+
         return self
 
 
-# alias
-NSubjettinessRatio.register("TauMN")
+Px.add_alias("px")
+Py.add_alias("py")
+Pz.add_alias("pz")
+E.add_alias("e", "Energy")
+Pt.add_alias("pt", "pT", "PT")
+Eta.add_alias("eta")
+Phi.add_alias("phi")
+M.add_alias("m", "mass", "Mass")
+NSubjettiness.add_alias("TauN")
+NSubjettinessRatio.add_alias("TauMN")
