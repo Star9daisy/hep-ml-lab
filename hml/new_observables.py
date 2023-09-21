@@ -28,8 +28,8 @@ class Observable(ABC):
         shortcut: str | None = None,
         object_pairs: list[tuple[str, int | None]] | None = None,
     ) -> None:
-        self._separator_between_branch_name_and_index = "_"
-        self._separator_between_objects = "-"
+        self.seprate_branch_name_and_index = "_"
+        self.separate_objects = "-"
 
         if shortcut:
             self.shortcut = shortcut
@@ -87,12 +87,10 @@ class Observable(ABC):
 
     def parse_shortcut(self, shortcut: str) -> list[tuple[str, int | None]]:
         object_pairs = []
-        objects = shortcut.split(self._separator_between_objects)
+        objects = shortcut.split(self.separate_objects)
         for obj in objects:
             if "_" in obj:
-                branch_name, index = obj.split(
-                    self._separator_between_branch_name_and_index
-                )
+                branch_name, index = obj.split(self.seprate_branch_name_and_index)
                 index = int(index)
             else:
                 branch_name, index = obj, None
@@ -104,11 +102,11 @@ class Observable(ABC):
         shortcuts = []
         for branch_name, index in object_pairs:
             if index is not None:
-                obj = f"{branch_name}{self._separator_between_branch_name_and_index}{index}"
+                obj = f"{branch_name}{self.seprate_branch_name_and_index}{index}"
             else:
                 obj = branch_name
             shortcuts.append(obj)
-        return self._separator_between_objects.join(shortcuts)
+        return self.separate_objects.join(shortcuts)
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
