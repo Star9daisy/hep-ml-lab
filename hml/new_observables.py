@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from itertools import product
 from typing import Any
 
+import numpy as np
 from ROOT import TTree  # type: ignore
 
 
@@ -27,17 +28,20 @@ class Observable(ABC):
         shortcut: str | None = None,
         object_pairs: list[tuple[str, int | None]] | None = None,
     ) -> None:
-        self._name = self.__class__.__name__
-        self._value = None
         self._separator_between_branch_name_and_index = "_"
         self._separator_between_objects = "-"
 
         if shortcut:
+            self.shortcut = shortcut
             self.object_pairs = self.parse_shortcut(shortcut)
         elif object_pairs:
+            self.shortcut = self.build_shortcut(object_pairs)
             self.object_pairs = object_pairs
         else:
             raise ValueError("Must provide either shortcut or object_pairs")
+
+        self._name = f"{self.shortcut}.{self.__class__.__name__}"
+        self._value = None
 
     @property
     def name(self) -> str:
@@ -46,6 +50,9 @@ class Observable(ABC):
     @property
     def value(self) -> Any:
         return self._value
+
+    def to_array(self) -> np.ndarray:
+        return np.atleast_1d(self.value)
 
     def __repr__(self) -> str:
         return f"{self.name}: {self.value}"
@@ -87,6 +94,16 @@ class Observable(ABC):
 
             object_pairs.append((branch_name, index))
         return object_pairs
+
+    def build_shortcut(self, object_pairs: list[tuple[str, int | None]]) -> str:
+        shortcuts = []
+        for branch_name, index in object_pairs:
+            if index is not None:
+                obj = f"{branch_name}{self._separator_between_branch_name_and_index}{index}"
+            else:
+                obj = branch_name
+            shortcuts.append(obj)
+        return self._separator_between_objects.join(shortcuts)
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
