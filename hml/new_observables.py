@@ -119,7 +119,7 @@ class Observable(ABC):
 
 
 class Px(Observable):
-    def update(self) -> Px:
+    def update(self) -> Observable:
         obj = self.objects[0]
         if isinstance(obj, list):
             self._value = [i.P4().Px() for i in obj]
@@ -130,7 +130,7 @@ class Px(Observable):
 
 
 class Py(Observable):
-    def update(self) -> Py:
+    def update(self) -> Observable:
         obj = self.objects[0]
         if isinstance(obj, list):
             self._value = [i.P4().Py() for i in obj]
@@ -141,7 +141,7 @@ class Py(Observable):
 
 
 class Pz(Observable):
-    def update(self) -> Pz:
+    def update(self) -> Observable:
         obj = self.objects[0]
         if isinstance(obj, list):
             self._value = [i.P4().Pz() for i in obj]
@@ -152,7 +152,7 @@ class Pz(Observable):
 
 
 class E(Observable):
-    def update(self) -> E:
+    def update(self) -> Observable:
         obj = self.objects[0]
         if isinstance(obj, list):
             self._value = [i.P4().E() for i in obj]
@@ -163,7 +163,7 @@ class E(Observable):
 
 
 class Eta(Observable):
-    def update(self) -> Eta:
+    def update(self) -> Observable:
         obj = self.objects[0]
         if isinstance(obj, list):
             self._value = [i.P4().Eta() for i in obj]
@@ -174,7 +174,7 @@ class Eta(Observable):
 
 
 class Phi(Observable):
-    def update(self) -> Phi:
+    def update(self) -> Observable:
         obj = self.objects[0]
         if isinstance(obj, list):
             self._value = [i.P4().Phi() for i in obj]
@@ -185,7 +185,7 @@ class Phi(Observable):
 
 
 class Pt(Observable):
-    def update(self) -> Pt:
+    def update(self) -> Observable:
         obj = self.objects[0]
         if isinstance(obj, list):
             self._value = [i.P4().Pt() for i in obj]
@@ -196,7 +196,7 @@ class Pt(Observable):
 
 
 class M(Observable):
-    def update(self) -> M:
+    def update(self) -> Observable:
         obj = self.objects[0]
         if isinstance(obj, list):
             self._value = [i.P4().M() for i in obj]
