@@ -38,14 +38,17 @@ class Observable(ABC):
             self.shortcut = self.build_shortcut(object_pairs)
             self.object_pairs = object_pairs
         else:
-            raise ValueError("Must provide either shortcut or object_pairs")
+            self.shortcut = None
+            self.object_pairs = None
 
-        self._name = f"{self.shortcut}.{self.__class__.__name__}"
         self._value = None
 
     @property
     def name(self) -> str:
-        return self._name
+        if self.shortcut:
+            return f"{self.shortcut}.{self.__class__.__name__}"
+        else:
+            return self.__class__.__name__
 
     @property
     def value(self) -> Any:
@@ -58,22 +61,24 @@ class Observable(ABC):
         return f"{self.name}: {self.value}"
 
     def read(self, event: TTree) -> Observable:
+        self.event = event
         self.objects = []
-        for branch_name, index in self.object_pairs:
-            if branch_name not in event.GetListOfBranches():
-                raise ValueError(f"Branch {branch_name} not found in event")
 
-            branch = getattr(event, branch_name)
-            if index is None:
-                self.objects.append([i for i in branch])
-            else:
-                if index >= branch.GetEntries():
-                    raise ValueError(
-                        f"Index {index} out of range for branch {branch_name}"
-                    )
+        if self.object_pairs:
+            for branch_name, index in self.object_pairs:
+                if branch_name not in event.GetListOfBranches():
+                    raise ValueError(f"Branch {branch_name} not found in event")
+
+                branch = getattr(event, branch_name)
+                if index is None:
+                    self.objects.append([i for i in branch])
                 else:
-                    self.objects.append(branch[index])
-
+                    if index >= branch.GetEntries():
+                        raise ValueError(
+                            f"Index {index} out of range for branch {branch_name}"
+                        )
+                    else:
+                        self.objects.append(branch[index])
         return self
 
     @abstractmethod
