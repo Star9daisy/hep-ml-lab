@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from itertools import product
 from typing import Any
+from warnings import warn
 
 import numpy as np
 from ROOT import TTree  # type: ignore
@@ -67,16 +68,16 @@ class Observable(ABC):
         if self.object_pairs:
             for branch_name, index in self.object_pairs:
                 if branch_name not in event.GetListOfBranches():
-                    raise ValueError(f"Branch {branch_name} not found in event")
+                    warn(f"Branch {branch_name} not found in event")
+                    self._value = None
 
                 branch = getattr(event, branch_name)
                 if index is None:
                     self.objects.append([i for i in branch])
                 else:
                     if index >= branch.GetEntries():
-                        raise ValueError(
-                            f"Index {index} out of range for branch {branch_name}"
-                        )
+                        warn(f"Index {index} out of range for branch {branch_name}")
+                        self._value = None
                     else:
                         self.objects.append(branch[index])
         return self
