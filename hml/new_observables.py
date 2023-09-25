@@ -81,9 +81,14 @@ class Observable(ABC):
                         self.objects.append(branch[index])
         return self
 
-    @abstractmethod
     def update(self) -> Observable:
+        self._value = self.get_value()
         return self
+
+    @abstractmethod
+    def get_value(self) -> Any:
+        value = None
+        return value
 
     def parse_shortcut(self, shortcut: str) -> list[tuple[str, int | None]]:
         object_pairs = []
