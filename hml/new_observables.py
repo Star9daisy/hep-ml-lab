@@ -125,95 +125,79 @@ class Observable(ABC):
 
 
 class Px(Observable):
-    def update(self) -> Observable:
+    def get_value(self) -> Any:
         obj = self.objects[0]
         if isinstance(obj, list):
-            self._value = [i.P4().Px() for i in obj]
+            return [i.P4().Px() for i in obj]
         else:
-            self._value = obj.P4().Px()
-
-        return self
+            return obj.P4().Px()
 
 
 class Py(Observable):
-    def update(self) -> Observable:
+    def get_value(self) -> Any:
         obj = self.objects[0]
         if isinstance(obj, list):
-            self._value = [i.P4().Py() for i in obj]
+            return [i.P4().Py() for i in obj]
         else:
-            self._value = obj.P4().Py()
-
-        return self
+            return obj.P4().Py()
 
 
 class Pz(Observable):
-    def update(self) -> Observable:
+    def get_value(self) -> Any:
         obj = self.objects[0]
         if isinstance(obj, list):
-            self._value = [i.P4().Pz() for i in obj]
+            return [i.P4().Pz() for i in obj]
         else:
-            self._value = obj.P4().Pz()
-
-        return self
+            return obj.P4().Pz()
 
 
 class E(Observable):
-    def update(self) -> Observable:
+    def get_value(self) -> Any:
         obj = self.objects[0]
         if isinstance(obj, list):
-            self._value = [i.P4().E() for i in obj]
+            return [i.P4().E() for i in obj]
         else:
-            self._value = obj.P4().E()
-
-        return self
-
-
-class Eta(Observable):
-    def update(self) -> Observable:
-        obj = self.objects[0]
-        if isinstance(obj, list):
-            self._value = [i.P4().Eta() for i in obj]
-        else:
-            self._value = obj.P4().Eta()
-
-        return self
-
-
-class Phi(Observable):
-    def update(self) -> Observable:
-        obj = self.objects[0]
-        if isinstance(obj, list):
-            self._value = [i.P4().Phi() for i in obj]
-        else:
-            self._value = obj.P4().Phi()
-
-        return self
+            return obj.P4().E()
 
 
 class Pt(Observable):
-    def update(self) -> Observable:
+    def get_value(self) -> Any:
         obj = self.objects[0]
         if isinstance(obj, list):
-            self._value = [i.P4().Pt() for i in obj]
+            return [i.P4().Pt() for i in obj]
         else:
-            self._value = obj.P4().Pt()
+            return obj.P4().Pt()
 
-        return self
+
+class Eta(Observable):
+    def get_value(self) -> Any:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            return [i.P4().Eta() for i in obj]
+        else:
+            return obj.P4().Eta()
+
+
+class Phi(Observable):
+    def get_value(self) -> Any:
+        obj = self.objects[0]
+        if isinstance(obj, list):
+            return [i.P4().Phi() for i in obj]
+        else:
+            return obj.P4().Phi()
 
 
 class M(Observable):
-    def update(self) -> Observable:
+    def get_value(self) -> Any:
         obj = self.objects[0]
         if isinstance(obj, list):
-            self._value = [i.P4().M() for i in obj]
+            return [i.P4().M() for i in obj]
         else:
-            self._value = obj.P4().M()
-
-        return self
+            return obj.P4().M()
 
 
 class DeltaR(Observable):
-    def update(self) -> Observable:
+    def get_value(self) -> Any:
         obj1, obj2 = self.objects[:2]
         obj1 = [obj1] if not isinstance(obj1, list) else obj1
         obj2 = [obj2] if not isinstance(obj2, list) else obj2
@@ -222,9 +206,7 @@ class DeltaR(Observable):
         for i, j in product(obj1, obj2):
             distances.append(i.P4().DeltaR(j.P4()))
 
-        self._value = distances[0] if len(distances) == 1 else distances
-
-        return self
+        return distances[0] if len(distances) == 1 else distances
 
 
 class NSubjettiness(Observable):
@@ -237,14 +219,12 @@ class NSubjettiness(Observable):
         super().__init__(shortcut, object_pairs)
         self.n = n
 
-    def update(self) -> Observable:
+    def get_value(self) -> Any:
         obj = self.objects[0]
         if isinstance(obj, list):
-            self._value = [i.Tau[self.n - 1] for i in obj]
+            return [i.Tau[self.n - 1] for i in obj]
         else:
-            self._value = obj.Tau[self.n - 1]
-
-        return self
+            return obj.Tau[self.n - 1]
 
 
 class NSubjettinessRatio(Observable):
@@ -259,14 +239,12 @@ class NSubjettinessRatio(Observable):
         self.m = m
         self.n = n
 
-    def update(self) -> Observable:
+    def get_value(self) -> Any:
         obj = self.objects[0]
         if isinstance(obj, list):
-            self._value = [i.Tau[self.m - 1] / i.Tau[self.n - 1] for i in obj]
+            return [i.Tau[self.m - 1] / i.Tau[self.n - 1] for i in obj]
         else:
-            self._value = obj.Tau[self.m - 1] / obj.Tau[self.n - 1]
-
-        return self
+            return obj.Tau[self.m - 1] / obj.Tau[self.n - 1]
 
 
 Px.add_alias("px")
