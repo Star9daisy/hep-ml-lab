@@ -24,25 +24,16 @@ class Madgraph5:
         model: PathLike = "sm",
         definitions: dict[str, Any] | None = None,
         output: PathLike = "madevent",
+        log_dir: PathLike = "Logs",
     ) -> None:
-        # Check if the executable exists
-        if (_executable := shutil.which(executable)) is not None:
-            self.executable = Path(_executable).resolve()
-            self.mg5_dir = self.executable.parent.parent
-        else:
-            raise EnvironmentError(f"{executable} does not exist.")
-
+        # Set properties ----------------------------------------------------- #
+        self.executable = executable
         self.model = model
         self.definitions = definitions
         self.processes = processes
+        self.output = output
 
-        self.output = Path(output).resolve()
-        if self.output.exists():
-            raise FileExistsError(
-                f"{self.output.relative_to(Path.cwd())} already exists."
-            )
-
-        # Create commands and save them in a temporary file
+        self.log_dir = log_dir
         self.commands = {
             "pre": [
                 *[f"import {model}"],
@@ -51,6 +42,8 @@ class Madgraph5:
                 *[f"output {self.output}"],
             ],
         }
+
+        # Create output directory -------------------------------------------- #
         command_file = self._cmds_to_file(self.commands["pre"])
 
         # Run Madgraph5
@@ -176,3 +169,57 @@ class Madgraph5:
             temp_file.write("\n".join(cmds))
             temp_file_path = temp_file.name
         return temp_file_path
+
+    @property
+    def executable(self) -> Path:
+        return self._executable
+
+    @executable.setter
+    def executable(self, value: PathLike):
+        if (_executable := shutil.which(value)) is None:
+            raise EnvironmentError(f"{value} is not a valid executable")
+
+        self._executable = Path(_executable).resolve()
+
+    @property
+    def model(self) -> PathLike:
+        return self._model
+
+    @model.setter
+    def model(self, value: PathLike):
+        self._model = value
+
+    @property
+    def definitions(self) -> dict[str, Any]:
+        return self._definitions
+
+    @definitions.setter
+    def definitions(self, value: dict[str, Any] | None):
+        self._definitions = value if value is not None else {}
+
+    @property
+    def processes(self) -> list[str]:
+        return self._processes
+
+    @processes.setter
+    def processes(self, value: list[str]):
+        self._processes = value
+
+    @property
+    def output(self) -> Path:
+        return self._output
+
+    @output.setter
+    def output(self, value: PathLike):
+        if (_output := Path(value).resolve()).exists():
+            raise FileExistsError(f"{_output.relative_to(Path.cwd())} already exists.")
+
+        self._output = _output
+
+    @property
+    def log_dir(self) -> Path:
+        return self._log_dir
+
+    @log_dir.setter
+    def log_dir(self, value: PathLike):
+        self._log_dir = self.output / value
