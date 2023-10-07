@@ -83,11 +83,8 @@ class Madgraph5:
         self.shower = shower
         self.detector = detector
         self.settings = settings
-
-        if cards is None:
-            self.cards = []
-        else:
-            self.cards = [card.resolve() for card in cards]
+        self.cards = [card.resolve() for card in cards]
+        self.multi_run = multi_run
 
         # -------------------------------------------------------------------- #
         commands = [
