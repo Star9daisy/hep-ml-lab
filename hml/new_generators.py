@@ -21,8 +21,8 @@ DetectorOption = Literal["off", "delphes"]
 class Madgraph5:
     def __init__(
         self,
-        executable: PathLike,
         processes: list[str],
+        executable: PathLike = "mg5_aMC",
         model: PathLike = "sm",
         definitions: dict[str, Any] = {},
         output: PathLike = "madevent",
