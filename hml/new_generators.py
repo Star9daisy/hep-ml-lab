@@ -74,6 +74,7 @@ class Madgraph5:
         settings: dict[str, Any] = {},
         cards: list[Path] = [],
         multi_run: int = 1,
+        verbose: int = 1,
     ):
         if shower not in ["off", "pythia8"]:
             raise ValueError(f"Unknown shower tool {shower}")
@@ -114,49 +115,8 @@ class Madgraph5:
             )
 
         # -------------------------------------------------------------------- #
-        status_markers = {
-            "Running Survey": "Running Survey",
-            "Running Pythia8": "Running Pythia8",
-            "Running Delphes": "Running Delphes",
-            "storing files": "Storing files",
-        }
-
-        current_run = 1
-        last_position = 0
-        last_known_status = -1  # This will help to avoid repeating the same status.
-
-        # Determine the index of the "storing files" status, since it's the
-        # repeating endpoint for each run
-        storing_files_idx = list(status_markers.keys()).index("storing files")
-
-        # -------------------------------------------------------------------- #
-        # Monitor the process and the log file
-        while True:
-            if Path("py.py").exists():
-                Path("py.py").unlink()
-
-            # Check the log file for status updates
-            with open(log_file, "r") as f:
-                f.seek(last_position)
-                content = f.read()
-                last_position = f.tell()
-                for idx, (marker, status) in enumerate(status_markers.items()):
-                    if marker in content and idx > last_known_status:
-                        print(status)
-                        if idx == storing_files_idx:
-                            current_run += 1
-                            if current_run > multi_run:
-                                last_known_status = idx
-                            else:
-                                last_known_status = -1
-                        else:
-                            last_known_status = idx
-
-            # Check if process is still running
-            if process.poll() is not None:  # Process has finished
-                print("Done")
-                os.close(child)
-                break
+        self._check_status(log_file, process, verbose)
+        os.close(child)
 
         # -------------------------------------------------------------------- #
         _, stderr = process.communicate()
@@ -222,3 +182,57 @@ class Madgraph5:
     @log_dir.setter
     def log_dir(self, value: PathLike):
         self._log_dir = self.output / value
+
+    def _check_status(
+        self,
+        log_file: Path,
+        process: subprocess.Popen,
+        verbose=1,
+    ) -> None:
+        # -------------------------------------------------------------------- #
+        status_markers = {
+            "Running Survey": "Running Survey",
+            "Running Pythia8": "Running Pythia8",
+            "Running Delphes": "Running Delphes",
+            "storing files": "Storing files",
+        }
+
+        current_run = 1
+        last_position = 0
+        last_known_status = -1  # This will help to avoid repeating the same status.
+
+        # Determine the index of the "storing files" status, since it's the
+        # repeating endpoint for each run
+        storing_files_idx = list(status_markers.keys()).index("storing files")
+
+        # -------------------------------------------------------------------- #
+        # Monitor the process and the log file
+        while True:
+            if Path("py.py").exists():
+                Path("py.py").unlink()
+
+            # Check the log file for status updates
+            with open(log_file, "r") as f:
+                f.seek(last_position)
+                content = f.read()
+                last_position = f.tell()
+
+                for idx, (marker, status) in enumerate(status_markers.items()):
+                    if marker in content and idx > last_known_status:
+                        if verbose:
+                            print(status)
+                        if idx == storing_files_idx:
+                            current_run += 1
+                            if current_run > self.multi_run:
+                                last_known_status = idx
+                            else:
+                                last_known_status = -1
+                            if verbose:
+                                print()
+                        else:
+                            last_known_status = idx
+
+            # Check if process is still running
+            if process.poll() is not None:  # Process has finished
+                print("Done")
+                break
