@@ -123,12 +123,6 @@ class Madgraph5:
         if stderr:
             raise RuntimeError(stderr.decode())
 
-    def _cmds_to_file(self, cmds: list[str]) -> str:
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-            temp_file.write("\n".join(cmds))
-            temp_file_path = temp_file.name
-        return temp_file_path
-
     @property
     def executable(self) -> Path:
         return self._executable
@@ -182,6 +176,12 @@ class Madgraph5:
     @log_dir.setter
     def log_dir(self, value: PathLike):
         self._log_dir = self.output / value
+
+    def _cmds_to_file(self, cmds: list[str]) -> str:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+            temp_file.write("\n".join(cmds))
+            temp_file_path = temp_file.name
+        return temp_file_path
 
     def _check_status(
         self,
