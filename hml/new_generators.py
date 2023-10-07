@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Union, Literal
 
 import ROOT
 
@@ -14,6 +14,8 @@ _ = ROOT.gSystem.Load("libDelphes")  # type: ignore
 
 
 PathLike = Union[str, Path]
+ShowerOption = Literal["off", "pythia8"]
+DetectorOption = Literal["off", "delphes"]
 
 
 class Madgraph5:
@@ -22,7 +24,7 @@ class Madgraph5:
         executable: PathLike,
         processes: list[str],
         model: PathLike = "sm",
-        definitions: dict[str, Any] | None = None,
+        definitions: dict[str, Any] = {},
         output: PathLike = "madevent",
         log_dir: PathLike = "Logs",
     ) -> None:
@@ -67,10 +69,10 @@ class Madgraph5:
 
     def launch(
         self,
-        shower: str = "off",
-        detector: str = "off",
-        settings: dict[str, Any] | None = None,
-        cards: list[Path] | None = None,
+        shower: ShowerOption = "off",
+        detector: DetectorOption = "off",
+        settings: dict[str, Any] = {},
+        cards: list[Path] = [],
         multi_run: int = 1,
     ):
         if shower not in ["off", "pythia8"]:
