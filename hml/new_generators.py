@@ -35,7 +35,6 @@ class Madgraph5:
         self.processes = processes
         self.output = output
 
-        self.log_dir = log_dir
         self.commands = {
             "pre": [
                 *[f"import {model}"],
@@ -66,6 +65,9 @@ class Madgraph5:
         _, stderr = process.communicate()
         if stderr:
             raise RuntimeError(stderr.decode())
+
+        # After output directory is created, set log directory
+        self.log_dir = log_dir
 
     def launch(
         self,
@@ -99,9 +101,8 @@ class Madgraph5:
         command_file = self._cmds_to_file(commands)
 
         # -------------------------------------------------------------------- #
-        (self.output / "Logs").mkdir()
         n_runs = len(list((self.output / "Events").glob("*banner.txt"))) + 1
-        log_file = self.output / "Logs" / f"run_{n_runs:02d}.log"
+        log_file = self.log_dir / f"run_{n_runs:02d}.log"
 
         # -------------------------------------------------------------------- #
         with open(log_file, "w") as f:
@@ -175,7 +176,9 @@ class Madgraph5:
 
     @log_dir.setter
     def log_dir(self, value: PathLike):
-        self._log_dir = self.output / value
+        _log_dir = self.output / value
+        _log_dir.mkdir()
+        self._log_dir = _log_dir
 
     def _cmds_to_file(self, cmds: list[str]) -> str:
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
