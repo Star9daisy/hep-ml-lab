@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any, Union, Literal
+from typing import Any, Literal, Union
 
 import ROOT
 
@@ -82,7 +82,7 @@ class Madgraph5:
 
         self.shower = shower
         self.detector = detector
-        self.settings = settings if settings is not None else {}
+        self.settings = settings
 
         if cards is None:
             self.cards = []
@@ -196,8 +196,8 @@ class Madgraph5:
         return self._definitions
 
     @definitions.setter
-    def definitions(self, value: dict[str, Any] | None):
-        self._definitions = value if value is not None else {}
+    def definitions(self, value: dict[str, Any]):
+        self._definitions = value
 
     @property
     def processes(self) -> list[str]:
