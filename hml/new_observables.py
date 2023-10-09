@@ -3,7 +3,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from itertools import product
 from typing import Any
-from warnings import warn
 
 import numpy as np
 from ROOT import TTree  # type: ignore
@@ -64,31 +63,26 @@ class Observable(ABC):
     def read(self, event: TTree) -> Observable:
         self.event = event
         self.objects = []
+        self._value = None
 
         if self.object_pairs:
             for branch_name, index in self.object_pairs:
-                if branch_name not in event.GetListOfBranches():
-                    warn(f"Branch {branch_name} not found in event")
-                    self._value = None
+                if branch_name in event.GetListOfBranches():
+                    branch = getattr(event, branch_name)
 
-                branch = getattr(event, branch_name)
-
-                if index is None:
-                    self.objects.append([i for i in branch])
-                    self._value = self.get_value()
-                else:
-                    if index >= branch.GetEntries():
-                        warn(f"Index {index} out of range for branch {branch_name}")
-                        self._value = None
-                    else:
+                    if index is None:
+                        self.objects.append([i for i in branch])
+                    if index < branch.GetEntries():
                         self.objects.append(branch[index])
-                        self._value = self.get_value()
+
+            if self.objects != []:
+                self._value = self.get_value()
+
         return self
 
     @abstractmethod
     def get_value(self) -> Any:
-        value = None
-        return value
+        ...
 
     def parse_shortcut(self, shortcut: str) -> list[tuple[str, int | None]]:
         object_pairs = []
@@ -197,7 +191,10 @@ class M(Observable):
 
 class DeltaR(Observable):
     def get_value(self) -> Any:
-        obj1, obj2 = self.objects[:2]
+        if len(self.objects) != 2:
+            return
+
+        obj1, obj2 = self.objects
         obj1 = [obj1] if not isinstance(obj1, list) else obj1
         obj2 = [obj2] if not isinstance(obj2, list) else obj2
 
