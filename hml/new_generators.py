@@ -134,7 +134,7 @@ class Madgraph5:
         # -------------------------------------------------------------------- #
         _, stderr = process.communicate()
         if stderr:
-            raise RuntimeError(stderr.decode())
+            raise RuntimeError(stderr.decode())  # pragma: no cover
 
         # -------------------------------------------------------------------- #
         return Madgraph5MultiRun.from_name(run_name, self.output)
@@ -359,7 +359,7 @@ class Madgraph5Run:
                 if "nevents" in line:
                     n_events = int(line.split("=")[0].strip())
                     if n_events != events.GetEntries():
-                        n_events = events.GetEntries()
+                        n_events = events.GetEntries()  # pragma: no cover
 
                 if "iseed" in line:
                     seed = int(line.split("=")[0].strip())
