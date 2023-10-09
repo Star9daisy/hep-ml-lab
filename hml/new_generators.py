@@ -50,24 +50,25 @@ class Madgraph5:
         # Create output directory -------------------------------------------- #
         command_file = self._cmds_to_file(self.commands["pre"])
 
-        # Run Madgraph5
-        process = subprocess.Popen(
-            f"{self.executable} {command_file}",
-            shell=True,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        if not self.output.exists():
+            # Run Madgraph5
+            process = subprocess.Popen(
+                f"{self.executable} {command_file}",
+                shell=True,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
 
-        # Remove py.py file
-        while process.poll() is None:
-            if Path("py.py").exists():
-                Path("py.py").unlink()
+            # Remove py.py file
+            while process.poll() is None:
+                if Path("py.py").exists():
+                    Path("py.py").unlink()
 
-        # Check if there's an error message in stderr
-        _, stderr = process.communicate()
-        if stderr:
-            raise RuntimeError(stderr.decode())
+            # Check if there's an error message in stderr
+            _, stderr = process.communicate()
+            if stderr:
+                raise RuntimeError(stderr.decode())
 
         # After output directory is created, set log directory
         self.log_dir = log_dir
@@ -170,9 +171,7 @@ class Madgraph5:
 
     @output.setter
     def output(self, value: PathLike):
-        if (_output := Path(value).resolve()).exists():
-            raise FileExistsError(f"{_output.relative_to(Path.cwd())} already exists.")
-
+        _output = Path(value).resolve()
         self._output = _output
 
     @property
@@ -182,7 +181,7 @@ class Madgraph5:
     @log_dir.setter
     def log_dir(self, value: PathLike):
         _log_dir = self.output / value
-        _log_dir.mkdir()
+        _log_dir.mkdir(exist_ok=True)
         self._log_dir = _log_dir
 
     @property
@@ -193,6 +192,34 @@ class Madgraph5:
                 runs.append(Madgraph5MultiRun.from_name(i.name, self.output))
 
         return runs
+
+    @classmethod
+    def from_output(cls, output: PathLike):
+        output = Path(output).resolve()
+        if not output.exists():
+            raise FileNotFoundError(f"{output.relative_to(Path.cwd())} does not exist.")
+
+        proc_card = output / "Cards/proc_card_mg5.dat"
+
+        model = "sm"
+        definitions = {}
+        processes = []
+
+        with proc_card.open() as f:
+            for line in f.readlines():
+                if line.startswith("import model"):
+                    model = line.split()[2]
+                if line.startswith("define"):
+                    key, value = line.replace("define ", "").split("=")
+                    definitions[key.strip()] = value.strip()
+
+                if line.startswith("generate"):
+                    processes.append(line.replace("generate ", "").strip())
+
+                if line.startswith("add process"):
+                    processes.append(line.replace("add process ", "").strip())
+
+        return cls(processes, model=model, definitions=definitions, output=output)
 
     def summary(self):
         console = Console()
