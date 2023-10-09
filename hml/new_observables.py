@@ -72,18 +72,17 @@ class Observable(ABC):
                     self._value = None
 
                 branch = getattr(event, branch_name)
+
                 if index is None:
                     self.objects.append([i for i in branch])
+                    self._value = self.get_value()
                 else:
                     if index >= branch.GetEntries():
                         warn(f"Index {index} out of range for branch {branch_name}")
                         self._value = None
                     else:
                         self.objects.append(branch[index])
-        return self
-
-    def update(self) -> Observable:
-        self._value = self.get_value()
+                        self._value = self.get_value()
         return self
 
     @abstractmethod
