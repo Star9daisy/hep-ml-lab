@@ -67,8 +67,13 @@ class Madgraph5:
                     Path("py.py").unlink()
 
             # Check if there's an error message in stderr
+            # Note:
+            # when importing a model like heft that needs to be downloaded,
+            # the success message is wrongly printed in stderr. This is why we
+            # check for the word "error" in stderr.
             _, stderr = process.communicate()
-            if stderr:
+            if "error" in stderr.decode().lower():
+                # if stderr:
                 raise RuntimeError(stderr.decode())
 
         # After output directory is created, set log directory
