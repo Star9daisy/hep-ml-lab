@@ -136,6 +136,9 @@ class Madgraph5:
         if stderr:
             raise RuntimeError(stderr.decode())
 
+        # -------------------------------------------------------------------- #
+        return Madgraph5MultiRun.from_name(run_name, self.output)
+
     @property
     def executable(self) -> Path:
         return self._executable
