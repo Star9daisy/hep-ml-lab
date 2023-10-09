@@ -40,7 +40,8 @@ class Madgraph5:
 
         self.commands = {
             "pre": [
-                *[f"import {model}"],
+                *[f"import model {model}"],
+                *[f"define {k} = {v}" for k, v in definitions.items()],
                 *[f"generate {self.processes[0]}"],
                 *[f"add process {p}" for p in self.processes[1:]],
                 *[f"output {self.output}"],
