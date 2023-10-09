@@ -5,6 +5,7 @@ import pty
 import shutil
 import subprocess
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal, Union
 
@@ -242,3 +243,72 @@ class Madgraph5:
                 if verbose:
                     print("Done")
                 break
+
+
+@dataclass
+class Madgraph5Run:
+    name: str
+    tag: str
+    directory: Path
+    seed: int
+    n_events: int
+    cross_section: float
+    collider: str
+    events: ROOT.TChain  # type: ignore
+
+    @classmethod
+    def from_directory(cls, directory: Path):
+        name = directory.name
+        banner = list(directory.glob("*banner.txt"))[0]
+
+        lpps = {"1": "p", "2": "e"}
+        tag = ""
+        n_events = 0
+        seed = 0
+        lpp1, lpp2 = "", ""
+        ebeam1, ebeam2 = 0.0, 0.0
+        cross_section = 0.0
+        events = ROOT.TChain("Delphes")  # type: ignore
+        for root_file in directory.glob("*.root"):
+            events.Add(str(root_file))
+
+        with banner.open() as f:
+            for line in f.readlines():
+                if "run_tag" in line:
+                    tag = line.split("=")[0].strip()
+
+                if "nevents" in line:
+                    n_events = int(line.split("=")[0].strip())
+                    if n_events != events.GetEntries():
+                        n_events = events.GetEntries()
+
+                if "iseed" in line:
+                    seed = int(line.split("=")[0].strip())
+
+                if "lpp1" in line:
+                    lpp1 = lpps.get(line.split("=")[0].strip(), "")
+
+                if "lpp2" in line:
+                    lpp2 = lpps.get(line.split("=")[0].strip(), "")
+
+                if "ebeam1" in line:
+                    ebeam1 = float(line.split("=")[0].strip())
+
+                if "ebeam2" in line:
+                    ebeam2 = float(line.split("=")[0].strip())
+
+                if "Integrated weight (pb)" in line:
+                    cross_section = float(line.split()[-1].strip())
+
+        collider = f"{lpp1}{lpp2}: {ebeam1}x{ebeam2}"
+
+        return cls(
+            name,
+            tag,
+            directory,
+            seed,
+            n_events,
+            cross_section,
+            collider,
+            events,
+        )
