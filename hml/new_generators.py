@@ -183,6 +183,10 @@ class Madgraph5:
         _log_dir.mkdir()
         self._log_dir = _log_dir
 
+    @property
+    def runs(self) -> list[Madgraph5Run]:
+        ...
+
     def _cmds_to_file(self, cmds: list[str]) -> str:
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
             temp_file.write("\n".join(cmds))
@@ -303,12 +307,77 @@ class Madgraph5Run:
         collider = f"{lpp1}{lpp2}: {ebeam1}x{ebeam2}"
 
         return cls(
+            name, tag, directory, seed, n_events, cross_section, collider, events
+        )
+
+
+@dataclass
+class Madgraph5MultiRun:
+    name: str
+    tag: str
+    seed: int
+    n_events: int
+    cross_section: float
+    collider: str
+    events: ROOT.TChain  # type: ignore
+    runs: list[Madgraph5Run]
+
+    @classmethod
+    def from_name(cls, name: str, output: PathLike = "madevent"):
+        events_dir = Path(output) / "Events"
+        banner = list(events_dir.glob(f"{name}_banner.txt"))[0]
+        runs = [i for i in events_dir.glob(f"{name}_*") if i.is_dir()]
+        runs = sorted(runs, key=lambda x: int(x.name.split("_")[-1]))
+        runs = [Madgraph5Run.from_directory(run) for run in runs]
+
+        lpps = {"1": "p", "2": "e"}
+        tag = ""
+        n_events = 0
+        seed = 0
+        lpp1, lpp2 = "", ""
+        ebeam1, ebeam2 = 0.0, 0.0
+        cross_section = 0.0
+        events = ROOT.TChain("Delphes")  # type: ignore
+        for root_file in events_dir.glob(f"{name}_*/*.root"):
+            events.Add(str(root_file))
+
+        with banner.open() as f:
+            for line in f.readlines():
+                if "run_tag" in line:
+                    tag = line.split("=")[0].strip()
+
+                if "nevents" in line:
+                    n_events = int(line.split("=")[0].strip())
+                    if n_events != events.GetEntries():
+                        n_events = events.GetEntries()
+
+                if "iseed" in line:
+                    seed = int(line.split("=")[0].strip())
+
+                if "lpp1" in line:
+                    lpp1 = lpps.get(line.split("=")[0].strip(), "")
+
+                if "lpp2" in line:
+                    lpp2 = lpps.get(line.split("=")[0].strip(), "")
+
+                if "ebeam1" in line:
+                    ebeam1 = float(line.split("=")[0].strip())
+
+                if "ebeam2" in line:
+                    ebeam2 = float(line.split("=")[0].strip())
+
+                if "Integrated weight (pb)" in line:
+                    cross_section = float(line.split()[-1].strip())
+
+        collider = f"{lpp1}{lpp2}: {ebeam1}x{ebeam2}"
+
+        return cls(
             name,
             tag,
-            directory,
             seed,
             n_events,
             cross_section,
             collider,
             events,
+            runs,
         )
