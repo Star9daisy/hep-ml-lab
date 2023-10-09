@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any, Literal, Union
 
 import ROOT
+from rich.console import Console
+from rich.table import Table
 
 _ = ROOT.gSystem.Load("libDelphes")  # type: ignore
 
@@ -184,8 +186,39 @@ class Madgraph5:
         self._log_dir = _log_dir
 
     @property
-    def runs(self) -> list[Madgraph5Run]:
-        ...
+    def runs(self) -> list[Madgraph5MultiRun]:
+        runs = []
+        for i in self.output.glob("Events/run_*"):
+            if i.is_dir() and i.name.count("_") == 1:
+                runs.append(Madgraph5MultiRun.from_name(i.name, self.output))
+
+        return runs
+
+    def summary(self):
+        console = Console()
+        table = Table(
+            title="\n".join(self.processes),
+            caption=f"Output: {self.output.absolute().relative_to(Path.cwd())}",
+        )
+
+        table.add_column("#", justify="right")
+        table.add_column("Name")
+        table.add_column("Tag")
+        table.add_column("Cross section (pb)", justify="center")
+        table.add_column("N events", justify="right")
+        table.add_column("Seed", justify="right")
+
+        for i, multi_run in enumerate(self.runs):
+            table.add_row(
+                f"{i}",
+                f"{multi_run.name}[{len(multi_run.runs)}]",
+                f"{multi_run.tag}",
+                f"{multi_run.cross_section:.3e}",
+                f"{multi_run.n_events:,}",
+                f"{multi_run.seed}",
+            )
+
+        console.print(table)
 
     def _cmds_to_file(self, cmds: list[str]) -> str:
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
