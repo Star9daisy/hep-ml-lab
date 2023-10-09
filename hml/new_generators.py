@@ -40,8 +40,8 @@ class Madgraph5:
 
         self.commands = {
             "pre": [
-                *[f"import model {model}"],
-                *[f"define {k} = {v}" for k, v in definitions.items()],
+                *[f"import model {self.model}"],
+                *[f"define {k} = {v}" for k, v in self.definitions.items()],
                 *[f"generate {self.processes[0]}"],
                 *[f"add process {p}" for p in self.processes[1:]],
                 *[f"output {self.output}"],
@@ -102,9 +102,9 @@ class Madgraph5:
         # -------------------------------------------------------------------- #
         commands = [
             *[f"launch -i {self.output}"],
-            *[f"multi_run {multi_run}"],
-            *[f"shower={shower}"],
-            *[f"detector={detector}"],
+            *[f"multi_run {self.multi_run}"],
+            *[f"shower={self.shower}"],
+            *[f"detector={self.detector}"],
             *[f"set {k} {v}" for k, v in self.settings.items()],
             *[f"{card}" for card in self.cards],
         ]
