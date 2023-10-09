@@ -206,7 +206,7 @@ class Madgraph5:
     def from_output(cls, output: PathLike, executable: PathLike = "mg5_aMC"):
         output = Path(output).resolve()
         if not output.exists():
-            raise FileNotFoundError(f"{output.relative_to(Path.cwd())} does not exist.")
+            raise FileNotFoundError(f"{output} does not exist.")
 
         proc_card = output / "Cards/proc_card_mg5.dat"
 
@@ -240,7 +240,7 @@ class Madgraph5:
         console = Console()
         table = Table(
             title="\n".join(self.processes),
-            caption=f"Output: {self.output.absolute().relative_to(Path.cwd())}",
+            caption=f"Output: {self.output}",
         )
 
         table.add_column("#", justify="right")
