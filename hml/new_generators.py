@@ -203,7 +203,7 @@ class Madgraph5:
         return runs
 
     @classmethod
-    def from_output(cls, output: PathLike):
+    def from_output(cls, output: PathLike, executable: PathLike = "mg5_aMC"):
         output = Path(output).resolve()
         if not output.exists():
             raise FileNotFoundError(f"{output.relative_to(Path.cwd())} does not exist.")
@@ -228,7 +228,13 @@ class Madgraph5:
                 if line.startswith("add process"):
                     processes.append(line.replace("add process ", "").strip())
 
-        return cls(processes, model=model, definitions=definitions, output=output)
+        return cls(
+            processes=processes,
+            executable=executable,
+            model=model,
+            definitions=definitions,
+            output=output,
+        )
 
     def summary(self):
         console = Console()
