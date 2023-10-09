@@ -417,7 +417,7 @@ class Madgraph5MultiRun:
 
                 if "nevents" in line:
                     n_events = int(line.split("=")[0].strip())
-                    if n_events != events.GetEntries():
+                    if n_events != events.GetEntries() and events.GetEntries() != 0:
                         n_events = events.GetEntries()
 
                 if "iseed" in line:
