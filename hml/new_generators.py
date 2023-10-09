@@ -101,8 +101,10 @@ class Madgraph5:
         command_file = self._cmds_to_file(commands)
 
         # -------------------------------------------------------------------- #
-        n_runs = len(list((self.output / "Events").glob("*banner.txt"))) + 1
-        log_file = self.log_dir / f"run_{n_runs:02d}.log"
+        n_runs = len(list((self.output / "Events").glob("*_banner.txt")))
+        run_name = f"run_{n_runs+1:02d}"
+        log_file = self.log_dir / f"{run_name}.log"
+        self.commands[run_name] = commands
 
         # -------------------------------------------------------------------- #
         with open(log_file, "w") as f:
