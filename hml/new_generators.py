@@ -239,5 +239,6 @@ class Madgraph5:
 
             # Check if process is still running
             if process.poll() is not None:  # Process has finished
-                print("Done")
+                if verbose:
+                    print("Done")
                 break
