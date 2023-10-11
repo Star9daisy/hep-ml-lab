@@ -6,19 +6,14 @@ import shutil
 import subprocess
 import tempfile
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Literal, Union
 
 import ROOT
 from rich.console import Console
 from rich.table import Table
 
+from .types import Any, DetectorOption, Path, PathLike, ShowerOption
+
 _ = ROOT.gSystem.Load("libDelphes")  # type: ignore
-
-
-PathLike = Union[str, Path]
-ShowerOption = Literal["off", "pythia8"]
-DetectorOption = Literal["off", "delphes"]
 
 
 class Madgraph5:
