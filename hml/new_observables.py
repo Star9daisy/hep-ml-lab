@@ -72,11 +72,10 @@ class Observable(ABC):
 
                     if index is None:
                         self.objects.append([i for i in branch])
-                    if index < branch.GetEntries():
+                    elif index < branch.GetEntries():
                         self.objects.append(branch[index])
 
-            if self.objects != []:
-                self._value = self.get_value()
+        self._value = self.get_value()
 
         return self
 
