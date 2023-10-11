@@ -54,7 +54,7 @@ class Observable(ABC):
     def value(self) -> Any:
         return self._value
 
-    def to_array(self) -> np.ndarray:
+    def to_numpy(self) -> np.ndarray:
         return np.atleast_1d(self.value)
 
     def __repr__(self) -> str:
