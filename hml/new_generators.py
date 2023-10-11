@@ -336,7 +336,8 @@ class Madgraph5Run:
     events: ROOT.TChain  # type: ignore
 
     @classmethod
-    def from_directory(cls, directory: Path):
+    def from_directory(cls, directory: PathLike):
+        directory = Path(directory)
         name = directory.name
         banner = list(directory.glob("*banner.txt"))[0]
 
