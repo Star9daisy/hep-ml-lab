@@ -118,6 +118,9 @@ class Observable(ABC):
 
 class Px(Observable):
     def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
         obj = self.objects[0]
         if isinstance(obj, list):
             return [i.P4().Px() for i in obj]
@@ -127,6 +130,9 @@ class Px(Observable):
 
 class Py(Observable):
     def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
         obj = self.objects[0]
         if isinstance(obj, list):
             return [i.P4().Py() for i in obj]
@@ -136,6 +142,9 @@ class Py(Observable):
 
 class Pz(Observable):
     def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
         obj = self.objects[0]
         if isinstance(obj, list):
             return [i.P4().Pz() for i in obj]
@@ -145,6 +154,9 @@ class Pz(Observable):
 
 class E(Observable):
     def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
         obj = self.objects[0]
         if isinstance(obj, list):
             return [i.P4().E() for i in obj]
@@ -154,6 +166,9 @@ class E(Observable):
 
 class Pt(Observable):
     def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
         obj = self.objects[0]
         if isinstance(obj, list):
             return [i.P4().Pt() for i in obj]
@@ -163,6 +178,9 @@ class Pt(Observable):
 
 class Eta(Observable):
     def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
         obj = self.objects[0]
         if isinstance(obj, list):
             return [i.P4().Eta() for i in obj]
@@ -172,6 +190,9 @@ class Eta(Observable):
 
 class Phi(Observable):
     def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
         obj = self.objects[0]
         if isinstance(obj, list):
             return [i.P4().Phi() for i in obj]
@@ -181,6 +202,9 @@ class Phi(Observable):
 
 class M(Observable):
     def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
         obj = self.objects[0]
         if isinstance(obj, list):
             return [i.P4().M() for i in obj]
@@ -215,6 +239,9 @@ class NSubjettiness(Observable):
         self.n = n
 
     def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
         obj = self.objects[0]
         if isinstance(obj, list):
             return [i.Tau[self.n - 1] for i in obj]
@@ -235,6 +262,9 @@ class NSubjettinessRatio(Observable):
         self.n = n
 
     def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
         obj = self.objects[0]
         if isinstance(obj, list):
             return [i.Tau[self.m - 1] / i.Tau[self.n - 1] for i in obj]
