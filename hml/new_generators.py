@@ -79,7 +79,7 @@ class Madgraph5:
         shower: ShowerOption = "off",
         detector: DetectorOption = "off",
         settings: dict[str, Any] = {},
-        cards: list[Path] = [],
+        cards: list[PathLike] = [],
         multi_run: int = 1,
         verbose: int = 1,
     ):
@@ -91,7 +91,7 @@ class Madgraph5:
         self.shower = shower
         self.detector = detector
         self.settings = settings
-        self.cards = [card.resolve() for card in cards]
+        self.cards = [Path(card).resolve() for card in cards]
         self.multi_run = multi_run
 
         # -------------------------------------------------------------------- #
