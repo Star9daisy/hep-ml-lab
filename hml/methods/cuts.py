@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
+from collections import OrderedDict
 from functools import reduce
 from itertools import product
 from pathlib import Path
@@ -12,6 +14,8 @@ import yaml
 from keras.losses import Loss
 from keras.metrics import Metric
 from keras.utils import to_categorical
+
+from ..new_observables import get_observable
 
 
 class CutAndCount:
@@ -150,7 +154,9 @@ class CutAndCount:
         y_pred_raw = reduce(np.logical_and, cut_results).astype(np.int16)
         return to_categorical(y_pred_raw)
 
-    def evaluate(self, x: np.ndarray, y: np.ndarray, verbose: int = 1) -> dict[str, list[float]]:
+    def evaluate(
+        self, x: np.ndarray, y: np.ndarray, verbose: int = 1
+    ) -> dict[str, list[float]]:
         y_true = y
         y_pred = self.predict(x)
 
@@ -171,7 +177,9 @@ class CutAndCount:
 
     def summary(self, return_string: bool = False) -> str | None:
         output = [f'Model: "{self.name}"']
-        for i, (cut, location) in enumerate(zip(self.cuts, self.signal_locations), start=1):
+        for i, (cut, location) in enumerate(
+            zip(self.cuts, self.signal_locations), start=1
+        ):
             if location == "left":
                 output.append(f"Cut{i}: Feature < {cut[0]}")
             elif location == "right":
@@ -280,9 +288,13 @@ def find_best_cut(sig: np.ndarray, bkg: np.ndarray, n_bins=100):
     cut_both = limits[accuracy.argmax()]
 
     # Return the best cut
-    best_index = np.argmax([accuracy_left, accuracy_right, accuracy_middle, accuracy_both])
+    best_index = np.argmax(
+        [accuracy_left, accuracy_right, accuracy_middle, accuracy_both]
+    )
     location = ["left", "right", "middle", "both_sides"][best_index]
-    best_accuracy = [accuracy_left, accuracy_right, accuracy_middle, accuracy_both][best_index]
+    best_accuracy = [accuracy_left, accuracy_right, accuracy_middle, accuracy_both][
+        best_index
+    ]
     best_cut = [cut_left, cut_right, cut_middle, cut_both][best_index]
     best_cut = best_cut.tolist()
 
@@ -296,38 +308,72 @@ def plot_cuts(sig, bkg, bins, cut, signal_location):
 
     cut = np.squeeze(cut)
     if signal_location == "left":
-        plt.axvline(cut, color="red", linestyle="--", label=f"Optimal cut: feature < {cut:.2f}")
+        plt.axvline(
+            cut, color="red", linestyle="--", label=f"Optimal cut: feature < {cut:.2f}"
+        )
         plt.fill_betweenx(
-            [0, plt.gca().get_ylim()[1]], plt.gca().get_xlim()[0], cut, color="red", alpha=0.5
+            [0, plt.gca().get_ylim()[1]],
+            plt.gca().get_xlim()[0],
+            cut,
+            color="red",
+            alpha=0.5,
         )
 
     elif signal_location == "right":
-        plt.axvline(cut, color="red", linestyle="--", label=f"Optimal cut: feature > {cut:.2f}")
+        plt.axvline(
+            cut, color="red", linestyle="--", label=f"Optimal cut: feature > {cut:.2f}"
+        )
         plt.fill_betweenx(
-            [0, plt.gca().get_ylim()[1]], cut, plt.gca().get_xlim()[1], color="red", alpha=0.5
+            [0, plt.gca().get_ylim()[1]],
+            cut,
+            plt.gca().get_xlim()[1],
+            color="red",
+            alpha=0.5,
         )
 
     elif signal_location == "middle":
         plt.axvline(
-            cut[0], color="red", linestyle="--", label=f"Optimal cut: feature > {cut[0]:.2f}"
+            cut[0],
+            color="red",
+            linestyle="--",
+            label=f"Optimal cut: feature > {cut[0]:.2f}",
         )
         plt.axvline(
-            cut[1], color="red", linestyle="--", label=f"Optimal cut: feature < {cut[1]:.2f}"
+            cut[1],
+            color="red",
+            linestyle="--",
+            label=f"Optimal cut: feature < {cut[1]:.2f}",
         )
-        plt.fill_betweenx([0, plt.gca().get_ylim()[1]], cut[0], cut[1], color="red", alpha=0.5)
+        plt.fill_betweenx(
+            [0, plt.gca().get_ylim()[1]], cut[0], cut[1], color="red", alpha=0.5
+        )
 
     else:
         plt.axvline(
-            cut[0], color="red", linestyle="--", label=f"Optimal cut: feature < {cut[0]:.2f}"
+            cut[0],
+            color="red",
+            linestyle="--",
+            label=f"Optimal cut: feature < {cut[0]:.2f}",
         )
         plt.axvline(
-            cut[1], color="red", linestyle="--", label=f"Optimal cut: feature > {cut[1]:.2f}"
+            cut[1],
+            color="red",
+            linestyle="--",
+            label=f"Optimal cut: feature > {cut[1]:.2f}",
         )
         plt.fill_betweenx(
-            [0, plt.gca().get_ylim()[1]], plt.gca().get_xlim()[0], cut[0], color="red", alpha=0.5
+            [0, plt.gca().get_ylim()[1]],
+            plt.gca().get_xlim()[0],
+            cut[0],
+            color="red",
+            alpha=0.5,
         )
         plt.fill_betweenx(
-            [0, plt.gca().get_ylim()[1]], cut[1], plt.gca().get_xlim()[1], color="red", alpha=0.5
+            [0, plt.gca().get_ylim()[1]],
+            cut[1],
+            plt.gca().get_xlim()[1],
+            color="red",
+            alpha=0.5,
         )
 
     plt.xlabel("Value")
@@ -335,3 +381,33 @@ def plot_cuts(sig, bkg, bins, cut, signal_location):
     plt.legend(loc="upper right")
     plt.title("Signal, Background")
     plt.show()
+
+
+class Filter:
+    def __init__(self, cuts: list[str]) -> None:
+        self.cuts = cuts
+        self.stat = OrderedDict({cut: 0 for cut in cuts})
+
+    def read(self, event):
+        self.event = event
+        return self
+
+    def passed(self):
+        def _replace_with_value(match):
+            observable_name = match.group(0)  # complete match
+            value = get_observable(observable_name).read(self.event).value
+
+            if value is not None:
+                return str(value)
+            else:
+                return "np.nan"
+
+        for cut in self.cuts:
+            modified_string = re.sub(
+                r"\b(?!\d+\b)([\w\d_]+)\.([\w\d_]+)\b", _replace_with_value, cut
+            )
+            if eval(modified_string) is False:
+                self.stat[cut] += 1
+                return False
+
+        return True

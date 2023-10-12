@@ -4,7 +4,7 @@ from .base import Method
 from .networks.base import KerasMethod
 
 # Cut methods
-from .cuts import CutAndCount
+from .cuts import CutAndCount, Filter
 
 # Tree methods
 from .trees import BoostedDecisionTree
