@@ -333,8 +333,14 @@ class Madgraph5Run:
     @classmethod
     def from_directory(cls, directory: PathLike):
         directory = Path(directory)
+        if not directory.exists():
+            raise FileNotFoundError(f"{directory} does not exist.")
+
         name = directory.name
-        banner = list(directory.glob("*banner.txt"))[0]
+        if len(banners := list(directory.glob(f"{name}_banner.txt"))) == 0:
+            raise FileNotFoundError(f"No banner found in {directory}")
+        else:
+            banner = banners[0]
 
         lpps = {"1": "p", "2": "e"}
         tag = ""
@@ -395,8 +401,16 @@ class Madgraph5MultiRun:
 
     @classmethod
     def from_name(cls, name: str, output: PathLike = "madevent"):
-        events_dir = Path(output) / "Events"
-        banner = list(events_dir.glob(f"{name}_banner.txt"))[0]
+        output = Path(output)
+        if not output.exists():
+            raise FileNotFoundError(f"{output} does not exist.")
+
+        events_dir = output / "Events"
+        if len(banners := list(events_dir.glob(f"{name}_banner.txt"))) == 0:
+            raise FileNotFoundError(f"No run named {name} found in {output}")
+        else:
+            banner = banners[0]
+
         runs = [i for i in events_dir.glob(f"{name}_*") if i.is_dir()]
         runs = sorted(runs, key=lambda x: int(x.name.split("_")[-1]))
         runs = [Madgraph5Run.from_directory(run) for run in runs]
