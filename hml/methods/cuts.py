@@ -8,8 +8,10 @@ from functools import reduce
 from itertools import product
 from pathlib import Path
 
+import keras
 import matplotlib.pyplot as plt
 import numpy as np
+import tensorflow as tf
 import yaml
 from keras.losses import Loss
 from keras.metrics import Metric
@@ -411,3 +413,148 @@ class Filter:
                 return False
 
         return True
+
+
+@keras.saving.register_keras_serializable(package="CutAndCount")
+class NewCutAndCount(keras.Model):
+    def __init__(self, n_bins=5, name="my_model"):
+        super().__init__(name=name)
+        self.n_bins = self.add_weight(
+            name="n_bins",
+            shape=(),
+            dtype=tf.int32,
+            trainable=False,
+            initializer=tf.keras.initializers.Constant(n_bins),
+        )
+        self.cut = self.add_weight(name="cut", shape=(2,), dtype=tf.float32)
+        self.direction = self.add_weight(name="direction", shape=(), dtype=tf.int32)
+
+    def train_step(self, data):
+        x_train, y_train = data
+
+        x_min = tf.reduce_min(x_train)
+        x_max = tf.reduce_max(x_train)
+
+        edges = tf.linspace(x_min, x_max, self.n_bins)  # (n_bins,)
+        edges = tf.expand_dims(edges, axis=1)  # (n_bins, 1)
+
+        i, j = tf.meshgrid(edges, edges)
+
+        # Filter out diagonal elements and pairs (i, j) where i >= j
+        mask = tf.math.less(i, j)
+
+        double_edges = tf.stack(
+            [tf.boolean_mask(i, mask), tf.boolean_mask(j, mask)], axis=1
+        )
+
+        losses = tf.map_fn(
+            lambda e: self._compute_max_index(e, x_train, y_train), double_edges
+        )
+        min_loss = tf.reduce_min(losses)
+        min_indices = tf.where(losses == min_loss)
+        min_indices = tf.cast(min_indices, tf.int32)
+        self.direction.assign(min_indices[0][1])  # type: ignore
+        self.cut.assign(tf.gather(double_edges, min_indices[0][0]))  # type: ignore
+
+        # current_min_loss = tf.reduce_min(losses)
+        # condition = tf.less(current_min_loss, self.prev_min_loss)
+
+        # @tf.function(reduce_retracing=True)
+        # def update_weights():
+        #     min_indices = tf.where(losses == current_min_loss)
+        #     min_indices = tf.cast(min_indices, tf.int32)
+        #     self.direction.assign(min_indices[0][1])
+        #     self.cut.assign(tf.gather(double_edges, min_indices[0][0]))
+        #     self.prev_min_loss.assign(current_min_loss)
+        #     return current_min_loss
+
+        # @tf.function(reduce_retracing=True)
+        # def keep_previous_weights():
+        #     return self.prev_min_loss
+
+        # updated_loss = tf.cond(condition, update_weights, keep_previous_weights)
+        self.compiled_metrics.update_state(y_train, self(x_train))  # type: ignore
+
+        for metric in self.metrics:
+            if metric.name == "loss":
+                metric.update_state(min_loss)
+            else:
+                metric.update_state(y_train, self(x_train))
+
+        results = {m.name: m.result() for m in self.metrics}
+        return results
+
+    def call(self, x):
+        y_pred = self._get_y_pred(x, self.direction)
+        return y_pred
+
+    @tf.function
+    def _get_y_pred(self, x, direction):
+        branch_fns = {
+            0: lambda: self._case_left(x),
+            1: lambda: self._case_right(x),
+            2: lambda: self._case_middle(x),
+            3: lambda: self._case_both(x),
+        }
+        return tf.switch_case(tf.identity(direction), branch_fns)
+
+    @tf.function
+    def _case_left(
+        self,
+        x,
+    ):
+        y_pred = x <= self.cut[0]
+        y_pred = tf.cast(y_pred, tf.float32)
+        return y_pred
+
+    @tf.function
+    def _case_right(
+        self,
+        x,
+    ):
+        y_pred = x >= self.cut[0]
+        y_pred = tf.cast(y_pred, tf.float32)
+        return y_pred
+
+    @tf.function
+    def _case_middle(
+        self,
+        x,
+    ):
+        y_pred = tf.logical_and(x >= self.cut[0], x <= self.cut[1])
+        y_pred = tf.cast(y_pred, tf.float32)
+        return y_pred
+
+    @tf.function
+    def _case_both(
+        self,
+        x,
+    ):
+        y_pred = tf.logical_or(x <= self.cut[0], x >= self.cut[1])
+        y_pred = tf.cast(y_pred, tf.float32)
+        return y_pred
+
+    @tf.function
+    def _compute_max_index(self, edges, x_train, y_train):
+        # left
+        y_pred_left = tf.cast(x_train <= edges[0], tf.float32)
+        loss_left = self.compute_loss(y=y_train, y_pred=y_pred_left)
+        self.compiled_loss.reset_state()  # type: ignore
+        # right
+        y_pred_right = tf.cast(x_train >= edges[0], tf.float32)
+        loss_right = self.compute_loss(y=y_train, y_pred=y_pred_right)
+        self.compiled_loss.reset_state()  # type: ignore
+        # middle
+        y_pred_middle = tf.logical_and(x_train >= edges[0], x_train <= edges[1])
+        y_pred_middle = tf.cast(y_pred_middle, tf.float32)
+        loss_middle = self.compute_loss(y=y_train, y_pred=y_pred_middle)
+        self.compiled_loss.reset_state()  # type: ignore
+        # both sides
+        y_pred_both = tf.logical_or(x_train <= edges[0], x_train >= edges[1])
+        y_pred_both = tf.cast(y_pred_both, tf.float32)
+        loss_both = self.compute_loss(y=y_train, y_pred=y_pred_both)
+        self.compiled_loss.reset_state()  # type: ignore
+
+        losses = tf.stack([loss_left, loss_right, loss_middle, loss_both])
+
+        return losses
