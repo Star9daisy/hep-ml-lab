@@ -426,8 +426,18 @@ class NewCutAndCount(keras.Model):
             trainable=False,
             initializer=tf.keras.initializers.Constant(n_bins),
         )
-        self.cut = self.add_weight(name="cut", shape=(2,), dtype=tf.float32)
-        self.direction = self.add_weight(name="direction", shape=(), dtype=tf.int32)
+        self.cut = self.add_weight(
+            name="cut",
+            shape=(2,),
+            dtype=tf.float32,
+            trainable=False,
+        )
+        self.case = self.add_weight(
+            name="case",
+            shape=(),
+            dtype=tf.int32,
+            trainable=False,
+        )
 
     def train_step(self, data):
         x_train, y_train = data
@@ -453,7 +463,7 @@ class NewCutAndCount(keras.Model):
         min_loss = tf.reduce_min(losses)
         min_indices = tf.where(losses == min_loss)
         min_indices = tf.cast(min_indices, tf.int32)
-        self.direction.assign(min_indices[0][1])  # type: ignore
+        self.case.assign(min_indices[0][1])  # type: ignore
         self.cut.assign(tf.gather(double_edges, min_indices[0][0]))  # type: ignore
 
         # current_min_loss = tf.reduce_min(losses)
@@ -485,7 +495,7 @@ class NewCutAndCount(keras.Model):
         return results
 
     def call(self, x):
-        y_pred = self._get_y_pred(x, self.direction)
+        y_pred = self._get_y_pred(x, self.case)
         return y_pred
 
     @tf.function
