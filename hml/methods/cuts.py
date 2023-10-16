@@ -465,24 +465,6 @@ class NewCutAndCount(keras.Model):
         min_indices = tf.cast(min_indices, tf.int32)
         self.case.assign(min_indices[0][1])  # type: ignore
         self.cut.assign(tf.gather(double_edges, min_indices[0][0]))  # type: ignore
-
-        # current_min_loss = tf.reduce_min(losses)
-        # condition = tf.less(current_min_loss, self.prev_min_loss)
-
-        # @tf.function(reduce_retracing=True)
-        # def update_weights():
-        #     min_indices = tf.where(losses == current_min_loss)
-        #     min_indices = tf.cast(min_indices, tf.int32)
-        #     self.direction.assign(min_indices[0][1])
-        #     self.cut.assign(tf.gather(double_edges, min_indices[0][0]))
-        #     self.prev_min_loss.assign(current_min_loss)
-        #     return current_min_loss
-
-        # @tf.function(reduce_retracing=True)
-        # def keep_previous_weights():
-        #     return self.prev_min_loss
-
-        # updated_loss = tf.cond(condition, update_weights, keep_previous_weights)
         self.compiled_metrics.update_state(y_train, self(x_train))  # type: ignore
 
         for metric in self.metrics:
