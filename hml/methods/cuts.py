@@ -491,37 +491,25 @@ class NewCutAndCount(keras.Model):
         return tf.switch_case(tf.identity(direction), branch_fns)
 
     @tf.function
-    def _case_left(
-        self,
-        x,
-    ):
+    def _case_left(self, x):
         y_pred = x <= self.cut[0]
         y_pred = tf.cast(y_pred, tf.float32)
         return y_pred
 
     @tf.function
-    def _case_right(
-        self,
-        x,
-    ):
+    def _case_right(self, x):
         y_pred = x >= self.cut[0]
         y_pred = tf.cast(y_pred, tf.float32)
         return y_pred
 
     @tf.function
-    def _case_middle(
-        self,
-        x,
-    ):
+    def _case_middle(self, x):
         y_pred = tf.logical_and(x >= self.cut[0], x <= self.cut[1])
         y_pred = tf.cast(y_pred, tf.float32)
         return y_pred
 
     @tf.function
-    def _case_both(
-        self,
-        x,
-    ):
+    def _case_both(self, x):
         y_pred = tf.logical_or(x <= self.cut[0], x >= self.cut[1])
         y_pred = tf.cast(y_pred, tf.float32)
         return y_pred
