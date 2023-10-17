@@ -417,7 +417,7 @@ class Filter:
 
 @keras.saving.register_keras_serializable(package="CutAndCount")
 class NewCutAndCount(keras.Model):
-    def __init__(self, n_bins=5, name="my_model"):
+    def __init__(self, n_bins=5, name="cut_and_count"):
         super().__init__(name=name)
         self.n_bins = self.add_weight(
             name="n_bins",
@@ -457,9 +457,10 @@ class NewCutAndCount(keras.Model):
             [tf.boolean_mask(i, mask), tf.boolean_mask(j, mask)], axis=1
         )
 
-        losses = tf.map_fn(
-            lambda e: self._compute_max_index(e, x_train, y_train), double_edges
-        )
+        # losses = tf.vectorized_map(
+        #     lambda e: self._compute_max_index(e, x_train, y_train), double_edges
+        # )  # (n_edge_pairs, 4)
+        losses = self._compute_max_index(double_edges, x_train, y_train)
         min_loss = tf.reduce_min(losses)
         min_indices = tf.where(losses == min_loss)
         min_indices = tf.cast(min_indices, tf.int32)
@@ -517,24 +518,26 @@ class NewCutAndCount(keras.Model):
     @tf.function
     def _compute_max_index(self, edges, x_train, y_train):
         # left
-        y_pred_left = tf.cast(x_train <= edges[0], tf.float32)
-        loss_left = self.compute_loss(y=y_train, y_pred=y_pred_left)
+        y_pred_left = tf.cast(
+            x_train <= edges[:, 0], tf.float32
+        )  # (n_samples, n_pairs)
+        loss_left = self.compute_loss(y=y_train, y_pred=y_pred_left)  # (n_pairs,)
         self.compiled_loss.reset_state()  # type: ignore
         # right
-        y_pred_right = tf.cast(x_train >= edges[0], tf.float32)
+        y_pred_right = tf.cast(x_train >= edges[:, 0], tf.float32)
         loss_right = self.compute_loss(y=y_train, y_pred=y_pred_right)
         self.compiled_loss.reset_state()  # type: ignore
         # middle
-        y_pred_middle = tf.logical_and(x_train >= edges[0], x_train <= edges[1])
+        y_pred_middle = tf.logical_and(x_train >= edges[:, 0], x_train <= edges[:, 1])
         y_pred_middle = tf.cast(y_pred_middle, tf.float32)
         loss_middle = self.compute_loss(y=y_train, y_pred=y_pred_middle)
         self.compiled_loss.reset_state()  # type: ignore
         # both sides
-        y_pred_both = tf.logical_or(x_train <= edges[0], x_train >= edges[1])
+        y_pred_both = tf.logical_or(x_train <= edges[:, 0], x_train >= edges[:, 1])
         y_pred_both = tf.cast(y_pred_both, tf.float32)
         loss_both = self.compute_loss(y=y_train, y_pred=y_pred_both)
         self.compiled_loss.reset_state()  # type: ignore
 
-        losses = tf.stack([loss_left, loss_right, loss_middle, loss_both])
+        losses = tf.stack([loss_left, loss_right, loss_middle, loss_both], axis=1)
 
         return losses
