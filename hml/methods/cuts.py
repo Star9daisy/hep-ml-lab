@@ -417,7 +417,7 @@ class Filter:
 
 @keras.saving.register_keras_serializable(package="CutAndCount")
 class NewCutAndCount(keras.Model):
-    def __init__(self, n_bins=5, name="cut_and_count"):
+    def __init__(self, n_bins=100, name="cut_and_count"):
         super().__init__(name=name)
         self.n_bins = self.add_weight(
             name="n_bins",
@@ -442,11 +442,42 @@ class NewCutAndCount(keras.Model):
     def train_step(self, data):
         x_train, y_train = data
 
-        x_min = tf.reduce_min(x_train)
-        x_max = tf.reduce_max(x_train)
+        # x_min = tf.reduce_min(x_train)
+        # x_max = tf.reduce_max(x_train)
 
-        edges = tf.linspace(x_min, x_max, self.n_bins)  # (n_bins,)
-        edges = tf.expand_dims(edges, axis=1)  # (n_bins, 1)
+        samples = x_train
+        samples_0 = tf.boolean_mask(samples, y_train == 0)
+        samples_1 = tf.boolean_mask(samples, y_train == 1)
+
+        value_range = (tf.reduce_min(samples), tf.reduce_max(samples))
+
+        hist_0 = tf.histogram_fixed_width(
+            samples_0, value_range=value_range, nbins=self.n_bins
+        )
+        hist_1 = tf.histogram_fixed_width(
+            samples_1, value_range=value_range, nbins=self.n_bins
+        )
+        bin_edges = tf.linspace(value_range[0], value_range[1], self.n_bins + 1)
+
+        selection_0 = hist_0 > hist_1
+        next_selection_0 = tf.roll(selection_0, shift=-1, axis=0)
+        change_points_0 = tf.math.not_equal(selection_0[:-1], next_selection_0[:-1])
+        cuts_0 = tf.gather(
+            bin_edges, tf.where(tf.logical_and(change_points_0, (hist_0 != 0)[:-1])) + 1
+        )
+
+        selection_1 = hist_1 > hist_0
+        next_selection_1 = tf.roll(selection_1, shift=-1, axis=0)
+        change_points_1 = tf.math.not_equal(selection_1[:-1], next_selection_1[:-1])
+        cuts_1 = tf.gather(
+            bin_edges, tf.where(tf.logical_and(change_points_1, (hist_1 != 0)[:-1])) + 1
+        )
+
+        cuts = tf.concat([cuts_0, cuts_1], 0)
+
+        edges = cuts
+        # edges = tf.linspace(x_min, x_max, self.n_bins)  # (n_bins,)
+        # edges = tf.expand_dims(edges, axis=1)  # (n_bins, 1)
 
         i, j = tf.meshgrid(edges, edges)
 
