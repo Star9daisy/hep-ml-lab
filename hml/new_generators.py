@@ -337,7 +337,7 @@ class Madgraph5Run:
             raise FileNotFoundError(f"{directory} does not exist.")
 
         name = directory.name
-        if len(banners := list(directory.glob(f"{name}_banner.txt"))) == 0:
+        if len(banners := list(directory.glob("*_banner.txt"))) == 0:
             raise FileNotFoundError(f"No banner found in {directory}")
         else:
             banner = banners[0]
