@@ -9,6 +9,14 @@ from hml.types import Path, PathLike
 
 class Dataset(Protocol):
     @property
+    def samples(self) -> np.ndarray:
+        ...
+
+    @property
+    def targets(self) -> np.ndarray:
+        ...
+
+    @property
     def description(self) -> str:
         ...
 
