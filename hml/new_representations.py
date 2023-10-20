@@ -24,10 +24,10 @@ class Set:
         for obs in self.observables:
             obs.read(event)
 
-        self.values = [obs.value for obs in self.observables]
+        self.values.append([obs.value for obs in self.observables])
 
-    def to_numpy(self) -> np.ndarray:
-        return np.array(self.values)
+    def to_numpy(self, dtype=np.float32) -> np.ndarray:
+        return np.array(self.values, dtype=dtype)
 
     def to_pandas(self) -> pd.DataFrame:
         return pd.DataFrame([self.values], columns=self.names)
