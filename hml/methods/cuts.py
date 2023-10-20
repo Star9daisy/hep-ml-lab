@@ -8,7 +8,6 @@ from functools import reduce
 from itertools import product
 from pathlib import Path
 
-import keras
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -16,6 +15,7 @@ import yaml
 from keras.losses import Loss
 from keras.metrics import Metric
 from keras.utils import to_categorical
+from tensorflow import keras
 
 from ..new_observables import get_observable
 
@@ -441,9 +441,6 @@ class NewCutAndCount(keras.Model):
 
     def train_step(self, data):
         x_train, y_train = data
-
-        # x_min = tf.reduce_min(x_train)
-        # x_max = tf.reduce_max(x_train)
 
         samples = x_train
         samples_0 = tf.boolean_mask(samples, y_train == 0)
