@@ -417,7 +417,7 @@ class Filter:
 
 @keras.saving.register_keras_serializable(package="CutAndCount")
 class NewCutAndCount(keras.Model):
-    def __init__(self, n_bins=100, name="cut_and_count"):
+    def __init__(self, n_features: int, n_bins=100, name="cut_and_count"):
         super().__init__(name=name)
         self.n_bins = self.add_weight(
             name="n_bins",
@@ -426,146 +426,192 @@ class NewCutAndCount(keras.Model):
             trainable=False,
             initializer=tf.keras.initializers.Constant(n_bins),
         )
-        self.cut = self.add_weight(
-            name="cut",
-            shape=(2,),
+        self.cuts = self.add_weight(
+            name="cuts",
+            shape=(n_features, 2),
             dtype=tf.float32,
             trainable=False,
         )
-        self.case = self.add_weight(
-            name="case",
-            shape=(),
+        self.cases = self.add_weight(
+            name="cases",
+            shape=(n_features),
             dtype=tf.int32,
             trainable=False,
         )
 
     def train_step(self, data):
-        x_train, y_train = data
-
-        samples = x_train
-        samples_0 = tf.boolean_mask(samples, y_train == 0)
-        samples_1 = tf.boolean_mask(samples, y_train == 1)
-
-        value_range = (tf.reduce_min(samples), tf.reduce_max(samples))
-
-        hist_0 = tf.histogram_fixed_width(
-            samples_0, value_range=value_range, nbins=self.n_bins
+        samples, targets = data
+        results = tf.map_fn(
+            lambda x: self.get_result(x, targets), tf.transpose(samples)
         )
-        hist_1 = tf.histogram_fixed_width(
-            samples_1, value_range=value_range, nbins=self.n_bins
-        )
-        bin_edges = tf.linspace(value_range[0], value_range[1], self.n_bins + 1)
+        min_losses = results[:, 0]
+        loss = tf.reduce_mean(min_losses)
+        cases = tf.cast(results[:, 1], tf.int32)
+        cuts = results[:, 2:]
 
-        selection_0 = hist_0 > hist_1
-        next_selection_0 = tf.roll(selection_0, shift=-1, axis=0)
-        change_points_0 = tf.math.not_equal(selection_0[:-1], next_selection_0[:-1])
-        cuts_0 = tf.gather(
-            bin_edges, tf.where(tf.logical_and(change_points_0, (hist_0 != 0)[:-1])) + 1
-        )
-
-        selection_1 = hist_1 > hist_0
-        next_selection_1 = tf.roll(selection_1, shift=-1, axis=0)
-        change_points_1 = tf.math.not_equal(selection_1[:-1], next_selection_1[:-1])
-        cuts_1 = tf.gather(
-            bin_edges, tf.where(tf.logical_and(change_points_1, (hist_1 != 0)[:-1])) + 1
-        )
-
-        cuts = tf.concat([cuts_0, cuts_1], 0)
-
-        edges = cuts
-        # edges = tf.linspace(x_min, x_max, self.n_bins)  # (n_bins,)
-        # edges = tf.expand_dims(edges, axis=1)  # (n_bins, 1)
-
-        i, j = tf.meshgrid(edges, edges)
-
-        # Filter out diagonal elements and pairs (i, j) where i >= j
-        mask = tf.math.less(i, j)
-
-        double_edges = tf.stack(
-            [tf.boolean_mask(i, mask), tf.boolean_mask(j, mask)], axis=1
-        )
-
-        # losses = tf.vectorized_map(
-        #     lambda e: self._compute_max_index(e, x_train, y_train), double_edges
-        # )  # (n_edge_pairs, 4)
-        losses = self._compute_max_index(double_edges, x_train, y_train)
-        min_loss = tf.reduce_min(losses)
-        min_indices = tf.where(losses == min_loss)
-        min_indices = tf.cast(min_indices, tf.int32)
-        self.case.assign(min_indices[0][1])  # type: ignore
-        self.cut.assign(tf.gather(double_edges, min_indices[0][0]))  # type: ignore
-        self.compiled_metrics.update_state(y_train, self(x_train))  # type: ignore
+        self.cases.assign(cases)
+        self.cuts.assign(cuts)
 
         for metric in self.metrics:
             if metric.name == "loss":
-                metric.update_state(min_loss)
-            else:
-                metric.update_state(y_train, self(x_train))
+                metric.update_state(loss)
+            # else:
+            #     metric.update_state(targets, self(samples))
 
-        results = {m.name: m.result() for m in self.metrics}
-        return results
+        return {m.name: m.result() for m in self.metrics}
 
-    def call(self, x):
-        y_pred = self._get_y_pred(x, self.case)
-        return y_pred
+    def get_result(self, x, y):
+        x_min = tf.reduce_min(x)
+        x_max = tf.reduce_max(x)
+        bin_edges = tf.linspace(x_min, x_max, self.n_bins + 1)
 
-    @tf.function
-    def _get_y_pred(self, x, direction):
-        branch_fns = {
-            0: lambda: self._case_left(x),
-            1: lambda: self._case_right(x),
-            2: lambda: self._case_middle(x),
-            3: lambda: self._case_both(x),
-        }
-        return tf.switch_case(tf.identity(direction), branch_fns)
+        samples_0 = x[y == 0]
+        samples_1 = x[y == 1]
+        hist_0 = tf.histogram_fixed_width(samples_0, [x_min, x_max], self.n_bins)
+        hist_1 = tf.histogram_fixed_width(samples_1, [x_min, x_max], self.n_bins)
 
-    @tf.function
-    def _case_left(self, x):
-        y_pred = x <= self.cut[0]
-        y_pred = tf.cast(y_pred, tf.float32)
-        return y_pred
+        # ---------------------------------------------------------------------------- #
+        curr_selection_0 = hist_0 > hist_1
+        next_selection_0 = tf.roll(curr_selection_0, shift=-1, axis=0)
 
-    @tf.function
-    def _case_right(self, x):
-        y_pred = x >= self.cut[0]
-        y_pred = tf.cast(y_pred, tf.float32)
-        return y_pred
+        is_border_bin_0 = tf.math.logical_xor(
+            curr_selection_0[:-1], next_selection_0[:-1]
+        )
+        is_not_empty_bin_0 = hist_0[:-1] > 0
 
-    @tf.function
-    def _case_middle(self, x):
-        y_pred = tf.logical_and(x >= self.cut[0], x <= self.cut[1])
-        y_pred = tf.cast(y_pred, tf.float32)
-        return y_pred
+        selection_0 = tf.logical_and(is_border_bin_0, is_not_empty_bin_0)
+        border_edge_indices_0 = tf.where(selection_0) + 1
+        edges_0 = tf.gather(bin_edges, border_edge_indices_0)
+        edges_0 = tf.squeeze(edges_0)
 
-    @tf.function
-    def _case_both(self, x):
-        y_pred = tf.logical_or(x <= self.cut[0], x >= self.cut[1])
-        y_pred = tf.cast(y_pred, tf.float32)
-        return y_pred
+        # ---------------------------------------------------------------------------- #
+        curr_selection_1 = hist_1 > hist_0
+        next_selection_1 = tf.roll(curr_selection_1, shift=-1, axis=0)
 
-    @tf.function
-    def _compute_max_index(self, edges, x_train, y_train):
-        # left
-        y_pred_left = tf.cast(
-            x_train <= edges[:, 0], tf.float32
-        )  # (n_samples, n_pairs)
-        loss_left = self.compute_loss(y=y_train, y_pred=y_pred_left)  # (n_pairs,)
-        self.compiled_loss.reset_state()  # type: ignore
-        # right
-        y_pred_right = tf.cast(x_train >= edges[:, 0], tf.float32)
-        loss_right = self.compute_loss(y=y_train, y_pred=y_pred_right)
-        self.compiled_loss.reset_state()  # type: ignore
-        # middle
-        y_pred_middle = tf.logical_and(x_train >= edges[:, 0], x_train <= edges[:, 1])
-        y_pred_middle = tf.cast(y_pred_middle, tf.float32)
-        loss_middle = self.compute_loss(y=y_train, y_pred=y_pred_middle)
-        self.compiled_loss.reset_state()  # type: ignore
-        # both sides
-        y_pred_both = tf.logical_or(x_train <= edges[:, 0], x_train >= edges[:, 1])
-        y_pred_both = tf.cast(y_pred_both, tf.float32)
-        loss_both = self.compute_loss(y=y_train, y_pred=y_pred_both)
-        self.compiled_loss.reset_state()  # type: ignore
+        is_border_bin_1 = tf.math.logical_xor(
+            curr_selection_1[:-1], next_selection_1[:-1]
+        )
+        is_not_empty_bin_1 = hist_1[:-1] > 0
 
-        losses = tf.stack([loss_left, loss_right, loss_middle, loss_both], axis=1)
+        selection_1 = tf.logical_and(is_border_bin_1, is_not_empty_bin_1)
+        border_edge_indices_1 = tf.where(selection_1) + 1
+        edges_1 = tf.gather(bin_edges, border_edge_indices_1)
+        edges_1 = tf.squeeze(edges_1)
 
-        return losses
+        # ---------------------------------------------------------------------------- #
+        edges_0 = tf.reshape(edges_0, [-1])
+        edges_1 = tf.reshape(edges_1, [-1])
+        edges = tf.unique(tf.concat([edges_0, edges_1], 0))[0]
+        i, j = tf.meshgrid(edges, edges)
+        mask = tf.math.less(i, j)
+        i, j = tf.boolean_mask(i, mask), tf.boolean_mask(j, mask)
+        edge_pairs = tf.stack([i, j], axis=1)
+
+        # To calculate losses for all edge pairs, we need to expand the samples to let
+        # pair information at the 2nd axis
+        x_expanded = tf.expand_dims(x, 1)  # (n_samples, 1)
+
+        # ---------------------------------------------------------------------------- #
+        on_left = x_expanded <= edge_pairs[:, 0]  # (n_samples, n_edges)
+        y_pred_left = tf.where(on_left, 1.0, 0.0)  # (n_samples, n_edges)
+        y_pred_left = tf.transpose(y_pred_left)  # (n_edges, n_samples)
+        losses_left = self.compute_loss(
+            y=tf.expand_dims(y, 0), y_pred=y_pred_left
+        )  # (n_edges,)
+
+        # ---------------------------------------------------------------------------- #
+        on_right = x_expanded >= edge_pairs[:, 0]
+        y_pred_right = tf.where(on_right, 1.0, 0.0)
+        y_pred_right = tf.transpose(y_pred_right)
+        losses_right = self.compute_loss(y=tf.expand_dims(y, 0), y_pred=y_pred_right)
+
+        # ---------------------------------------------------------------------------- #
+        in_middle = tf.logical_and(
+            edge_pairs[:, 0] <= x_expanded, x_expanded <= edge_pairs[:, 1]
+        )
+        y_pred_middle = tf.where(in_middle, 1.0, 0.0)
+        y_pred_middle = tf.transpose(y_pred_middle, (1, 0))
+        losses_middle = self.compute_loss(y=tf.expand_dims(y, 0), y_pred=y_pred_middle)
+
+        # ---------------------------------------------------------------------------- #
+        on_both_sides = tf.logical_or(
+            x_expanded <= edge_pairs[:, 0], x_expanded >= edge_pairs[:, 1]
+        )
+        y_pred_both = tf.where(on_both_sides, 1.0, 0.0)
+        y_pred_both = tf.transpose(y_pred_both, (1, 0))
+        losses_both = self.compute_loss(y=tf.expand_dims(y, 0), y_pred=y_pred_both)
+
+        # ---------------------------------------------------------------------------- #
+        losses = tf.stack([losses_left, losses_right, losses_middle, losses_both], 1)
+        min_loss = tf.reduce_min(losses)
+        min_index = tf.where(losses == min_loss)[0]
+        cut = edge_pairs[min_index[0]]
+        case = tf.cast(min_index[1], tf.float32)
+
+        result = tf.stack([min_loss, case, cut[0], cut[1]])
+        return result
+
+    # def call(self, x):
+    #     y_pred = self._get_y_pred(x, self.case)
+    #     return y_pred
+
+    # @tf.function
+    # def _get_y_pred(self, x, direction):
+    #     branch_fns = {
+    #         0: lambda: self._case_left(x),
+    #         1: lambda: self._case_right(x),
+    #         2: lambda: self._case_middle(x),
+    #         3: lambda: self._case_both(x),
+    #     }
+    #     return tf.switch_case(tf.identity(direction), branch_fns)
+
+    # @tf.function
+    # def _case_left(self, x):
+    #     y_pred = x <= self.cut[0]
+    #     y_pred = tf.cast(y_pred, tf.float32)
+    #     return y_pred
+
+    # @tf.function
+    # def _case_right(self, x):
+    #     y_pred = x >= self.cut[0]
+    #     y_pred = tf.cast(y_pred, tf.float32)
+    #     return y_pred
+
+    # @tf.function
+    # def _case_middle(self, x):
+    #     y_pred = tf.logical_and(x >= self.cut[0], x <= self.cut[1])
+    #     y_pred = tf.cast(y_pred, tf.float32)
+    #     return y_pred
+
+    # @tf.function
+    # def _case_both(self, x):
+    #     y_pred = tf.logical_or(x <= self.cut[0], x >= self.cut[1])
+    #     y_pred = tf.cast(y_pred, tf.float32)
+    #     return y_pred
+
+    # @tf.function
+    # def _compute_max_index(self, edges, x_train, y_train):
+    #     # left
+    #     y_pred_left = tf.cast(
+    #         x_train <= edges[:, 0], tf.float32
+    #     )  # (n_samples, n_pairs)
+    #     loss_left = self.compute_loss(y=y_train, y_pred=y_pred_left)  # (n_pairs,)
+    #     self.compiled_loss.reset_state()  # type: ignore
+    #     # right
+    #     y_pred_right = tf.cast(x_train >= edges[:, 0], tf.float32)
+    #     loss_right = self.compute_loss(y=y_train, y_pred=y_pred_right)
+    #     self.compiled_loss.reset_state()  # type: ignore
+    #     # middle
+    #     y_pred_middle = tf.logical_and(x_train >= edges[:, 0], x_train <= edges[:, 1])
+    #     y_pred_middle = tf.cast(y_pred_middle, tf.float32)
+    #     loss_middle = self.compute_loss(y=y_train, y_pred=y_pred_middle)
+    #     self.compiled_loss.reset_state()  # type: ignore
+    #     # both sides
+    #     y_pred_both = tf.logical_or(x_train <= edges[:, 0], x_train >= edges[:, 1])
+    #     y_pred_both = tf.cast(y_pred_both, tf.float32)
+    #     loss_both = self.compute_loss(y=y_train, y_pred=y_pred_both)
+    #     self.compiled_loss.reset_state()  # type: ignore
+
+    #     losses = tf.stack([loss_left, loss_right, loss_middle, loss_both], axis=1)
+
+    #     return losses
