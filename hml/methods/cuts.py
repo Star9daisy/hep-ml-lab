@@ -503,6 +503,11 @@ class NewCutAndCount(keras.Model):
         edges_0 = tf.reshape(edges_0, [-1])
         edges_1 = tf.reshape(edges_1, [-1])
         edges = tf.unique(tf.concat([edges_0, edges_1], 0))[0]
+        edges = tf.cond(
+            tf.equal(tf.rank(edges), 1),
+            lambda: tf.concat([edges, [x_max]], 0),
+            lambda: edges,
+        )
         i, j = tf.meshgrid(edges, edges)
         mask = tf.math.less(i, j)
         i, j = tf.boolean_mask(i, mask), tf.boolean_mask(j, mask)
