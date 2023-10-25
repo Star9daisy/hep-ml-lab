@@ -444,14 +444,14 @@ class NewCutAndCount(keras.Model):
         results = tf.map_fn(
             lambda x: self.get_result(x, targets), tf.transpose(samples)
         )
-        min_losses = results[:, 0]
+        min_losses = results[:, 0]  # type: ignore
         loss = tf.reduce_mean(min_losses)
-        cases = tf.cast(results[:, 1], tf.int32)
-        cuts = results[:, 2:]
+        cases = tf.cast(results[:, 1], tf.int32)  # type: ignore
+        cuts = results[:, 2:]  # type: ignore
 
         self.cases.assign(cases)
         self.cuts.assign(cuts)
-        self.compiled_metrics.update_state(targets, self(samples))
+        self.compiled_metrics.update_state(targets, self(samples))  # type: ignore
 
         for metric in self.metrics:
             if metric.name == "loss":
@@ -518,7 +518,7 @@ class NewCutAndCount(keras.Model):
         x_expanded = tf.expand_dims(x, 1)  # (n_samples, 1)
 
         # ---------------------------------------------------------------------------- #
-        on_left = x_expanded <= edge_pairs[:, 0]  # (n_samples, n_edges)
+        on_left = x_expanded <= edge_pairs[:, 0]  # (n_samples, n_edges) # type: ignore
         y_pred_left = tf.where(on_left, 1.0, 0.0)  # (n_samples, n_edges)
         y_pred_left = tf.transpose(y_pred_left)  # (n_edges, n_samples)
         losses_left = self.compute_loss(
@@ -526,14 +526,14 @@ class NewCutAndCount(keras.Model):
         )  # (n_edges,)
 
         # ---------------------------------------------------------------------------- #
-        on_right = x_expanded >= edge_pairs[:, 0]
+        on_right = x_expanded >= edge_pairs[:, 0]  # type: ignore
         y_pred_right = tf.where(on_right, 1.0, 0.0)
         y_pred_right = tf.transpose(y_pred_right)
         losses_right = self.compute_loss(y=tf.expand_dims(y, 0), y_pred=y_pred_right)
 
         # ---------------------------------------------------------------------------- #
         in_middle = tf.logical_and(
-            edge_pairs[:, 0] <= x_expanded, x_expanded <= edge_pairs[:, 1]
+            edge_pairs[:, 0] <= x_expanded, x_expanded <= edge_pairs[:, 1]  # type: ignore
         )
         y_pred_middle = tf.where(in_middle, 1.0, 0.0)
         y_pred_middle = tf.transpose(y_pred_middle, (1, 0))
@@ -541,7 +541,7 @@ class NewCutAndCount(keras.Model):
 
         # ---------------------------------------------------------------------------- #
         on_both_sides = tf.logical_or(
-            x_expanded <= edge_pairs[:, 0], x_expanded >= edge_pairs[:, 1]
+            x_expanded <= edge_pairs[:, 0], x_expanded >= edge_pairs[:, 1]  # type: ignore
         )
         y_pred_both = tf.where(on_both_sides, 1.0, 0.0)
         y_pred_both = tf.transpose(y_pred_both, (1, 0))
@@ -551,7 +551,7 @@ class NewCutAndCount(keras.Model):
         losses = tf.stack([losses_left, losses_right, losses_middle, losses_both], 1)
         min_loss = tf.reduce_min(losses)
         min_index = tf.where(losses == min_loss)[0]
-        cut = edge_pairs[min_index[0]]
+        cut = edge_pairs[min_index[0]]  # type: ignore
         case = tf.cast(min_index[1], tf.float32)
 
         result = tf.stack([min_loss, case, cut[0], cut[1]])
