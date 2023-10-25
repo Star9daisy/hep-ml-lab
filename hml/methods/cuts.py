@@ -551,67 +551,26 @@ class NewCutAndCount(keras.Model):
         result = tf.stack([min_loss, case, cut[0], cut[1]])
         return result
 
-    # def call(self, x):
-    #     y_pred = self._get_y_pred(x, self.case)
-    #     return y_pred
+    def call(self, x):
+        left = x <= self.cuts[:, 0]
+        right = x >= self.cuts[:, 0]
+        middle = tf.logical_and(self.cuts[:, 0] <= x, x <= self.cuts[:, 1])
+        both_sides = tf.logical_or(x <= self.cuts[:, 0], x >= self.cuts[:, 1])
+        conditions = tf.stack([left, right, middle, both_sides], axis=-1)
 
-    # @tf.function
-    # def _get_y_pred(self, x, direction):
-    #     branch_fns = {
-    #         0: lambda: self._case_left(x),
-    #         1: lambda: self._case_right(x),
-    #         2: lambda: self._case_middle(x),
-    #         3: lambda: self._case_both(x),
-    #     }
-    #     return tf.switch_case(tf.identity(direction), branch_fns)
+        feature_indices = tf.range(4)
+        cases_indices = tf.cast(self.cases, tf.int32)
+        indices = tf.stack([feature_indices, cases_indices], axis=-1)
 
-    # @tf.function
-    # def _case_left(self, x):
-    #     y_pred = x <= self.cut[0]
-    #     y_pred = tf.cast(y_pred, tf.float32)
-    #     return y_pred
-
-    # @tf.function
-    # def _case_right(self, x):
-    #     y_pred = x >= self.cut[0]
-    #     y_pred = tf.cast(y_pred, tf.float32)
-    #     return y_pred
-
-    # @tf.function
-    # def _case_middle(self, x):
-    #     y_pred = tf.logical_and(x >= self.cut[0], x <= self.cut[1])
-    #     y_pred = tf.cast(y_pred, tf.float32)
-    #     return y_pred
-
-    # @tf.function
-    # def _case_both(self, x):
-    #     y_pred = tf.logical_or(x <= self.cut[0], x >= self.cut[1])
-    #     y_pred = tf.cast(y_pred, tf.float32)
-    #     return y_pred
-
-    # @tf.function
-    # def _compute_max_index(self, edges, x_train, y_train):
-    #     # left
-    #     y_pred_left = tf.cast(
-    #         x_train <= edges[:, 0], tf.float32
-    #     )  # (n_samples, n_pairs)
-    #     loss_left = self.compute_loss(y=y_train, y_pred=y_pred_left)  # (n_pairs,)
-    #     self.compiled_loss.reset_state()  # type: ignore
-    #     # right
-    #     y_pred_right = tf.cast(x_train >= edges[:, 0], tf.float32)
-    #     loss_right = self.compute_loss(y=y_train, y_pred=y_pred_right)
-    #     self.compiled_loss.reset_state()  # type: ignore
-    #     # middle
-    #     y_pred_middle = tf.logical_and(x_train >= edges[:, 0], x_train <= edges[:, 1])
-    #     y_pred_middle = tf.cast(y_pred_middle, tf.float32)
-    #     loss_middle = self.compute_loss(y=y_train, y_pred=y_pred_middle)
-    #     self.compiled_loss.reset_state()  # type: ignore
-    #     # both sides
-    #     y_pred_both = tf.logical_or(x_train <= edges[:, 0], x_train >= edges[:, 1])
-    #     y_pred_both = tf.cast(y_pred_both, tf.float32)
-    #     loss_both = self.compute_loss(y=y_train, y_pred=y_pred_both)
-    #     self.compiled_loss.reset_state()  # type: ignore
-
-    #     losses = tf.stack([loss_left, loss_right, loss_middle, loss_both], axis=1)
-
-    #     return losses
+        y_pred_per_feature = tf.stack(
+            [
+                conditions[:, indices[0, 0], indices[0, 1]],
+                conditions[:, indices[1, 0], indices[1, 1]],
+                conditions[:, indices[2, 0], indices[2, 1]],
+                conditions[:, indices[3, 0], indices[3, 1]],
+            ],
+            axis=-1,
+        )
+        y_pred = tf.reduce_all(y_pred_per_feature, axis=-1)
+        y_pred = tf.cast(y_pred, tf.float32)
+        return y_pred
