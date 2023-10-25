@@ -455,8 +455,8 @@ class NewCutAndCount(keras.Model):
         for metric in self.metrics:
             if metric.name == "loss":
                 metric.update_state(loss)
-            # else:
-            #     metric.update_state(targets, self(samples))
+            else:
+                metric.update_state(targets, self(samples))
 
         return {m.name: m.result() for m in self.metrics}
 
