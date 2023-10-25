@@ -559,19 +559,21 @@ class NewCutAndCount(keras.Model):
         both_sides = tf.logical_or(x <= self.cuts[:, 0], x >= self.cuts[:, 1])
         conditions = tf.stack([left, right, middle, both_sides], axis=-1)
 
-        feature_indices = tf.range(4)
+        feature_indices = tf.range(tf.shape(x)[1])
         cases_indices = tf.cast(self.cases, tf.int32)
-        indices = tf.stack([feature_indices, cases_indices], axis=-1)
+        index_pairs = tf.stack([feature_indices, cases_indices], axis=-1)
 
-        y_pred_per_feature = tf.stack(
-            [
-                conditions[:, indices[0, 0], indices[0, 1]],
-                conditions[:, indices[1, 0], indices[1, 1]],
-                conditions[:, indices[2, 0], indices[2, 1]],
-                conditions[:, indices[3, 0], indices[3, 1]],
-            ],
-            axis=-1,
-        )
-        y_pred = tf.reduce_all(y_pred_per_feature, axis=-1)
+        y_pred_per_feature = tf.map_fn(
+            lambda x: self.get_pred_per_feature(conditions, x),
+            index_pairs,
+            fn_output_signature=tf.bool,
+        )  # (n_features, n_samples)
+        y_pred_per_feature = tf.transpose(y_pred_per_feature)  # (n_samples, n_features)
+        y_pred = tf.reduce_all(y_pred_per_feature, axis=-1)  # (n_samples,)
         y_pred = tf.cast(y_pred, tf.float32)
         return y_pred
+
+    # conditions: (n_samples, n_features, 4)
+    # indices: (n_features, 2)
+    def get_pred_per_feature(self, conditions, indices):
+        return conditions[:, indices[0], indices[1]]
