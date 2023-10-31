@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Literal, NamedTuple
 
 import dill as pickle
-import joblib
 import keras
 from numpy import ndarray
 from numpy.random import RandomState
