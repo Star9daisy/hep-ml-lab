@@ -27,11 +27,11 @@ class MaxSignificance(Metric):
         y_true = tf.convert_to_tensor(y_true)
         y_pred = tf.convert_to_tensor(y_pred)
 
-        if tf.rank(y_true) == 2 and tf.shape(y_true)[1] > 1:
-            y_true = y_true[:, self.class_id]
+        if tf.rank(y_true) == 2 and tf.shape(y_true)[-1] > 1:
+            y_true = tf.gather(y_true, self.class_id, axis=-1)
 
-        if tf.rank(y_pred) == 2 and tf.shape(y_pred)[1] > 1:
-            y_pred = y_pred[:, self.class_id]
+        if tf.rank(y_pred) == 2 and tf.shape(y_pred)[-1] > 1:
+            y_pred = tf.gather(y_pred, self.class_id, axis=-1)
 
         self.tp.update_state(y_true, y_pred, sample_weight)
         self.fp.update_state(y_true, y_pred, sample_weight)
