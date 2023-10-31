@@ -1,20 +1,62 @@
-from numpy.testing import assert_almost_equal
+import tensorflow as tf
+
+from hml.metrics import MaxSignificance, RejectionAtEfficiency
 
 
 def test_max_significance():
-    from hml.metrics import MaxSignificance
+    # Standard case
+    y_true = [0, 1, 1, 1]
+    y_pred = [1, 0, 1, 1]
+    assert MaxSignificance()(y_true, y_pred) == 2.0 / tf.sqrt(2.0 + 1.0)
 
-    m = MaxSignificance()
-    m.update_state([0, 0, 1], [[0.8, 0.2], [0.3, 0.7], [0.4, 0.6]])
-    assert_almost_equal(m.result().numpy(), 0.87897015)
+    # Binary case
+    y_true = [[0], [1], [1], [1]]
+    y_pred = [[0.98], [0], [0.8], [0.6]]
+    assert MaxSignificance()(y_true, y_pred) == 2.0 / tf.sqrt(2.0 + 1.0)
+
+    # Categorical case
+    y_true = [[1, 0], [0, 1], [0, 1], [0, 1]]
+    y_pred = [[0.02, 0.98], [1.0, 0.0], [0.2, 0.8], [0.4, 0.6]]
+    assert MaxSignificance()(y_true, y_pred) == 2.0 / tf.sqrt(2.0 + 1.0)
+
+    # Sparse categorical case
+    y_true = [[0], [1], [1], [1]]
+    y_pred = [[0.02, 0.98], [1.0, 0.0], [0.2, 0.8], [0.4, 0.6]]
+    assert MaxSignificance()(y_true, y_pred) == 2.0 / tf.sqrt(2.0 + 1.0)
+
+
+def test_max_significance_edge_cases():
+    # All true positives ----------------------------------------------------- #
+    y_true, y_pred = [1, 1, 1, 1], [1, 1, 1, 1]
+    assert MaxSignificance()(y_true, y_pred) == 2
+
+    # All false positives ---------------------------------------------------- #
+    y_true, y_pred = [0, 0, 0, 0], [1, 1, 1, 1]
+    assert MaxSignificance()(y_true, y_pred) == 0
+
+    # No positives ----------------------------------------------------------- #
+    y_true, y_pred = [0, 0, 0, 0], [0, 0, 0, 0]
+    assert tf.math.is_nan(MaxSignificance()(y_true, y_pred))
 
 
 def test_rejection_at_efficiency():
-    from hml.metrics import RejectionAtEfficiency
+    # Binary case ------------------------------------------------------------ #
+    y_true = [0, 0, 0, 1, 1]
+    y_pred = [1.0, 0.0, 0.0, 1.0, 1.0]
+    assert RejectionAtEfficiency(0.5)(y_true, y_pred) == 3.0000002
 
-    m = RejectionAtEfficiency()
-    m.update_state(
-        [[1, 0], [1, 0], [1, 0], [0, 1], [0, 1]],
-        [[1, 0], [0.7, 0.3], [0.2, 0.8], [0.7, 0.3], [0.2, 0.8]],
-    )
-    assert_almost_equal(m.result().numpy(), 2.9999993)
+    # Categorical case ------------------------------------------------------- #
+    y_true = [[1, 0], [1, 0], [1, 0], [0, 1], [0, 1]]
+    y_pred = [[0.02, 0.98], [1.0, 0.0], [1.0, 0.0], [0.2, 0.8], [0.4, 0.6]]
+    assert RejectionAtEfficiency(0.5, class_id=1)(y_true, y_pred) == 3.0000002
+
+    # Sparse categorical case ------------------------------------------------ #
+    y_true = [0, 0, 0, 1, 1]
+    y_pred = [[0.02, 0.98], [1.0, 0.0], [1.0, 0.0], [0.2, 0.8], [0.4, 0.6]]
+    assert RejectionAtEfficiency(0.5, class_id=1)(y_true, y_pred) == 3.0000002
+
+
+def test_rejection_at_efficiency_edge_cases():
+    # Negatives are all true ------------------------------------------------- #
+    y_true, y_pred = [0, 0, 1, 1], [0, 0, 1, 1]
+    assert tf.math.is_inf(RejectionAtEfficiency(0.5)(y_true, y_pred))
