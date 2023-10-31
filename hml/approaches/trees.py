@@ -120,7 +120,7 @@ class GradientBoostedDecisionTree(GradientBoostingClassifier):
         self.metric_pairs = []
         for metric in self.metrics:
             if issubclass(type(metric), keras.metrics.Metric):
-                self.metric_pairs.append((metric().name, metric()))
+                self.metric_pairs.append((metric.name, metric))
             elif metric in KERAS_METRICS:
                 self.metric_pairs.append((metric, KERAS_METRICS[metric]()))
             elif metric in ["accuracy", "acc"]:
