@@ -11,7 +11,7 @@ class Filter:
         self.cuts = cuts
         self.stat = OrderedDict({cut: 0 for cut in cuts})
 
-    def read(self, event):
+    def read_event(self, event):
         self.event = event
         return self
 
