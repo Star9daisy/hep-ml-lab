@@ -34,11 +34,21 @@ def load_dataset(filepath: PathLike) -> Dataset:
         raise FileNotFoundError(f"File {filepath} does not exist")
 
     data = np.load(filepath)
-    _type = data["_type"].item()
-    if _type == "tabular":
-        return TabularDataset.load(filepath)
-    else:
-        raise ValueError(f"Invalid dataset type {_type}")
+
+    if _type := data.get("_type") is None:
+        raise ValueError(
+            f"No `_type` key in {filepath}. Cannot load dataset anonymously, "
+            f"try to determine the type of dataset and load it directly from "
+            f"the corresponding class."
+        )
+
+    if _type not in DATASET_CLASSES:
+        raise ValueError(
+            f"Unknown dataset type {_type}. Available types: "
+            f"{', '.join(DATASET_CLASSES.keys())}"
+        )
+
+    return DATASET_CLASSES[_type].load(filepath)
 
 
 class TabularDataset:
@@ -108,3 +118,8 @@ class TabularDataset:
             target_names=data["target_names"],
             description=data["description"].item(),
         )
+
+
+DATASET_CLASSES = {
+    "tabular": TabularDataset,
+}
