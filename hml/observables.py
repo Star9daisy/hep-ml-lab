@@ -60,7 +60,7 @@ class Observable(ABC):
     def __repr__(self) -> str:
         return f"{self.name}: {self.value}"
 
-    def read(self, event: TTree) -> Observable:
+    def read_event(self, event: TTree) -> Observable:
         self.event = event
         self.objects = []
         self._value = None

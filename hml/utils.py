@@ -18,7 +18,7 @@ class Filter:
     def passed(self):
         def _replace_with_value(match):
             observable_name = match.group(0)  # complete match
-            value = get_observable(observable_name).read(self.event).value
+            value = get_observable(observable_name).read_event(self.event).value
 
             if value is not None:
                 return str(value)
