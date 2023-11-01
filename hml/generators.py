@@ -492,8 +492,6 @@ class Madgraph5MultiRun:
         Name of the run, e.g. "run_01".
     tag : str
         Tag of the run, by default "" (not the same as "tag_1" in Madgraph5).
-    directory : PathLike
-        Path to the directory of the run.
     seed : int
         Random seed of the run.
     n_events : int
