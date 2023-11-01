@@ -1,6 +1,5 @@
 import keras
 import tensorflow as tf
-from keras import initializers
 
 
 class CutAndCount(keras.Model):
@@ -10,7 +9,7 @@ class CutAndCount(keras.Model):
             name="n_bins",
             shape=(),
             dtype=tf.int32,
-            initializer=initializers.Constant(n_bins),
+            initializer=keras.initializers.Constant(n_bins),
             trainable=False,
         )
 
@@ -19,14 +18,14 @@ class CutAndCount(keras.Model):
             name="cuts",
             shape=(input_shape[-1], 2),
             dtype=tf.float32,
-            initializer=initializers.Zeros(),
+            initializer=keras.initializers.Zeros(),
             trainable=False,
         )
         self.cases = self.add_weight(
             name="cases",
             shape=(input_shape[-1],),
             dtype=tf.int32,
-            initializer=initializers.Zeros(),
+            initializer=keras.initializers.Zeros(),
             trainable=False,
         )
 
