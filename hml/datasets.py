@@ -8,27 +8,43 @@ from .types import Path, PathLike
 
 
 class Dataset(Protocol):
+    """A protocol for datasets used in HML.
+
+    This protocol follows the same style as the `sklearn.utils.Bunch` class and
+    is simpified to quickly save and load datasets.
+    """
+
     @property
     def samples(self) -> np.ndarray:
+        """The samples (data points) of the dataset."""
         ...
 
     @property
     def targets(self) -> np.ndarray:
+        """The targets (integer labels) of the dataset."""
         ...
 
     @property
     def description(self) -> str:
+        """The description of the dataset."""
         ...
 
     def save(self, filepath: PathLike, overwrite: bool) -> None:
+        """Save the dataset to a .npz file.
+
+        It is required to save `_type` to distinguish between different datasets
+        and load them correctly via `load_dataset` method.
+        """
         ...
 
     @classmethod
     def load(cls, filepath: PathLike) -> Dataset:
+        """Load the dataset from a .npz file."""
         ...
 
 
 def load_dataset(filepath: PathLike) -> Dataset:
+    """Load a dataset from a .npz file."""
     filepath = Path(filepath)
     if not filepath.exists():
         raise FileNotFoundError(f"File {filepath} does not exist")
@@ -52,6 +68,25 @@ def load_dataset(filepath: PathLike) -> Dataset:
 
 
 class TabularDataset:
+    """A tabular dataset.
+
+    This is a class for tabular datasets. Samples are from 1D representation to
+    build this 2D representation.
+
+    Parameters
+    ----------
+    samples : np.ndarray
+        The samples (data points) of the dataset.
+    targets : np.ndarray
+        The targets (integer labels) of the dataset.
+    feature_names : list[str]
+        The names of the features.
+    target_names : list[str]
+        The names of the targets.
+    description : str
+        The description of the dataset.
+    """
+
     def __init__(
         self,
         samples: np.ndarray,
