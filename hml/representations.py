@@ -7,6 +7,18 @@ from .observables import Observable, get_observable
 
 
 class Set:
+    """A set of observables.
+
+    Set is a 1D representation of an event. It contains a list of observables.
+    It is usually used as input to approaches like CutAndCount and
+    ToyMultilayerPerceptron (MLP).
+
+    Parameters
+    ----------
+    observables : list[Observable | str]
+        A list of observables or their names.
+    """
+
     def __init__(self, observables: list[Observable | str]) -> None:
         self.observables = []
         for obs in observables:
