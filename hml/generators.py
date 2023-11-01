@@ -17,6 +17,37 @@ _ = ROOT.gSystem.Load("libDelphes")  # type: ignore
 
 
 class Madgraph5:
+    """Wrapper class for Madgraph5.
+
+    It uses commands from MadEvent (`launch -i` in Madgraph5 CLI) to launch runs
+    sequentially. It also provides a summary of the runs similar to the website
+    provided by Madgraph5.
+
+    Parameters
+    ----------
+    processes : list[str]
+        List of processes to generate.
+    executable : PathLike, optional
+        Path to the Madgraph5 executable, by default "mg5_aMC".
+    model : PathLike, optional
+        Path to the model or the name of the model, by default "sm".
+    definitions : dict[str, Any], optional
+        Dictionary of definitions to pass to Madgraph5, by default {}.
+    output : PathLike, optional
+        Path to the output directory, by default "madevent".
+    log_dir : PathLike, optional
+        Path to the log directory relative to the output, by default "Logs".
+
+    The relation between the parameters and the Madgraph5 commands is as follows:
+
+    | Parameters  | Commands or options              |
+    | ----------- | -------------------------------- |
+    | model       | import model command             |
+    | definitions | define command                   |
+    | processes   | generate & add process commands  |
+    | output      | output command                   |
+    """
+
     def __init__(
         self,
         processes: list[str],
@@ -83,6 +114,34 @@ class Madgraph5:
         multi_run: int = 1,
         verbose: int = 1,
     ):
+        """The launch command in Madgraph5 CLI.
+
+        Parameters
+        ----------
+        shower : ShowerOption, optional
+            Shower tool to use, currently supports "off" and "pythia8", by
+            default "off".
+        detector : DetectorOption, optional
+            Detector tool to use, currently supports "off" and "delphes", by
+            default "off".
+        settings : dict[str, Any], optional
+            Dictionary of settings to pass to Madgraph5, by default {}.
+        cards : list[PathLike], optional
+            List of cards to pass to Madgraph5, by default [].
+        multi_run : int, optional
+            Number of runs to launch, by default 1.
+        verbose : int, optional
+            Verbosity level, 0 for quiet, 1 for simple, by default 1.
+
+        The relation between the parameters and the Madgraph5 commands is as
+        follows:
+
+        | shower      | shower option                                     |
+        | detector    | detector option                                   |
+        | settings    | set command                                       |
+        | cards       | card paths directly passed when configuring cards |
+        """
+
         if shower not in ["off", "pythia8"]:
             raise ValueError(f"Unknown shower tool {shower}")
         if detector not in ["off", "delphes"]:
@@ -190,6 +249,7 @@ class Madgraph5:
 
     @property
     def runs(self) -> list[Madgraph5MultiRun]:
+        """List of runs in the output directory."""
         runs = []
         for i in self.output.glob("Events/run_*"):
             if i.is_dir() and i.name.count("_") == 1:
@@ -199,6 +259,7 @@ class Madgraph5:
 
     @classmethod
     def from_output(cls, output: PathLike, executable: PathLike = "mg5_aMC"):
+        """Create a Madgraph5 instance from an existing output directory."""
         output = Path(output).resolve()
         if not output.exists():
             raise FileNotFoundError(f"{output} does not exist.")
@@ -232,6 +293,7 @@ class Madgraph5:
         )
 
     def summary(self):
+        """Print a summary of the runs in the output directory."""
         console = Console()
         table = Table(
             title="\n".join(self.processes),
@@ -321,6 +383,33 @@ class Madgraph5:
 
 @dataclass
 class Madgraph5Run:
+    """A single run of Madgraph5.
+
+    Single run includes complete information about the run. It is usually
+    launced by the `launch` command in Madgraph5 CLI or the `generate_events`
+    command in MadEvent CLI.
+
+    Parameters
+    ----------
+    name : str
+        Name of the run, e.g. "run_01", "run_02_0".
+    tag : str
+        Tag of the run, by default "" (not the same as "tag_1" in Madgraph5).
+    directory : PathLike
+        Path to the directory of the run.
+    seed : int
+        Random seed of the run.
+    n_events : int
+        Number of events in the run parsed from the banner file and the root
+        files. The latter shall prevail.
+    cross_section : float
+        Cross section of the run.
+    collider : str
+        Collider configurations of the run.
+    events : ROOT.TChain
+        TChain of the root files in the run.
+    """
+
     name: str
     tag: str
     directory: Path
@@ -390,6 +479,36 @@ class Madgraph5Run:
 
 @dataclass
 class Madgraph5MultiRun:
+    """A run launched by multi_run of MadEvent.
+
+    A multi-run is a collection of runs launched by the `multi_run` command in
+    MadEvent CLI that is launched by the `launch -i` command in Madgraph5 CLI.
+    It usually contains one "run_xx" directory, one "run_xx_banner.txt" file,
+    and several "run_xx_y" single runs.
+
+    Parameters
+    ----------
+    name : str
+        Name of the run, e.g. "run_01".
+    tag : str
+        Tag of the run, by default "" (not the same as "tag_1" in Madgraph5).
+    directory : PathLike
+        Path to the directory of the run.
+    seed : int
+        Random seed of the run.
+    n_events : int
+        Number of events in the run parsed from the banner file and the root
+        files. The latter shall prevail.
+    cross_section : float
+        Cross section of the run.
+    collider : str
+        Collider configurations of the run.
+    events : ROOT.TChain
+        TChain of the root files in the run.
+    runs : list[Madgraph5Run]
+        The single runs in the multi-run.
+    """
+
     name: str
     tag: str
     seed: int
@@ -401,6 +520,7 @@ class Madgraph5MultiRun:
 
     @classmethod
     def from_name(cls, name: str, output: PathLike = "madevent"):
+        """Create a multi-run from the name of the run and the output directory."""
         output = Path(output)
         if not output.exists():
             raise FileNotFoundError(f"{output} does not exist.")
