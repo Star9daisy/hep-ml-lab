@@ -17,6 +17,7 @@ plugins:
   - exclude:
       glob:
         - examples/data/*
+  - search
   - mkdocstrings:
       handlers:
         python:
