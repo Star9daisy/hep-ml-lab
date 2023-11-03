@@ -55,9 +55,9 @@ extra_javascript:
 nav:
   - Introcution: index.md
   - Examples:
-      - Generate events: examples/generate_events.md
-      - Create datasets: examples/create_datasets.md
-      - Apply approaches: examples/apply_approaches.md
+      - Generate events: examples/01_generate_events.md
+      - Create datasets: examples/02_create_datasets.md
+      - Apply approaches: examples/03_apply_approaches.md
   - API Reference:
       - hml.generators: api-reference/hml.generators.md
       - hml.observables: api-reference/hml.observables.md
