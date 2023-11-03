@@ -405,13 +405,37 @@ class NSubjettinessRatio(Observable):
             return obj.Tau[self.m - 1] / obj.Tau[self.n - 1]
 
 
+class Size(Observable):
+    """The number of physics objects.
+
+    Available for single object. For example:
+    - `Jet.Size` is the number of jets.
+
+    Alias: size
+    """
+
+    def get_value(self):
+        if len(self.objects) > 0:
+            return len(self.objects[0])
+
+
 Px.add_alias("px")
 Py.add_alias("py")
 Pz.add_alias("pz")
 E.add_alias("e", "Energy")
+
 Pt.add_alias("pt", "pT", "PT")
 Eta.add_alias("eta")
 Phi.add_alias("phi")
 M.add_alias("m", "mass", "Mass")
+
 NSubjettiness.add_alias("TauN")
 NSubjettinessRatio.add_alias("TauMN")
+
+Size.add_alias("size")
+
+Energy = E
+PT = Pt
+Mass = M
+TauN = NSubjettiness
+TauMN = NSubjettinessRatio
