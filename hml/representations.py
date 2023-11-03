@@ -42,4 +42,4 @@ class Set:
         return np.array(self.values, dtype=dtype)
 
     def to_pandas(self) -> pd.DataFrame:
-        return pd.DataFrame([self.values], columns=self.names)
+        return pd.DataFrame(self.values, columns=self.names)
