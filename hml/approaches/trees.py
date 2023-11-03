@@ -187,7 +187,7 @@ class GradientBoostedDecisionTree(GradientBoostingClassifier):
         _ = super().fit(x, y, sample_weight, _monitor)
         return history
 
-    def predict(self, x: ndarray) -> ndarray:
+    def predict(self, x: ndarray, **kwargs) -> ndarray:
         return super().predict_proba(x)
 
     def summary(self, deep=False, **kwargs):
