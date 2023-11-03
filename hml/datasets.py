@@ -51,7 +51,7 @@ def load_dataset(filepath: PathLike) -> Dataset:
 
     data = np.load(filepath)
 
-    if _type := data.get("_type") is None:
+    if (_type := data.get("_type").item()) is None:
         raise ValueError(
             f"No `_type` key in {filepath}. Cannot load dataset anonymously, "
             f"try to determine the type of dataset and load it directly from "
