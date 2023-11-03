@@ -2,6 +2,7 @@ import keras
 import tensorflow as tf
 
 
+@keras.saving.register_keras_serializable()
 class CutAndCount(keras.Model):
     def __init__(self, n_bins: int = 50, name: str = "cut_and_count"):
         super().__init__(name=name)
