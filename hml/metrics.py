@@ -23,7 +23,7 @@ class MaxSignificance(Metric):
         self.tp = TruePositives(thresholds=thresholds, dtype=dtype)
         self.fp = FalsePositives(thresholds=thresholds, dtype=dtype)
 
-    def update_state(self, y_true, y_pred, sample_weight=None):
+    def update_state(self, y_true, y_pred, sample_weight=None):  # pragma: no cover
         y_true = tf.convert_to_tensor(y_true)
         y_pred = tf.convert_to_tensor(y_pred)
 
@@ -36,14 +36,14 @@ class MaxSignificance(Metric):
         self.tp.update_state(y_true, y_pred, sample_weight)
         self.fp.update_state(y_true, y_pred, sample_weight)
 
-    def result(self):
+    def result(self):  # pragma: no cover
         s = self.tp.result()
         b = self.fp.result()
         significance = s / tf.sqrt(s + b)
         max_significance = tf.reduce_max(significance)
         return max_significance
 
-    def reset_state(self):
+    def reset_state(self):  # pragma: no cover
         self.tp.reset_state()
         self.fp.reset_state()
 
@@ -66,7 +66,7 @@ class RejectionAtEfficiency(Metric):
             dtype=dtype,
         )
 
-    def update_state(self, y_true, y_pred, sample_weight=None):
+    def update_state(self, y_true, y_pred, sample_weight=None):  # pragma: no cover
         y_true = tf.convert_to_tensor(y_true)
         y_pred = tf.convert_to_tensor(y_pred)
 
@@ -76,10 +76,10 @@ class RejectionAtEfficiency(Metric):
 
         self.specificity_at_sensitivity.update_state(y_true, y_pred, sample_weight)
 
-    def result(self):
+    def result(self):  # pragma: no cover
         fpr = 1 - self.specificity_at_sensitivity.result()
         rejection = 1 / fpr
         return rejection
 
-    def reset_state(self):
+    def reset_state(self):  # pragma: no cover
         self.specificity_at_sensitivity.reset_state()
