@@ -191,7 +191,7 @@ class GradientBoostedDecisionTree(GradientBoostingClassifier):
         return super().predict_proba(x)
 
     def summary(self, deep=False, **kwargs):
-        output = [f"Model: {self.name}"]
+        output = [f'Model: "{self.name}"']
         for name, value in self.get_params(deep=deep, **kwargs).items():
             output.append(f"- {name}: {value}")
 
