@@ -24,10 +24,8 @@ class Set:
         for obs in observables:
             if isinstance(obs, Observable):
                 self.observables.append(obs)
-            elif isinstance(obs, str):
-                self.observables.append(get_observable(obs))
             else:
-                raise TypeError(f"Invalid type {type(obs)} for observable {obs}")
+                self.observables.append(get_observable(obs))
 
         self.names = [obs.name for obs in self.observables]
         self.values = []
