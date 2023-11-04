@@ -1,77 +1,77 @@
-import shutil
-from pathlib import Path
+from typing import Any
 
 import pytest
 
-from hml.generators import Madgraph5, MG5Run
+from hml.generators import Madgraph5
 from hml.observables import (
     DeltaR,
     E,
     Eta,
     M,
+    NSubjettiness,
+    NSubjettinessRatio,
     Observable,
     Phi,
     Pt,
     Px,
     Py,
     Pz,
-    get_lorentzvector_values,
-    resolve_shortname,
+    Size,
+    get_observable,
 )
 
 
-def test_resolve_shortname():
-    assert resolve_shortname("Jet") == (["Jet"], [-1])
-    assert resolve_shortname("Jet1") == (["Jet"], [0])
-    assert resolve_shortname("Muon1") == (["Muon"], [0])
-    assert resolve_shortname("Muon2") == (["Muon"], [1])
-    assert resolve_shortname("Jet1+Jet2") == (["Jet", "Jet"], [0, 1])
-    assert resolve_shortname("Jet1+Jet2+Jet3") == (["Jet", "Jet", "Jet"], [0, 1, 2])
-    assert resolve_shortname("Jet1+Muon1") == (["Jet", "Muon"], [0, 0])
+def test_Observable(tmpdir):
+    demo_output = tmpdir / "demo"
 
-    with pytest.raises(ValueError):
-        resolve_shortname("Jet0")
-    with pytest.raises(ValueError):
-        resolve_shortname("*Jet")
-
-
-def test_observables():
-    event_name = "pp2zj_"
-    generator = Madgraph5(
-        executable="mg5_aMC",
-        processes=["p p > z j, z > j j"],
-        output=f"./tests/data/{event_name}",
-        shower="Pythia8",
-        detector="Delphes",
-        n_events=10,
-        seed=42,
-        cards=["./tests/scripts/delphes_card_eflow.dat"],
+    g = Madgraph5(processes=["p p > z z, z > j j, z > e+ e-"], output=demo_output)
+    run = g.launch(
+        shower="pythia8",
+        detector="delphes",
+        settings={"iseed": 42, "nevents": 100},
     )
-    generator.launch()
+    event = next(iter(run.events))
 
-    run = MG5Run(f"tests/data/{event_name}/run_1")
-    for event in run.events:
-        if event.Jet_size >= 2:
-            break
+    for obs_class in [Px, Py, Pz, E, Pt, Eta, Phi, M]:
+        obs1 = obs_class("Jet_0").read_event(event)
+        obs2 = get_observable(f"Jet_0.{obs_class.__name__}").read_event(event)
+        assert obs1.name == obs2.name
+        assert obs1.value == obs2.value
 
-    for obs in [Pt, M, Eta, Phi, Px, Py, Pz, E]:
-        assert issubclass(obs, Observable)
-        for shortname in ["Jet", "Jet1", "Jet2"]:
-            a = obs(shortname)
-            a.from_event(event)
-            assert a.values is not None
+    obs1 = Size("Jet").read_event(event)
+    obs2 = get_observable("Jet.Size").read_event(event)
+    obs3 = Size(object_pairs=[("Jet", None)]).read_event(event)
+    assert obs1.name == obs2.name
+    assert obs1.value == obs2.value
+    assert obs1.name == obs3.name
+    assert obs1.value == obs3.value
 
-    assert issubclass(DeltaR, Observable)
-    obs = DeltaR("Jet1", "Jet2")
-    obs.from_event(event)
-    assert obs.values is not None
+    obs1 = DeltaR("Jet_0-Jet_1").read_event(event)
+    obs2 = get_observable("Jet_0-Jet_1.DeltaR").read_event(event)
+    obs3 = DeltaR(object_pairs=[("Jet", 0), ("Jet", 1)]).read_event(event)
+    assert obs1.name == obs2.name
+    assert obs1.value == obs2.value
+    assert obs1.name == obs3.name
+    assert obs1.value == obs3.value
+    assert repr(obs1) == f"Jet_0-Jet_1.DeltaR: {obs1.value}"
+    assert obs1.to_numpy().shape == ()
 
-    assert len(get_lorentzvector_values(event, "Pt", ["Jet"], [-1])) == event.Jet_size
+    obs1 = NSubjettiness("FatJet_0", n=1).read_event(event)
+    obs2 = get_observable("FatJet_0.NSubjettiness", n=1).read_event(event)
+    assert obs1.name == obs2.name
+    assert obs1.value == obs2.value
+
+    obs1 = NSubjettinessRatio("FatJet_0", m=2, n=1).read_event(event)
+    obs2 = get_observable("FatJet_0.NSubjettinessRatio", m=2, n=1).read_event(event)
+    assert obs1.name == obs2.name
+    assert obs1.value == obs2.value
+
     with pytest.raises(ValueError):
-        get_lorentzvector_values(event, "Pt", ["Jet"], [1, 2])
-    with pytest.raises(IndexError):
-        get_lorentzvector_values(event, "Pt", ["Jet"], [event.Jet_size + 1])
+        get_observable("wrong_name")
 
-    # Clean up
-    run.events.Reset()
-    generator.clean()
+    class Dummy(Observable):
+        def get_value(self) -> Any:
+            return 1.0
+
+    dummy = get_observable("Dummy").read_event(event)
+    assert dummy.name == "Dummy"
