@@ -62,7 +62,7 @@ class Madgraph5:
         self.model = model
         self.definitions = definitions
         self.processes = processes
-        self.output = output
+        self.output = Path(output)
 
         self.commands = {
             "pre": [
