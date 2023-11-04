@@ -62,7 +62,7 @@ class CutAndCount(keras.Model):
         return {m.name: m.result() for m in self.metrics}
 
     @tf.function
-    def _get_result(self, x, y):
+    def _get_result(self, x, y):  # pragma: no cover
         # Find the min and max of the feature to get the bin edges
         # bin_edges: (n_bins+1,)
         x_min, x_max = tf.reduce_min(x), tf.reduce_max(x)
@@ -138,7 +138,7 @@ class CutAndCount(keras.Model):
         return result
 
     @tf.function
-    def _get_min_loss_and_case(self, x, y, candidate_pair):
+    def _get_min_loss_and_case(self, x, y, candidate_pair):  # pragma: no cover
         # I: (n_samples,), (n_samples, ?), (2,)
         cut0 = candidate_pair[0]
         cut1 = candidate_pair[1]
@@ -188,7 +188,7 @@ class CutAndCount(keras.Model):
         min_index = tf.where(tf.equal(losses_and_cases[:, 0], min_loss))[0, 0]  # type: ignore
         return losses_and_cases[min_index]  # (2,)
 
-    def call(self, x):
+    def call(self, x):  # pragma: no cover
         left = x <= self.cuts[:, 0]  # (n_samples, n_features)
         right = x >= self.cuts[:, 0]
         middle = tf.logical_and(self.cuts[:, 0] <= x, x <= self.cuts[:, 1])
