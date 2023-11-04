@@ -22,9 +22,9 @@ def test_Madgraph5(tmp_path):
     )
 
     with pytest.raises(ValueError):
-        g.launch(shower="wrong_shower")
+        g.launch(shower="wrong_shower")  # type: ignore
     with pytest.raises(ValueError):
-        g.launch(detector="wrong_detector")
+        g.launch(detector="wrong_detector")  # type: ignore
 
     g.launch(settings={"nevents": 100})
     g.launch(
