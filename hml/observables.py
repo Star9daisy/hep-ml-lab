@@ -114,7 +114,7 @@ class Observable(ABC):
 
         Return None if the observable is not correctly got.
         """
-        ...
+        ...  # pragma: no cover
 
     def parse_shortcut(self, shortcut: str) -> list[tuple[str, int | None]]:
         """Parse the shortcut to get the object pairs."""
