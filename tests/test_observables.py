@@ -21,8 +21,8 @@ from hml.observables import (
 )
 
 
-def test_Observable(tmpdir):
-    demo_output = tmpdir / "demo"
+def test_Observable(tmp_path):
+    demo_output = tmp_path / "demo"
 
     g = Madgraph5(processes=["p p > z z, z > j j, z > e+ e-"], output=demo_output)
     run = g.launch(
