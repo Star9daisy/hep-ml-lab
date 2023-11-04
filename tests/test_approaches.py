@@ -73,7 +73,7 @@ def test_cba(tmp_path):
     m.summary()
     m.save(tmp_path / "CBA.keras")
     loaded_m = load_approach(tmp_path / "CBA.keras")
-    assert (loaded_m.cuts.numpy() == m.cuts.numpy()).all()
+    assert (loaded_m.cuts.numpy() == m.cuts.numpy()).all()  # type: ignore
 
 
 def test_bdt(tmp_path):
@@ -129,7 +129,7 @@ def test_bdt(tmp_path):
     m.summary()
     m.save(tmp_path / "BDT.pickle")
     loaded_m = load_approach(tmp_path / "BDT.pickle")
-    assert loaded_m.n_estimators_ == m.n_estimators_
+    assert loaded_m.n_estimators_ == m.n_estimators_  # type: ignore
 
 
 def test_mlp(tmp_path):
@@ -196,4 +196,4 @@ def test_mlp(tmp_path):
     m.summary()
     m.save(tmp_path / "MLP.keras")
     loaded_m = load_approach(tmp_path / "MLP.keras")
-    assert loaded_m.count_params() == m.count_params()
+    assert loaded_m.count_params() == m.count_params()  # type: ignore
