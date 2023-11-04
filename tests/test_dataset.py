@@ -1,42 +1,29 @@
-import shutil
-from pathlib import Path
-
 import numpy as np
+import pytest
 
-from hml.datasets import Dataset
+from hml.datasets import TabularDataset, load_dataset
 
 
-def test_save_and_load():
+def test_save_and_load(tmp_path):
     np.random.seed(42)
-
-    dir_path = Path("./tests/data/demo_dataset")
-    dataset = Dataset(
-        data=np.random.random((100, 5)),
-        target=np.random.randint(0, 2, (100, 1)),
+    dataset = TabularDataset(
+        samples=np.random.random((100, 5)),
+        targets=np.random.randint(0, 2, (100, 1)),
         feature_names=["a", "b", "c", "d", "e"],
         target_names=["background", "signal"],
-        description="""This is a demo dataset.
-
-    It is used to demonstrate the functionality of the HML package.
-    """,
-        dir_path=dir_path,
+        description="Demo dataset",
     )
+    dataset.save(tmp_path / "demo_dataset")
 
-    dataset.save(exist_ok=True)
+    with pytest.raises(FileNotFoundError):
+        load_dataset(tmp_path / "wrong_dir.npz")
 
-    files = list(Path("./tests/data/demo_dataset").iterdir())
-    assert len(files) == 2
-    assert Path("./tests/data/demo_dataset/dataset.npz").exists()
-    assert Path("./tests/data/demo_dataset/metadata.yml").exists()
+    loaded_dataset1 = load_dataset(tmp_path / "demo_dataset.npz")
+    loaded_dataset2 = TabularDataset.load(tmp_path / "demo_dataset.npz")
+    assert type(loaded_dataset1) == TabularDataset
 
-    loaded_dataset = Dataset.load("./tests/data/demo_dataset")
-
-    assert np.all(dataset.data == loaded_dataset.data)
-    assert np.all(dataset.target == loaded_dataset.target)
-    assert dataset.feature_names == loaded_dataset.feature_names
-    assert dataset.target_names == loaded_dataset.target_names
-    assert dataset.description == loaded_dataset.description
-    assert dataset.dir_path == loaded_dataset.dir_path
-
-    # Clean up
-    shutil.rmtree("./tests/data/demo_dataset", ignore_errors=True)
+    assert np.all(dataset.samples == loaded_dataset2.samples)
+    assert np.all(dataset.targets == loaded_dataset2.targets)
+    assert (dataset.feature_names == loaded_dataset2.feature_names).all()
+    assert (dataset.target_names == loaded_dataset2.target_names).all()
+    assert dataset.description == loaded_dataset2.description

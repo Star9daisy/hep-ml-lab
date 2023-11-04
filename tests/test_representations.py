@@ -1,45 +1,27 @@
-import shutil
-from pathlib import Path
-
-from hml.generators import Madgraph5, MG5Run
+from hml.generators import Madgraph5
 from hml.observables import M, Pt
 from hml.representations import Set
+from hml.utils import Filter
 
 
-def test_observables():
-    event_name = "pp2zj_"
-    generator = Madgraph5(
-        executable="mg5_aMC",
-        processes=["p p > z j, z > j j"],
-        output=f"./tests/data/{event_name}",
-        shower="Pythia8",
-        detector="Delphes",
-        settings={"nevents": 10, "iseed": 42},
+def test_Set(tmp_path):
+    demo_output = tmp_path / "demo"
+    g = Madgraph5(processes=["p p > z z, z > j j, z > e+ e-"], output=demo_output)
+    run = g.launch(
+        shower="pythia8",
+        detector="delphes",
+        settings={"iseed": 42, "nevents": 100},
     )
-
-    generator.launch()
-    run = MG5Run(f"tests/data/{event_name}/run_1")
-    representation = Set(
-        [
-            Pt("Jet1"),
-            Pt("Jet2"),
-            Pt("Jet1+Jet2"),
-            M("Jet1"),
-            M("Jet2"),
-            M("Jet1+Jet2"),
-        ]
-    )
+    representation1 = Set([Pt("Jet1"), M("Jet2"), M("Jet1+Jet2")])
+    representation2 = Set(["Jet1.Pt", "Jet2.M", "Jet1+Jet2.M"])
 
     for event in run.events:
-        if event.Jet.GetEntries() < 2:
-            continue
+        if Filter(["Jet.Size >= 2"]).read_event(event).passed():
+            representation1.read_event(event)
+            representation2.read_event(event)
+            break
 
-        representation.from_event(event)
-        break
-
-    assert representation.values is not None
-    assert representation.values.shape == (6,)
-
-    # Clean up
-    run.events.Reset()
-    generator.clean()
+    assert representation1.values is not None
+    assert representation1.to_numpy().shape == (1, 3)
+    assert representation1.to_pandas().shape == (1, 3)
+    assert representation1.to_numpy().shape == representation2.to_numpy().shape
