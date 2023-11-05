@@ -31,6 +31,10 @@ def test_Observable(tmp_path):
         settings={"iseed": 42, "nevents": 100},
     )
     event = next(iter(run.events))
+    if event.Jet.GetEntries() < 2:
+        for event in run.events:
+            if event.Jet.GetEntries() >= 2:
+                break
 
     for obs_class in [Px, Py, Pz, E, Pt, Eta, Phi, M]:
         obs1 = obs_class("Jet_0").read_event(event)
