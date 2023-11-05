@@ -17,6 +17,7 @@ plugins:
   - exclude:
       glob:
         - examples/data/*
+  - search
   - mkdocstrings:
       handlers:
         python:
@@ -54,18 +55,18 @@ extra_javascript:
 nav:
   - Introcution: index.md
   - Examples:
-      - Generate events: examples/generate_events.md
-      - Create datasets: examples/create_datasets.md
-      - Apply methods: examples/apply_methods.md
+      - Generate events: examples/01_generate_events.md
+      - Create datasets: examples/02_create_datasets.md
+      - Apply approaches: examples/03_apply_approaches.md
   - API Reference:
       - hml.generators: api-reference/hml.generators.md
       - hml.observables: api-reference/hml.observables.md
       - hml.representations: api-reference/hml.representations.md
       - hml.datasets: api-reference/hml.datasets.md
-      - hml.preprocessing: api-reference/hml.preprocessing.md
-      - hml.methods:
-          - api-reference/hml.methods/cuts.md
-          - api-reference/hml.methods/trees.md
+      - hml.approaches:
+          - api-reference/hml.approaches/cuts.md
+          - api-reference/hml.approaches/trees.md
           - Networks:
-              - MLP: api-reference/hml.methods/networks/mlps.md
+              - MLP: api-reference/hml.approaches/networks/mlps.md
       - hml.metrics: api-reference/hml.metrics.md
+      - hml.utils: api-reference/hml.utils.md

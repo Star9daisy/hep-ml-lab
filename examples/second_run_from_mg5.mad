@@ -1,8 +1,0 @@
-launch -i data/runs_from_mg5
-generate_events
-    set nevents 1000
-    set iseed 42
-    set ptj 10.0
-    set etaj 2.4
-    set run_tag ptj=10,etaj=2.4
-print_results --path=data/runs_from_mg5/results --format=short
