@@ -9,17 +9,15 @@
       
       
       
-        <link rel="prev" href="../hml.observables/">
+        <link rel="prev" href="../hml.metrics/">
       
-      
-        <link rel="next" href="../hml.datasets/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
-        <title>hml.representations - HEP ML Lab</title>
+        <title>hml.utils - HEP ML Lab</title>
       
     
     
@@ -69,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#hml.representations.Set" class="md-skip">
+        <a href="#hml.utils.Filter" class="md-skip">
           Skip to content
         </a>
       
@@ -104,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              hml.representations
+              hml.utils
             
           </span>
         </div>
@@ -363,48 +361,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          hml.representations
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../hml.representations/" class="md-nav__link">
         hml.representations
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#hml.representations.Set" class="md-nav__link">
-    Set
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -552,11 +513,68 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../hml.utils/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          hml.utils
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         hml.utils
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#hml.utils.Filter" class="md-nav__link">
+    Filter
+  </a>
+  
+    <nav class="md-nav" aria-label="Filter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hml.utils.Filter.read_event" class="md-nav__link">
+    read_event()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hml.utils.Filter.passed" class="md-nav__link">
+    passed()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -593,9 +611,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#hml.representations.Set" class="md-nav__link">
-    Set
+  <a href="#hml.utils.Filter" class="md-nav__link">
+    Filter
   </a>
+  
+    <nav class="md-nav" aria-label="Filter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hml.utils.Filter.read_event" class="md-nav__link">
+    read_event()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hml.utils.Filter.passed" class="md-nav__link">
+    passed()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -617,7 +655,7 @@
   
 
 
-  <h1>hml.representations</h1>
+  <h1>hml.utils</h1>
 
 <div class="doc doc-object doc-module">
 
@@ -640,20 +678,17 @@
 
 
 
-<h2 id="hml.representations.Set" class="doc doc-heading">
-          <span class="doc doc-object-name doc-class-name">Set</span>
+<h2 id="hml.utils.Filter" class="doc doc-heading">
+          <span class="doc doc-object-name doc-class-name">Filter</span>
 
 
-<a href="#hml.representations.Set" class="headerlink" title="Permanent link">#</a></h2>
+<a href="#hml.utils.Filter" class="headerlink" title="Permanent link">#</a></h2>
 
 
   <div class="doc doc-contents ">
 
   
-      <p>A set of observables.</p>
-<p>Set is a 1D representation of an event. It contains a list of observables.
-It is usually used as input to approaches like CutAndCount and
-ToyMultilayerPerceptron (MLP).</p>
+      <p>Pre-select events based on a list of cuts.</p>
 
 
 
@@ -666,15 +701,15 @@ ToyMultilayerPerceptron (MLP).</p>
     </thead>
     <tbody>
         <tr>
-          <td><code>observables</code></td>
+          <td><code>cuts</code></td>
           <td class="doc-param-details">
             <div class="doc-md-description">
-              <p>A list of observables or their names.</p>
+              <p>The list of cuts to apply.</p>
             </div>
             <p>
                 <span class="doc-param-annotation">
                   <b>TYPE:</b>
-                    <code>list[<a class="autorefs autorefs-internal" title="hml.observables.Observable" href="../hml.observables/#hml.observables.Observable">Observable</a> | str]</code>
+                    <code>list[str]</code>
                 </span>
             </p>
           </td>
@@ -683,7 +718,7 @@ ToyMultilayerPerceptron (MLP).</p>
   </table>
 
             <details class="quote">
-              <summary>Source code in <code>hml/representations.py</code></summary>
+              <summary>Source code in <code>hml/utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
 <span class="normal"><a href="#__codelineno-0-10">10</a></span>
 <span class="normal"><a href="#__codelineno-0-11">11</a></span>
@@ -718,41 +753,51 @@ ToyMultilayerPerceptron (MLP).</p>
 <span class="normal"><a href="#__codelineno-0-40">40</a></span>
 <span class="normal"><a href="#__codelineno-0-41">41</a></span>
 <span class="normal"><a href="#__codelineno-0-42">42</a></span>
-<span class="normal"><a href="#__codelineno-0-43">43</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="k">class</span> <span class="nc">Set</span><span class="p">:</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;A set of observables.</span>
+<span class="normal"><a href="#__codelineno-0-43">43</a></span>
+<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+<span class="normal"><a href="#__codelineno-0-45">45</a></span>
+<span class="normal"><a href="#__codelineno-0-46">46</a></span>
+<span class="normal"><a href="#__codelineno-0-47">47</a></span>
+<span class="normal"><a href="#__codelineno-0-48">48</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="k">class</span> <span class="nc">Filter</span><span class="p">:</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Pre-select events based on a list of cuts.</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11"></a>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="sd">    Set is a 1D representation of an event. It contains a list of observables.</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    It is usually used as input to approaches like CutAndCount and</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="sd">    ToyMultilayerPerceptron (MLP).</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">    Parameters</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="sd">    ----------</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    observables : list[Observable | str]</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">        A list of observables or their names.</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="sd">    Parameters</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    ----------</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="sd">    cuts : list[str]</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">        The list of cuts to apply.</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cuts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">cuts</span> <span class="o">=</span> <span class="n">cuts</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">stat</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">({</span><span class="n">cut</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">cut</span> <span class="ow">in</span> <span class="n">cuts</span><span class="p">})</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Observable</span> <span class="o">|</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">observables</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a>        <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">observables</span><span class="p">:</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a>            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">Observable</span><span class="p">):</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">observables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a>            <span class="k">else</span><span class="p">:</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">observables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_observable</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a>    <span class="k">def</span> <span class="nf">read_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Read the event from a TTree.&quot;&quot;&quot;</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">event</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a>        <span class="k">return</span> <span class="bp">self</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a>    <span class="k">def</span> <span class="nf">passed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the event passed the cuts.&quot;&quot;&quot;</span>
 </span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">obs</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observables</span><span class="p">]</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a>    <span class="k">def</span> <span class="nf">read_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a>        <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observables</span><span class="p">:</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>            <span class="n">obs</span><span class="o">.</span><span class="n">read_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">obs</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">observables</span><span class="p">])</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="k">def</span> <span class="nf">to_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a>        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="k">def</span> <span class="nf">to_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a>        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a>        <span class="k">def</span> <span class="nf">_replace_with_value</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="w">            </span><span class="sd">&quot;&quot;&quot;Replace the string name of an observable with its value.&quot;&quot;&quot;</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a>            <span class="n">observable_name</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># complete match</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a>            <span class="n">value</span> <span class="o">=</span> <span class="n">get_observable</span><span class="p">(</span><span class="n">observable_name</span><span class="p">)</span><span class="o">.</span><span class="n">read_event</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a>                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a>            <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a>                <span class="k">return</span> <span class="s2">&quot;np.nan&quot;</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a>        <span class="k">for</span> <span class="n">cut</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cuts</span><span class="p">:</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a>            <span class="n">modified_string</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a>                <span class="sa">r</span><span class="s2">&quot;\b(?!\d+\b)([\w\d_]+)\.([\w\d_]+)\b&quot;</span><span class="p">,</span> <span class="n">_replace_with_value</span><span class="p">,</span> <span class="n">cut</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a>            <span class="p">)</span>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44"></a>            <span class="k">if</span> <span class="nb">eval</span><span class="p">(</span><span class="n">modified_string</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">[</span><span class="n">cut</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a>                <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48"></a>        <span class="k">return</span> <span class="kc">True</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
 
@@ -767,6 +812,106 @@ ToyMultilayerPerceptron (MLP).</p>
 
 
 
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="hml.utils.Filter.read_event" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">read_event</span>
+
+
+<a href="#hml.utils.Filter.read_event" class="headerlink" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">read_event</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</span></code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Read the event from a TTree.</p>
+
+          <details class="quote">
+            <summary>Source code in <code>hml/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-22">22</a></span>
+<span class="normal"><a href="#__codelineno-0-23">23</a></span>
+<span class="normal"><a href="#__codelineno-0-24">24</a></span>
+<span class="normal"><a href="#__codelineno-0-25">25</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="k">def</span> <span class="nf">read_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the event from a TTree.&quot;&quot;&quot;</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">event</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a>    <span class="k">return</span> <span class="bp">self</span>
+</span></code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h3 id="hml.utils.Filter.passed" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">passed</span>
+
+
+<a href="#hml.utils.Filter.passed" class="headerlink" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">passed</span><span class="p">()</span>
+</span></code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Check if the event passed the cuts.</p>
+
+          <details class="quote">
+            <summary>Source code in <code>hml/utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-27">27</a></span>
+<span class="normal"><a href="#__codelineno-0-28">28</a></span>
+<span class="normal"><a href="#__codelineno-0-29">29</a></span>
+<span class="normal"><a href="#__codelineno-0-30">30</a></span>
+<span class="normal"><a href="#__codelineno-0-31">31</a></span>
+<span class="normal"><a href="#__codelineno-0-32">32</a></span>
+<span class="normal"><a href="#__codelineno-0-33">33</a></span>
+<span class="normal"><a href="#__codelineno-0-34">34</a></span>
+<span class="normal"><a href="#__codelineno-0-35">35</a></span>
+<span class="normal"><a href="#__codelineno-0-36">36</a></span>
+<span class="normal"><a href="#__codelineno-0-37">37</a></span>
+<span class="normal"><a href="#__codelineno-0-38">38</a></span>
+<span class="normal"><a href="#__codelineno-0-39">39</a></span>
+<span class="normal"><a href="#__codelineno-0-40">40</a></span>
+<span class="normal"><a href="#__codelineno-0-41">41</a></span>
+<span class="normal"><a href="#__codelineno-0-42">42</a></span>
+<span class="normal"><a href="#__codelineno-0-43">43</a></span>
+<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+<span class="normal"><a href="#__codelineno-0-45">45</a></span>
+<span class="normal"><a href="#__codelineno-0-46">46</a></span>
+<span class="normal"><a href="#__codelineno-0-47">47</a></span>
+<span class="normal"><a href="#__codelineno-0-48">48</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="k">def</span> <span class="nf">passed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the event passed the cuts.&quot;&quot;&quot;</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a>    <span class="k">def</span> <span class="nf">_replace_with_value</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Replace the string name of an observable with its value.&quot;&quot;&quot;</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a>        <span class="n">observable_name</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># complete match</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a>        <span class="n">value</span> <span class="o">=</span> <span class="n">get_observable</span><span class="p">(</span><span class="n">observable_name</span><span class="p">)</span><span class="o">.</span><span class="n">read_event</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a>            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a>            <span class="k">return</span> <span class="s2">&quot;np.nan&quot;</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="k">for</span> <span class="n">cut</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cuts</span><span class="p">:</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a>        <span class="n">modified_string</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a>            <span class="sa">r</span><span class="s2">&quot;\b(?!\d+\b)([\w\d_]+)\.([\w\d_]+)\b&quot;</span><span class="p">,</span> <span class="n">_replace_with_value</span><span class="p">,</span> <span class="n">cut</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a>        <span class="p">)</span>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44"></a>        <span class="k">if</span> <span class="nb">eval</span><span class="p">(</span><span class="n">modified_string</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">[</span><span class="n">cut</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a>            <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48"></a>    <span class="k">return</span> <span class="kc">True</span>
+</span></code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
 
 
 
