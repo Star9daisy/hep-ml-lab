@@ -12,8 +12,8 @@ def test_Set(tmp_path):
         detector="delphes",
         settings={"iseed": 42, "nevents": 100},
     )
-    representation1 = Set([Pt("Jet1"), M("Jet2"), M("Jet1+Jet2")])
-    representation2 = Set(["Jet1.Pt", "Jet2.M", "Jet1+Jet2.M"])
+    representation1 = Set([Pt("Jet0"), M("Jet1"), M("Jet0+Jet1")])
+    representation2 = Set(["Jet0.Pt", "Jet1.M", "Jet0+Jet1.M"])
 
     for event in run.events:
         if Filter(["Jet.Size >= 2"]).read_event(event).passed():
