@@ -1,45 +1,43 @@
 from __future__ import annotations
 
-import cppyy
 import numpy as np
+import pandas as pd
 
-from .observables import Observable
+from .observables import Observable, get_observable
 
 
 class Set:
-    """Set represents one event as a set of observables.
+    """A set of observables.
+
+    Set is a 1D representation of an event. It contains a list of observables.
+    It is usually used as input to approaches like CutAndCount and
+    ToyMultilayerPerceptron (MLP).
 
     Parameters
     ----------
-    observables : list[Observable]
-        List of observables.
-
-    Attributes
-    ----------
-    observables : list[Observable]
-        List of observables.
-    names : list[str]
-        List of names of observables.
-    values : np.ndarray
-        2D array of values of observables.
+    observables : list[Observable | str]
+        A list of observables or their names.
     """
 
-    def __init__(self, observables: list[Observable]):
-        self.observables = observables
-        self.names = [obs.name for obs in observables]
-        self.values = None
+    def __init__(self, observables: list[Observable | str]) -> None:
+        self.observables = []
+        for obs in observables:
+            if isinstance(obs, Observable):
+                self.observables.append(obs)
+            else:
+                self.observables.append(get_observable(obs))
 
-    def from_event(self, event: cppyy.gbl.TTree):
-        """Fill observables from one event.
+        self.names = [obs.name for obs in self.observables]
+        self.values = []
 
-        Parameters
-        ----------
-        event : TTree
-            One event from a ROOT file.
-        """
+    def read_event(self, event) -> None:
         for obs in self.observables:
-            obs.from_event(event)
+            obs.read_event(event)
 
-        # Stack 1D values of observables into 2D array
-        self.values = np.stack([obs.values for obs in self.observables], axis=0)
-        self.values = np.squeeze(self.values, axis=1)
+        self.values.append([obs.value for obs in self.observables])
+
+    def to_numpy(self, dtype=np.float32) -> np.ndarray:
+        return np.array(self.values, dtype=dtype)
+
+    def to_pandas(self) -> pd.DataFrame:
+        return pd.DataFrame(self.values, columns=self.names)
