@@ -4,18 +4,15 @@
 [![codecov](https://codecov.io/gh/Star9daisy/hep-ml-lab/branch/main/graph/badge.svg?token=6VWJi5ct6c)](https://app.codecov.io/gh/Star9daisy/hep-ml-lab)
 [![GitHub](https://img.shields.io/github/license/star9daisy/hep-ml-lab)](https://github.com/Star9daisy/hep-ml-lab/blob/main/LICENSE)
 
-
-❗ Before the official version is released, please note that the program may
-have significant differences as versions change.
-
 ## Introduction
 HEP-ML-Lab is an end-to-end framework used for research combining high-energy
 physics phenomenology with machine learning. It covers three main parts: the
 generation of simulated data, the conversion of data representation, and the
-application of analysis methods.
+application of analysis approaches.
 
 With HML, researchers can easily compare the performance between traditional
-methods and modern machine learning, and obtain robust and reproducible results.
+methods and modern machine learning algorithms, and obtain robust and
+reproducible results.
 
 To get started, please check out the [documents](https://star9daisy.github.io/hep-ml-lab/).
 
@@ -37,6 +34,11 @@ pip install hep-ml-lab
 - `hml.utils`: Utility functions.
 
 ## Updates
+
+### v0.3.0
+- New Madgraph5 API now is closer to the original Madgraph5 CLI.
+- New Observable parsing system makes it easier to use and define new observables.
+- New CutAndCout and BoostedDecisionTree in Keras style.
 
 ### v0.2.2
 - Change output structure of `hml.generators.Madgraph5` to ensure reproducibility.

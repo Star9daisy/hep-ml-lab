@@ -4,7 +4,6 @@
 [![codecov](https://codecov.io/gh/Star9daisy/hep-ml-lab/branch/main/graph/badge.svg?token=6VWJi5ct6c)](https://app.codecov.io/gh/Star9daisy/hep-ml-lab)
 [![GitHub](https://img.shields.io/github/license/star9daisy/hep-ml-lab)](https://github.com/Star9daisy/hep-ml-lab/blob/main/LICENSE)
 
-
 ## Introduction
 HEP-ML-Lab is an end-to-end framework used for research combining high-energy
 physics phenomenology with machine learning. It covers three main parts: the
