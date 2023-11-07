@@ -35,7 +35,7 @@ class Filter:
             if value is not None:
                 return str(value)
             else:
-                return "np.nan"
+                return "float('nan')"
 
         for cut in self.cuts:
             modified_string = re.sub(
