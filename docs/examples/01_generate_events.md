@@ -92,7 +92,7 @@ zjj.summary()
 The data in the summary table are properties of a run:
 
 ```python
-run_01 = g1.runs[0]
+run_01 = zjj.runs[0]
 print("Name:", run_01.name)
 print("N Subruns:", len(run_01.runs))
 print("Tag:", run_01.tag)
