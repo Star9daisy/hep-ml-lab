@@ -87,8 +87,8 @@ class Madgraph5:
                 stderr=subprocess.PIPE,
             )
 
-            # Remove py.py file
-            while process.poll() is None:
+            # Remove py.py file after initialization
+            if process.poll() is not None:
                 if Path("py.py").exists():
                     Path("py.py").unlink()
 
