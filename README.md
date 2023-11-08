@@ -35,6 +35,14 @@ pip install hep-ml-lab
 
 ## Updates
 
+### v0.3.0.1
+- Fix a bug that Madgraph5 may run into an infinite loop caused by HML keeping
+  removing py.py file during initialization.
+- Fix nan value not implemented in Fileter.
+- Fix the wrong order of runs when using `hml.generators.Madgraph5.runs` and
+  `hml.generators.Madgraph5.summary`.
+- Fix the typo "g1" in quickstart.
+
 ### v0.3.0
 - New Madgraph5 API now is closer to the original Madgraph5 CLI.
 - New Observable parsing system makes it easier to use and define new observables.

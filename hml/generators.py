@@ -87,8 +87,8 @@ class Madgraph5:
                 stderr=subprocess.PIPE,
             )
 
-            # Remove py.py file
-            while process.poll() is None:
+            # Remove py.py file after initialization
+            if process.poll() is not None:
                 if Path("py.py").exists():
                     Path("py.py").unlink()
 
@@ -250,10 +250,14 @@ class Madgraph5:
     @property
     def runs(self) -> list[Madgraph5MultiRun]:
         """List of runs in the output directory."""
-        runs = []
+        run_paths = []
         for i in self.output.glob("Events/run_*"):
             if i.is_dir() and i.name.count("_") == 1:
-                runs.append(Madgraph5MultiRun.from_name(i.name, self.output))
+                run_paths.append(i)
+
+        # Sort the runs by their number
+        run_paths = sorted(run_paths, key=lambda x: int(x.name.split("_")[-1]))
+        runs = [Madgraph5MultiRun.from_name(i.name, self.output) for i in run_paths]
 
         return runs
 
