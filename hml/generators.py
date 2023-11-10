@@ -107,8 +107,8 @@ class Madgraph5:
 
     def launch(
         self,
-        shower: ShowerOption = "off",
-        detector: DetectorOption = "off",
+        shower: ShowerOption = "",
+        detector: DetectorOption = "",
         settings: dict[str, Any] = {},
         cards: list[PathLike] = [],
         multi_run: int = 1,
@@ -142,9 +142,9 @@ class Madgraph5:
         | cards       | card paths directly passed when configuring cards |
         """
 
-        if shower not in ["off", "pythia8"]:
+        if shower not in ["", "off", "pythia8"]:
             raise ValueError(f"Unknown shower tool {shower}")
-        if detector not in ["off", "delphes"]:
+        if detector not in ["", "off", "delphes"]:
             raise ValueError(f"Unknown detector tool {detector}")
 
         self.shower = shower
@@ -155,10 +155,10 @@ class Madgraph5:
 
         # -------------------------------------------------------------------- #
         commands = [
-            *[f"launch -i {self.output}"],
-            *[f"multi_run {self.multi_run}"],
-            *[f"shower={self.shower}"],
-            *[f"detector={self.detector}"],
+            f"launch -i {self.output}",
+            f"multi_run {self.multi_run}",
+            f"shower={self.shower}" if self.shower != "" else "",
+            f"detector={self.detector}" if self.detector != "" else "",
             *[f"set {k} {v}" for k, v in self.settings.items()],
             *[f"{card}" for card in self.cards],
         ]
