@@ -160,7 +160,7 @@ class Madgraph5:
             f"shower={self.shower}" if self.shower != "" else "",
             f"detector={self.detector}" if self.detector != "" else "",
             *[f"set {k} {v}" for k, v in self.settings.items()],
-            *[f"{card}" for card in self.cards],
+            *[f"{card_path}" for card_path in self.cards.values()],
         ]
         command_file = self._strs_to_file(commands)
 
