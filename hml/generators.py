@@ -150,6 +150,11 @@ class Madgraph5:
         self.cards = {}
         self.shower = shower
         self.detector = detector
+        if shower == "pythia8":
+            self.cards["pythia8_card"] = self.output / "Cards/pythia8_card_default.dat"
+        if detector == "delphes":
+            self.cards["delphes_card"] = self.output / "Cards/delphes_card_default.dat"
+
         self.settings = settings
         self.cards = [Path(card).resolve() for card in cards]
         self.multi_run = multi_run
