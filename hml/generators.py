@@ -147,6 +147,7 @@ class Madgraph5:
         if detector not in ["", "off", "delphes"]:
             raise ValueError(f"Unknown detector tool {detector}")
 
+        self.cards = {}
         self.shower = shower
         self.detector = detector
         self.settings = settings
@@ -323,8 +324,10 @@ class Madgraph5:
 
         console.print(table)
 
-    def _strs_to_file(self, strs: list[str]) -> str:
-        with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
+    def _strs_to_file(self, strs: list[str], prefix="") -> str:
+        with tempfile.NamedTemporaryFile(
+            mode="w", delete=False, prefix=prefix
+        ) as temp_file:
             temp_file.write("\n".join(strs))
             temp_file_path = temp_file.name
         return temp_file_path
