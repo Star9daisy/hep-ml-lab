@@ -75,7 +75,7 @@ class Madgraph5:
         }
 
         # Create output directory -------------------------------------------- #
-        command_file = self._cmds_to_file(self.commands["pre"])
+        command_file = self._strs_to_file(self.commands["pre"])
 
         if not self.output.exists():
             # Run Madgraph5
@@ -162,7 +162,7 @@ class Madgraph5:
             *[f"set {k} {v}" for k, v in self.settings.items()],
             *[f"{card}" for card in self.cards],
         ]
-        command_file = self._cmds_to_file(commands)
+        command_file = self._strs_to_file(commands)
 
         # -------------------------------------------------------------------- #
         n_runs = len(list((self.output / "Events").glob("*_banner.txt")))
@@ -323,9 +323,9 @@ class Madgraph5:
 
         console.print(table)
 
-    def _cmds_to_file(self, cmds: list[str]) -> str:
+    def _strs_to_file(self, strs: list[str]) -> str:
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as temp_file:
-            temp_file.write("\n".join(cmds))
+            temp_file.write("\n".join(strs))
             temp_file_path = temp_file.name
         return temp_file_path
 
