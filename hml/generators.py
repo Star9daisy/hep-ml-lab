@@ -112,6 +112,7 @@ class Madgraph5:
         settings: dict[str, Any] = {},
         cards: list[PathLike] = [],
         multi_run: int = 1,
+        seed: int = 0,
         verbose: int = 1,
     ):
         """The launch command in Madgraph5 CLI.
@@ -130,6 +131,9 @@ class Madgraph5:
             List of cards to pass to Madgraph5, by default [].
         multi_run : int, optional
             Number of runs to launch, by default 1.
+        seed : int, optional
+            Random seed to use, by default 0. 0 means a random seed will be
+            assigned automatically.
         verbose : int, optional
             Verbosity level, 0 for quiet, 1 for simple, by default 1.
 
@@ -156,8 +160,69 @@ class Madgraph5:
             self.cards["delphes_card"] = self.output / "Cards/delphes_card_default.dat"
 
         self.settings = settings
-        self.cards = [Path(card).resolve() for card in cards]
+        self.seed = seed
+        self.settings["iseed"] = self.seed
         self.multi_run = multi_run
+
+        for card in cards:
+            card = Path(card).resolve()
+
+            # Check if the card exists
+            if not card.exists():
+                raise FileNotFoundError(f"{card} does not exist.")
+
+            # Check if the card is a pythia8 card
+            if card.name.startswith("pythia8_card") and shower == "pythia8":
+                self.cards["pythia8_card"] = card
+
+            # Check if the card is a delphes card
+            if card.name.startswith("delphes_card") and detector == "delphes":
+                self.cards["delphes_card"] = card
+
+        # Set random seed for pythia8 card ----------------------------------- #
+        if "pythia8_card" in self.cards:
+            with self.cards["pythia8_card"].open() as f:
+                lines = f.readlines()
+
+            set_seed = False
+            found_seed = False
+            for i, line in enumerate(lines):
+                if line.startswith("Random:setSeed"):
+                    set_seed = True
+                if line.startswith("Random:seed"):
+                    found_seed = True
+                    lines[i] = f"Random:seed = {self.seed}\n"
+
+            if not set_seed:
+                lines.append("Random:setSeed = on\n")
+            if not found_seed:
+                lines.append(f"Random:seed = {self.seed}\n")
+
+            # Write back to the card
+            pythia8_card = self._strs_to_file(lines, prefix="pythia8_card_")
+            self.cards["pythia8_card"] = pythia8_card
+            with open(pythia8_card, "w") as f:
+                f.writelines(lines)
+
+        # Set random seed for delphes card ----------------------------------- #
+        if "delphes_card" in self.cards:
+            with self.cards["delphes_card"].open() as f:
+                lines = f.readlines()
+
+            found_seed = False
+            for i, line in enumerate(lines):
+                if line.startswith("set RandomSeed"):
+                    found_seed = True
+                    lines[i] = f"set RandomSeed {self.seed}\n"
+
+            if not found_seed:
+                lines.insert(0, f"set RandomSeed {self.seed}\n")
+
+            # Write back to the card
+            delphes_card = self._strs_to_file(lines, prefix="delphes_card_")
+            self.cards["delphes_card"] = delphes_card
+            with open(delphes_card, "w") as f:
+                f.writelines(lines)
 
         # -------------------------------------------------------------------- #
         commands = [
