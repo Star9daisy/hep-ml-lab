@@ -53,7 +53,7 @@ jobs:
         source root/bin/thisroot.sh
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/madgraph5/Delphes
         export ROOT_INCLUDE_PATH=$(pwd)/madgraph5/Delphes/external
-        poetry run pytest --cov=hml --cov-report=xml tests
+        poetry run pytest -v --cov=hml --cov-report=xml tests
     
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
