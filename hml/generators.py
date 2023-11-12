@@ -427,9 +427,6 @@ class Madgraph5:
         # -------------------------------------------------------------------- #
         # Monitor the process and the log file
         while True:
-            if Path("py.py").exists():
-                Path("py.py").unlink()
-
             # Check the log file for status updates
             with open(log_file, "r") as f:
                 f.seek(last_position)
@@ -453,6 +450,8 @@ class Madgraph5:
 
             # Check if process is still running
             if process.poll() is not None:  # Process has finished
+                if Path("py.py").exists():
+                    Path("py.py").unlink()
                 if verbose:
                     print("Done")
                 break
