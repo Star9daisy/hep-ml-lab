@@ -2,8 +2,13 @@
 name = "hep-ml-lab"
 version = "0.3.0.1"
 description = "An end-to-end framework used for research combining high-energy physics phenomenology with machine learning."
-authors = ["Star9daisy", "star9daisy@outlook.com"]
+license = "MIT"
+authors = ["Star9daisy <star9daisy@outlook.com>"]
 readme = "README.md"
+repository = "https://github.com/Star9daisy/hep-ml-lab"
+documentation = "https://star9daisy.github.io/hep-ml-lab/"
+keywords = ["high energy physics", "machine learning", "framework"]
+
 packages = [
     { include = "hml" },
 ]
