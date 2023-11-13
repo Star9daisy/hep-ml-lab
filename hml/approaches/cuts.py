@@ -29,6 +29,7 @@ class CutAndCount(keras.Model):
             initializer=keras.initializers.Zeros(),
             trainable=False,
         )
+        self.built = True
 
     def train_step(self, data):
         x, y = data
@@ -43,7 +44,8 @@ class CutAndCount(keras.Model):
         )
 
         # Call the model once to create the weights
-        _ = self(x)
+        if not self.built:
+            _ = self(x)
 
         cases = tf.cast(results[:, 2], tf.int32)  # type: ignore
         self.cases.assign(cases)
