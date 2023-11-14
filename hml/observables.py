@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from functools import reduce
 from itertools import product
 from typing import Any
 
@@ -441,6 +442,27 @@ class Charge(Observable):
             return obj.Charge
 
 
+class InvariantMass(Observable):
+    """Get the invariant mass of the object.
+
+    Available for single and multiple objects. For example:
+    - `Jet_0.InvariantMass` is the same as `Jet_0.Mass`.
+    - `Electron_0-Jet_0.InvariantMass` is the invariant mass of the leading
+        electron and leading jet.
+
+    Alias: InvMass
+    """
+
+    def get_value(self) -> Any:
+        for obj in self.objects:
+            if isinstance(obj, list):
+                raise ValueError(
+                    "InvariantMass is not available for collective objects"
+                )
+
+        return reduce(lambda i, j: i.P4() + j.P4(), self.objects).M()
+
+
 Px.add_alias("px")
 Py.add_alias("py")
 Pz.add_alias("pz")
@@ -462,3 +484,4 @@ PT = Pt
 Mass = M
 TauN = NSubjettiness
 TauMN = NSubjettinessRatio
+InvMass = InvariantMass
