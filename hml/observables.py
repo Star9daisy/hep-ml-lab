@@ -463,6 +463,26 @@ class InvariantMass(Observable):
         return reduce(lambda i, j: i.P4() + j.P4(), self.objects).M()
 
 
+class BTag(Observable):
+    """Get the b-tag of the object.
+
+    Available for single and multiple objects. For example:
+    - `Jet_0.BTag` is the b-tag of the leading jet.
+    - `Jet.BTag` is the b-tag of all jets.
+    """
+
+    def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
+        obj = self.objects[0]
+
+        if isinstance(obj, list):
+            return [i.BTag for i in obj]
+        else:
+            return obj.BTag
+
+
 Px.add_alias("px")
 Py.add_alias("py")
 Pz.add_alias("pz")
