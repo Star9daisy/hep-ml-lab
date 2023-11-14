@@ -419,6 +419,28 @@ class Size(Observable):
             return len(self.objects[0])
 
 
+class Charge(Observable):
+    """Get the charge of the object.
+
+    Available for single and multiple objects. For example:
+    - `Electron_0.Charge` is the charge of the leading electron.
+    - `Electron.Charge` is the charge of all electrons.
+
+    Alias: charge
+    """
+
+    def get_value(self) -> Any:
+        if len(self.objects) == 0:
+            return
+
+        obj = self.objects[0]
+
+        if isinstance(obj, list):
+            return [i.Charge for i in obj]
+        else:
+            return obj.Charge
+
+
 Px.add_alias("px")
 Py.add_alias("py")
 Pz.add_alias("pz")
@@ -433,6 +455,7 @@ NSubjettiness.add_alias("TauN")
 NSubjettinessRatio.add_alias("TauMN")
 
 Size.add_alias("size")
+Charge.add_alias("charge")
 
 Energy = E
 PT = Pt
