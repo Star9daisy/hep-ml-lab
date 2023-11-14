@@ -401,9 +401,19 @@ class NSubjettinessRatio(Observable):
 
         obj = self.objects[0]
         if isinstance(obj, list):
-            return [i.Tau[self.m - 1] / i.Tau[self.n - 1] for i in obj]
+            value = []
+            for i in obj:
+                if i.Tau[self.n - 1] == 0:
+                    value.append(float("nan"))
+                else:
+                    value.append(i.Tau[self.m - 1] / i.Tau[self.n - 1])
         else:
-            return obj.Tau[self.m - 1] / obj.Tau[self.n - 1]
+            if obj.Tau[self.n - 1] == 0:
+                value = float("nan")
+            else:
+                value = obj.Tau[self.m - 1] / obj.Tau[self.n - 1]
+
+        return value
 
 
 class Size(Observable):
