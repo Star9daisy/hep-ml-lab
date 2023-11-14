@@ -498,6 +498,7 @@ NSubjettinessRatio.add_alias("TauMN")
 
 Size.add_alias("size")
 Charge.add_alias("charge")
+InvariantMass.add_alias("InvMass")
 
 Energy = E
 PT = Pt
