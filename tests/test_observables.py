@@ -62,11 +62,14 @@ def test_Observable(tmp_path):
     obs1 = AngularDistance("Jet_0-Jet_1").read_event(event)
     obs2 = get_observable("Jet_0-Jet_1.DeltaR").read_event(event)
     obs3 = AngularDistance(phyobj_pairs=[("Jet", 0), ("Jet", 1)]).read_event(event)
-    assert obs1.name == obs2.name
+    # assert obs1.name == obs2.name
+    assert obs1.name == "Jet_0-Jet_1.AngularDistance"
+    assert obs2.name == "Jet_0-Jet_1.DeltaR"
+    assert obs3.name == "Jet_0-Jet_1.AngularDistance"
     assert obs1.value == obs2.value
-    assert obs1.name == obs3.name
+    # assert obs1.name == obs3.name
     assert obs1.value == obs3.value
-    assert repr(obs1) == f"Jet_0-Jet_1.DeltaR: {obs1.value}"
+    assert repr(obs1) == f"Jet_0-Jet_1.AngularDistance: {obs1.value}"
     assert obs1.to_numpy().shape == ()
 
     obs1 = NSubjettiness("FatJet_0", n=1).read_event(event)
