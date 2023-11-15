@@ -4,19 +4,19 @@ import pytest
 
 from hml.generators import Madgraph5
 from hml.observables import (
-    DeltaR,
-    E,
-    Eta,
-    M,
+    AngularDistance,
+    AzimuthalAngle,
+    Energy,
+    Mass,
+    MomentumX,
+    MomentumY,
+    MomentumZ,
     NSubjettiness,
     NSubjettinessRatio,
     Observable,
-    Phi,
-    Pt,
-    Px,
-    Py,
-    Pz,
+    PseudoRapidity,
     Size,
+    TransverseMomentum,
     get_observable,
 )
 
@@ -36,7 +36,16 @@ def test_Observable(tmp_path):
             if event.Jet.GetEntries() >= 2:
                 break
 
-    for obs_class in [Px, Py, Pz, E, Pt, Eta, Phi, M]:
+    for obs_class in [
+        MomentumX,
+        MomentumY,
+        MomentumZ,
+        Energy,
+        TransverseMomentum,
+        PseudoRapidity,
+        AzimuthalAngle,
+        Mass,
+    ]:
         obs1 = obs_class("Jet_0").read_event(event)
         obs2 = get_observable(f"Jet_0.{obs_class.__name__}").read_event(event)
         assert obs1.name == obs2.name
@@ -50,9 +59,9 @@ def test_Observable(tmp_path):
     assert obs1.name == obs3.name
     assert obs1.value == obs3.value
 
-    obs1 = DeltaR("Jet_0-Jet_1").read_event(event)
+    obs1 = AngularDistance("Jet_0-Jet_1").read_event(event)
     obs2 = get_observable("Jet_0-Jet_1.DeltaR").read_event(event)
-    obs3 = DeltaR(phyobj_pairs=[("Jet", 0), ("Jet", 1)]).read_event(event)
+    obs3 = AngularDistance(phyobj_pairs=[("Jet", 0), ("Jet", 1)]).read_event(event)
     assert obs1.name == obs2.name
     assert obs1.value == obs2.value
     assert obs1.name == obs3.name

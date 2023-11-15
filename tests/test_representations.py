@@ -1,5 +1,5 @@
 from hml.generators import Madgraph5
-from hml.observables import M, Pt
+from hml.observables import Mass, TransverseMomentum
 from hml.representations import Set
 from hml.utils import Filter
 
@@ -12,7 +12,7 @@ def test_Set(tmp_path):
         detector="delphes",
         settings={"iseed": 42, "nevents": 100},
     )
-    representation1 = Set([Pt("Jet0"), M("Jet1"), M("Jet0+Jet1")])
+    representation1 = Set([TransverseMomentum("Jet0"), Mass("Jet1"), Mass("Jet0+Jet1")])
     representation2 = Set(["Jet0.Pt", "Jet1.M", "Jet0+Jet1.M"])
 
     for event in run.events:
