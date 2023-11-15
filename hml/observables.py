@@ -40,7 +40,7 @@ class Observable(ABC):
         shortcut: str | None = None,
         object_pairs: list[tuple[str, int | None]] | None = None,
     ) -> None:
-        self.seprate_branch_name_and_index = "_"
+        self.separate_branch_name_and_index = "_"
         self.separate_objects = "-"
 
         if shortcut:
@@ -123,7 +123,7 @@ class Observable(ABC):
         objects = shortcut.split(self.separate_objects)
         for obj in objects:
             if "_" in obj:
-                branch_name, index = obj.split(self.seprate_branch_name_and_index)
+                branch_name, index = obj.split(self.separate_branch_name_and_index)
                 index = int(index)
             else:
                 branch_name, index = obj, None
@@ -136,7 +136,7 @@ class Observable(ABC):
         shortcuts = []
         for branch_name, index in object_pairs:
             if index is not None:
-                obj = f"{branch_name}{self.seprate_branch_name_and_index}{index}"
+                obj = f"{branch_name}{self.separate_branch_name_and_index}{index}"
             else:
                 obj = branch_name
             shortcuts.append(obj)
