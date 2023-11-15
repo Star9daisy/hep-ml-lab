@@ -34,7 +34,7 @@ def get_observable(name: str, **kwargs) -> Observable:
     if classname not in Observable.all_observables:
         raise ValueError(f"Observable {classname} not found")
 
-    return Observable.all_observables[classname](phyobj, **kwargs)
+    return Observable.all_observables[classname](phyobj, name=classname, **kwargs)
 
 
 class Observable(ABC):
@@ -49,6 +49,7 @@ class Observable(ABC):
         self,
         phyobj: str | None = None,
         phyobj_pairs: list[tuple[str, int | None]] | None = None,
+        name: str | None = None,
     ) -> None:
         self.sep_for_branch_and_index = "_"
         self.sep_for_phyobjs = "-"
@@ -63,6 +64,7 @@ class Observable(ABC):
             self.phyobj = None
             self.phyobj_pairs = None
 
+        self._name = self.__class__.__name__ if name is None else name
         self._value = None
 
     @property
@@ -72,9 +74,9 @@ class Observable(ABC):
         The name is composed of the shortcut and the class name, e.g. `Jet_0.Pt`.
         """
         if self.phyobj:
-            return f"{self.phyobj}.{self.__class__.__name__}"
+            return f"{self.phyobj}.{self._name}"
         else:
-            return self.__class__.__name__
+            return self._name
 
     @property
     def value(self) -> Any:
