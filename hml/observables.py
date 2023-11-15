@@ -27,14 +27,14 @@ def get_observable(name: str, **kwargs) -> Observable:
     between each particle and the leading FatJet.
     """
     if len(parts := name.split(".")) == 1:
-        shortcut, classname = "", parts[0]
+        phyobj, classname = "", parts[0]
     else:
-        shortcut, classname = parts
+        phyobj, classname = parts
 
     if classname not in Observable.all_observables:
         raise ValueError(f"Observable {classname} not found")
 
-    return Observable.all_observables[classname](shortcut, **kwargs)
+    return Observable.all_observables[classname](phyobj, **kwargs)
 
 
 class Observable(ABC):
@@ -47,21 +47,21 @@ class Observable(ABC):
 
     def __init__(
         self,
-        shortcut: str | None = None,
-        object_pairs: list[tuple[str, int | None]] | None = None,
+        phyobj: str | None = None,
+        phyobj_pairs: list[tuple[str, int | None]] | None = None,
     ) -> None:
-        self.separate_branch_name_and_index = "_"
-        self.separate_objects = "-"
+        self.sep_for_branch_and_index = "_"
+        self.sep_for_phyobjs = "-"
 
-        if shortcut:
-            self.shortcut = shortcut
-            self.object_pairs = self.parse_shortcut(shortcut)
-        elif object_pairs:
-            self.shortcut = self.build_shortcut(object_pairs)
-            self.object_pairs = object_pairs
+        if phyobj:
+            self.phyobj = phyobj
+            self.phyobj_pairs = self.parse_phyobj(phyobj)
+        elif phyobj_pairs:
+            self.phyobj = self.build_phyobj(phyobj_pairs)
+            self.phyobj_pairs = phyobj_pairs
         else:
-            self.shortcut = None
-            self.object_pairs = None
+            self.phyobj = None
+            self.phyobj_pairs = None
 
         self._value = None
 
@@ -71,8 +71,8 @@ class Observable(ABC):
 
         The name is composed of the shortcut and the class name, e.g. `Jet_0.Pt`.
         """
-        if self.shortcut:
-            return f"{self.shortcut}.{self.__class__.__name__}"
+        if self.phyobj:
+            return f"{self.phyobj}.{self.__class__.__name__}"
         else:
             return self.__class__.__name__
 
@@ -96,18 +96,18 @@ class Observable(ABC):
         calculated by calling the `get_value` method.
         """
         self.event = event
-        self.objects = []
+        self.phyobjs = []
         self._value = None
 
-        if self.object_pairs:
-            for branch_name, index in self.object_pairs:
+        if self.phyobj_pairs:
+            for branch_name, index in self.phyobj_pairs:
                 if branch_name in event.GetListOfBranches():
                     branch = getattr(event, branch_name)
 
                     if index is None:
-                        self.objects.append([i for i in branch])
+                        self.phyobjs.append([i for i in branch])
                     elif index < branch.GetEntries():
-                        self.objects.append(branch[index])
+                        self.phyobjs.append(branch[index])
 
         self._value = self.get_value()
 
@@ -127,30 +127,30 @@ class Observable(ABC):
         """
         ...  # pragma: no cover
 
-    def parse_shortcut(self, shortcut: str) -> list[tuple[str, int | None]]:
+    def parse_phyobj(self, phyobj: str) -> list[tuple[str, int | None]]:
         """Parse the shortcut to get the object pairs."""
-        object_pairs = []
-        objects = shortcut.split(self.separate_objects)
-        for obj in objects:
+        phyobj_pairs = []
+        phyobjs = phyobj.split(self.sep_for_phyobjs)
+        for obj in phyobjs:
             if "_" in obj:
-                branch_name, index = obj.split(self.separate_branch_name_and_index)
+                branch_name, index = obj.split(self.sep_for_branch_and_index)
                 index = int(index)
             else:
                 branch_name, index = obj, None
 
-            object_pairs.append((branch_name, index))
-        return object_pairs
+            phyobj_pairs.append((branch_name, index))
+        return phyobj_pairs
 
-    def build_shortcut(self, object_pairs: list[tuple[str, int | None]]) -> str:
+    def build_phyobj(self, phyobj_pairs: list[tuple[str, int | None]]) -> str:
         """Build the shortcut from the object pairs."""
-        shortcuts = []
-        for branch_name, index in object_pairs:
+        phyobjs = []
+        for branch_name, index in phyobj_pairs:
             if index is not None:
-                obj = f"{branch_name}{self.separate_branch_name_and_index}{index}"
+                obj = f"{branch_name}{self.sep_for_branch_and_index}{index}"
             else:
                 obj = branch_name
-            shortcuts.append(obj)
-        return self.separate_objects.join(shortcuts)
+            phyobjs.append(obj)
+        return self.sep_for_phyobjs.join(phyobjs)
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
@@ -174,10 +174,10 @@ class Px(Observable):
     """
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
         if isinstance(obj, list):
             return [i.P4().Px() for i in obj]
         else:
@@ -195,10 +195,10 @@ class Py(Observable):
     """
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
         if isinstance(obj, list):
             return [i.P4().Py() for i in obj]
         else:
@@ -216,10 +216,10 @@ class Pz(Observable):
     """
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
         if isinstance(obj, list):
             return [i.P4().Pz() for i in obj]
         else:
@@ -237,10 +237,10 @@ class E(Observable):
     """
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
         if isinstance(obj, list):
             return [i.P4().E() for i in obj]
         else:
@@ -258,10 +258,10 @@ class Pt(Observable):
     """
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
         if isinstance(obj, list):
             return [i.P4().Pt() for i in obj]
         else:
@@ -279,10 +279,10 @@ class Eta(Observable):
     """
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
         if isinstance(obj, list):
             return [i.P4().Eta() for i in obj]
         else:
@@ -300,10 +300,10 @@ class Phi(Observable):
     """
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
         if isinstance(obj, list):
             return [i.P4().Phi() for i in obj]
         else:
@@ -320,10 +320,10 @@ class M(Observable):
     Alias: m, mass, Mass"""
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
         if isinstance(obj, list):
             return [i.P4().M() for i in obj]
         else:
@@ -341,10 +341,10 @@ class DeltaR(Observable):
     """
 
     def get_value(self) -> Any:
-        if len(self.objects) != 2:
+        if len(self.phyobjs) != 2:
             return
 
-        obj1, obj2 = self.objects
+        obj1, obj2 = self.phyobjs
         obj1 = [obj1] if not isinstance(obj1, list) else obj1
         obj2 = [obj2] if not isinstance(obj2, list) else obj2
 
@@ -374,10 +374,10 @@ class NSubjettiness(Observable):
         self.n = n
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
         if isinstance(obj, list):
             return [i.Tau[self.n - 1] for i in obj]
         else:
@@ -406,10 +406,10 @@ class NSubjettinessRatio(Observable):
         self.n = n
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
         if isinstance(obj, list):
             value = []
             for i in obj:
@@ -436,8 +436,8 @@ class Size(Observable):
     """
 
     def get_value(self):
-        if len(self.objects) > 0:
-            return len(self.objects[0])
+        if len(self.phyobjs) > 0:
+            return len(self.phyobjs[0])
 
 
 class Charge(Observable):
@@ -451,10 +451,10 @@ class Charge(Observable):
     """
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
 
         if isinstance(obj, list):
             return [i.Charge for i in obj]
@@ -474,13 +474,13 @@ class InvariantMass(Observable):
     """
 
     def get_value(self) -> Any:
-        for obj in self.objects:
+        for obj in self.phyobjs:
             if isinstance(obj, list):
                 raise ValueError(
                     "InvariantMass is not available for collective objects"
                 )
 
-        return reduce(lambda i, j: i.P4() + j.P4(), self.objects).M()
+        return reduce(lambda i, j: i.P4() + j.P4(), self.phyobjs).M()
 
 
 class BTag(Observable):
@@ -492,10 +492,10 @@ class BTag(Observable):
     """
 
     def get_value(self) -> Any:
-        if len(self.objects) == 0:
+        if len(self.phyobjs) == 0:
             return
 
-        obj = self.objects[0]
+        obj = self.phyobjs[0]
 
         if isinstance(obj, list):
             return [i.BTag for i in obj]
