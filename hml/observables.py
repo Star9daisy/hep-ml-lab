@@ -388,8 +388,9 @@ class NSubjettiness(Observable):
         shortcut: str | None = None,
         object_pairs: list[tuple[str, int | None]] | None = None,
         n: int = 1,
+        **kwargs,
     ) -> None:
-        super().__init__(shortcut, object_pairs)
+        super().__init__(shortcut, object_pairs, **kwargs)
         self.n = n
 
     def get_value(self) -> float | list[float] | None:
@@ -424,8 +425,9 @@ class NSubjettinessRatio(Observable):
         object_pairs: list[tuple[str, int | None]] | None = None,
         m: int = 2,
         n: int = 1,
+        **kwargs,
     ) -> None:
-        super().__init__(shortcut, object_pairs)
+        super().__init__(shortcut, object_pairs, **kwargs)
         self.m = m
         self.n = n
 
