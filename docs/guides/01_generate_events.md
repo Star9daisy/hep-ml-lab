@@ -194,4 +194,4 @@ HML can handle three cases:
     Madgraph5Run.from_directory("./data/qcd/Events/run_01_0")
     ```
 
-Check the [doc](../api-reference/hml.generators.md) to learn more about `Madgraph5, Madgraph5MultiRun, Madgraph5Run`.
+Check the [doc](../api/hml.generators.md) to learn more about `Madgraph5, Madgraph5MultiRun, Madgraph5Run`.

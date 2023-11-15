@@ -149,4 +149,4 @@ dataset.save("./data/zjj_vs_qcd")
 - Utilize `feature_names` and `target_names` to enhance the readability of your data.
 - Include a brief `description` for your dataset.
 
-Check the doc to learn more about [observables](../api-reference/hml.observables.md), [representations](../api-reference/hml.representations.md) and [datasets](../api-reference/hml.datasets.md).
+Check the doc to learn more about [observables](../api/hml.observables.md), [representations](../api/hml.representations.md) and [datasets](../api/hml.datasets.md).
