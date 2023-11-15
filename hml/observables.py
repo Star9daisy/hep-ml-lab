@@ -10,11 +10,21 @@ from ROOT import TTree  # type: ignore
 
 
 def get_observable(name: str, **kwargs) -> Observable:
-    """Get an observable from its name.
+    """Get an observable according to its name.
 
-    An observable name is composed of two parts: the shortcut and the class name.
-    For example, `Jet_0.Pt` is the name of the `Pt` observable of the first jet,
-    in which `Jet_0` is the shortcut and `Pt` is the class name.
+    An observable name is composed of two parts: the physics object and the
+    observable class.
+
+    For example:
+
+    1. `Jet_0.Pt`: `Jet_0` is the single physics object (the
+    leading jet), and `Pt` is the observable class (TransverseMomentum);
+    2. `Electron.Charge`: `Electron` is the collective physics objects (all
+    electrons), and `Charge` is the observable class;
+    3. `Particle-FatJet_0.DeltaR`: `Particle-FatJet_0` are the multiple physics
+    objects (all particles and the leading FatJet), and `DeltaR` is the
+    observable class (AngularDistance). It calculates the angular distance
+    between each particle and the leading FatJet.
     """
     if len(parts := name.split(".")) == 1:
         shortcut, classname = "", parts[0]
