@@ -44,7 +44,7 @@ def test_Observable(tmp_path):
 
     obs1 = Size("Jet").read_event(event)
     obs2 = get_observable("Jet.Size").read_event(event)
-    obs3 = Size(object_pairs=[("Jet", None)]).read_event(event)
+    obs3 = Size(phyobj_pairs=[("Jet", None)]).read_event(event)
     assert obs1.name == obs2.name
     assert obs1.value == obs2.value
     assert obs1.name == obs3.name
@@ -52,7 +52,7 @@ def test_Observable(tmp_path):
 
     obs1 = DeltaR("Jet_0-Jet_1").read_event(event)
     obs2 = get_observable("Jet_0-Jet_1.DeltaR").read_event(event)
-    obs3 = DeltaR(object_pairs=[("Jet", 0), ("Jet", 1)]).read_event(event)
+    obs3 = DeltaR(phyobj_pairs=[("Jet", 0), ("Jet", 1)]).read_event(event)
     assert obs1.name == obs2.name
     assert obs1.value == obs2.value
     assert obs1.name == obs3.name
