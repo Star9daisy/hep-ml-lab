@@ -347,4 +347,4 @@ assert approach2.n_estimators_ == loaded_approach2.n_estimators_
 assert approach3.count_params() == loaded_approach3.count_params()
 ```
 
-Check the doc to learn more about [cuts](../api-reference/hml.approaches/cuts.md), [trees](../api-reference/hml.approaches/trees.md), and networks.
+Check the doc to learn more about [cuts](../api/hml.approaches/cuts.md), [trees](../api/hml.approaches/trees.md), and networks.
