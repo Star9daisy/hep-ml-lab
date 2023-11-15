@@ -165,17 +165,18 @@ class Observable(ABC):
             Observable.all_observables[i] = cls
 
 
-class Px(Observable):
+# MomentumX ------------------------------------------------------------------ #
+class MomentumX(Observable):
     """Get the x component of the momentum.
 
     Available for single and multiple objects. For example:
     - `Jet_0.Px` is the x component of the momentum of the leading jet.
     - `Jet.Px` is the x component of the momentum of all jets.
 
-    Alias: px
+    Alias: momentum_x, Px, px
     """
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -186,17 +187,22 @@ class Px(Observable):
             return obj.P4().Px()
 
 
-class Py(Observable):
+class Px(MomentumX):
+    pass
+
+
+# MomentumY ------------------------------------------------------------------ #
+class MomentumY(Observable):
     """Get the y component of the momentum.
 
     Available for single and multiple objects. For example:
     - `Jet_0.Py` is the y component of the momentum of the leading jet.
     - `Jet.Py` is the y component of the momentum of all jets.
 
-    Alias: py
+    Alias: momentum_y, Py, py
     """
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -207,17 +213,22 @@ class Py(Observable):
             return obj.P4().Py()
 
 
-class Pz(Observable):
+class Py(MomentumY):
+    pass
+
+
+# MomentumZ ------------------------------------------------------------------ #
+class MomentumZ(Observable):
     """Get the z component of the momentum.
 
     Available for single and multiple objects. For example:
     - `Jet_0.Pz` is the z component of the momentum of the leading jet.
     - `Jet.Pz` is the z component of the momentum of all jets.
 
-    Alias: pz
+    Alias: momentum_z, Pz, pz
     """
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -228,17 +239,22 @@ class Pz(Observable):
             return obj.P4().Pz()
 
 
-class E(Observable):
+class Pz(MomentumZ):
+    pass
+
+
+# Energy --------------------------------------------------------------------- #
+class Energy(Observable):
     """Get the energy of the object.
 
     Available for single and multiple objects. For example:
     - `Jet_0.E` is the energy of the leading jet.
     - `Jet.E` is the energy of all jets.
 
-    Alias: e, Energy
+    Alias: energy, E, e
     """
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -249,17 +265,22 @@ class E(Observable):
             return obj.P4().E()
 
 
-class Pt(Observable):
+class E(Energy):
+    pass
+
+
+# TransverseMomentum --------------------------------------------------------- #
+class TransverseMomentum(Observable):
     """Get the transverse momentum of the object.
 
     Available for single and multiple objects. For example:
     - `Jet_0.Pt` is the transverse momentum of the leading jet.
     - `Jet.Pt` is the transverse momentum of all jets.
 
-    Alias: pt, pT, PT
+    Alias: transverse_momentum, PT, Pt, pT, pt
     """
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -270,8 +291,13 @@ class Pt(Observable):
             return obj.P4().Pt()
 
 
-class Eta(Observable):
-    """Get the pseudorapidity of the object.
+class Pt(TransverseMomentum):
+    pass
+
+
+# PseudoRapidity ------------------------------------------------------------- #
+class PseudoRapidity(Observable):
+    """Get the pseudo-rapidity of the object.
 
     Available for single and multiple objects. For example:
     - `Jet_0.Eta` is the pseudorapidity of the leading jet.
@@ -280,7 +306,7 @@ class Eta(Observable):
     Alias: eta
     """
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -291,17 +317,22 @@ class Eta(Observable):
             return obj.P4().Eta()
 
 
-class Phi(Observable):
+class Eta(PseudoRapidity):
+    pass
+
+
+# AzimuthalAngle ------------------------------------------------------------- #
+class AzimuthalAngle(Observable):
     """Get the azimuthal angle of the object.
 
     Available for single and multiple objects. For example:
     - `Jet_0.Phi` is the azimuthal angle of the leading jet.
     - `Jet.Phi` is the azimuthal angle of all jets.
 
-    Alias: phi
+    Alias: azimuthal_angle, Phi, phi
     """
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -312,16 +343,22 @@ class Phi(Observable):
             return obj.P4().Phi()
 
 
-class M(Observable):
+class Phi(AzimuthalAngle):
+    pass
+
+
+# Mass ----------------------------------------------------------------------- #
+class Mass(Observable):
     """Get the mass of the object.
 
     Available for single and multiple objects. For example:
     - `Jet_0.M` is the mass of the leading jet.
     - `Jet.M` is the mass of all jets.
 
-    Alias: m, mass, Mass"""
+    Alias: mass, M, m
+    """
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -332,38 +369,18 @@ class M(Observable):
             return obj.P4().M()
 
 
-class DeltaR(Observable):
-    """Calculate the deltaR between two objects.
-
-    Available for two objects. For example:
-    - `Jet_0-Jet_1.DeltaR` is the deltaR between the leading two jets.
-    - `Jet_0-Jet.DeltaR` is the deltaR between the leading jet and all jets.
-    - `Jet-Jet.DeltaR` is the deltaR between all jets.
-
-    """
-
-    def get_value(self) -> Any:
-        if len(self.phyobjs) != 2:
-            return
-
-        obj1, obj2 = self.phyobjs
-        obj1 = [obj1] if not isinstance(obj1, list) else obj1
-        obj2 = [obj2] if not isinstance(obj2, list) else obj2
-
-        distances = []
-        for i, j in product(obj1, obj2):
-            distances.append(i.P4().DeltaR(j.P4()))
-
-        return distances[0] if len(distances) == 1 else distances
+class M(Mass):
+    pass
 
 
+# NSubjettiness -------------------------------------------------------------- #
 class NSubjettiness(Observable):
     """Get the n-subjettiness from the leaf Tau of the branch FatJet.
 
     Available for single FatJet objects. For example:
     - `FatJet_0.NSubjettiness` is the tau1 (by default) of the leading FatJet.
 
-    Alias: TauN
+    Alias: n_subjettiness, TauN, tau_n
     """
 
     def __init__(
@@ -375,7 +392,7 @@ class NSubjettiness(Observable):
         super().__init__(shortcut, object_pairs)
         self.n = n
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -386,6 +403,11 @@ class NSubjettiness(Observable):
             return obj.Tau[self.n - 1]
 
 
+class TauN(NSubjettiness):
+    pass
+
+
+# NSubjettinessRatio --------------------------------------------------------- #
 class NSubjettinessRatio(Observable):
     """Calculate the n-subjettiness ratio from the leaf Tau of the branch FatJet.
 
@@ -393,7 +415,7 @@ class NSubjettinessRatio(Observable):
     - `FatJet_0.NSubjettinessRatio` is the tau21 (by default) of the leading
     FatJet.
 
-    Alias: TauMN
+    Alias: n_subjetiness_ratio, TauMN, tau_mn
     """
 
     def __init__(
@@ -407,7 +429,7 @@ class NSubjettinessRatio(Observable):
         self.m = m
         self.n = n
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -428,72 +450,22 @@ class NSubjettinessRatio(Observable):
         return value
 
 
-class Size(Observable):
-    """The number of physics objects.
-
-    Available for single object. For example:
-    - `Jet.Size` is the number of jets.
-
-    Alias: size
-    """
-
-    def get_value(self):
-        if len(self.phyobjs) > 0:
-            return len(self.phyobjs[0])
+class TauMN(NSubjettinessRatio):
+    pass
 
 
-class Charge(Observable):
-    """Get the charge of the object.
-
-    Available for single and multiple objects. For example:
-    - `Electron_0.Charge` is the charge of the leading electron.
-    - `Electron.Charge` is the charge of all electrons.
-
-    Alias: charge
-    """
-
-    def get_value(self) -> Any:
-        if len(self.phyobjs) == 0:
-            return
-
-        obj = self.phyobjs[0]
-
-        if isinstance(obj, list):
-            return [i.Charge for i in obj]
-        else:
-            return obj.Charge
-
-
-class InvariantMass(Observable):
-    """Get the invariant mass of the object.
-
-    Available for single and multiple objects. For example:
-    - `Jet_0.InvariantMass` is the same as `Jet_0.Mass`.
-    - `Electron_0-Jet_0.InvariantMass` is the invariant mass of the leading
-        electron and leading jet.
-
-    Alias: InvMass
-    """
-
-    def get_value(self) -> Any:
-        for obj in self.phyobjs:
-            if isinstance(obj, list):
-                raise ValueError(
-                    "InvariantMass is not available for collective objects"
-                )
-
-        return reduce(lambda i, j: i.P4() + j.P4(), self.phyobjs).M()
-
-
+# BTag ----------------------------------------------------------------------- #
 class BTag(Observable):
     """Get the b-tag of the object.
 
     Available for single and multiple objects. For example:
     - `Jet_0.BTag` is the b-tag of the leading jet.
     - `Jet.BTag` is the b-tag of all jets.
+
+    Alias: b_tag
     """
 
-    def get_value(self) -> Any:
+    def get_value(self) -> float | list[float] | None:
         if len(self.phyobjs) == 0:
             return
 
@@ -505,26 +477,141 @@ class BTag(Observable):
             return obj.BTag
 
 
+# Charge --------------------------------------------------------------------- #
+class Charge(Observable):
+    """Get the charge of the object.
+
+    Available for single and multiple objects. For example:
+    - `Electron_0.Charge` is the charge of the leading electron.
+    - `Electron.Charge` is the charge of all electrons.
+
+    Alias: charge
+    """
+
+    def get_value(self) -> float | list[float] | None:
+        if len(self.phyobjs) == 0:
+            return
+
+        obj = self.phyobjs[0]
+
+        if isinstance(obj, list):
+            return [i.Charge for i in obj]
+        else:
+            return obj.Charge
+
+
+# Size ----------------------------------------------------------------------- #
+class Size(Observable):
+    """The number of physics objects.
+
+    Available for single object. For example:
+    - `Jet.Size` is the number of jets.
+
+    Alias: size
+    """
+
+    def get_value(self) -> float | list[float] | None:
+        if len(self.phyobjs) > 0:
+            return len(self.phyobjs[0])
+
+
+# AngularDistance ------------------------------------------------------------ #
+class AngularDistance(Observable):
+    """Calculate the angular distance between two objects.
+
+    Available for two objects. For example:
+    - `Jet_0-Jet_1.DeltaR` is the deltaR between the leading two jets.
+    - `Jet_0-Jet.DeltaR` is the deltaR between the leading jet and all jets.
+    - `Jet-Jet.DeltaR` is the deltaR between all jets.
+
+    Alias: angular_distance, DeltaR, delta_r
+    """
+
+    def get_value(self) -> float | list[float] | None:
+        if len(self.phyobjs) != 2:
+            return
+
+        obj1, obj2 = self.phyobjs
+        obj1 = [obj1] if not isinstance(obj1, list) else obj1
+        obj2 = [obj2] if not isinstance(obj2, list) else obj2
+
+        distances = []
+        for i, j in product(obj1, obj2):
+            distances.append(i.P4().DeltaR(j.P4()))
+
+        return distances[0] if len(distances) == 1 else distances
+
+
+class DeltaR(AngularDistance):
+    pass
+
+
+# InvariantMass -------------------------------------------------------------- #
+class InvariantMass(Observable):
+    """Get the invariant mass of the object.
+
+    Available for single and multiple objects. For example:
+    - `Jet_0.InvariantMass` is the same as `Jet_0.Mass`.
+    - `Electron_0-Jet_0.InvariantMass` is the invariant mass of the leading
+        electron and leading jet.
+
+    Alias: invariant_mass, InvMass, inv_mass, InvM, inv_m
+    """
+
+    def get_value(self) -> float | list[float] | None:
+        for obj in self.phyobjs:
+            if isinstance(obj, list):
+                raise ValueError(
+                    "InvariantMass is not available for collective objects"
+                )
+
+        return reduce(lambda i, j: i.P4() + j.P4(), self.phyobjs).M()
+
+
+class InvMass(InvariantMass):
+    pass
+
+
+class InvM(InvariantMass):
+    pass
+
+
+# Alias ---------------------------------------------------------------------- #
+# Px, Py, Pz, E
+MomentumX.add_alias("momentum_x")
+MomentumY.add_alias("momentum_y")
+MomentumZ.add_alias("momentum_z")
+Energy.add_alias("energy")
 Px.add_alias("px")
 Py.add_alias("py")
 Pz.add_alias("pz")
-E.add_alias("e", "Energy")
+E.add_alias("e")
 
-Pt.add_alias("pt", "pT", "PT")
+# Pt, Eta, Phi, M
+TransverseMomentum.add_alias("transverse_momentum")
+PseudoRapidity.add_alias("pseudo_rapidity")
+AzimuthalAngle.add_alias("azimuthal_angle")
+Mass.add_alias("mass")
+Pt.add_alias("PT", "pT", "pt")
 Eta.add_alias("eta")
 Phi.add_alias("phi")
-M.add_alias("m", "mass", "Mass")
+M.add_alias("m")
 
-NSubjettiness.add_alias("TauN")
-NSubjettinessRatio.add_alias("TauMN")
-
-Size.add_alias("size")
+# Other leaves
+BTag.add_alias("b_tag")
 Charge.add_alias("charge")
-InvariantMass.add_alias("InvMass")
+Size.add_alias("size")
 
-Energy = E
-PT = Pt
-Mass = M
-TauN = NSubjettiness
-TauMN = NSubjettinessRatio
-InvMass = InvariantMass
+# NSubjettiness
+NSubjettiness.add_alias("n_subjettiness")
+NSubjettinessRatio.add_alias("n_subjetiness_ratio")
+TauN.add_alias("tau_n")
+TauMN.add_alias("tau_mn")
+
+# Custom
+InvariantMass.add_alias("invariant_mass")
+InvMass.add_alias("inv_mass")
+InvM.add_alias("inv_m")
+
+AngularDistance.add_alias("angular_distance")
+DeltaR.add_alias("delta_r")
