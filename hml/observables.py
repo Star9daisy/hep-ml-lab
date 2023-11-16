@@ -71,7 +71,8 @@ class Observable(ABC):
     def name(self) -> str:
         """The name of the observable.
 
-        The name is composed of the shortcut and the class name, e.g. `Jet_0.Pt`.
+        The name is composed of the physics object and the class name, e.g.
+        `Jet_0.Pt`.
         """
         if self.phyobj:
             return f"{self.phyobj}.{self._name}"
@@ -92,7 +93,7 @@ class Observable(ABC):
         return f"{self.name}: {self.value}"
 
     def read(self, event: TTree) -> Observable:
-        """Read an event and fetch the needed physics objects.
+        """Read an event and fetch the physics objects.
 
         It creates three attributes: event, objects and _value. The _value is
         calculated by calling the `get_value` method.
@@ -122,7 +123,7 @@ class Observable(ABC):
         Implement this method to define a new observable. Here're common cases:
         1. Quick calculation: use `self.event` to get physics objects and write
         the calculation directly.
-        2. Take the advantage of Observable: use `self.objects` to do the
+        2. Take the advantage of Observable: use `self.phyobjs` to do the
         calculation.
 
         Return None if the observable is not correctly got.
@@ -130,7 +131,7 @@ class Observable(ABC):
         ...  # pragma: no cover
 
     def parse_phyobj(self, phyobj: str) -> list[tuple[str, int | None]]:
-        """Parse the shortcut to get the object pairs."""
+        """Parse the physics object string to get their pairs."""
         phyobj_pairs = []
         phyobjs = phyobj.split(self.sep_for_phyobjs)
         for obj in phyobjs:
@@ -144,7 +145,7 @@ class Observable(ABC):
         return phyobj_pairs
 
     def build_phyobj(self, phyobj_pairs: list[tuple[str, int | None]]) -> str:
-        """Build the shortcut from the object pairs."""
+        """Build the observable name from the physics object pairs."""
         phyobjs = []
         for branch_name, index in phyobj_pairs:
             if index is not None:
@@ -169,7 +170,7 @@ class Observable(ABC):
 class MomentumX(Observable):
     """Get the x component of the momentum.
 
-    Available for single and multiple objects. For example:
+    Available for single and collective physics objects. For example:
     - `Jet_0.Px` is the x component of the momentum of the leading jet.
     - `Jet.Px` is the x component of the momentum of all jets.
 
@@ -195,7 +196,7 @@ class Px(MomentumX):
 class MomentumY(Observable):
     """Get the y component of the momentum.
 
-    Available for single and multiple objects. For example:
+    Available for single and collective physics objects. For example:
     - `Jet_0.Py` is the y component of the momentum of the leading jet.
     - `Jet.Py` is the y component of the momentum of all jets.
 
@@ -221,7 +222,7 @@ class Py(MomentumY):
 class MomentumZ(Observable):
     """Get the z component of the momentum.
 
-    Available for single and multiple objects. For example:
+    Available for single and collective physics objects. For example:
     - `Jet_0.Pz` is the z component of the momentum of the leading jet.
     - `Jet.Pz` is the z component of the momentum of all jets.
 
@@ -247,7 +248,7 @@ class Pz(MomentumZ):
 class Energy(Observable):
     """Get the energy of the object.
 
-    Available for single and multiple objects. For example:
+    Available for single and collective physics objects. For example:
     - `Jet_0.E` is the energy of the leading jet.
     - `Jet.E` is the energy of all jets.
 
@@ -273,7 +274,7 @@ class E(Energy):
 class TransverseMomentum(Observable):
     """Get the transverse momentum of the object.
 
-    Available for single and multiple objects. For example:
+    Available for single and collective physics objects. For example:
     - `Jet_0.Pt` is the transverse momentum of the leading jet.
     - `Jet.Pt` is the transverse momentum of all jets.
 
@@ -299,7 +300,7 @@ class Pt(TransverseMomentum):
 class PseudoRapidity(Observable):
     """Get the pseudo-rapidity of the object.
 
-    Available for single and multiple objects. For example:
+    Available for single and collective physics objects. For example:
     - `Jet_0.Eta` is the pseudorapidity of the leading jet.
     - `Jet.Eta` is the pseudorapidity of all jets.
 
@@ -325,7 +326,7 @@ class Eta(PseudoRapidity):
 class AzimuthalAngle(Observable):
     """Get the azimuthal angle of the object.
 
-    Available for single and multiple objects. For example:
+    Available for single and collective physics objects. For example:
     - `Jet_0.Phi` is the azimuthal angle of the leading jet.
     - `Jet.Phi` is the azimuthal angle of all jets.
 
@@ -351,7 +352,7 @@ class Phi(AzimuthalAngle):
 class Mass(Observable):
     """Get the mass of the object.
 
-    Available for single and multiple objects. For example:
+    Available for single and collective physics objects. For example:
     - `Jet_0.M` is the mass of the leading jet.
     - `Jet.M` is the mass of all jets.
 
@@ -377,8 +378,9 @@ class M(Mass):
 class NSubjettiness(Observable):
     """Get the n-subjettiness from the leaf Tau of the branch FatJet.
 
-    Available for single FatJet objects. For example:
+    Available for single and collective FatJet objects. For example:
     - `FatJet_0.NSubjettiness` is the tau1 (by default) of the leading FatJet.
+    - `FatJet.NSubjettiness` is the tau1 of all FatJets.
 
     Alias: n_subjettiness, TauN, tau_n
     """
@@ -412,8 +414,9 @@ class TauN(NSubjettiness):
 class NSubjettinessRatio(Observable):
     """Calculate the n-subjettiness ratio from the leaf Tau of the branch FatJet.
 
-    Available for single FatJet objects. For example:
+    Available for single and collective FatJet objects. For example:
     - `FatJet_0.NSubjettinessRatio` is the tau21 (by default) of the leading
+    - `FatJet.NSubjettinessRatio` is the tau21 of all FatJets.
     FatJet.
 
     Alias: n_subjetiness_ratio, TauMN, tau_mn
@@ -458,9 +461,9 @@ class TauMN(NSubjettinessRatio):
 
 # BTag ----------------------------------------------------------------------- #
 class BTag(Observable):
-    """Get the b-tag of the object.
+    """Get the b-tag of the physics object.
 
-    Available for single and multiple objects. For example:
+    Available for single and collective physics objects. For example:
     - `Jet_0.BTag` is the b-tag of the leading jet.
     - `Jet.BTag` is the b-tag of all jets.
 
@@ -483,7 +486,7 @@ class BTag(Observable):
 class Charge(Observable):
     """Get the charge of the object.
 
-    Available for single and multiple objects. For example:
+    Available for single and collective physics objects. For example:
     - `Electron_0.Charge` is the charge of the leading electron.
     - `Electron.Charge` is the charge of all electrons.
 
@@ -506,7 +509,7 @@ class Charge(Observable):
 class Size(Observable):
     """The number of physics objects.
 
-    Available for single object. For example:
+    Available for collective object. For example:
     - `Jet.Size` is the number of jets.
 
     Alias: size
@@ -521,7 +524,7 @@ class Size(Observable):
 class AngularDistance(Observable):
     """Calculate the angular distance between two objects.
 
-    Available for two objects. For example:
+    Available for multiple(two) physics objects. For example:
     - `Jet_0-Jet_1.DeltaR` is the deltaR between the leading two jets.
     - `Jet_0-Jet.DeltaR` is the deltaR between the leading jet and all jets.
     - `Jet-Jet.DeltaR` is the deltaR between all jets.
@@ -552,7 +555,7 @@ class DeltaR(AngularDistance):
 class InvariantMass(Observable):
     """Get the invariant mass of the object.
 
-    Available for single and multiple objects. For example:
+    Available for multiple physics objects. For example:
     - `Jet_0.InvariantMass` is the same as `Jet_0.Mass`.
     - `Electron_0-Jet_0.InvariantMass` is the invariant mass of the leading
         electron and leading jet.
