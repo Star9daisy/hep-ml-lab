@@ -30,9 +30,9 @@ class Set:
         self.names = [obs.name for obs in self.observables]
         self.values = []
 
-    def read_event(self, event) -> None:
+    def read(self, event) -> None:
         for obs in self.observables:
-            obs.read_event(event)
+            obs.read(event)
 
         self.values.append([obs.value for obs in self.observables])
 
