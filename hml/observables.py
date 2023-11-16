@@ -520,6 +520,36 @@ class Size(Observable):
             return len(self.phyobjs[0])
 
 
+# InvariantMass -------------------------------------------------------------- #
+class InvariantMass(Observable):
+    """Get the invariant mass of the object.
+
+    Available for multiple physics objects. For example:
+    - `Jet_0.InvariantMass` is the same as `Jet_0.Mass`.
+    - `Electron_0-Jet_0.InvariantMass` is the invariant mass of the leading
+        electron and leading jet.
+
+    Alias: invariant_mass, InvMass, inv_mass, InvM, inv_m
+    """
+
+    def get_value(self) -> float | list[float] | None:
+        for obj in self.phyobjs:
+            if isinstance(obj, list):
+                raise ValueError(
+                    "InvariantMass is not available for collective objects"
+                )
+
+        return reduce(lambda i, j: i.P4() + j.P4(), self.phyobjs).M()
+
+
+class InvMass(InvariantMass):
+    pass
+
+
+class InvM(InvariantMass):
+    pass
+
+
 # AngularDistance ------------------------------------------------------------ #
 class AngularDistance(Observable):
     """Calculate the angular distance between two objects.
@@ -548,36 +578,6 @@ class AngularDistance(Observable):
 
 
 class DeltaR(AngularDistance):
-    pass
-
-
-# InvariantMass -------------------------------------------------------------- #
-class InvariantMass(Observable):
-    """Get the invariant mass of the object.
-
-    Available for multiple physics objects. For example:
-    - `Jet_0.InvariantMass` is the same as `Jet_0.Mass`.
-    - `Electron_0-Jet_0.InvariantMass` is the invariant mass of the leading
-        electron and leading jet.
-
-    Alias: invariant_mass, InvMass, inv_mass, InvM, inv_m
-    """
-
-    def get_value(self) -> float | list[float] | None:
-        for obj in self.phyobjs:
-            if isinstance(obj, list):
-                raise ValueError(
-                    "InvariantMass is not available for collective objects"
-                )
-
-        return reduce(lambda i, j: i.P4() + j.P4(), self.phyobjs).M()
-
-
-class InvMass(InvariantMass):
-    pass
-
-
-class InvM(InvariantMass):
     pass
 
 
