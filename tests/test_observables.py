@@ -46,7 +46,7 @@ def test_Observable(tmp_path):
         AzimuthalAngle,
         Mass,
     ]:
-        obs1 = obs_class("Jet_0").read_event(event)
+        obs1 = obs_class("Jet_0").read(event)
         obs2 = get_observable(f"Jet_0.{obs_class.__name__}").read(event)
         assert obs1.name == obs2.name
         assert obs1.value == obs2.value
