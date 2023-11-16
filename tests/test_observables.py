@@ -47,21 +47,21 @@ def test_Observable(tmp_path):
         Mass,
     ]:
         obs1 = obs_class("Jet_0").read_event(event)
-        obs2 = get_observable(f"Jet_0.{obs_class.__name__}").read_event(event)
+        obs2 = get_observable(f"Jet_0.{obs_class.__name__}").read(event)
         assert obs1.name == obs2.name
         assert obs1.value == obs2.value
 
-    obs1 = Size("Jet").read_event(event)
-    obs2 = get_observable("Jet.Size").read_event(event)
-    obs3 = Size(phyobj_pairs=[("Jet", None)]).read_event(event)
+    obs1 = Size("Jet").read(event)
+    obs2 = get_observable("Jet.Size").read(event)
+    obs3 = Size(phyobj_pairs=[("Jet", None)]).read(event)
     assert obs1.name == obs2.name
     assert obs1.value == obs2.value
     assert obs1.name == obs3.name
     assert obs1.value == obs3.value
 
-    obs1 = AngularDistance("Jet_0-Jet_1").read_event(event)
-    obs2 = get_observable("Jet_0-Jet_1.DeltaR").read_event(event)
-    obs3 = AngularDistance(phyobj_pairs=[("Jet", 0), ("Jet", 1)]).read_event(event)
+    obs1 = AngularDistance("Jet_0-Jet_1").read(event)
+    obs2 = get_observable("Jet_0-Jet_1.DeltaR").read(event)
+    obs3 = AngularDistance(phyobj_pairs=[("Jet", 0), ("Jet", 1)]).read(event)
     # assert obs1.name == obs2.name
     assert obs1.name == "Jet_0-Jet_1.AngularDistance"
     assert obs2.name == "Jet_0-Jet_1.DeltaR"
@@ -72,13 +72,13 @@ def test_Observable(tmp_path):
     assert repr(obs1) == f"Jet_0-Jet_1.AngularDistance: {obs1.value}"
     assert obs1.to_numpy().shape == ()
 
-    obs1 = NSubjettiness("FatJet_0", n=1).read_event(event)
-    obs2 = get_observable("FatJet_0.NSubjettiness", n=1).read_event(event)
+    obs1 = NSubjettiness("FatJet_0", n=1).read(event)
+    obs2 = get_observable("FatJet_0.NSubjettiness", n=1).read(event)
     assert obs1.name == obs2.name
     assert obs1.value == obs2.value
 
-    obs1 = NSubjettinessRatio("FatJet_0", m=2, n=1).read_event(event)
-    obs2 = get_observable("FatJet_0.NSubjettinessRatio", m=2, n=1).read_event(event)
+    obs1 = NSubjettinessRatio("FatJet_0", m=2, n=1).read(event)
+    obs2 = get_observable("FatJet_0.NSubjettinessRatio", m=2, n=1).read(event)
     assert obs1.name == obs2.name
     assert obs1.value == obs2.value
 
@@ -89,5 +89,5 @@ def test_Observable(tmp_path):
         def get_value(self) -> Any:
             return 1.0
 
-    dummy = get_observable("Dummy").read_event(event)
+    dummy = get_observable("Dummy").read(event)
     assert dummy.name == "Dummy"

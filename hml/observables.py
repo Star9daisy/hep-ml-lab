@@ -91,7 +91,7 @@ class Observable(ABC):
         """The representation of the observable."""
         return f"{self.name}: {self.value}"
 
-    def read_event(self, event: TTree) -> Observable:
+    def read(self, event: TTree) -> Observable:
         """Read an event and fetch the needed physics objects.
 
         It creates three attributes: event, objects and _value. The _value is
