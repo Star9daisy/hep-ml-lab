@@ -524,7 +524,8 @@ class Size(Observable):
 class InvariantMass(Observable):
     """Get the invariant mass of the object.
 
-    Available for multiple physics objects. For example:
+    Available for single and multiple physics objects. When it is the single
+    case, InvariantMass is the same as Mass. For example:
     - `Jet_0.InvariantMass` is the same as `Jet_0.Mass`.
     - `Electron_0-Jet_0.InvariantMass` is the invariant mass of the leading
         electron and leading jet.
