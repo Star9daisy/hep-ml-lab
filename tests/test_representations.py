@@ -17,8 +17,8 @@ def test_Set(tmp_path):
 
     for event in run.events:
         if Filter(["Jet.Size >= 2"]).read_event(event).passed():
-            representation1.read_event(event)
-            representation2.read_event(event)
+            representation1.read(event)
+            representation2.read(event)
             break
 
     assert representation1.values is not None
