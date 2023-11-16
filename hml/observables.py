@@ -563,7 +563,7 @@ class AngularDistance(Observable):
     Alias: angular_distance, DeltaR, delta_r
     """
 
-    def get_value(self) -> float | list[float] | None:
+    def get_value(self) -> float | list[float] | list[list[float]] | None:
         if len(self.phyobjs) != 2:
             return
 
