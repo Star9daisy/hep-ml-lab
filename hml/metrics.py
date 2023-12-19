@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import tensorflow as tf
+from keras import ops
 from keras.metrics import (
     FalsePositives,
     Metric,
@@ -18,34 +18,41 @@ class MaxSignificance(Metric):
         dtype=None,
     ):
         super().__init__(name, dtype)
-
         self.class_id = class_id
         self.tp = TruePositives(thresholds=thresholds, dtype=dtype)
         self.fp = FalsePositives(thresholds=thresholds, dtype=dtype)
 
-    def update_state(self, y_true, y_pred, sample_weight=None):  # pragma: no cover
-        y_true = tf.convert_to_tensor(y_true)
-        y_pred = tf.convert_to_tensor(y_pred)
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_true = ops.convert_to_tensor(y_true)
+        y_pred = ops.convert_to_tensor(y_pred)
 
-        if tf.rank(y_true) == 2 and tf.shape(y_true)[-1] > 1:
-            y_true = tf.gather(y_true, self.class_id, axis=-1)
+        y_true = ops.cond(
+            ops.logical_and(
+                ops.greater(ops.ndim(y_true), 1),
+                ops.greater(ops.shape(y_true)[-1], 1),
+            ),
+            lambda: ops.take(y_true, self.class_id, axis=-1),
+            lambda: y_true,
+        )
 
-        if tf.rank(y_pred) == 2 and tf.shape(y_pred)[-1] > 1:
-            y_pred = tf.gather(y_pred, self.class_id, axis=-1)
+        y_pred = ops.cond(
+            ops.logical_and(
+                ops.greater(ops.ndim(y_pred), 1),
+                ops.greater(ops.shape(y_pred)[-1], 1),
+            ),
+            lambda: ops.take(y_pred, self.class_id, axis=-1),
+            lambda: y_pred,
+        )
 
         self.tp.update_state(y_true, y_pred, sample_weight)
         self.fp.update_state(y_true, y_pred, sample_weight)
 
-    def result(self):  # pragma: no cover
+    def result(self):
         s = self.tp.result()
         b = self.fp.result()
-        significance = s / tf.sqrt(s + b)
-        max_significance = tf.reduce_max(significance)
+        significance = ops.divide(s, ops.sqrt(s + b))
+        max_significance = ops.max(significance)
         return max_significance
-
-    def reset_state(self):  # pragma: no cover
-        self.tp.reset_state()
-        self.fp.reset_state()
 
 
 class RejectionAtEfficiency(Metric):
@@ -54,7 +61,7 @@ class RejectionAtEfficiency(Metric):
         efficiency,
         num_thresholds=200,
         class_id=None,
-        name=None,
+        name="rejection_at_efficiency",
         dtype=None,
     ):
         super().__init__(name, dtype)
@@ -62,24 +69,20 @@ class RejectionAtEfficiency(Metric):
             sensitivity=efficiency,
             num_thresholds=num_thresholds,
             class_id=class_id,
-            name=name,
             dtype=dtype,
         )
 
-    def update_state(self, y_true, y_pred, sample_weight=None):  # pragma: no cover
-        y_true = tf.convert_to_tensor(y_true)
-        y_pred = tf.convert_to_tensor(y_pred)
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_true = ops.convert_to_tensor(y_true)
+        y_pred = ops.convert_to_tensor(y_pred)
 
         if y_true.shape != y_pred.shape:
             n_classes = y_pred.shape[-1]
-            y_true = tf.one_hot(tf.squeeze(y_true), n_classes, dtype=tf.int32)
+            y_true = ops.one_hot(ops.squeeze(y_true), n_classes, dtype="int32")
 
         self.specificity_at_sensitivity.update_state(y_true, y_pred, sample_weight)
 
-    def result(self):  # pragma: no cover
-        fpr = 1 - self.specificity_at_sensitivity.result()
-        rejection = 1 / fpr
+    def result(self):
+        fpr = ops.subtract(1, self.specificity_at_sensitivity.result())
+        rejection = ops.divide(1, fpr)
         return rejection
-
-    def reset_state(self):  # pragma: no cover
-        self.specificity_at_sensitivity.reset_state()
