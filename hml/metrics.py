@@ -4,6 +4,7 @@ from keras import ops
 from keras.metrics import (
     FalsePositives,
     Metric,
+    Precision,
     SpecificityAtSensitivity,
     TruePositives,
 )
@@ -23,26 +24,11 @@ class MaxSignificance(Metric):
         self.fp = FalsePositives(thresholds=thresholds, dtype=dtype)
 
     def update_state(self, y_true, y_pred, sample_weight=None):
-        y_true = ops.convert_to_tensor(y_true)
-        y_pred = ops.convert_to_tensor(y_pred)
+        y_t_ndim = ops.ndim(ops.squeeze(y_true))
+        y_p_ndim = ops.ndim(ops.squeeze(y_pred))
 
-        y_true = ops.cond(
-            ops.logical_and(
-                ops.greater(ops.ndim(y_true), 1),
-                ops.greater(ops.shape(y_true)[-1], 1),
-            ),
-            lambda: ops.take(y_true, self.class_id, axis=-1),
-            lambda: y_true,
-        )
-
-        y_pred = ops.cond(
-            ops.logical_and(
-                ops.greater(ops.ndim(y_pred), 1),
-                ops.greater(ops.shape(y_pred)[-1], 1),
-            ),
-            lambda: ops.take(y_pred, self.class_id, axis=-1),
-            lambda: y_pred,
-        )
+        y_true = ops.argmax(y_true, -1) if y_t_ndim == 2 else y_true
+        y_pred = ops.take(y_pred, self.class_id, -1) if y_p_ndim == 2 else y_pred
 
         self.tp.update_state(y_true, y_pred, sample_weight)
         self.fp.update_state(y_true, y_pred, sample_weight)
@@ -73,11 +59,8 @@ class RejectionAtEfficiency(Metric):
         )
 
     def update_state(self, y_true, y_pred, sample_weight=None):
-        y_true = ops.convert_to_tensor(y_true)
-        y_pred = ops.convert_to_tensor(y_pred)
-
-        if y_true.shape != y_pred.shape:
-            n_classes = y_pred.shape[-1]
+        if ops.shape(y_true) != ops.shape(y_pred):
+            n_classes = ops.shape(y_pred)[-1]
             y_true = ops.one_hot(ops.squeeze(y_true), n_classes, dtype="int32")
 
         self.specificity_at_sensitivity.update_state(y_true, y_pred, sample_weight)
