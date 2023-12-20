@@ -34,6 +34,10 @@ class CutAndCount(keras.Model):
     def train_step(self, data):
         x, y = data
 
+        # Call the model once to create the weights
+        if not self.built:
+            _ = self(x)
+
         # Loop over all features to get best results for each feature
         # I: (n_samples,), (n_samples, ?)
         # O: (n_features, 3): (cut0, cut1, case)
@@ -43,18 +47,15 @@ class CutAndCount(keras.Model):
             fn_output_signature=tf.float32,
         )
 
-        # Call the model once to create the weights
-        if not self.built:
-            _ = self(x)
-
         cases = tf.cast(results[:, 2], tf.int32)  # type: ignore
         self.cases.assign(cases)
         self.cuts.assign(results[:, :2])  # type: ignore
         y_pred = self(x)
 
         loss = self.compute_loss(y=y, y_pred=y_pred)
-        self.compiled_metrics.update_state(y, y_pred)  # type: ignore
+        # self.compiled_metrics.update_state(y, y_pred)  # type: ignore
 
+        # return {m.name: m.result() for m in self.metrics}
         for metric in self.metrics:
             if metric.name == "loss":
                 metric.update_state(loss)
@@ -152,28 +153,28 @@ class CutAndCount(keras.Model):
         # Turn the predictions into one-hot encoding
         y_pred0 = tf.concat([1 - y_pred0[:, None], y_pred0[:, None]], axis=1)
         loss0 = self.compute_loss(y=y, y_pred=y_pred0)
-        self.compiled_loss.reset_state()  # type: ignore
+        # self.compiled_loss.reset_state()  # type: ignore
 
         # Case 1: signal on the right
         on_right = x >= cut0
         y_pred1 = tf.where(on_right, 1.0, 0.0)
         y_pred1 = tf.concat([1 - y_pred1[:, None], y_pred1[:, None]], axis=1)
         loss1 = self.compute_loss(y=y, y_pred=y_pred1)
-        self.compiled_loss.reset_state()  # type: ignore
+        # self.compiled_loss.reset_state()  # type: ignore
 
         # Case 2: signal in the middle
         in_middle = tf.math.logical_and(x >= cut0, x <= cut1)
         y_pred2 = tf.where(in_middle, 1.0, 0.0)
         y_pred2 = tf.concat([1 - y_pred2[:, None], y_pred2[:, None]], axis=1)
         loss2 = self.compute_loss(y=y, y_pred=y_pred2)
-        self.compiled_loss.reset_state()  # type: ignore
+        # self.compiled_loss.reset_state()  # type: ignore
 
         # Case 3: signal on both sides
         on_both_sides = tf.math.logical_or(x <= cut0, x >= cut1)
         y_pred3 = tf.where(on_both_sides, 1.0, 0.0)
         y_pred3 = tf.concat([1 - y_pred3[:, None], y_pred3[:, None]], axis=1)
         loss3 = self.compute_loss(y=y, y_pred=y_pred3)
-        self.compiled_loss.reset_state()  # type: ignore
+        # self.compiled_loss.reset_state()  # type: ignore
 
         losses_and_cases = tf.concat(
             [
