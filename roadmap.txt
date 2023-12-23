@@ -1,0 +1,20 @@
+New observable naming convention
+
+The observable name contains two parts:
+1. Physics object name;
+2. Observable class name.
+
+The physics object name consists of two parts:
+1. Branch name;
+2. Index.
+
+And it could be categorized into three types according to different combinations
+of the branch name and index:
+1. Single: the index is an integer, e.g. "Jet0", "Muon1", "Photon2";
+2. Collective: the index is not specified, e.g. "Jet", "Muon", "Photon"; Or the
+    index represents a range, e.g. "Jet1:", "Muon:2", "Photon1:3";
+3. Multiple: this is the combination of the above two types and separated by
+    comma, e.g. "Jet0,Muon1,Photon2", "Jet,Muon:2,Photon1:3".
+
+For different types of physics objects, one still needs to make sure whether the
+observable class supports it.
