@@ -19,6 +19,7 @@ class Filter:
         self.cuts = cuts
         self.stat = OrderedDict({cut: 0 for cut in cuts})
 
+    # TODO fix it as read
     def read_event(self, event):
         """Read the event from a TTree."""
         self.event = event
@@ -27,6 +28,7 @@ class Filter:
     def passed(self):
         """Check if the event passed the cuts."""
 
+        # TODO: fix the pattern, currently it only supports "Jet_0.PT" not available for "Jet_0-Jet_1.InvM"
         def _replace_with_value(match):
             """Replace the string name of an observable with its value."""
             observable_name = match.group(0)  # complete match
