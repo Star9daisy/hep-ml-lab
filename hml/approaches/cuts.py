@@ -310,14 +310,14 @@ class CutLayer(keras.layers.Layer):
             self.case.assign(case)
 
     def call(self, inputs, targets=None, sample_weight=None):
+        x = inputs
+        y = targets
+        x = ops.take(x, self.feature_id, -1)
         self.sample_weight = sample_weight
-        x = ops.convert_to_tensor(inputs, "float32")
 
-        if targets is not None and self.loss_fn is not None:
-            y = ops.convert_to_tensor(targets, "int32")
-            y = ops.argmax(y, -1) if y.ndim > 1 else y
+        if y is not None and self.loss_fn is not None:
+            y = ops.argmax(y, -1) if ops.ndim(y) > 1 else y  # type: ignore
 
-            x = ops.take(inputs, self.feature_id, -1)
             x_min = ops.min(x)
             x_max = ops.max(x)
             bin_edges = ops.linspace(x_min, x_max, self.n_bins + 1)
