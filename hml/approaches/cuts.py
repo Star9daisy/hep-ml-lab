@@ -278,6 +278,7 @@ def ops_unique(tensor):
         return ops.array([0])
 
 
+@keras.saving.register_keras_serializable()
 class CutLayer(keras.layers.Layer):
     def __init__(
         self,
@@ -286,8 +287,9 @@ class CutLayer(keras.layers.Layer):
         n_bins=50,
         feature_id=0,
         loss_fn: Callable | str = "binary_crossentropy",
+        **kwargs,
     ):
-        super().__init__()
+        super().__init__(**kwargs)
 
         self.n_bins = n_bins
         self.feature_id = feature_id
@@ -425,3 +427,14 @@ class CutLayer(keras.layers.Layer):
 
     def compute_output_shape(self, input_shape):
         return input_shape
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "n_bins": self.n_bins,
+                "feature_id": self.feature_id,
+                "loss_fn": self.loss_fn,
+            }
+        )
+        return config
