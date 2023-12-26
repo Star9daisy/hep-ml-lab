@@ -265,13 +265,16 @@ def ops_histogram_fixed_width(values, value_range, nbins, dtype="int32"):
 
 def ops_unique(tensor):
     sorted_tensor, sorted_indices = ops.sort(tensor), ops.argsort(tensor)
-    unique_indices = ops.append(
-        [0], ops.where(ops.not_equal(sorted_tensor[1:], sorted_tensor[:-1]))[0] + 1
-    )
-    unique_elements = ops.take(sorted_tensor, unique_indices)
-    # unique_indices = ops.take(sorted_indices, unique_indices)
+    selection = ops.not_equal(sorted_tensor[1:], sorted_tensor[:-1])
+    selection = ops.add(ops.squeeze(ops.where(selection), 0), 1)
+    unique_indices = ops.append([0], selection)
 
-    return unique_elements
+    try:
+        unique_elements = ops.take(sorted_tensor, unique_indices)
+        unique_indices = ops.take(sorted_indices, unique_indices)
+        return unique_elements
+    except:
+        return ops.array([0])
 
 
 class CutLayer(keras.layers.Layer):
