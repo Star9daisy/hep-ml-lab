@@ -322,16 +322,8 @@ class CutLayer(keras.layers.Layer):
             x_max = ops.max(x)
             bin_edges = ops.linspace(x_min, x_max, self.n_bins + 1)
 
-            is_bkg = ops.where(ops.equal(y, 0))
-            is_sig = ops.where(ops.equal(y, 1))
-
-            is_sig = is_sig[0] if isinstance(is_sig, tuple) else is_sig
-            is_bkg = is_bkg[0] if isinstance(is_bkg, tuple) else is_bkg
-
-            is_sig = ops.convert_to_tensor(is_sig, "int32")
-            is_bkg = ops.convert_to_tensor(is_bkg, "int32")
-            is_sig = ops.squeeze(is_sig, 0) if is_sig.ndim > 1 else is_sig
-            is_bkg = ops.squeeze(is_bkg, 0) if is_bkg.ndim > 1 else is_bkg
+            is_bkg = ops.squeeze(ops.where(ops.equal(y, 0)), 0)
+            is_sig = ops.squeeze(ops.where(ops.equal(y, 1)), 0)
 
             x0 = ops.take(x, is_bkg)
             x1 = ops.take(x, is_sig)
