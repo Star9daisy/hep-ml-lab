@@ -1,6 +1,7 @@
+from typing import Callable
+
 import keras
 import tensorflow as tf
-from typing import Callable
 from keras import losses, ops
 
 
@@ -242,8 +243,8 @@ class CutAndCount(keras.Model):
 def ops_histogram_fixed_width(values, value_range, nbins, dtype="int32"):
     value_min, value_max = value_range
     bin_edges = ops.linspace(value_min, value_max, nbins + 1)
-    lower = bin_edges[:-1]
-    upper = bin_edges[1:]
+    lower = bin_edges[:-1]  # type: ignore
+    upper = bin_edges[1:]  # type: ignore
 
     return ops.fori_loop(
         0,
@@ -265,7 +266,7 @@ def ops_histogram_fixed_width(values, value_range, nbins, dtype="int32"):
 
 def ops_unique(tensor):
     sorted_tensor, sorted_indices = ops.sort(tensor), ops.argsort(tensor)
-    selection = ops.not_equal(sorted_tensor[1:], sorted_tensor[:-1])
+    selection = ops.not_equal(sorted_tensor[1:], sorted_tensor[:-1])  # type: ignore
     selection = ops.add(ops.squeeze(ops.where(selection), 0), 1)
     unique_indices = ops.append([0], selection)
 
@@ -331,20 +332,20 @@ class CutLayer(keras.layers.Layer):
             hist0 = ops_histogram_fixed_width(x0, [x_min, x_max], self.n_bins)
             hist1 = ops_histogram_fixed_width(x1, [x_min, x_max], self.n_bins)
 
-            curr_case0 = ops.greater(hist0, hist1)[:-1]
-            next_case0 = ops.greater(hist0, hist1)[1:]
+            curr_case0 = ops.greater(hist0, hist1)[:-1]  # type: ignore
+            next_case0 = ops.greater(hist0, hist1)[1:]  # type: ignore
             is_on_boundary0 = ops.logical_xor(curr_case0, next_case0)
-            is_not_empty0 = hist0[:-1] > 0
+            is_not_empty0 = hist0[:-1] > 0  # type: ignore
             is_candidate0 = ops.logical_and(is_on_boundary0, is_not_empty0)
-            candidate_indices0 = ops.squeeze(ops.where(is_candidate0), 0) + 1
+            candidate_indices0 = ops.add(ops.squeeze(ops.where(is_candidate0), 0), 1)
             candidates0 = ops.take(bin_edges, candidate_indices0)
 
-            curr_case1 = ops.greater(hist1, hist0)[:-1]
-            next_case1 = ops.greater(hist1, hist0)[1:]
+            curr_case1 = ops.greater(hist1, hist0)[:-1]  # type: ignore
+            next_case1 = ops.greater(hist1, hist0)[1:]  # type: ignore
             is_on_boundary1 = ops.logical_xor(curr_case1, next_case1)
-            is_not_empty1 = hist1[:-1] > 0
+            is_not_empty1 = hist1[:-1] > 0  # type: ignore
             is_candidate1 = ops.logical_and(is_on_boundary1, is_not_empty1)
-            candidate_indices1 = ops.squeeze(ops.where(is_candidate1), 0) + 1
+            candidate_indices1 = ops.add(ops.squeeze(ops.where(is_candidate1), 0), 1)
             candidates1 = ops.take(bin_edges, candidate_indices1)
 
             candidates = ops_unique(ops.concatenate([candidates0, candidates1], 0))
@@ -353,20 +354,19 @@ class CutLayer(keras.layers.Layer):
                 lambda: ops.append(candidates, x_max),
                 lambda: candidates,
             )
-
-            i, j = ops.meshgrid(candidates, candidates)
+            i, j = ops.meshgrid(candidates, candidates)  # type: ignore
             i, j = i[i < j], j[i < j]
             candidate_pairs = ops.stack([i, j], 1)
             losses_and_cases = ops.vectorized_map(
                 lambda pair: self._get_min_loss_and_case(x, y, pair, self.loss_fn),
                 candidate_pairs,
             )
-            min_index = ops.argmin(losses_and_cases[:, 0])
-            min_loss = losses_and_cases[min_index, 0]
-            min_case = losses_and_cases[min_index, 1]
+            min_index = ops.argmin(ops.take(losses_and_cases, 0, 1))
+            min_loss = losses_and_cases[min_index, 0]  # type: ignore
+            min_case = losses_and_cases[min_index, 1]  # type: ignore
 
-            lower = candidate_pairs[min_index, 0]
-            upper = candidate_pairs[min_index, 1]
+            lower = candidate_pairs[min_index, 0]  # type: ignore
+            upper = candidate_pairs[min_index, 1]  # type: ignore
 
             self.cut.assign(ops.array([lower, upper]))
             self.case.assign(min_case)
@@ -389,16 +389,6 @@ class CutLayer(keras.layers.Layer):
             ),
         )
         return y_pred
-
-        # if self.cut == "":
-        #     raise ValueError("cut is not set")
-        # if "feature" not in self.cut:
-        #     raise ValueError("cut must contain 'feature'")
-
-        # feature = ops.take(inputs, self.feature_id, -1)
-        # y_pred = ops.cast(eval(self.cut), "int32")
-
-        # return y_pred
 
     def _get_min_loss_and_case(self, x, y, candidate_pair, loss_fn):  # pragma: no cover
         # I: (n_samples,), (n_samples, ?), (2,)
