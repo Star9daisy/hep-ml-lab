@@ -1,0 +1,6 @@
+class RejectionAtEfficiency:
+    ...
+
+
+def rejection_at_efficiency():
+    ...

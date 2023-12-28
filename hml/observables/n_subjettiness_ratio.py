@@ -1,0 +1,6 @@
+class NSubjettinessRatio:
+    ...
+
+
+class TauMN:
+    ...

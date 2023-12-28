@@ -1,0 +1,6 @@
+class MaxSignificance:
+    ...
+
+
+def max_significance():
+    ...

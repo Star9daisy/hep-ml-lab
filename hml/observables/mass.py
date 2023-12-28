@@ -1,0 +1,6 @@
+class Mass:
+    ...
+
+
+class M:
+    ...
