@@ -1,0 +1,6 @@
+class Energy:
+    ...
+
+
+class E:
+    ...

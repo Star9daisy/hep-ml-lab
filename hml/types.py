@@ -1,6 +1,26 @@
-from pathlib import Path
-from typing import Any, Literal, Union
+class PathLike:
+    ...
 
-PathLike = Union[str, Path]
-ShowerOption = Literal["", "off", "pythia8"]
-DetectorOption = Literal["", "off", "delphes"]
+
+class Generator:
+    ...
+
+
+class Observable:
+    ...
+
+
+class Representation:
+    ...
+
+
+class Dataset:
+    ...
+
+
+class Approach:
+    ...
+
+
+class Metric:
+    ...
