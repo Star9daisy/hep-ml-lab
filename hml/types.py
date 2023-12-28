@@ -1,5 +1,7 @@
-class PathLike:
-    ...
+from pathlib import Path
+from typing import Union
+
+PathLike = Union[str, Path]
 
 
 class Generator:
