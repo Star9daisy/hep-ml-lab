@@ -1,4 +1,36 @@
-from hml.utils import parse_physics_object
+from hml.utils import get_madgraph5_run, parse_physics_object
+
+
+def test_get_madgraph5_run_for_single():
+    expected = {
+        "name": "run_01",
+        "collider": "pp:6500.0x6500.0",
+        "tag": "tag_1",
+        "seed": 42,
+        "cross": 503.6,
+        "error": 2.8,
+        "n_events": 100,
+        "events": {
+            "lhe": "tests/data/pp2tt/Events/run_01/unweighted_events.lhe.gz",
+            "hepmc": "tests/data/pp2tt/Events/run_01/tag_1_pythia8_events.hepmc.gz",
+            "root": "tests/data/pp2tt/Events/run_01/tag_1_delphes_events.root",
+        },
+    }
+    assert get_madgraph5_run("tests/data/pp2tt", "run_01") == expected
+
+
+def test_get_madgraph5_run_for_multiple():
+    expected = {
+        "name": "run_02",
+        "collider": "pp:6500.0x6500.0",
+        "tag": "tag_1",
+        "seed": 42,
+        "cross": 503.7,
+        "error": 2.0,
+        "n_events": 200,
+        "events": {"lhe": "tests/data/pp2tt/Events/run_02/unweighted_events.lhe.gz"},
+    }
+    assert get_madgraph5_run("tests/data/pp2tt", "run_02") == expected
 
 
 def test_parse_physics_object_single():
