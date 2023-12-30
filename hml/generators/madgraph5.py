@@ -185,6 +185,18 @@ class Madgraph5:
             f.write(run_log)
         print(f"Run log saved to", run_log_file.relative_to(Path.cwd()))
 
+    @property
+    def runs(self) -> list[Madgraph5Run]:
+        run_paths = []
+        for i in self.output_dir.glob("Events/run_*"):
+            if i.is_dir() and i.name.count("_") == 1:
+                run_paths.append(i)
+
+        # Sort the runs by their number
+        run_paths = sorted(run_paths, key=lambda x: int(x.name.split("_")[-1]))
+        runs = [Madgraph5Run(self.output_dir, i.name) for i in run_paths]
+
+        return runs
 
 class Madgraph5Run:
     def __init__(self, output_dir: PathLike, name: str):
