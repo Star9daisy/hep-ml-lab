@@ -89,6 +89,7 @@ class Madgraph5:
         self.process_log += self.run_command(f"define {expression}")
 
     def generate(self, *processes: str):
+        self._processes = [i for i in processes]
         self.process_log += self.run_command(f"generate {processes[0]}")
         for process in processes[1:]:
             self.process_log += self.run_command(f"add process {process}")
