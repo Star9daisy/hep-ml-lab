@@ -17,16 +17,13 @@ class Madgraph5:
     def __init__(
         self,
         executable: PathLike,
-        logging_level="INFO",
         verbose: int = 1,
     ):
         self.executable = executable
-        self.child = pexpect.spawn(f"{self.executable.as_posix()} -l {logging_level}")
-        self.run_log = ""
+        self.child = pexpect.spawn(f"{self.executable.as_posix()}")
         self.process_log = ""
-        self.log_dir = Path("Logs")
-        self.diagram_dir = Path("Diagrams")
-        self.output_dir = None
+        self.DEFAULT_LOG_DIR = Path("Logs")
+        self.DEFAULT_DIAGRAM_DIR = Path("Diagrams")
         self.verbose = verbose
 
         self.process_log += self.run_command("")
@@ -107,29 +104,29 @@ class Madgraph5:
         for eps in self.diagram_dir.glob("*.eps"):
             subprocess.run(f"ps2pdf {eps} {eps.with_suffix('.pdf')}", shell=True)
 
-    def output(self, directory: PathLike = "", overwrite: bool = True):
-        if directory != "":
-            self.output_dir = Path(directory)
+    def output(self, output_dir: PathLike | None = None, overwrite: bool = True):
+        if output_dir is None:
+            log = self.run_command(f"output")
+            self.process_log += log
+
+            match = re.findall(r"Output to directory (.+) done.", log)
+            self.output_dir = Path(match[0])
+        else:
+            self.output_dir = Path(output_dir)
             if self.output_dir.exists():
                 if overwrite:
                     shutil.rmtree(self.output_dir)
                 else:
                     raise FileExistsError(f"{self.output_dir} already exists")
             self.process_log += self.run_command(f"output {self.output_dir}")
-        else:
-            log = self.run_command(f"output {directory}")
-            if (output_dir := re.findall(r"Output to directory (.+) done.", log)) == []:
-                raise RuntimeError("Could not find output directory")
-
-            self.output_dir = Path(output_dir[0])
-            self.process_log += log
 
         if self.diagram_dir.exists():
+            self.diagram_dir = self.diagram_dir.rename(self.DEFAULT_DIAGRAM_DIR)
             shutil.move(self.diagram_dir, self.output_dir / self.diagram_dir)
         else:
             self.display_diagrams(self.output_dir / self.diagram_dir)
 
-        self.log_dir = self.output_dir / self.log_dir
+        self.log_dir = self.output_dir / self.DEFAULT_LOG_DIR
         self.log_dir.mkdir()
         process_log_file = self.log_dir / "process.log"
 
@@ -146,14 +143,15 @@ class Madgraph5:
         cards=[],
         multi_run=1,
         seed=0,
-        output_dir: PathLike = "",
+        output_dir: PathLike | None = None,
     ):
+        run_log = ""
         if self.output_dir is None:
-            if output_dir == "":
+            if output_dir is None:
                 raise ValueError("No output directory specified")
             else:
                 self.output_dir = Path(output_dir)
-                self.log_dir = self.output_dir / self.log_dir
+                self.log_dir = self.output_dir / self.DEFAULT_LOG_DIR
                 self.log_dir.mkdir()
 
         # In the middle: MadEvent CLI ends with '>'
@@ -176,15 +174,15 @@ class Madgraph5:
             commands += "\n".join(cards) + "\n"
         commands += "done\n"
 
-        self.run_log += self.run_command(commands, end_marker=r">$")
+        run_log += self.run_command(commands, end_marker=r">$")
 
         # In the end: Back to Madgraph CLI
-        self.run_log += self.run_command("exit")
+        run_log += self.run_command("exit")
 
-        run_name = re.findall(r"survey  (.+) \r\n", self.run_log)[0]
+        run_name = re.findall(r"survey  (.+) \r\n", run_log)[0]
         run_log_file = self.log_dir / f"{run_name}.log"
         with run_log_file.open("w") as f:
-            f.write(self.run_log)
+            f.write(run_log)
         print(f"Run log saved to", run_log_file.relative_to(Path.cwd()))
 
 
