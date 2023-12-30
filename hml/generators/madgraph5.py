@@ -6,6 +6,7 @@ import subprocess
 
 import pexpect
 import ROOT
+from bs4 import BeautifulSoup
 
 from ..types import Path, PathLike
 from ..utils import get_madgraph5_run
@@ -93,6 +94,25 @@ class Madgraph5:
         self.process_log += self.run_command(f"generate {processes[0]}")
         for process in processes[1:]:
             self.process_log += self.run_command(f"add process {process}")
+
+    @property
+    def processes(self) -> list[str]:
+        # 1st case: generate() has been called
+        try:
+            return self._processes
+        except AttributeError:
+            pass
+
+        # 2nd case: from_output() has been called
+        try:
+            crossx = self.output_dir / "crossx.html"
+            with crossx.open() as f:
+                soup = BeautifulSoup(f, "html.parser")
+                title_col = soup.find_all("h2")[0].text.strip()
+                processes = re.findall(r"^Results in the .+ for (.+)", title_col)[0]
+                return processes.split(",")
+        except AttributeError:
+            raise AttributeError("No processes defined yet")
 
     def display_diagrams(self, diagram_dir: PathLike = "Diagrams"):
         self.diagram_dir = Path(diagram_dir)
