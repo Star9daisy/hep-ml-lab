@@ -144,16 +144,8 @@ class Madgraph5:
         cards=[],
         multi_run=1,
         seed=0,
-        output_dir: PathLike | None = None,
     ):
         run_log = ""
-        if self.output_dir is None:
-            if output_dir is None:
-                raise ValueError("No output directory specified")
-            else:
-                self.output_dir = Path(output_dir)
-                self.log_dir = self.output_dir / self.DEFAULT_LOG_DIR
-                self.log_dir.mkdir()
 
         # In the middle: MadEvent CLI ends with '>'
         commands = f"launch -i {self.output_dir}\n"
