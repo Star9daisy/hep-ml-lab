@@ -7,6 +7,8 @@ import subprocess
 import pexpect
 import ROOT
 from bs4 import BeautifulSoup
+from rich.console import Console
+from rich.table import Table
 
 from ..types import Path, PathLike
 from ..utils import get_madgraph5_run
@@ -211,6 +213,32 @@ class Madgraph5:
         runs = [Madgraph5Run(self.output_dir, i.name) for i in run_paths]
 
         return runs
+
+    def summary(self):
+        console = Console()
+        table = Table(
+            title="\n".join(self.processes),
+            caption=f"Output: {self.output_dir.relative_to(Path.cwd())}",
+        )
+
+        table.add_column("#", justify="right")
+        table.add_column("Name")
+        table.add_column("Tag")
+        table.add_column("Cross section (pb)", justify="center")
+        table.add_column("N events", justify="right")
+        table.add_column("Seed", justify="right")
+
+        for i, run in enumerate(self.runs):
+            table.add_row(
+                f"{i}",
+                f"{run.name}[{len(run.sub_runs)}]",
+                f"{run.tag}",
+                f"{run.cross:.3e} +- {run.error:.3e}",
+                f"{run.n_events:,}",
+                f"{run.seed}",
+            )
+
+        console.print(table)
 
     @classmethod
     def from_output(cls, output_dir: PathLike, executable: PathLike) -> Madgraph5:
