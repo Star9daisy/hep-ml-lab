@@ -231,6 +231,9 @@ class Madgraph5Run:
     @property
     def n_events(self) -> int:
         n_events = self.events().GetEntries()
+        if n_events == 0:
+            n_events = self._info["n_events"]
+
         return n_events
 
     @property
