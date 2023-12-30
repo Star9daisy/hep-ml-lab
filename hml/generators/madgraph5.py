@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import re
+import shutil
+import subprocess
+
+import pexpect
 import ROOT
 
 from ..types import Path, PathLike
@@ -9,7 +14,178 @@ _ = ROOT.gSystem.Load("libDelphes")  # type: ignore
 
 
 class Madgraph5:
-    ...
+    def __init__(
+        self,
+        executable: PathLike,
+        logging_level="INFO",
+        verbose: int = 1,
+    ):
+        self.executable = executable
+        self.child = pexpect.spawn(f"{self.executable.as_posix()} -l {logging_level}")
+        self.run_log = ""
+        self.process_log = ""
+        self.log_dir = Path("Logs")
+        self.diagram_dir = Path("Diagrams")
+        self.output_dir = None
+        self.verbose = verbose
+
+        self.process_log += self.run_command("")
+
+    @property
+    def executable(self) -> Path:
+        return self._executable
+
+    @executable.setter
+    def executable(self, value: PathLike):
+        if (_executable := shutil.which(value)) is None:
+            raise FileNotFoundError(f"Could not find Madgraph5 executable {value}")
+
+        self._executable = Path(_executable).resolve()
+
+    @property
+    def home(self) -> Path:
+        return self.executable.parent.parent
+
+    @property
+    def version(self) -> str:
+        _version = "unknown"
+        with (self.home / "VERSION").open() as f:
+            for line in f.readlines():
+                if line.startswith("version") and _version == "unknown":
+                    _version = line.split("=")[1].strip()
+
+        return _version
+
+    def __repr__(self):
+        return f"Madgraph5 v{self.version}"
+
+    def run_command(
+        self,
+        command: str,
+        start_marker: str = r"\r\n",
+        end_marker: str = r"MG5_aMC>$",
+        timeout: int | None = None,
+    ) -> str:
+        output = ""
+        self.child.sendline(command)
+        while True:
+            if self.child.expect([start_marker, end_marker], timeout) == 1:  # type: ignore
+                break
+
+            middle_output = self.child.before.decode()
+            output += middle_output + "\r\n"
+            if self.verbose > 0:
+                print(middle_output)
+
+        self.clean_pypy()
+        return output
+
+    def clean_pypy(self):
+        py_py = Path("py.py")
+        if py_py.exists():
+            py_py.unlink()
+
+    def import_model(self, model: PathLike):
+        self.process_log += self.run_command(f"import model {model}")
+
+    def define(self, expression: str):
+        self.process_log += self.run_command(f"define {expression}")
+
+    def generate(self, *processes: str):
+        self.process_log += self.run_command(f"generate {processes[0]}")
+        for process in processes[1:]:
+            self.process_log += self.run_command(f"add process {process}")
+
+    def display_diagrams(self, diagram_dir: PathLike = "Diagrams"):
+        self.diagram_dir = Path(diagram_dir)
+        if self.diagram_dir.exists():
+            raise FileExistsError(f"{self.diagram_dir} already exists")
+
+        self.diagram_dir.mkdir(parents=True)
+        self.process_log += self.run_command(f"display diagrams {self.diagram_dir}")
+
+        for eps in self.diagram_dir.glob("*.eps"):
+            subprocess.run(f"ps2pdf {eps} {eps.with_suffix('.pdf')}", shell=True)
+
+    def output(self, directory: PathLike = "", overwrite: bool = True):
+        if directory != "":
+            self.output_dir = Path(directory)
+            if self.output_dir.exists():
+                if overwrite:
+                    shutil.rmtree(self.output_dir)
+                else:
+                    raise FileExistsError(f"{self.output_dir} already exists")
+            self.process_log += self.run_command(f"output {self.output_dir}")
+        else:
+            log = self.run_command(f"output {directory}")
+            if (output_dir := re.findall(r"Output to directory (.+) done.", log)) == []:
+                raise RuntimeError("Could not find output directory")
+
+            self.output_dir = Path(output_dir[0])
+            self.process_log += log
+
+        if self.diagram_dir.exists():
+            shutil.move(self.diagram_dir, self.output_dir / self.diagram_dir)
+        else:
+            self.display_diagrams(self.output_dir / self.diagram_dir)
+
+        self.log_dir = self.output_dir / self.log_dir
+        self.log_dir.mkdir()
+        process_log_file = self.log_dir / "process.log"
+
+        with process_log_file.open("w") as f:
+            f.write(self.process_log)
+        if self.verbose > 0:
+            print("Process log saved to", process_log_file.relative_to(Path.cwd()))
+
+    def launch(
+        self,
+        shower="off",
+        detector="off",
+        settings={},
+        cards=[],
+        multi_run=1,
+        seed=0,
+        output_dir: PathLike = "",
+    ):
+        if self.output_dir is None:
+            if output_dir == "":
+                raise ValueError("No output directory specified")
+            else:
+                self.output_dir = Path(output_dir)
+                self.log_dir = self.output_dir / self.log_dir
+                self.log_dir.mkdir()
+
+        # In the middle: MadEvent CLI ends with '>'
+        commands = f"launch -i {self.output_dir}\n"
+        if multi_run == 1:
+            commands += "generate_events\n"
+        else:
+            commands += f"multi_run {multi_run}\n"
+
+        commands += f"shower={shower}\n"
+        commands += f"detector={detector}\n"
+        commands += "done\n"
+
+        settings["iseed"] = seed
+        if settings != {}:
+            commands += "\n".join([f"set {k} {v}" for k, v in settings.items()])
+            commands += "\n"
+
+        if cards != []:
+            commands += "\n".join(cards) + "\n"
+        commands += "done\n"
+
+        self.run_log += self.run_command(commands, end_marker=r">$")
+
+        # In the end: Back to Madgraph CLI
+        self.run_log += self.run_command("exit")
+
+        run_name = re.findall(r"survey  (.+) \r\n", self.run_log)[0]
+        run_log_file = self.log_dir / f"{run_name}.log"
+        with run_log_file.open("w") as f:
+            f.write(self.run_log)
+        print(f"Run log saved to", run_log_file.relative_to(Path.cwd()))
 
 
 class Madgraph5Run:
