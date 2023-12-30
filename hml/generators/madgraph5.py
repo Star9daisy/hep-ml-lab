@@ -191,6 +191,20 @@ class Madgraph5:
 
         return runs
 
+    @classmethod
+    def from_output(cls, output_dir: PathLike, executable: PathLike) -> Madgraph5:
+        output_dir = Path(output_dir)
+        if not output_dir.exists():
+            raise FileNotFoundError(f"Output directory {output_dir} does not exist")
+
+        output_dir = output_dir.resolve()
+        mg5 = cls(executable, verbose=0)
+        mg5.verbose = 1
+        mg5.output_dir = output_dir
+
+        return mg5
+
+
 class Madgraph5Run:
     def __init__(self, output_dir: PathLike, name: str):
         self.output_dir = Path(output_dir)
