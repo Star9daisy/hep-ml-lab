@@ -1,6 +1,26 @@
-class PseudoRapidity:
-    ...
+from ..types import Observable
 
 
-class Eta:
+class PseudoRapidity(Observable):
+    def get_value(self):
+        if len(self.main_phyobjs) != 1:
+            return
+
+        main_phyobjs = self.main_phyobjs[0]
+        sub_phyobjs = self.sub_phyobjs[0]
+
+        if len(sub_phyobjs) == 0:
+            values = [
+                obj.P4().Eta() if obj is not None else float("nan")
+                for obj in main_phyobjs
+            ]
+        else:
+            values = [
+                [sub.P4().Eta() if sub is not None else float("nan") for sub in main]
+                for main in self.sub_phyobjs[0]
+            ]
+        return values
+
+
+class Eta(PseudoRapidity):
     ...
