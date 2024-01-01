@@ -21,6 +21,7 @@ class Observable(ABC):
         self.main_phyobjs = []
         self.sub_phyobjs = []
         self.infos = self.parse_physics_object(self.name)
+        self._value = None
 
     def read(self, event):
         for info in self.infos:
