@@ -133,9 +133,9 @@ class Madgraph5:
             self.process_log += log
 
             match = re.findall(r"Output to directory (.+) done.", log)
-            self.output_dir = Path(match[0])
+            self.output_dir = Path(match[0]).resolve()
         else:
-            self.output_dir = Path(output_dir)
+            self.output_dir = Path(output_dir).resolve()
             if self.output_dir.exists():
                 if overwrite:
                     shutil.rmtree(self.output_dir)
@@ -153,11 +153,18 @@ class Madgraph5:
         self.log_dir = self.output_dir / self.DEFAULT_LOG_DIR
         self.log_dir.mkdir()
         process_log_file = self.log_dir / "process.log"
+        process_log_file = process_log_file.resolve()
 
         with process_log_file.open("w") as f:
             f.write(self.process_log)
         if self.verbose > 0:
-            print("Process log saved to", process_log_file.relative_to(Path.cwd()))
+            if process_log_file.is_relative_to(Path.cwd()):
+                print(
+                    "Process log saved to",
+                    process_log_file.relative_to(Path.cwd()),
+                )
+            else:
+                print("Process log saved to", process_log_file)
 
     def launch(
         self,
@@ -197,9 +204,15 @@ class Madgraph5:
 
         run_name = re.findall(r"survey  (.+) \r\n", run_log)[0]
         run_log_file = self.log_dir / f"{run_name}.log"
+        run_log_file = run_log_file.resolve()
         with run_log_file.open("w") as f:
             f.write(run_log)
-        print(f"Run log saved to", run_log_file.relative_to(Path.cwd()))
+
+        if self.verbose > 0:
+            if run_log_file.is_relative_to(Path.cwd()):
+                print("Run log saved to", run_log_file.relative_to(Path.cwd()))
+            else:
+                print("Run log saved to", run_log_file)
 
     @property
     def runs(self) -> list[Madgraph5Run]:
@@ -216,10 +229,12 @@ class Madgraph5:
 
     def summary(self):
         console = Console()
-        table = Table(
-            title="\n".join(self.processes),
-            caption=f"Output: {self.output_dir.relative_to(Path.cwd())}",
-        )
+
+        if self.output_dir.is_relative_to(Path.cwd()):
+            output_dir = self.output_dir.relative_to(Path.cwd())
+        else:
+            output_dir = self.output_dir
+        table = Table(title="\n".join(self.processes), caption=f"Output: {output_dir}")
 
         table.add_column("#", justify="right")
         table.add_column("Name")
