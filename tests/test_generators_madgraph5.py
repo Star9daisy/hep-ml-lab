@@ -23,8 +23,8 @@ def test_madgraph5_run_for_multiple():
     assert g.name == "run_02"
     assert g.collider == "pp:6500.0x6500.0"
     assert g.tag == "tag_1"
-    assert g.seed == 42
-    assert g.cross == 503.7
+    assert g.seed == 48
+    assert g.cross == 504.2
     assert g.error == 2.0
     assert g.n_events == 200
     assert len(g.sub_runs) == 2
