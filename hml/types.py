@@ -74,7 +74,6 @@ class Observable(ABC):
     @property
     def shape(self):
         captured_output = io.StringIO()
-        sys.stdout = captured_output
         self.to_awkward().type.show(captured_output)
         return captured_output.getvalue().strip()
 
