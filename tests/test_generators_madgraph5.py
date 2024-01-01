@@ -1,4 +1,6 @@
-from hml.generators import Madgraph5Run
+import pytest
+
+from hml.generators import Madgraph5, Madgraph5Run
 
 
 def test_madgraph5_run_for_single():
@@ -27,3 +29,30 @@ def test_madgraph5_run_for_multiple():
     assert g.n_events == 200
     assert len(g.sub_runs) == 2
     assert g.events().GetEntries() == 200
+
+
+def test_madgraph5(tmp_path):
+    g = Madgraph5("mg5_aMC")
+    g.import_model("sm")
+    g.define("p = g u c d s u~ c~ d~ s~")
+    g.generate("p p > t t~")
+    g.output(f"{tmp_path}/gen_pp2tt")
+    g.launch(settings={"nevents": 100})
+    g.launch(settings={"nevents": 100}, multi_run=2)
+    assert len(g.runs) == 2
+    assert g.processes == ["p p > t t~"]
+    assert str(g) == "Madgraph5 v3.5.2"
+    g.summary()
+
+    g2 = Madgraph5.from_output(f"{tmp_path}/gen_pp2tt", "mg5_aMC")
+    assert len(g2.runs) == 2
+
+    # Wrong cases
+    # Wrong executable
+    with pytest.raises(FileNotFoundError):
+        Madgraph5("wrong_executable")
+
+    # Call .processes before generator.generate or Madgraph5.from_output
+    with pytest.raises(AttributeError):
+        _g = Madgraph5("mg5_aMC")
+        print(_g.processes)
