@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import io
 import re
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Union
@@ -71,7 +73,10 @@ class Observable(ABC):
 
     @property
     def shape(self):
-        return self.to_awkward().type.show()
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        self.to_awkward().type.show(captured_output)
+        return captured_output.getvalue().strip()
 
     def to_awkward(self, dtype="float32"):
         ak_array = ak.from_iter(self.value)
