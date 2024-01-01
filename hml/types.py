@@ -30,7 +30,7 @@ class Observable(ABC):
             main_phyobjs = list(getattr(event, main_branch))[
                 slice(main_start, main_end)
             ]
-            if (main_end is int) and (len(main_phyobjs) < main_end - main_start):
+            if (main_end is not None) and (len(main_phyobjs) < main_end - main_start):
                 main_phyobjs += [None] * (main_end - main_start - len(main_phyobjs))
             self.main_phyobjs.append(main_phyobjs)
 
@@ -41,6 +41,13 @@ class Observable(ABC):
 
                 current_sub_phyobjs = []
                 for i in main_phyobjs:
+                    if i is None:
+                        if sub_end is None:
+                            current_sub_phyobjs.append([None])
+                        else:
+                            current_sub_phyobjs.append([None] * (sub_end - sub_start))
+                        continue
+
                     sub_phyobjs = list(getattr(i, sub_branch))[
                         slice(sub_start, sub_end)
                     ]
@@ -48,6 +55,8 @@ class Observable(ABC):
                         sub_phyobjs += [None] * (sub_end - sub_start - len(sub_phyobjs))
                     current_sub_phyobjs.append(sub_phyobjs)
                 self.sub_phyobjs.append(current_sub_phyobjs)
+            else:
+                self.sub_phyobjs.append([])
 
         self._value = self.get_value()
 
