@@ -21,6 +21,7 @@ class Observable(ABC):
     ALL_OBSERVABLES = {}
 
     def __init__(self, physics_object: str | None = None):
+        self.physics_object = physics_object
         self.main_objs = []
         self.sub_objs = []
 
@@ -34,6 +35,8 @@ class Observable(ABC):
         self._value = None
 
     def read(self, event):
+        self.event = event
+
         for obj in self.objs:
             main_name = obj["main"][0]
             main_start = obj["main"][1]
