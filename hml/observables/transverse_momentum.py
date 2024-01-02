@@ -24,3 +24,7 @@ class TransverseMomentum(Observable):
 
 class Pt(TransverseMomentum):
     ...
+
+
+TransverseMomentum.add_alias("transverse_momentum")
+Pt.add_alias("PT", "pT", "pt")

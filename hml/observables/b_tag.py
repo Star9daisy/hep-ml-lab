@@ -15,3 +15,6 @@ class BTag(Observable):
             values.append(value)
 
         return values
+
+
+BTag.add_alias("b_tag")

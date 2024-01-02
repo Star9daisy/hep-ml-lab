@@ -24,3 +24,7 @@ class PseudoRapidity(Observable):
 
 class Eta(PseudoRapidity):
     ...
+
+
+PseudoRapidity.add_alias("pseudo_rapidity")
+Eta.add_alias("eta")

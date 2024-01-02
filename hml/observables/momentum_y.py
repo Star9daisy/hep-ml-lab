@@ -24,3 +24,7 @@ class MomentumY(Observable):
 
 class Py(MomentumY):
     ...
+
+
+MomentumY.add_alias("momentum_y")
+Py.add_alias("py")

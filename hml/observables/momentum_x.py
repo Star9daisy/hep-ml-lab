@@ -24,3 +24,7 @@ class MomentumX(Observable):
 
 class Px(MomentumX):
     ...
+
+
+MomentumX.add_alias("momentum_x")
+Px.add_alias("px")

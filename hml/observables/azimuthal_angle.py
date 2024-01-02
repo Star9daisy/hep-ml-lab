@@ -24,3 +24,7 @@ class AzimuthalAngle(Observable):
 
 class Phi(AzimuthalAngle):
     ...
+
+
+AzimuthalAngle.add_alias("azimuthal_angle")
+Phi.add_alias("phi")

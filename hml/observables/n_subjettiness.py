@@ -23,3 +23,7 @@ class NSubjettiness(Observable):
 
 class TauN(NSubjettiness):
     ...
+
+
+NSubjettiness.add_alias("n_subjettiness")
+TauN.add_alias("tau_n")

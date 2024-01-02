@@ -15,3 +15,6 @@ class Size(Observable):
         values = [len(self.main_objs[0])]
 
         return values
+
+
+Size.add_alias("size")

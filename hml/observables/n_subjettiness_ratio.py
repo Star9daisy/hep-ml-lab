@@ -29,3 +29,7 @@ class NSubjettinessRatio(Observable):
 
 class TauMN(NSubjettinessRatio):
     ...
+
+
+NSubjettinessRatio.add_alias("n_subjettiness_ratio")
+TauMN.add_alias("tau_mn")
