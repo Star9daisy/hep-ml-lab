@@ -3,8 +3,8 @@ from ..utils import get_observable
 
 
 class AngularDistance(Observable):
-    def __init__(self, physics_object, sorted_by="pt", reverse=True):
-        super().__init__(physics_object)
+    def __init__(self, physics_object, sorted_by="pt", reverse=True, **kwargs):
+        super().__init__(physics_object, **kwargs)
         self.sorted_by = sorted_by
         self.reverse = reverse
         self.orders = [
