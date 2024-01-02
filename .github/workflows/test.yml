@@ -9,7 +9,7 @@ jobs:
     container: star9daisy/hml-env:2.0.0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     
     - name: Install Poetry
       run: curl -sSL https://install.python-poetry.org | python3 -
