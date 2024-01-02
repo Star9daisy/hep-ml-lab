@@ -5,7 +5,7 @@ def get_observable(name: str, *arg, **kwargs):
     if len(parts := name.split(".")) == 1:
         physics_object, classname = "", parts[0]
     else:
-        physics_object, classname = parts
+        physics_object, classname = ".".join(parts[:-1]), parts[-1]
 
     if classname not in Observable.ALL_OBSERVABLES:
         raise ValueError(f"Observable {classname} not found")
