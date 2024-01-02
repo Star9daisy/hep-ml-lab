@@ -43,7 +43,7 @@ class Observable(ABC):
                 and required_main_length > actual_main_length
             ):
                 main_padding_length = main_end - main_start - len(clipped_main_objs)
-                padded_main_objs += [None] * main_padding_length
+                padded_main_objs = clipped_main_objs + [None] * main_padding_length
                 prepared_main_objs = padded_main_objs
             else:
                 prepared_main_objs = clipped_main_objs
@@ -78,7 +78,7 @@ class Observable(ABC):
                     and required_sub_length > acutal_sub_length
                 ):
                     sub_padding_length = required_sub_length - acutal_sub_length
-                    padded_sub_objs += [None] * sub_padding_length
+                    padded_sub_objs = clipped_sub_objs + [None] * sub_padding_length
                     prepared_sub_objs = padded_sub_objs
                 else:
                     prepared_sub_objs = clipped_sub_objs
