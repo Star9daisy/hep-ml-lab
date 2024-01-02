@@ -96,6 +96,8 @@ class Observable(ABC):
 
         self._value = self.get_value()
 
+        return self
+
     @property
     def name(self):
         if self._name is None:
