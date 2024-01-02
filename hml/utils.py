@@ -10,7 +10,9 @@ def get_observable(name: str, *arg, **kwargs):
     if classname not in Observable.ALL_OBSERVABLES:
         raise ValueError(f"Observable {classname} not found")
 
-    return Observable.ALL_OBSERVABLES[classname](physics_object, *arg, **kwargs)
+    return Observable.ALL_OBSERVABLES[classname](
+        physics_object, classname, *arg, **kwargs
+    )
 
 
 def save_dataset():
