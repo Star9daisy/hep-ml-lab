@@ -87,3 +87,29 @@ def test_size():
         obs_specific = Size(obj).read(event_zz)
         obs_agnostic = get_observable(f"{obj}.Size").read(event_tt)
         assert obs_specific == obs_agnostic
+
+
+def test_invariant_mass():
+    for obj in [
+        "Jet0,Jet1",
+        "Jet:2,Jet:2",
+        "Jet:2,Jet:2.Constituents:4",
+        "Jet:2.Constituents:4,Jet:2",
+        "Jet:2.Constituents:4,Jet:2.Constituents:4",
+    ]:
+        obs_specific = InvariantMass(obj).read(event_zz)
+        obs_agnostic = get_observable(f"{obj}.InvariantMass").read(event_tt)
+        assert obs_specific == obs_agnostic
+
+
+def test_angular_distance():
+    for obj in [
+        "Jet0,Jet1",
+        "Jet:2,Jet:2",
+        "Jet:2,Jet:2.Constituents:4",
+        "Jet:2.Constituents:4,Jet:2",
+        "Jet:2.Constituents:4,Jet:2.Constituents:4",
+    ]:
+        obs_specific = AngularDistance(obj).read(event_zz)
+        obs_agnostic = get_observable(f"{obj}.AngularDistance").read(event_tt)
+        assert obs_specific == obs_agnostic
