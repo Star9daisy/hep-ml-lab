@@ -27,6 +27,98 @@ six = ">=1.6.1,<2.0"
 wheel = ">=0.23.0,<1.0"
 
 [[package]]
+name = "awkward"
+version = "2.5.1"
+description = "Manipulate JSON-like data with NumPy-like idioms."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "awkward-2.5.1-py3-none-any.whl", hash = "sha256:9b7f17557b5c44cbed337829d06797e58b7d5bc142e4e53911f55d7d579707d9"},
+    {file = "awkward-2.5.1.tar.gz", hash = "sha256:a71e3712066a21c1489e17631b51d76b11e43b479273955d5a2985a0da860bf6"},
+]
+
+[package.dependencies]
+awkward-cpp = "27"
+importlib-metadata = {version = ">=4.13.0", markers = "python_version < \"3.12\""}
+numpy = ">=1.18.0"
+packaging = "*"
+typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.11\""}
+
+[[package]]
+name = "awkward-cpp"
+version = "27"
+description = "CPU kernels and compiled extensions for Awkward Array"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "awkward-cpp-27.tar.gz", hash = "sha256:3c196518bfcce709766d63878041317a4914b62f8083e1a3e03b4fd6ea6f3c8d"},
+    {file = "awkward_cpp-27-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:c8b4903cb133a5e0b94f59c6dadd2d2d21713b4607464403069ff010cdb20314"},
+    {file = "awkward_cpp-27-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:5317a786996ee85e534d82e93e20f69eb347991d7c61f1438193ad48e21af8de"},
+    {file = "awkward_cpp-27-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:92a3e546029a9f40a628b00a9e2bedd74da1851bb97804ae4130abd574906048"},
+    {file = "awkward_cpp-27-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e09cfbc98f86f65fe3e68c55e3baf49f55ef8be10c8ed470e374a84875e124bf"},
+    {file = "awkward_cpp-27-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:01d964c412c66249196fe7213eee3429dd44c39bfc5ce897f48f8dbe2b649908"},
+    {file = "awkward_cpp-27-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:0530ee6457cd0915be97bc671b7572a9598257bc67469e1dae91e8d8b8846978"},
+    {file = "awkward_cpp-27-cp310-cp310-win_amd64.whl", hash = "sha256:4cb5eabc595ef30468cc9e38301543c88863555fb14667e151d44d90b7eea560"},
+    {file = "awkward_cpp-27-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:3ceb119bfe1901de7dfcfab8d7928949897818e08fa450805b8c82a970c75164"},
+    {file = "awkward_cpp-27-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:dc4c143a30f0f9c56dcfd2c35991b38e2d96262a8eea82110b513f3be767e4dd"},
+    {file = "awkward_cpp-27-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:430bbe49d29c507424b0877a78441cda5a2a54ba8fe66338feb50c1512b3e32a"},
+    {file = "awkward_cpp-27-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b9415ada8469140d42086dd1b209263c12c56ad52b72c4ecb31cdb5785f78f52"},
+    {file = "awkward_cpp-27-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:103d545cfc4f848ee014d485f666d819325a131e97f4c188295202f700244e3f"},
+    {file = "awkward_cpp-27-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:5ca8d4ac0ffb05eae07d3e1f619c842436588f03c342f63a8ff2abd1fd7ef4c0"},
+    {file = "awkward_cpp-27-cp311-cp311-win_amd64.whl", hash = "sha256:c47eb36d1981964f4d6381ffe5b9b6ef4dedcca1a833ca9d794d014baa5ade7e"},
+    {file = "awkward_cpp-27-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:666cd368fca9c404d89579fcb95a0ca44a3cbaf8a421eb45e6bb75a2896b3782"},
+    {file = "awkward_cpp-27-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:750f9ff682d36463be212efabecb6573bfbb002704fe615c1917ae3889e770d9"},
+    {file = "awkward_cpp-27-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:be259029dc405c356eb3d7f31677045f7fb1f0d921f6ce924ae3671a5f6f1394"},
+    {file = "awkward_cpp-27-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8cfaa324e64944c02e9bfc803576059e1c28069c75c1d9b0cc4b45cedb6fc8cc"},
+    {file = "awkward_cpp-27-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:ebe38a0ce74c88060d7dc80982905b0bb34e885a7461262caa1f476adee5f60d"},
+    {file = "awkward_cpp-27-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:0b7161d567789de8d133feaa2e6e7110a08f192ef2345bdf0c5f671667dbe840"},
+    {file = "awkward_cpp-27-cp312-cp312-win_amd64.whl", hash = "sha256:25652cb79aec5e8455e90dc4f5a02c76eb2071578be8a78b5c42d7fb44c799b1"},
+    {file = "awkward_cpp-27-cp38-cp38-macosx_10_9_universal2.whl", hash = "sha256:0ed1d19cb0ce420029cc8926b73469a2f8915df8f13c06cb6b838d8abbc70184"},
+    {file = "awkward_cpp-27-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:3998b8007b2f92d958b891838315aa71bdbad161382668d3b3ef2df9715a70f8"},
+    {file = "awkward_cpp-27-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3f2940062d92bd705d11ca312468173f9886e8780232dddab84ce9179cdc2b83"},
+    {file = "awkward_cpp-27-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f32e0aac5f803705be8a12a20359697d9979891bc7a8090fd86ee0ed768298af"},
+    {file = "awkward_cpp-27-cp38-cp38-musllinux_1_1_aarch64.whl", hash = "sha256:7f3e2329aa3d291d36ecced1f707205af34f66c869fe7c6f74ed61c701ae0025"},
+    {file = "awkward_cpp-27-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:3278ef22fe159e8ffdf1f91d9a7a4bc4eb612a74f9c251c1db9373e746b802c2"},
+    {file = "awkward_cpp-27-cp38-cp38-win32.whl", hash = "sha256:c52b64d0dc881a58d5d6f10875166ea87e33bf4579fb12164ab8352c7c79d5eb"},
+    {file = "awkward_cpp-27-cp38-cp38-win_amd64.whl", hash = "sha256:e4536512dadc8059f51684b180060e06b55da186c51ef51959a2df41343fe75f"},
+    {file = "awkward_cpp-27-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:ac8c8d3e3655de67d2256a665fe57a067e70484589f783377df81421c08d26cb"},
+    {file = "awkward_cpp-27-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:927163c45e916cbb5c4a48afab2936756f0f01fec856e4e81c313a80c4643a20"},
+    {file = "awkward_cpp-27-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:92bbef6f14203ca2fb37bce0024ea403e04cd2a711563d5714f522edcb04a3a2"},
+    {file = "awkward_cpp-27-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:da6b27bbfde5c4ae617da891554b29e16a0bd37a90d568c45227ac635ec2faa4"},
+    {file = "awkward_cpp-27-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:4b7d74e57c37d9c9c753e11e86162fa9206c7d66aa792232a6055b7f25e80264"},
+    {file = "awkward_cpp-27-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:f8ad338ebde4f4a7a75bb3434d022749a932b6eaf8b1a060e379d8e5e4f419f2"},
+    {file = "awkward_cpp-27-cp39-cp39-win32.whl", hash = "sha256:988de71fea9504913d87da2d4b9352c85a4dd08ce10743cfc98443ba2179f2fa"},
+    {file = "awkward_cpp-27-cp39-cp39-win_amd64.whl", hash = "sha256:19a16d905b3148e68421918c4e309bd93f44f435dfad90cca877cd8a22fc75de"},
+    {file = "awkward_cpp-27-pp310-pypy310_pp73-macosx_10_9_x86_64.whl", hash = "sha256:5f238e9e17ad328c1f8f6988e57f306708ad40f14c5bb4d30d76a46d1d7bf384"},
+    {file = "awkward_cpp-27-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:32be71ffd09eecd9f0f7b52bf4c501450da9007371e65d6de342cc95191178b7"},
+    {file = "awkward_cpp-27-pp38-pypy38_pp73-macosx_10_9_x86_64.whl", hash = "sha256:d25164744491e81f8a84d6b33917c693a85cf9a5db133fcc7b58fa2147237882"},
+    {file = "awkward_cpp-27-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:51bde62eeeda6a6880879c9ddc6f2b246d99e788ccd235c0de9a91e149754b93"},
+    {file = "awkward_cpp-27-pp39-pypy39_pp73-macosx_10_9_x86_64.whl", hash = "sha256:f6291bd8993cefc1a2b9f65fff048e1187af9bd3127c1def029342c8b0dd6963"},
+    {file = "awkward_cpp-27-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f08e51122e4a6ed770fa67c24668d4237f4855c62b970d254227a5670abb1cb9"},
+]
+
+[package.dependencies]
+numpy = ">=1.18.0"
+
+[[package]]
+name = "beautifulsoup4"
+version = "4.12.2"
+description = "Screen-scraping library"
+optional = false
+python-versions = ">=3.6.0"
+files = [
+    {file = "beautifulsoup4-4.12.2-py3-none-any.whl", hash = "sha256:bd2520ca0d9d7d12694a53d44ac482d181b4ec1888909b035a3dbf40d0f57d4a"},
+    {file = "beautifulsoup4-4.12.2.tar.gz", hash = "sha256:492bbc69dca35d12daac71c4db1bfff0c876c00ef4a2ffacce226d4638eb72da"},
+]
+
+[package.dependencies]
+soupsieve = ">1.2"
+
+[package.extras]
+html5lib = ["html5lib"]
+lxml = ["lxml"]
+
+[[package]]
 name = "black"
 version = "23.7.0"
 description = "The uncompromising code formatter."
@@ -1111,6 +1203,20 @@ files = [
 ]
 
 [[package]]
+name = "pexpect"
+version = "4.9.0"
+description = "Pexpect allows easy control of interactive console applications."
+optional = false
+python-versions = "*"
+files = [
+    {file = "pexpect-4.9.0-py2.py3-none-any.whl", hash = "sha256:7236d1e080e4936be2dc3e326cec0af72acf9212a7e1d060210e70a47e253523"},
+    {file = "pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f"},
+]
+
+[package.dependencies]
+ptyprocess = ">=0.5"
+
+[[package]]
 name = "platformdirs"
 version = "3.10.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
@@ -1160,6 +1266,17 @@ files = [
     {file = "protobuf-4.23.4-cp39-cp39-win_amd64.whl", hash = "sha256:0a5759f5696895de8cc913f084e27fd4125e8fb0914bb729a17816a33819f474"},
     {file = "protobuf-4.23.4-py3-none-any.whl", hash = "sha256:e9d0be5bf34b275b9f87ba7407796556abeeba635455d036c7351f7c183ef8ff"},
     {file = "protobuf-4.23.4.tar.gz", hash = "sha256:ccd9430c0719dce806b93f89c91de7977304729e55377f872a92465d548329a9"},
+]
+
+[[package]]
+name = "ptyprocess"
+version = "0.7.0"
+description = "Run a subprocess in a pseudo terminal"
+optional = false
+python-versions = "*"
+files = [
+    {file = "ptyprocess-0.7.0-py2.py3-none-any.whl", hash = "sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35"},
+    {file = "ptyprocess-0.7.0.tar.gz", hash = "sha256:5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220"},
 ]
 
 [[package]]
@@ -1644,6 +1761,17 @@ files = [
 ]
 
 [[package]]
+name = "soupsieve"
+version = "2.5"
+description = "A modern CSS selector implementation for Beautiful Soup."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "soupsieve-2.5-py3-none-any.whl", hash = "sha256:eaa337ff55a1579b6549dc679565eac1e3d000563bcb1c8ab0d0fefbc0c2cdc7"},
+    {file = "soupsieve-2.5.tar.gz", hash = "sha256:5663d5a7b3bfaeee0bc4372e7fc48f9cff4940b3eec54a6451cc5299f1097690"},
+]
+
+[[package]]
 name = "tensorboard"
 version = "2.15.1"
 description = "TensorBoard lets you watch Tensors Flow"
@@ -2015,4 +2143,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "a74bd31cd24c4b7fd8537ed44f85a4ea677b440f3a268a95e2608969a72ae58a"
+content-hash = "8bdf864929cadedef809a9be9935bda3403a303bc971223110da11f7f3b734b6"

@@ -21,6 +21,9 @@ python = ">=3.9,<3.12"
 rich = "^13.4.2"
 scikit-learn = "^1.2.2"
 tensorflow = "^2.14.0"
+beautifulsoup4 = "^4.12.2"
+pexpect = "^4.9.0"
+awkward = "^2.5.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
