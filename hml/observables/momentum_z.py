@@ -24,3 +24,7 @@ class MomentumZ(Observable):
 
 class Pz(MomentumZ):
     ...
+
+
+MomentumZ.add_alias("momentum_z")
+Pz.add_alias("pz")

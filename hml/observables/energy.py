@@ -24,3 +24,7 @@ class Energy(Observable):
 
 class E(Energy):
     ...
+
+
+Energy.add_alias("energy")
+E.add_alias("e")

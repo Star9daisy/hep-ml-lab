@@ -24,3 +24,7 @@ class Mass(Observable):
 
 class M(Mass):
     ...
+
+
+Mass.add_alias("mass")
+M.add_alias("m")

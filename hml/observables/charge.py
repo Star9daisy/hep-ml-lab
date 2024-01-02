@@ -15,3 +15,6 @@ class Charge(Observable):
             values.append(value)
 
         return values
+
+
+Charge.add_alias("charge")
