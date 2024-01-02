@@ -20,18 +20,17 @@ class Generator:
 class Observable(ABC):
     ALL_OBSERVABLES = {}
 
-    def __init__(self, physics_object: str | None = None):
+    def __init__(self, physics_object: str | None = None, name: str | None = None):
         self.physics_object = physics_object
         self.main_objs = []
         self.sub_objs = []
 
         if physics_object is not None:
             self.objs = self.parse_physics_object(physics_object)
-            self._name = f"{physics_object}.{self.__class__.__name__}"
         else:
             self.objs = []
-            self._name = self.__class__.__name__
 
+        self._name = self.__class__.__name__ if name is None else name
         self._value = None
 
     def read(self, event):
@@ -103,8 +102,8 @@ class Observable(ABC):
 
     @property
     def name(self):
-        if self._name is None:
-            return self.__class__.__name__
+        if self.physics_object is not None:
+            return f"{self.physics_object}.{self._name}"
         else:
             return self._name
 
