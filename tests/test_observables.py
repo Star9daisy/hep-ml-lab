@@ -10,7 +10,24 @@ event_zz = next(iter(run_zz.events()))
 
 
 def test_four_vector():
-    for obs_cls in [Px, Py, Pz, E, Pt, Eta, Phi, M]:
+    for obs_cls in [
+        Px,
+        Py,
+        Pz,
+        E,
+        Pt,
+        Eta,
+        Phi,
+        M,
+        MomentumX,
+        MomentumY,
+        MomentumZ,
+        Energy,
+        TransverseMomentum,
+        PseudoRapidity,
+        AzimuthalAngle,
+        Mass,
+    ]:
         obs = obs_cls("Jet0")
         obs.read(event_tt)
         assert obs.name == f"Jet0.{obs_cls.__name__}"
@@ -40,6 +57,11 @@ def test_four_vector():
         obs.read(event_tt)
         assert obs.name == f"Jet:200.Constituents:200.{obs_cls.__name__}"
         assert obs.shape == "200 * 200 * float32"
+
+        obs = obs_cls("Jet:200.Constituents")
+        obs.read(event_tt)
+        assert obs.name == f"Jet:200.Constituents.{obs_cls.__name__}"
+        assert obs.shape == "200 * var * float32"
 
         obs = obs_cls("Jet0,Jet1")
         obs.read(event_tt)
