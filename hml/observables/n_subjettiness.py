@@ -2,8 +2,8 @@ from ..types import Observable
 
 
 class NSubjettiness(Observable):
-    def __init__(self, name, n):
-        super().__init__(name)
+    def __init__(self, physics_object, n):
+        super().__init__(physics_object)
         self.n = n
 
     def get_value(self):

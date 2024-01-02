@@ -2,8 +2,8 @@ from ..types import Observable
 
 
 class NSubjettinessRatio(Observable):
-    def __init__(self, name, m, n):
-        super().__init__(name)
+    def __init__(self, physics_object, m, n):
+        super().__init__(physics_object)
         self.m = m
         self.n = n
 
