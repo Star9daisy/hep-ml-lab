@@ -10,11 +10,16 @@ class InvariantMass(Observable):
                 return
 
         values = []
-        sub_objs = []
+        flat_objs = []
         for objs in self.main_objs:
-            sub_objs.append(reduce(lambda i, j: i.P4() + j.P4(), objs))
+            for obj in objs:
+                flat_objs.append(obj)
+        self.flat_objs = flat_objs
 
-        values.append(reduce(lambda i, j: i.P4() + j.P4(), sub_objs).M())
+        value = flat_objs[0].P4()
+        for obj in flat_objs[1:]:
+            value = value + obj.P4()
+        values.append(value.M())
 
         return values
 
