@@ -13,9 +13,11 @@ class Mass(Observable):
                 values.append(value)
         else:
             for main in self.sub_objs[0]:
+                values_per_main = []
                 for sub in main:
                     value = sub.P4().M() if sub is not None else float("nan")
-                    values.append(value)
+                    values_per_main.append(value)
+                values.append(values_per_main)
 
         return values
 
