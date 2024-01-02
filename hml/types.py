@@ -177,6 +177,9 @@ class Observable(ABC):
     def __repr__(self) -> str:
         return f"{self.name}: {self.value}"
 
+    def __eq__(self, other: Observable) -> bool:
+        return self.name == other.name
+
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         Observable.ALL_OBSERVABLES[cls.__name__] = cls
