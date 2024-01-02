@@ -196,3 +196,43 @@ def test_size():
     obs = Size("Jet.Constituents")
     obs.read(event_tt)
     assert obs.value == None
+
+
+def test_invariant_mass():
+    obs = InvariantMass("Jet0,Jet1").read(event_zz)
+    assert obs.shape == "1 * float32"
+
+    obs = InvariantMass("Jet:2,Jet:2").read(event_zz)
+    assert obs.shape == "1 * float32"
+
+    obs = InvariantMass("Jet:2.Constituents,Jet:2").read(event_zz)
+    assert obs.value == None
+
+    obs = InvariantMass("Jet:2.Constituents,Jet:2.Constituents").read(event_zz)
+    assert obs.value == None
+
+
+def test_angular_distance():
+    obs = AngularDistance("Jet0,Jet0").read(event_zz)
+    assert obs.shape == "1 * 1 * float32"
+
+    obs = AngularDistance("Jet:2,Jet:2").read(event_zz)
+    assert obs.shape == "2 * 2 * float32"
+
+    obs = AngularDistance("Jet:2,Jet:2.Constituents:4").read(event_zz)
+    assert obs.shape == "2 * 8 * float32"
+
+    obs = AngularDistance("Jet:2.Constituents:4,Jet:2").read(event_zz)
+    assert obs.shape == "8 * 2 * float32"
+
+    obs = AngularDistance("Jet:2.Constituents:4,Jet:2.Constituents:4").read(event_zz)
+    assert obs.shape == "8 * 8 * float32"
+
+    obs = AngularDistance("Jet:10,Jet:3").read(event_zz)
+    assert obs.shape == "10 * 3 * float32"
+
+    obs = AngularDistance("Jet:10,Jet:3.Constituents:100").read(event_zz)
+    assert obs.shape == "10 * 300 * float32"
+
+    obs = AngularDistance("Jet0,Jet1,Jet2").read(event_zz)
+    assert obs.value == None
