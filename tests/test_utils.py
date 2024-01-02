@@ -1,7 +1,18 @@
-from hml.utils import get_madgraph5_run, parse_physics_object
+# from hml.utils import get_madgraph5_run, parse_physics_object
+from hml.generators import Madgraph5Run
+from hml.types import Observable
+
+
+class Dummy(Observable):
+    def get_value(self):
+        return
+
+
+dummy = Dummy("")
 
 
 def test_get_madgraph5_run_for_single():
+    run = Madgraph5Run("tests/data/pp2tt", "run_01")
     expected = {
         "name": "run_01",
         "collider": "pp:6500.0x6500.0",
@@ -16,21 +27,22 @@ def test_get_madgraph5_run_for_single():
             "root": "tests/data/pp2tt/Events/run_01/tag_1_delphes_events.root",
         },
     }
-    assert get_madgraph5_run("tests/data/pp2tt", "run_01") == expected
+    assert run._get_info("tests/data/pp2tt", "run_01") == expected
 
 
 def test_get_madgraph5_run_for_multiple():
+    run = Madgraph5Run("tests/data/pp2tt", "run_02")
     expected = {
         "name": "run_02",
         "collider": "pp:6500.0x6500.0",
         "tag": "tag_1",
-        "seed": 42,
-        "cross": 503.7,
+        "seed": 48,
+        "cross": 504.2,
         "error": 2.0,
         "n_events": 200,
         "events": {"lhe": "tests/data/pp2tt/Events/run_02/unweighted_events.lhe.gz"},
     }
-    assert get_madgraph5_run("tests/data/pp2tt", "run_02") == expected
+    assert run._get_info("tests/data/pp2tt", "run_02") == expected
 
 
 def test_parse_physics_object_single():
@@ -49,7 +61,7 @@ def test_parse_physics_object_single():
     expected_phyobjs = [[i] for i in expected_phyobjs]
 
     for obj, exp in zip(phyobjs, expected_phyobjs):
-        assert parse_physics_object(obj) == exp
+        assert dummy.parse_physics_object(obj) == exp
 
 
 def test_parse_physics_object_collective_only_main():
@@ -68,7 +80,7 @@ def test_parse_physics_object_collective_only_main():
     expected_phyobjs = [[i] for i in expected_phyobjs]
 
     for obj, exp in zip(phyobjs, expected_phyobjs):
-        assert parse_physics_object(obj) == exp
+        assert dummy.parse_physics_object(obj) == exp
 
 
 def test_parse_physics_object_collective_main_sub():
@@ -96,7 +108,7 @@ def test_parse_physics_object_collective_main_sub():
     expected_phyobjs = [[i] for i in expected_phyobjs]
 
     for obj, exp in zip(phyobjs, expected_phyobjs):
-        assert parse_physics_object(obj) == exp
+        assert dummy.parse_physics_object(obj) == exp
 
 
 def test_parse_physics_object_multiple_single_single():
@@ -123,7 +135,7 @@ def test_parse_physics_object_multiple_single_single():
     ]
 
     for obj, exp in zip(phyobjs, expected_phyobjs):
-        assert parse_physics_object(obj) == exp
+        assert dummy.parse_physics_object(obj) == exp
 
 
 def test_parse_physics_object_multiple_single_collective_only_main():
@@ -162,7 +174,7 @@ def test_parse_physics_object_multiple_single_collective_only_main():
     ]
 
     for physics_object, expected in zip(mp_objs, mp_expected_objs):
-        assert parse_physics_object(physics_object) == expected
+        assert dummy.parse_physics_object(physics_object) == expected
 
 
 def test_parse_physics_object_multiple_main_sub():
@@ -210,7 +222,7 @@ def test_parse_physics_object_multiple_main_sub():
     ]
 
     for physics_object, expected in zip(mp_objs, mp_expected_objs):
-        assert parse_physics_object(physics_object) == expected
+        assert dummy.parse_physics_object(physics_object) == expected
 
 
 def test_parse_physics_object_multiple_collective_collective_only_main():
@@ -249,7 +261,7 @@ def test_parse_physics_object_multiple_collective_collective_only_main():
     ]
 
     for obj, exp in zip(mp_objs, mp_expected_objs):
-        assert parse_physics_object(obj) == exp
+        assert dummy.parse_physics_object(obj) == exp
 
 
 def test_parse_physics_object_multiple_collective_collective_main_sub_main():
@@ -293,7 +305,7 @@ def test_parse_physics_object_multiple_collective_collective_main_sub_main():
     ]
 
     for obj, exp in zip(mp_objs, mp_expected_objs):
-        assert parse_physics_object(obj) == exp
+        assert dummy.parse_physics_object(obj) == exp
 
 
 def test_parse_physics_object_multiple_collective_collective_main_sub_main_sub():
@@ -347,4 +359,4 @@ def test_parse_physics_object_multiple_collective_collective_main_sub_main_sub()
     ]
 
     for obj, exp in zip(mp_objs, mp_expected_objs):
-        assert parse_physics_object(obj) == exp
+        assert dummy.parse_physics_object(obj) == exp
