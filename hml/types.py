@@ -18,6 +18,8 @@ class Generator:
 
 
 class Observable(ABC):
+    ALL_OBSERVABLES = {}
+
     def __init__(self, physics_object: str | None = None):
         self.main_objs = []
         self.sub_objs = []
@@ -169,6 +171,19 @@ class Observable(ABC):
                 item["sub"] = self.parse_branch(sub)
                 output.append(item)
         return output
+
+    def __repr__(self) -> str:
+        return f"{self.name}: {self.value}"
+
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+        Observable.ALL_OBSERVABLES[cls.__name__] = cls
+
+    @classmethod
+    def add_alias(cls, *alias: str) -> None:
+        """Add alias for the class name."""
+        for i in alias:
+            Observable.ALL_OBSERVABLES[i] = cls
 
 
 class Representation:
