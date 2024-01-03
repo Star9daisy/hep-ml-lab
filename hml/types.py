@@ -36,65 +36,66 @@ class Observable(ABC):
     def read(self, event):
         self.event = event
 
-        for obj in self.objs:
-            main_name = obj["main"][0]
-            main_start = obj["main"][1]
-            main_end = obj["main"][2]
+        if self.physics_object:
+            for obj in self.objs:
+                main_name = obj["main"][0]
+                main_start = obj["main"][1]
+                main_end = obj["main"][2]
 
-            main_objs = list(getattr(event, main_name))
-            clipped_main_objs = main_objs[slice(main_start, main_end)]
-            required_main_length = (
-                main_end - main_start if main_end is not None else None
-            )
-            actual_main_length = len(clipped_main_objs)
-
-            if (
-                required_main_length is not None
-                and required_main_length > actual_main_length
-            ):
-                main_padding_length = main_end - main_start - len(clipped_main_objs)
-                padded_main_objs = clipped_main_objs + [None] * main_padding_length
-                prepared_main_objs = padded_main_objs
-            else:
-                prepared_main_objs = clipped_main_objs
-            self.main_objs.append(prepared_main_objs)
-
-            if obj.get("sub") is None:
-                self.sub_objs.append([])
-                continue
-
-            sub_name = obj["sub"][0]
-            sub_start = obj["sub"][1]
-            sub_end = obj["sub"][2]
-
-            sub_objs_per_main = []
-            for main_obj in prepared_main_objs:
-                if main_obj is None:
-                    if sub_end is None:
-                        sub_objs_per_main.append([None])
-                    else:
-                        sub_objs_per_main.append([None] * required_sub_length)
-                    continue
-
-                sub_objs = list(getattr(main_obj, sub_name))
-                clipped_sub_objs = sub_objs[slice(sub_start, sub_end)]
-                required_sub_length = (
-                    sub_end - sub_start if sub_end is not None else None
+                main_objs = list(getattr(event, main_name))
+                clipped_main_objs = main_objs[slice(main_start, main_end)]
+                required_main_length = (
+                    main_end - main_start if main_end is not None else None
                 )
-                acutal_sub_length = len(clipped_sub_objs)
+                actual_main_length = len(clipped_main_objs)
 
                 if (
-                    required_sub_length is not None
-                    and required_sub_length > acutal_sub_length
+                    required_main_length is not None
+                    and required_main_length > actual_main_length
                 ):
-                    sub_padding_length = required_sub_length - acutal_sub_length
-                    padded_sub_objs = clipped_sub_objs + [None] * sub_padding_length
-                    prepared_sub_objs = padded_sub_objs
+                    main_padding_length = main_end - main_start - len(clipped_main_objs)
+                    padded_main_objs = clipped_main_objs + [None] * main_padding_length
+                    prepared_main_objs = padded_main_objs
                 else:
-                    prepared_sub_objs = clipped_sub_objs
-                sub_objs_per_main.append(prepared_sub_objs)
+                    prepared_main_objs = clipped_main_objs
+                self.main_objs.append(prepared_main_objs)
 
-            self.sub_objs.append(sub_objs_per_main)
+                if obj.get("sub") is None:
+                    self.sub_objs.append([])
+                    continue
+
+                sub_name = obj["sub"][0]
+                sub_start = obj["sub"][1]
+                sub_end = obj["sub"][2]
+
+                sub_objs_per_main = []
+                for main_obj in prepared_main_objs:
+                    if main_obj is None:
+                        if sub_end is None:
+                            sub_objs_per_main.append([None])
+                        else:
+                            sub_objs_per_main.append([None] * required_sub_length)
+                        continue
+
+                    sub_objs = list(getattr(main_obj, sub_name))
+                    clipped_sub_objs = sub_objs[slice(sub_start, sub_end)]
+                    required_sub_length = (
+                        sub_end - sub_start if sub_end is not None else None
+                    )
+                    acutal_sub_length = len(clipped_sub_objs)
+
+                    if (
+                        required_sub_length is not None
+                        and required_sub_length > acutal_sub_length
+                    ):
+                        sub_padding_length = required_sub_length - acutal_sub_length
+                        padded_sub_objs = clipped_sub_objs + [None] * sub_padding_length
+                        prepared_sub_objs = padded_sub_objs
+                    else:
+                        prepared_sub_objs = clipped_sub_objs
+                    sub_objs_per_main.append(prepared_sub_objs)
+
+                self.sub_objs.append(sub_objs_per_main)
 
         self._value = self.get_value()
 
