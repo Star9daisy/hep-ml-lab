@@ -64,7 +64,19 @@ class CutLayer(keras.Layer):
         if not isinstance(self._cut, str):
             raise TypeError(f"is_passed should be used when specify a cut manually")
 
-        cut_exp = self._cut
+        cut_exp = self._cut.strip()
+
+        veto = False
+        if "veto" in cut_exp:
+            cut_exp = cut_exp.replace("veto", "")
+            veto = True
+
+        is_any = False
+        if "[any]" in cut_exp:
+            cut_exp = cut_exp.replace("[any]", "")
+            is_any = True
+        else:
+            cut_exp = cut_exp.replace("[all]", "")
 
         cuts_per_obs = cut_exp.strip().split("and")
         cuts_per_obs = [i.strip().split("or") for i in cuts_per_obs]
@@ -84,11 +96,25 @@ class CutLayer(keras.Layer):
 
         df = pd.DataFrame({obs.name: obs.value for obs in obs_list})
 
-        if len(df) == len(df.query(cut_exp)):
-            return True
+        result = False
+        if is_any:
+            if len(df.query(cut_exp)) > 0:
+                result = True
+            else:
+                self._count += 1
+                result = False
         else:
+            if len(df) == len(df.query(cut_exp)):
+                result = True
+            else:
+                self._count += 1
+                result = False
+
+        if veto:
             self._count += 1
-            return False
+            result = not result
+
+        return result
 
     def call(self, inputs, targets=None, sample_weight=None, training=None):
         x = inputs
@@ -225,19 +251,19 @@ class CutLayer(keras.Layer):
 
     @property
     def count(self):
-        return ops.convert_to_numpy(self._count)
+        return int(ops.convert_to_numpy(self._count))
 
     @property
     def cut_left(self):
-        return ops.convert_to_numpy(self._cut_left)
+        return float(ops.convert_to_numpy(self._cut_left))
 
     @property
     def cut_right(self):
-        return ops.convert_to_numpy(self._cut_right)
+        return float(ops.convert_to_numpy(self._cut_right))
 
     @property
     def case(self):
-        return ops.convert_to_numpy(self._case)
+        return int(ops.convert_to_numpy(self._case))
 
     def get_config(self):
         config = super().get_config()
