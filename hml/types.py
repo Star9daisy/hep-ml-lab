@@ -103,7 +103,7 @@ class Observable(ABC):
 
     @property
     def name(self):
-        if self.physics_object is not None:
+        if self.physics_object:
             return f"{self.physics_object}.{self._name}"
         else:
             return self._name
