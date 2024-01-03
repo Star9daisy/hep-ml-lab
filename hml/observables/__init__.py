@@ -21,3 +21,4 @@ from .invariant_mass import InvariantMass, InvMass, InvM
 from .b_tag import BTag
 from .charge import Charge
 from .size import Size
+from .dummy import Dummy
