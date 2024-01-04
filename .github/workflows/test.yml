@@ -12,18 +12,21 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Install Poetry
-      run: curl -sSL https://install.python-poetry.org | python3 -
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bashrc
     
     - name: Install HML dependencies
-      run: /github/home/.local/bin/poetry install
+      run: poetry install
     
     - name: Run tests
       run: |
         . /root/softwares/root6/bin/thisroot.sh
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/root/softwares/madgraph5/Delphes
         export ROOT_INCLUDE_PATH=/root/softwares/madgraph5/Delphes/external
-        /github/home/.local/bin/poetry run pip install keras --upgrade
-        /github/home/.local/bin/poetry run pytest -v --cov=hml --cov-report=xml tests
+        poetry run pip install keras --upgrade
+        poetry run pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
+        poetry run pytest -v --cov=hml --cov-report=xml tests
       shell: bash
     
     - name: Upload coverage reports to Codecov
