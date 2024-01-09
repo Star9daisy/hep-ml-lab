@@ -27,7 +27,7 @@ class CutLayer(keras.Layer):
             super().__init__(name=cut, **kwargs)
         else:
             super().__init__(**kwargs)
-            self.name = self.name.replace("cut_layer", "Observable")
+            self.name = self.name.replace("cut_layer", "observable")
 
         self._cut = cut
         self._count = count
@@ -61,6 +61,8 @@ class CutLayer(keras.Layer):
         self.loss_fn = losses.get(loss_fn)
 
     def is_passed(self, event):
+        # TODO: if cut does not have logical operators, it will be treated as a
+        #       learnable cut. Calling this method will raise an error.
         if not isinstance(self._cut, str):
             raise TypeError(f"is_passed should be used when specify a cut manually")
 
