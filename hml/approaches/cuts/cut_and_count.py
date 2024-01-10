@@ -65,7 +65,7 @@ class CutAndCount(keras.Model):
     def sequential_call(self, x, y=None, show_cut_mark=False):
         y_pred = ops.ones(ops.shape(x)[0])
         mask = y_pred
-        for i, cut_layer in enumerate(self.cut_layers):
+        for cut_layer in self.cut_layers:
             ix = ops.take(x, cut_layer.feature_id, axis=-1)
 
             if y is not None:

@@ -105,16 +105,8 @@ class CutLayer(keras.Layer):
 
     def apply_cut(self, x, cut_mark=-1.0):
         x = ops.cast(x, "float32")
-        # y = ops.cast(y, "int32")
-
         if ops.ndim(x) == 2:
             x = ops.take(x, self.feature_id, axis=-1)
-
-        # if ops.ndim(y) == 2:
-        #     if ops.ndim(ops.squeeze(y)) == 2:
-        #         y = ops.argmax(y, -1)
-        #     else:
-        #         y = ops.squeeze(y)
 
         y_pred = ops.cond(
             ops.equal(self._case, 0),
@@ -138,9 +130,6 @@ class CutLayer(keras.Layer):
             ),
         )
         return y_pred
-        # kept_indices = ops.squeeze(ops.where(indices == 1.0))
-
-        # return ops.take(x, kept_indices), ops.take(y, kept_indices)
 
     def compute_output_shape(self, input_shape):
         return input_shape
