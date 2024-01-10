@@ -64,20 +64,20 @@ class CutAndCount(keras.Model):
 
     def sequential_call(self, x, y=None, show_cut_mark=False):
         y_pred = ops.ones(ops.shape(x)[0])
-        iy = y_pred
+        mask = y_pred
         for i, cut_layer in enumerate(self.cut_layers):
             ix = ops.take(x, cut_layer.feature_id, axis=-1)
 
             if y is not None:
-                masked_x = ops.take(ix, ops.squeeze(ops.where(iy >= 0), 0))
-                masked_y = ops.take(y, ops.squeeze(ops.where(iy >= 0), 0))
+                masked_x = ops.take(ix, ops.squeeze(ops.where(mask >= 0), 0))
+                masked_y = ops.take(y, ops.squeeze(ops.where(mask >= 0), 0))
                 cut_left, cut_right, case = self.find_best_cut(masked_x, masked_y)
                 cut_layer._cut_left.assign(cut_left)
                 cut_layer._cut_right.assign(cut_right)
                 cut_layer._case.assign(case)
 
-            iy = cut_layer.apply_cut(ix, -1)
-            y_pred = ops.logical_and(y_pred, ops.where(iy < 0, 0.0, 1.0))
+            mask = cut_layer.apply_cut(ix, -1)
+            y_pred = ops.logical_and(y_pred, ops.where(mask < 0, 0.0, 1.0))
             y_pred = ops.cast(y_pred, "float32")
 
         return y_pred
