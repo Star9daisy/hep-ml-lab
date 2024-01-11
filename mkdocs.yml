@@ -29,6 +29,7 @@ plugins:
             docstring_style: numpy
             separate_signature: true
             docstring_section_style: spacy
+  - mkdocs-jupyter
 
 markdown_extensions:
   - toc:
@@ -66,6 +67,7 @@ nav:
   - Examples:
     - 1511.05190: examples/1511.05190.md
     - 1801.00797: examples/1801.00797.md
+    - example: examples/example.ipynb
   - API:
       - hml.generators: api/hml.generators.md
       - hml.observables: api/hml.observables.md
