@@ -237,6 +237,7 @@ class Madgraph5:
 
         table.add_column("#", justify="right")
         table.add_column("Name")
+        table.add_column("Collider")
         table.add_column("Tag")
         table.add_column("Cross section (pb)", justify="center")
         table.add_column("N events", justify="right")
@@ -246,6 +247,7 @@ class Madgraph5:
             table.add_row(
                 f"{i}",
                 f"{run.name}[{len(run.sub_runs)}]",
+                f"{run.collider}",
                 f"{run.tag}",
                 f"{run.cross:.3e} +- {run.error:.3e}",
                 f"{run.n_events:,}",
