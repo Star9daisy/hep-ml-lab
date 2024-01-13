@@ -61,9 +61,10 @@ extra_css:
 
 nav:
   - Home: index.md
-  - Getting started:
-    - Installation: getting_started/installation.md
-    - Quick start: getting_started/quick_start.md
+  - Install:
+    - Prerequisites: install/prerequisites.md
+    - pip: install/pip.md
+    - Docker: install/docker.md
   - Guides:
     - guides/index.md
     - Generate events: guides/generate_events.ipynb
