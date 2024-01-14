@@ -132,8 +132,11 @@ class Observable(ABC):
             pass
         return ak_array
 
-    def to_numpy(self, dtype=None):
-        return np.array(self._value, dtype=dtype)
+    def to_numpy(self, keepdims=None, dtype=None):
+        if keepdims is not None:
+            return np.array(self._value, dtype=dtype)
+        else:
+            return np.squeeze(np.array(self._value, dtype=dtype))
 
     @abstractmethod
     def get_value(self) -> Any:
