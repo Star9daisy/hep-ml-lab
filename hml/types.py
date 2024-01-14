@@ -123,7 +123,7 @@ class Observable(ABC):
         self.to_awkward().type.show(captured_output)
         return captured_output.getvalue().strip()
 
-    def to_awkward(self, dtype="float32"):
+    def to_awkward(self, dtype=None):
         ak_array = ak.from_iter(self.value)
         ak_array = ak.values_astype(ak_array, dtype)
         try:
@@ -132,7 +132,7 @@ class Observable(ABC):
             pass
         return ak_array
 
-    def to_numpy(self, dtype="float32"):
+    def to_numpy(self, dtype=None):
         return np.array(self._value, dtype=dtype)
 
     @abstractmethod
