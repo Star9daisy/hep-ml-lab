@@ -1,4 +1,7 @@
+import fastjet as fj
+import matplotlib.pyplot as plt
 from keras import ops
+from matplotlib import colors
 
 from .types import Observable
 
@@ -79,3 +82,39 @@ def ops_unique(tensor):
         return unique_elements
     except:
         return ops.array([0])
+
+
+def show_image(image, xedges, yedges, axis=None, norm=colors.LogNorm(), cmap="jet"):
+    if axis:
+        axis.imshow(
+            image.T,
+            origin="lower",
+            extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]],
+            cmap=cmap,
+            norm=norm,
+        )
+    else:
+        plt.imshow(
+            image.T,
+            origin="lower",
+            extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]],
+            cmap=cmap,
+            norm=norm,
+        )
+
+
+def get_jet_algorithm(name: str):
+    JET_ALGORITHMS = {
+        "kt": fj.kt_algorithm,
+        "cambridge": fj.cambridge_algorithm,
+        "antikt": fj.antikt_algorithm,
+        "genkt": fj.genkt_algorithm,
+        "cambridge_for_passive": fj.cambridge_for_passive_algorithm,
+        "genkt_for_passive": fj.genkt_for_passive_algorithm,
+        "ee_kt": fj.ee_kt_algorithm,
+        "ee_genkt": fj.ee_genkt_algorithm,
+        "plugin": fj.plugin_algorithm,
+        "undefined": fj.undefined_jet_algorithm,
+    }
+
+    return JET_ALGORITHMS.get(name, fj.undefined_jet_algorithm)
