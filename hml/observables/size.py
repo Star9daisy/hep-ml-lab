@@ -6,9 +6,6 @@ class Size(Observable):
         if len(self.main_objs) != 1:
             return
 
-        if len(self.main_objs[0]) == 1:
-            return
-
         if len(self.sub_objs[0]) != 0:
             return
 
