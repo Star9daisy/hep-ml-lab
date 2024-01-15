@@ -23,11 +23,8 @@ class Observable(ABC):
 
     def __init__(self, physics_object: str | None = None, name: str | None = None):
         self.physics_object = physics_object
-        self.main_objs = []
-        self.sub_objs = []
-
-        if physics_object is not None:
-            self.objs = self.parse_physics_object(physics_object)
+        if self.physics_object is not None:
+            self.objs = self.parse_physics_object(self.physics_object)
         else:
             self.objs = []
 
@@ -35,6 +32,8 @@ class Observable(ABC):
         self._value = None
 
     def read(self, event):
+        self.main_objs = []
+        self.sub_objs = []
         self.event = event
 
         if self.physics_object:
