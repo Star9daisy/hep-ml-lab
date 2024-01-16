@@ -156,6 +156,7 @@ class Image:
         limits=None,
         show_pixels=False,
         grid=True,
+        norm=None,
     ):
         plt.figure(dpi=64)
 
@@ -189,7 +190,7 @@ class Image:
         else:
             # Use pcolormesh instead of imshow so that the actual values of bins
             # are shown.
-            plt.pcolormesh(self.w_bins, self.h_bins, self.values.T)
+            plt.pcolormesh(self.w_bins, self.h_bins, self.values.T, norm=norm)
 
             # Turn on colorbar to show the range of values.
             plt.colorbar()
