@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from hml.types import Observable
 from hml.utils import get_observable
@@ -25,21 +26,32 @@ class Set:
             else:
                 self.observables.append(i)
 
-        self.values = None
+        self._values = None
 
     def read(self, event):
-        for i in self.observables:
-            i.read(event)
-
-        self.values = self.get_values()
-
-    def get_values(self):
-        values = []
+        self._values = []
 
         for i in self.observables:
-            values += i.value
+            value = i.read(event).to_numpy()
 
-        return values
+            # Check if the observable is a scalar
+            if value.shape != ():
+                raise ValueError(
+                    f"Observable {i.name} has shape {value.shape} "
+                    "but should be a scalar."
+                )
 
-    def to_numpy(self, dtype="float32"):
-        return np.array(self.values, dtype=dtype)
+            self._values.append(value)
+
+        self._values = np.array(self._values)
+
+    @property
+    def names(self):
+        return [i.name for i in self.observables]
+
+    @property
+    def values(self):
+        return self._values
+
+    def to_pandas(self):
+        return pd.DataFrame(self.values, columns=self.names)
