@@ -191,7 +191,7 @@ def test_size():
 
     obs = Size("Jet0")
     obs.read(event_tt)
-    assert obs.value == None
+    assert obs.value == [1]
 
     obs = Size("Jet.Constituents")
     obs.read(event_tt)
