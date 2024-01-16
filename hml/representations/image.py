@@ -1,4 +1,5 @@
 import fastjet as fj
+import matplotlib.pyplot as plt
 import numpy as np
 
 from hml.utils import get_jet_algorithm, get_observable
@@ -114,11 +115,6 @@ class Image:
         )
         self.width._value = pixelized_values.tolist()
 
-        self._values = np.histogram2d(
-            self.width.to_numpy(),
-            self.height.to_numpy(),
-            bins=(self.w_bins, self.h_bins),
-        )[0]
         self.is_pixelized = True
 
     def continuous_to_center(self, values, bins):
@@ -153,3 +149,65 @@ class Image:
             return hist
 
         return self.height.to_numpy(), self.width.to_numpy()
+
+    def show(
+        self,
+        as_point=False,
+        limits=None,
+        show_pixels=False,
+        grid=True,
+    ):
+        plt.figure(dpi=64)
+
+        if not self.is_pixelized:
+            plt.scatter(
+                x=self.width.to_numpy(),
+                y=self.height.to_numpy(),
+                c="k",
+                s=10,
+                marker="o",
+            )
+
+            # Restrict the range of axes.
+            if limits is not None:
+                plt.xlim(limits[0])
+                plt.ylim(limits[1])
+
+        elif as_point:
+            plt.scatter(
+                x=self.width.to_numpy(),
+                y=self.height.to_numpy(),
+                c="k",
+                s=10,
+                marker="s",
+            )
+            plt.xlim(self.w_bins[0], self.w_bins[-1])
+            plt.ylim(self.h_bins[0], self.h_bins[-1])
+
+            plt.gca().set_aspect("equal")
+
+        else:
+            # Use pcolormesh instead of imshow so that the actual values of bins
+            # are shown.
+            plt.pcolormesh(self.w_bins, self.h_bins, self.values.T)
+
+            # Turn on colorbar to show the range of values.
+            plt.colorbar()
+
+            if show_pixels:
+                # Turn off ticks and labels.
+                plt.tick_params(
+                    bottom=False, left=False, labelbottom=False, labelleft=False
+                )
+                plt.xticks(self.w_bins)
+                plt.yticks(self.h_bins)
+
+            # Set aspect ratio to be equal so that every pixel is square.
+            # Ignore the actual values of bins since here is just a schematic.
+            plt.gca().set_aspect("equal")
+
+        # Turn on grid to show pixel boundaries.
+        if grid:
+            plt.grid(alpha=0.5)
+
+        plt.show()

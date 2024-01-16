@@ -84,25 +84,6 @@ def ops_unique(tensor):
         return ops.array([0])
 
 
-def show_image(image, xedges, yedges, axis=None, norm=colors.LogNorm(), cmap="jet"):
-    if axis:
-        axis.imshow(
-            image.T,
-            origin="lower",
-            extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]],
-            cmap=cmap,
-            norm=norm,
-        )
-    else:
-        plt.imshow(
-            image.T,
-            origin="lower",
-            extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]],
-            cmap=cmap,
-            norm=norm,
-        )
-
-
 def get_jet_algorithm(name: str):
     JET_ALGORITHMS = {
         "kt": fj.kt_algorithm,
