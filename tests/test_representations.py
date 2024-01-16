@@ -1,5 +1,5 @@
 from hml.generators import Madgraph5Run
-from hml.representations import Image
+from hml.representations import Image, Set
 from hml.types import Path
 
 DATA_DIR = Path("tests/data")
@@ -53,3 +53,11 @@ def test_image_pixelize_first():
     image.show(as_point=True)
     image.show()
     image.show(show_pixels=True)
+
+
+def test_set():
+    set = Set("FatJet0.Pt", "FatJet0.Eta", "FatJet0.Phi", "FatJet0.Mass")
+    set.read(event_zz)
+
+    assert set.names == ["FatJet0.Pt", "FatJet0.Eta", "FatJet0.Phi", "FatJet0.Mass"]
+    assert set.values.shape == (4,)
