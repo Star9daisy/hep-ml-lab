@@ -92,6 +92,7 @@ class ImageDataset:
             "registered_methods": self.image.registered_methods,
             "been_split": self.been_split,
             "seed": self.seed,
+            "is_pixelized": self.image.is_pixelized,
         }
         configs_json = json.dumps(configs)
 
@@ -130,6 +131,7 @@ class ImageDataset:
         image = Image(
             height=configs["height"], width=configs["width"], channel=configs["channel"]
         )
+        image.is_pixelized = configs["is_pixelized"]
         image.registered_methods = configs["registered_methods"]
 
         dataset = cls(image)
