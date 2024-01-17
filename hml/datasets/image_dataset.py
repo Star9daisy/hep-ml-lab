@@ -26,6 +26,14 @@ class ImageDataset:
 
     def read(self, event, target):
         self.image.read(event)
+
+        if self.image.is_pixelized and np.all(np.isnan(self.image.values)):
+            return
+        elif np.all(np.isnan(self.image.values[0])) or np.all(
+            np.isnan(self.image.values)
+        ):
+            return
+
         if self.image.status:
             self._targets.append([target])
             if self.image.is_pixelized:
