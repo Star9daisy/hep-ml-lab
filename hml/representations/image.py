@@ -18,6 +18,11 @@ class Image:
         self.status = True
 
     def read(self, event):
+        self.is_translated = None
+        self.is_pixelized = None
+        self.been_read = False
+        self.status = True
+
         self.event = event
         self.height.read(event)
         self.width.read(event)
