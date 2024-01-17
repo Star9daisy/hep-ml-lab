@@ -13,109 +13,163 @@ class Image:
 
         self.is_translated = None
         self.is_pixelized = None
+        self.been_read = False
+        self.registered_methods = []
 
     def read(self, event):
         self.event = event
         self.height.read(event)
         self.width.read(event)
         self.channel.read(event) if self.channel is not None else None
+        self.been_read = True
+
+        for method, kwargs in self.registered_methods:
+            getattr(self, method)(**kwargs)
+
+        return self
 
     def with_subjets(self, constituents, algorithm, r, min_pt):
-        px = get_observable(f"{constituents}.Px").read(self.event).value[0]
-        py = get_observable(f"{constituents}.Py").read(self.event).value[0]
-        pz = get_observable(f"{constituents}.Pz").read(self.event).value[0]
-        e = get_observable(f"{constituents}.E").read(self.event).value[0]
+        if self.been_read:
+            px = get_observable(f"{constituents}.Px").read(self.event).value[0]
+            py = get_observable(f"{constituents}.Py").read(self.event).value[0]
+            pz = get_observable(f"{constituents}.Pz").read(self.event).value[0]
+            e = get_observable(f"{constituents}.E").read(self.event).value[0]
 
-        particles = [fj.PseudoJet(px[i], py[i], pz[i], e[i]) for i in range(len(px))]
-        subjet_def = fj.JetDefinition(get_jet_algorithm(algorithm), r)
-        self.cluster = fj.ClusterSequence(particles, subjet_def)
-        self.subjets = self.cluster.inclusive_jets(min_pt)
+            particles = [
+                fj.PseudoJet(px[i], py[i], pz[i], e[i]) for i in range(len(px))
+            ]
+            subjet_def = fj.JetDefinition(get_jet_algorithm(algorithm), r)
+            self.cluster = fj.ClusterSequence(particles, subjet_def)
+            self.subjets = self.cluster.inclusive_jets(min_pt)
+
+        else:
+            self.registered_methods.append(
+                (
+                    "with_subjets",
+                    {
+                        "constituents": constituents,
+                        "algorithm": algorithm,
+                        "r": r,
+                        "min_pt": min_pt,
+                    },
+                )
+            )
+
+        return self
 
     def translate(self, origin="SubJet0"):
-        origin_height = get_observable(f"{origin}.{self.height.__class__.__name__}")
-        origin_width = get_observable(f"{origin}.{self.width.__class__.__name__}")
+        if self.been_read:
+            origin_height = get_observable(f"{origin}.{self.height.__class__.__name__}")
+            origin_width = get_observable(f"{origin}.{self.width.__class__.__name__}")
 
-        obj, index, _ = origin_height.objs[0]["main"]
+            obj, index, _ = origin_height.objs[0]["main"]
 
-        if obj != "SubJet":
-            raise ValueError(f"{obj} is not supported yet!")
+            if obj != "SubJet":
+                raise ValueError(f"{obj} is not supported yet!")
 
-        origin_height._value = [
-            getattr(self.subjets[index], origin_height.__class__.__name__.lower())()
-        ]
-        origin_width._value = [
-            getattr(self.subjets[index], origin_width.__class__.__name__.lower())()
-        ]
+            origin_height._value = [
+                getattr(self.subjets[index], origin_height.__class__.__name__.lower())()
+            ]
+            origin_width._value = [
+                getattr(self.subjets[index], origin_width.__class__.__name__.lower())()
+            ]
 
-        self.origin_height = origin_height
-        self.origin_width = origin_width
+            self.origin_height = origin_height
+            self.origin_width = origin_width
 
-        self.height._value = (
-            self.height.to_numpy(keepdims=True) - origin_height.to_numpy()
-        ).tolist()
-        self.width._value = (
-            self.width.to_numpy(keepdims=True) - origin_width.to_numpy()
-        ).tolist()
+            self.height._value = (
+                self.height.to_numpy(keepdims=True) - origin_height.to_numpy()
+            ).tolist()
+            self.width._value = (
+                self.width.to_numpy(keepdims=True) - origin_width.to_numpy()
+            ).tolist()
 
-        self.is_translated = True
+            self.is_translated = True
+
+        else:
+            self.registered_methods.append(
+                ("translate", {"origin": origin}),
+            )
+
+        return self
 
     def rotate(self, axis="SubJet1", orientation=-90):
-        axis_height = get_observable(f"{axis}.{self.height.__class__.__name__}")
-        axis_width = get_observable(f"{axis}.{self.width.__class__.__name__}")
+        if self.been_read:
+            axis_height = get_observable(f"{axis}.{self.height.__class__.__name__}")
+            axis_width = get_observable(f"{axis}.{self.width.__class__.__name__}")
 
-        obj, index, _ = axis_height.objs[0]["main"]
+            obj, index, _ = axis_height.objs[0]["main"]
 
-        if obj != "SubJet":
-            raise ValueError(f"{obj} is not supported yet!")
+            if obj != "SubJet":
+                raise ValueError(f"{obj} is not supported yet!")
 
-        axis_height._value = [
-            getattr(self.subjets[index], axis_height.__class__.__name__.lower())()
-        ]
-        axis_width._value = [
-            getattr(self.subjets[index], axis_width.__class__.__name__.lower())()
-        ]
-
-        delta_h = axis_height.to_numpy() - self.origin_height.to_numpy()
-        delta_w = axis_width.to_numpy() - self.origin_width.to_numpy()
-        angle = orientation - np.arctan2(delta_h, delta_w) * 180 / np.pi
-        angle = np.deg2rad(angle)
-
-        rotation_matrix = np.array(
-            [
-                [np.cos(angle), -np.sin(angle)],
-                [np.sin(angle), np.cos(angle)],
+            axis_height._value = [
+                getattr(self.subjets[index], axis_height.__class__.__name__.lower())()
             ]
-        )
-        points = np.vstack([self.width.to_numpy(), self.height.to_numpy()])
-        rotated_points = np.dot(rotation_matrix, points)
-        self.width._value = (
-            rotated_points[0].reshape(self.width.to_numpy(keepdims=True).shape).tolist()
-        )
-        self.height._value = (
-            rotated_points[1]
-            .reshape(self.height.to_numpy(keepdims=True).shape)
-            .tolist()
-        )
+            axis_width._value = [
+                getattr(self.subjets[index], axis_width.__class__.__name__.lower())()
+            ]
+
+            delta_h = axis_height.to_numpy() - self.origin_height.to_numpy()
+            delta_w = axis_width.to_numpy() - self.origin_width.to_numpy()
+            angle = orientation - np.arctan2(delta_h, delta_w) * 180 / np.pi
+            angle = np.deg2rad(angle)
+
+            rotation_matrix = np.array(
+                [
+                    [np.cos(angle), -np.sin(angle)],
+                    [np.sin(angle), np.cos(angle)],
+                ]
+            )
+            points = np.vstack([self.width.to_numpy(), self.height.to_numpy()])
+            rotated_points = np.dot(rotation_matrix, points)
+            self.width._value = (
+                rotated_points[0]
+                .reshape(self.width.to_numpy(keepdims=True).shape)
+                .tolist()
+            )
+            self.height._value = (
+                rotated_points[1]
+                .reshape(self.height.to_numpy(keepdims=True).shape)
+                .tolist()
+            )
+
+        else:
+            self.registered_methods.append(
+                ("rotate", {"axis": axis, "orientation": orientation}),
+            )
+
+        return self
 
     def pixelize(self, size, range):
-        self.h_bins = np.linspace(*range[0], size[0] + 1)
-        self.w_bins = np.linspace(*range[1], size[1] + 1)
+        if self.been_read:
+            self.h_bins = np.linspace(*range[0], size[0] + 1)
+            self.w_bins = np.linspace(*range[1], size[1] + 1)
 
-        pixelized_values = self.continuous_to_center(
-            self.height.to_numpy(), self.h_bins
-        )
-        pixelized_values = pixelized_values.reshape(
-            self.height.to_numpy(keepdims=True).shape
-        )
-        self.height._value = pixelized_values.tolist()
+            pixelized_values = self.continuous_to_center(
+                self.height.to_numpy(), self.h_bins
+            )
+            pixelized_values = pixelized_values.reshape(
+                self.height.to_numpy(keepdims=True).shape
+            )
+            self.height._value = pixelized_values.tolist()
 
-        pixelized_values = self.continuous_to_center(self.width.to_numpy(), self.w_bins)
-        pixelized_values = pixelized_values.reshape(
-            self.width.to_numpy(keepdims=True).shape
-        )
-        self.width._value = pixelized_values.tolist()
+            pixelized_values = self.continuous_to_center(
+                self.width.to_numpy(), self.w_bins
+            )
+            pixelized_values = pixelized_values.reshape(
+                self.width.to_numpy(keepdims=True).shape
+            )
+            self.width._value = pixelized_values.tolist()
 
-        self.is_pixelized = True
+            self.is_pixelized = True
+
+        else:
+            self.registered_methods.append(
+                ("pixelize", {"size": size, "range": range}),
+            )
+
+        return self
 
     def continuous_to_center(self, values, bins):
         out_values = np.empty_like(values)
