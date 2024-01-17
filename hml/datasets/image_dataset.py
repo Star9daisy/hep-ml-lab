@@ -193,36 +193,55 @@ class ImageDataset:
 
     def show(
         self,
+        limits=None,
         show_pixels=False,
         grid=True,
         norm=None,
-        n_samples=10000,
+        n_samples=-1,
     ):
         plt.figure()
-        # Use pcolormesh instead of imshow so that the actual values of bins
-        # are shown.
-        plt.pcolormesh(
-            self.image.w_bins,
-            self.image.h_bins,
-            self.samples[:n_samples].sum(0).T,
-            norm=norm,
-            cmap="jet",
-        )
 
-        # Turn on colorbar to show the range of values.
-        plt.colorbar()
-
-        if show_pixels:
-            # Turn off ticks and labels.
-            plt.tick_params(
-                bottom=False, left=False, labelbottom=False, labelleft=False
+        if not self.image.is_pixelized:
+            plt.scatter(
+                x=self.samples[1][:n_samples],
+                y=self.samples[0][:n_samples],
+                c="k",
+                s=10,
+                marker="o",
             )
-            plt.xticks(self.image.w_bins)
-            plt.yticks(self.image.h_bins)
 
-        # Set aspect ratio to be equal so that every pixel is square.
-        # Ignore the actual values of bins since here is just a schematic.
-        plt.gca().set_aspect("equal")
+            # Restrict the range of axes.
+            if limits is not None:
+                plt.xlim(limits[0])
+                plt.ylim(limits[1])
+
+        else:
+            # Use pcolormesh instead of imshow so that the actual values of bins
+            # are shown.
+            plt.pcolormesh(
+                self.image.w_bins,
+                self.image.h_bins,
+                self.samples[:n_samples].sum(0).T,
+                norm=norm,
+            )
+
+            # Turn on colorbar to show the range of values.
+            plt.colorbar()
+
+            if show_pixels:
+                # Turn off ticks and labels.
+                plt.tick_params(
+                    bottom=False,
+                    left=False,
+                    labelbottom=False,
+                    labelleft=False,
+                )
+                plt.xticks(self.image.w_bins)
+                plt.yticks(self.image.h_bins)
+
+            # Set aspect ratio to be equal so that every pixel is square.
+            # Ignore the actual values of bins since here is just a schematic.
+            plt.gca().set_aspect("equal")
 
         # Turn on grid to show pixel boundaries.
         if grid:
