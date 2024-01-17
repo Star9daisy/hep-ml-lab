@@ -188,6 +188,7 @@ class Image:
             self.registered_methods.append(
                 ("pixelize", {"size": size, "range": range}),
             )
+            self.is_pixelized = True
 
         return self
 
