@@ -2,6 +2,7 @@ import json
 import zipfile
 from io import BytesIO
 
+import awkward as ak
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -12,7 +13,7 @@ from hml.representations import Image
 class ImageDataset:
     def __init__(self, representation: Image):
         self.image = representation
-        self._samples = []
+        self._samples = [] if self.image.is_pixelized else [[], []]
         self._targets = []
         self.been_split = False
         self.train = None
@@ -26,8 +27,12 @@ class ImageDataset:
     def read(self, event, target):
         self.image.read(event)
         if self.image.status:
-            self._samples.append(self.image.values)
             self._targets.append([target])
+            if self.image.is_pixelized:
+                self._samples.append(self.image.values)
+            else:
+                self._samples[0].append(self.image.values[0])
+                self._samples[1].append(self.image.values[1])
 
     def split(self, train, test, val=None, seed=None):
         train *= 10
@@ -151,7 +156,12 @@ class ImageDataset:
 
             self._been_read = True
 
-        return np.array(self._samples, dtype=np.float32)
+        if self.image.is_pixelized:
+            return np.array(self._samples, dtype=np.float32)
+        else:
+            height = ak.to_numpy(ak.flatten(ak.from_iter(self._samples[0])))
+            width = ak.to_numpy(ak.flatten(ak.from_iter(self._samples[1])))
+            return height, width
 
     @property
     def targets(self):
