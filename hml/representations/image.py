@@ -15,6 +15,7 @@ class Image:
         self.is_pixelized = None
         self.been_read = False
         self.registered_methods = []
+        self.status = True
 
     def read(self, event):
         self.event = event
@@ -67,6 +68,10 @@ class Image:
             if obj != "SubJet":
                 raise ValueError(f"{obj} is not supported yet!")
 
+            if len(self.subjets) < index + 1:
+                self.status = False
+                return self
+
             origin_height._value = [
                 getattr(self.subjets[index], origin_height.__class__.__name__.lower())()
             ]
@@ -95,6 +100,9 @@ class Image:
 
     def rotate(self, axis="SubJet1", orientation=-90):
         if self.been_read:
+            if self.status is False:
+                return self
+
             axis_height = get_observable(f"{axis}.{self.height.__class__.__name__}")
             axis_width = get_observable(f"{axis}.{self.width.__class__.__name__}")
 
@@ -102,6 +110,10 @@ class Image:
 
             if obj != "SubJet":
                 raise ValueError(f"{obj} is not supported yet!")
+
+            if len(self.subjets) < index + 1:
+                self.status = False
+                return self
 
             axis_height._value = [
                 getattr(self.subjets[index], axis_height.__class__.__name__.lower())()
@@ -143,6 +155,9 @@ class Image:
 
     def pixelize(self, size, range):
         if self.been_read:
+            if self.status is False:
+                return self
+
             self.h_bins = np.linspace(*range[0], size[0] + 1)
             self.w_bins = np.linspace(*range[1], size[1] + 1)
 
