@@ -73,9 +73,9 @@ class ImageDataset:
 
     def save(self, filepath="dataset.ds"):
         configs = {
-            "height": self.image.height,
-            "width": self.image.width,
-            "channel": self.image.channel,
+            "height": self.image.height.name,
+            "width": self.image.width.name,
+            "channel": self.image.channel.name if self.image.channel else None,
             "registered_methods": self.image.registered_methods,
             "been_split": self.been_split,
             "seed": self.seed,
@@ -114,7 +114,12 @@ class ImageDataset:
         with zf.open("configs.json") as json_file:
             configs = json.load(json_file)
 
-        dataset = cls(*configs["observables"])
+        image = Image(
+            height=configs["height"], width=configs["width"], channel=configs["channel"]
+        )
+        image.registered_methods = configs["registered_methods"]
+
+        dataset = cls(image)
         dataset._filepath = filepath
         dataset._data = zf.open("data.npz")
 
