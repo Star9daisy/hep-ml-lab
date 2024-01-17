@@ -55,6 +55,26 @@ def test_image_pixelize_first():
     image.show(show_pixels=True)
 
 
+def test_image_lazy_read():
+    images = []
+    image = (
+        Image(
+            height="FatJet0.Constituents.Phi",
+            width="FatJet0.Constituents.Eta",
+            channel="FatJet0.Constituents.Pt",
+        )
+        .with_subjets("FatJet0.Constituents", "kt", 0.3, 0)
+        .translate(origin="SubJet0")
+        .rotate(axis="SubJet1", orientation=-90)
+        .pixelize(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
+    )
+
+    for event in run_zz.events():
+        image.read(event)
+        if image.status:
+            images.append(image.values)
+
+
 def test_set():
     set = Set("FatJet0.Pt", "FatJet0.Eta", "FatJet0.Phi", "FatJet0.Mass")
     set.read(event_zz)
