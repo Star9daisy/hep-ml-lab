@@ -1,6 +1,6 @@
-import fastjet as fj
 import matplotlib.pyplot as plt
 import numpy as np
+from fastjet import ClusterSequence, JetDefinition, PseudoJet
 
 from hml.utils import get_jet_algorithm, get_observable
 
@@ -39,11 +39,9 @@ class Image:
             pz = get_observable(f"{constituents}.Pz").read(self.event).value[0]
             e = get_observable(f"{constituents}.E").read(self.event).value[0]
 
-            particles = [
-                fj.PseudoJet(px[i], py[i], pz[i], e[i]) for i in range(len(px))
-            ]
-            subjet_def = fj.JetDefinition(get_jet_algorithm(algorithm), r)
-            self.cluster = fj.ClusterSequence(particles, subjet_def)
+            particles = [PseudoJet(px[i], py[i], pz[i], e[i]) for i in range(len(px))]
+            subjet_def = JetDefinition(get_jet_algorithm(algorithm), r)
+            self.cluster = ClusterSequence(particles, subjet_def)
             self.subjets = self.cluster.inclusive_jets(min_pt)
 
         else:
