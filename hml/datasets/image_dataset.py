@@ -131,7 +131,7 @@ class ImageDataset:
         image = Image(
             height=configs["height"], width=configs["width"], channel=configs["channel"]
         )
-        image.been_pixelized = configs["is_pixelized"]
+        image.been_pixelized = configs["been_pixelized"]
         image.registered_methods = configs["registered_methods"]
 
         dataset = cls(image)
