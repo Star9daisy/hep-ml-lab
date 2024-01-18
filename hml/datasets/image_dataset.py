@@ -93,6 +93,8 @@ class ImageDataset:
             "been_split": self.been_split,
             "seed": self.seed,
             "been_pixelized": self.image.been_pixelized,
+            "w_bins": self.image.w_bins.tolist(),
+            "h_bins": self.image.h_bins.tolist(),
         }
         configs_json = json.dumps(configs)
 
@@ -133,6 +135,8 @@ class ImageDataset:
         )
         image.been_pixelized = configs["been_pixelized"]
         image.registered_methods = configs["registered_methods"]
+        image.h_bins = np.array(configs["h_bins"])
+        image.w_bins = np.array(configs["w_bins"])
 
         dataset = cls(image)
         dataset._filepath = filepath
