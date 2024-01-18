@@ -11,13 +11,13 @@ class Image:
         self.width = get_observable(width)
         self.channel = get_observable(channel) if channel is not None else None
 
-        self.is_pixelized = None
+        self.been_pixelized = None
         self.been_read = False
         self.registered_methods = []
         self.status = True
 
     def read(self, event):
-        self.is_pixelized = None
+        self.been_pixelized = None
         self.been_read = False
         self.status = True
 
@@ -178,13 +178,13 @@ class Image:
             )
             self.width._value = pixelized_values.tolist()
 
-            self.is_pixelized = True
+            self.been_pixelized = True
 
         else:
             self.registered_methods.append(
                 ("pixelize", {"size": size, "range": range}),
             )
-            self.is_pixelized = True
+            self.been_pixelized = True
 
         return self
 
@@ -203,7 +203,7 @@ class Image:
 
     @property
     def values(self):
-        if self.is_pixelized is not None:
+        if self.been_pixelized is not None:
             if self.channel is not None:
                 hist, _, _ = np.histogram2d(
                     self.width.to_numpy(),
@@ -231,7 +231,7 @@ class Image:
     ):
         plt.figure()
 
-        if not self.is_pixelized:
+        if not self.been_pixelized:
             plt.scatter(
                 x=self.width.to_numpy(),
                 y=self.height.to_numpy(),
