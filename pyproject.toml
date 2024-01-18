@@ -9,9 +9,7 @@ repository = "https://github.com/Star9daisy/hep-ml-lab"
 documentation = "https://star9daisy.github.io/hep-ml-lab/"
 keywords = ["high energy physics", "machine learning", "framework"]
 
-packages = [
-    { include = "hml" },
-]
+packages = [{ include = "hml" }]
 
 [tool.poetry.dependencies]
 dill = "^0.3.7"
@@ -33,7 +31,7 @@ deptry = "^0.12.0"
 mkdocs = "^1.4.3"
 mkdocs-exclude = "^1.0.2"
 mkdocs-material = "^9.1.15"
-mkdocstrings = {extras = ["python"], version = "^0.22.0"}
+mkdocstrings = { extras = ["python"], version = "^0.22.0" }
 pygments = "^2.16.1"
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
