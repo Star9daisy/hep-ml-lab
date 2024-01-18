@@ -11,14 +11,12 @@ class Image:
         self.width = get_observable(width)
         self.channel = get_observable(channel) if channel is not None else None
 
-        self.is_translated = None
         self.is_pixelized = None
         self.been_read = False
         self.registered_methods = []
         self.status = True
 
     def read(self, event):
-        self.is_translated = None
         self.is_pixelized = None
         self.been_read = False
         self.status = True
@@ -93,8 +91,6 @@ class Image:
             self.width._value = (
                 self.width.to_numpy(keepdims=True) - origin_width.to_numpy()
             ).tolist()
-
-            self.is_translated = True
 
         else:
             self.registered_methods.append(
