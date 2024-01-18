@@ -169,10 +169,13 @@ class Madgraph5:
         self,
         shower="off",
         detector="off",
+        madspin="off",
         settings={},
+        decays=[],
         cards=[],
         multi_run=1,
         seed=0,
+        dry=False,
     ):
         run_log = ""
 
@@ -185,6 +188,7 @@ class Madgraph5:
 
         commands += f"shower={shower}\n"
         commands += f"detector={detector}\n"
+        commands += f"madspin={madspin}\n"
         commands += "done\n"
 
         settings["iseed"] = seed
@@ -192,9 +196,15 @@ class Madgraph5:
             commands += "\n".join([f"set {k} {v}" for k, v in settings.items()])
             commands += "\n"
 
+        if decays != []:
+            commands += "\n".join([f"decay {i}" for i in decays]) + "\n"
+
         if cards != []:
             commands += "\n".join(cards) + "\n"
         commands += "done\n"
+
+        if dry:
+            return commands
 
         run_log += self.run_command(commands, end_marker=r">$")
 
