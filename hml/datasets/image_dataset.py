@@ -200,13 +200,25 @@ class ImageDataset:
         grid=True,
         norm=None,
         n_samples=-1,
+        target=None,
     ):
+        if target is not None:
+            if self.image.been_pixelized:
+                samples = self.samples[np.squeeze(self.targets) == target]
+            else:
+                samples = (
+                    self.samples[0][np.squeeze(self.targets) == target],
+                    self.samples[1][np.squeeze(self.targets) == target],
+                )
+        else:
+            samples = self.samples
+
         plt.figure()
 
-        if not self.image.is_pixelized:
+        if not self.image.been_pixelized:
             plt.scatter(
-                x=self.samples[1][:n_samples],
-                y=self.samples[0][:n_samples],
+                x=samples[1][:n_samples],
+                y=samples[0][:n_samples],
                 c="k",
                 s=10,
                 marker="o",
@@ -223,7 +235,7 @@ class ImageDataset:
             plt.pcolormesh(
                 self.image.w_bins,
                 self.image.h_bins,
-                self.samples[:n_samples].sum(0).T,
+                samples[:n_samples].sum(0).T,
                 norm=norm,
             )
 
