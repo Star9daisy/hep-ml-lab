@@ -233,7 +233,7 @@ class Image:
         grid=True,
         norm=None,
     ):
-        plt.figure(dpi=64)
+        plt.figure()
 
         if not self.is_pixelized:
             plt.scatter(
