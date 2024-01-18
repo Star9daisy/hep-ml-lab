@@ -13,7 +13,7 @@ from hml.representations import Image
 class ImageDataset:
     def __init__(self, representation: Image):
         self.image = representation
-        self._samples = [] if self.image.is_pixelized else [[], []]
+        self._samples = [] if self.image.been_pixelized else [[], []]
         self._targets = []
         self.been_split = False
         self.train = None
@@ -27,7 +27,7 @@ class ImageDataset:
     def read(self, event, target):
         self.image.read(event)
 
-        if self.image.is_pixelized and np.all(np.isnan(self.image.values)):
+        if self.image.been_pixelized and np.all(np.isnan(self.image.values)):
             return
         elif np.all(np.isnan(self.image.values[0])) or np.all(
             np.isnan(self.image.values)
@@ -36,7 +36,7 @@ class ImageDataset:
 
         if self.image.status:
             self._targets.append([target])
-            if self.image.is_pixelized:
+            if self.image.been_pixelized:
                 self._samples.append(self.image.values)
             else:
                 self._samples[0].append(self.image.values[0])
@@ -92,7 +92,7 @@ class ImageDataset:
             "registered_methods": self.image.registered_methods,
             "been_split": self.been_split,
             "seed": self.seed,
-            "is_pixelized": self.image.is_pixelized,
+            "been_pixelized": self.image.been_pixelized,
         }
         configs_json = json.dumps(configs)
 
@@ -131,7 +131,7 @@ class ImageDataset:
         image = Image(
             height=configs["height"], width=configs["width"], channel=configs["channel"]
         )
-        image.is_pixelized = configs["is_pixelized"]
+        image.been_pixelized = configs["is_pixelized"]
         image.registered_methods = configs["registered_methods"]
 
         dataset = cls(image)
@@ -166,7 +166,7 @@ class ImageDataset:
 
             self._been_read = True
 
-        if self.image.is_pixelized:
+        if self.image.been_pixelized:
             return np.array(self._samples, dtype=np.float32)
         else:
             height = ak.to_numpy(ak.flatten(ak.from_iter(self._samples[0])))
