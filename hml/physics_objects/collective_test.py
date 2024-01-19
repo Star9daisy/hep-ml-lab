@@ -5,6 +5,7 @@ from hml.physics_objects import is_collective_physics_object
 
 
 def test_validation_function():
+    assert is_collective_physics_object("Jet") is True
     assert is_collective_physics_object("Jet0:") is True
     assert is_collective_physics_object("Jet:1") is True
     assert is_collective_physics_object("Jet0:1") is True
