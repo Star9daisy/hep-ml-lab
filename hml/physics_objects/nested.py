@@ -14,7 +14,7 @@ def is_nested_physics_object(name: str) -> bool:
 
 
 class NestedPhysicsObject:
-    pattern = r"^([A-Za-z]+\d*:?\d*).([A-Za-z]+\d*:?\d*)$"
+    pattern = r"^([A-Za-z]+\d*:?\d*)\.([A-Za-z]+\d*:?\d*)$"
 
     def __init__(
         self,
