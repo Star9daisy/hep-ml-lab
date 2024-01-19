@@ -26,7 +26,6 @@ fastjet = "^3.4.1.3"
 matplotlib = "^3.8.2"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
 deptry = "^0.12.0"
 mkdocs = "^1.4.3"
 mkdocs-exclude = "^1.0.2"
@@ -37,6 +36,7 @@ pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 python-dotenv = "^1.0.0"
 mkdocs-jupyter = "^0.24.6"
+ruff = "^0.1.13"
 
 [tool.deptry.per_rule_ignores]
 DEP001 = ["ROOT"]
