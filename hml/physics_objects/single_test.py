@@ -1,6 +1,13 @@
 import pytest
 
 from hml.physics_objects import SinglePhysicsObject
+from hml.physics_objects import is_single_physics_object
+
+
+def test_validation_function():
+    assert is_single_physics_object("Jet0") is True
+    assert is_single_physics_object("Jet0:") is False
+    assert is_single_physics_object("Jet0.Constituents1") is False
 
 
 def test_pattern():

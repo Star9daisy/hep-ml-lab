@@ -1,6 +1,17 @@
 import pytest
 
 from hml.physics_objects import CollectivePhysicsObject
+from hml.physics_objects import is_collective_physics_object
+
+
+def test_validation_function():
+    assert is_collective_physics_object("Jet0:") is True
+    assert is_collective_physics_object("Jet:1") is True
+    assert is_collective_physics_object("Jet0:1") is True
+
+    assert is_collective_physics_object("Jet:") is False
+    assert is_collective_physics_object("Jet0") is False
+    assert is_collective_physics_object("Jet0.Constituents1") is False
 
 
 def test_pattern1():

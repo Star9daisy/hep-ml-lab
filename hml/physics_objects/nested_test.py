@@ -3,6 +3,15 @@ import pytest
 from hml.physics_objects import CollectivePhysicsObject
 from hml.physics_objects import NestedPhysicsObject
 from hml.physics_objects import SinglePhysicsObject
+from hml.physics_objects import is_nested_physics_object
+
+
+def test_validation_function():
+    assert is_nested_physics_object("Jet0.Constituents1") is True
+
+    assert is_nested_physics_object("Jet0.") is False
+    assert is_nested_physics_object("Jet0") is False
+    assert is_nested_physics_object("Jet0:") is False
 
 
 def test_pattern_single_single():
