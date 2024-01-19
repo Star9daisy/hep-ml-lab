@@ -4,6 +4,10 @@ import re
 from typing import Any
 
 
+def is_collective_physics_object(name: str) -> bool:
+    return bool(re.match(r"[A-Za-z]+\d*:?\d*", name))
+
+
 class CollectivePhysicsObject:
     pattern1 = r"^([A-Za-z]+)$"
     pattern2 = r"^([A-Za-z]+)(\d+):$"

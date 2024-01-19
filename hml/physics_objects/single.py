@@ -4,6 +4,10 @@ import re
 from typing import Any
 
 
+def is_single_physics_object(name: str) -> bool:
+    return bool(re.match(SinglePhysicsObject.pattern, name))
+
+
 class SinglePhysicsObject:
     pattern = r"^([A-Za-z]+)(\d+)$"
 
