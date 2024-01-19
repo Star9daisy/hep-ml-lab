@@ -11,8 +11,9 @@ def test_validation_function():
     assert is_multiple_physics_object("Jet0,Jet0") is True
     assert is_multiple_physics_object("Jet0,Jet0,Jet0") is True
     assert is_multiple_physics_object("Jet0,Jet0:1,Jet0.Constituents") is True
+    assert is_multiple_physics_object("Jet0,") is True
 
-    assert is_multiple_physics_object("Jet0,") is False
+    assert is_multiple_physics_object(",") is False
     assert is_multiple_physics_object("Jet0") is False
     assert is_multiple_physics_object("Jet0:") is False
 
