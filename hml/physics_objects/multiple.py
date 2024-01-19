@@ -11,19 +11,16 @@ from .nested import is_nested_physics_object
 from .single import SinglePhysicsObject
 from .single import is_single_physics_object
 
+PATTERN = r"([A-Za-z]+\d*:?\d*(?:\.[A-Za-z]+\d*:?\d*)*)"
+
 
 def is_multiple_physics_object(name: str) -> bool:
     if "," not in name:
         return False
-    else:
-        for n in name.split(","):
-            if not (
-                is_single_physics_object(n)
-                or is_collective_physics_object(n)
-                or is_nested_physics_object(n)
-            ):
-                return False
 
+    if re.findall(PATTERN, name) == []:
+        return False
+    else:
         return True
 
 
@@ -45,19 +42,19 @@ class MultiplePhysicsObject:
 
     @classmethod
     def from_name(cls, name: str) -> MultiplePhysicsObject:
-        if is_multiple_physics_object(name) is False:
+        if not is_multiple_physics_object(name):
             raise ValueError(
                 f"Could not parse name {name} as a multiple physics object"
             )
 
         physics_objects = []
-        for n in name.split(","):
-            if is_single_physics_object(n):
-                physics_objects.append(SinglePhysicsObject.from_name(n))
-            elif is_collective_physics_object(n):
-                physics_objects.append(CollectivePhysicsObject.from_name(n))
-            elif is_nested_physics_object(n):
-                physics_objects.append(NestedPhysicsObject.from_name(n))
+        for match in re.findall(PATTERN, name):
+            if is_single_physics_object(match):
+                physics_objects.append(SinglePhysicsObject.from_name(match))
+            elif is_collective_physics_object(match):
+                physics_objects.append(CollectivePhysicsObject.from_name(match))
+            elif is_nested_physics_object(match):
+                physics_objects.append(NestedPhysicsObject.from_name(match))
             else:
                 raise ValueError(f"Could not parse name {name} as a physics object")
 
