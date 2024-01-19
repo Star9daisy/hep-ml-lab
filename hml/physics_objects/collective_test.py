@@ -8,9 +8,10 @@ def test_pattern1():
     obj2 = CollectivePhysicsObject.from_name("Jet")
     obj3 = CollectivePhysicsObject.from_config(
         {
-            "collective_physics_object_type": "Jet",
-            "collective_physics_object_start": None,
-            "collective_physics_object_end": None,
+            "class_name": "CollectivePhysicsObject",
+            "type": "Jet",
+            "start": None,
+            "end": None,
         }
     )
 
@@ -20,9 +21,10 @@ def test_pattern1():
         assert obj.end is None
         assert obj.name == "Jet"
         assert obj.config == {
-            "collective_physics_object_type": "Jet",
-            "collective_physics_object_start": None,
-            "collective_physics_object_end": None,
+            "class_name": "CollectivePhysicsObject",
+            "type": "Jet",
+            "start": None,
+            "end": None,
         }
 
 
@@ -31,9 +33,10 @@ def test_pattern2():
     obj2 = CollectivePhysicsObject.from_name("Jet0:")
     obj3 = CollectivePhysicsObject.from_config(
         {
-            "collective_physics_object_type": "Jet",
-            "collective_physics_object_start": 0,
-            "collective_physics_object_end": None,
+            "class_name": "CollectivePhysicsObject",
+            "type": "Jet",
+            "start": 0,
+            "end": None,
         }
     )
 
@@ -43,9 +46,10 @@ def test_pattern2():
         assert obj.end is None
         assert obj.name == "Jet0:"
         assert obj.config == {
-            "collective_physics_object_type": "Jet",
-            "collective_physics_object_start": 0,
-            "collective_physics_object_end": None,
+            "class_name": "CollectivePhysicsObject",
+            "type": "Jet",
+            "start": 0,
+            "end": None,
         }
 
 
@@ -54,9 +58,10 @@ def test_pattern3():
     obj2 = CollectivePhysicsObject.from_name("Jet:1")
     obj3 = CollectivePhysicsObject.from_config(
         {
-            "collective_physics_object_type": "Jet",
-            "collective_physics_object_start": None,
-            "collective_physics_object_end": 1,
+            "class_name": "CollectivePhysicsObject",
+            "type": "Jet",
+            "start": None,
+            "end": 1,
         }
     )
 
@@ -66,9 +71,10 @@ def test_pattern3():
         assert obj.end == 1
         assert obj.name == "Jet:1"
         assert obj.config == {
-            "collective_physics_object_type": "Jet",
-            "collective_physics_object_start": None,
-            "collective_physics_object_end": 1,
+            "class_name": "CollectivePhysicsObject",
+            "type": "Jet",
+            "start": None,
+            "end": 1,
         }
 
 
@@ -77,9 +83,10 @@ def test_pattern4():
     obj2 = CollectivePhysicsObject.from_name("Jet0:1")
     obj3 = CollectivePhysicsObject.from_config(
         {
-            "collective_physics_object_type": "Jet",
-            "collective_physics_object_start": 0,
-            "collective_physics_object_end": 1,
+            "class_name": "CollectivePhysicsObject",
+            "type": "Jet",
+            "start": 0,
+            "end": 1,
         }
     )
 
@@ -89,9 +96,10 @@ def test_pattern4():
         assert obj.end == 1
         assert obj.name == "Jet0:1"
         assert obj.config == {
-            "collective_physics_object_type": "Jet",
-            "collective_physics_object_start": 0,
-            "collective_physics_object_end": 1,
+            "class_name": "CollectivePhysicsObject",
+            "type": "Jet",
+            "start": 0,
+            "end": 1,
         }
 
 

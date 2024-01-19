@@ -1,3 +1,5 @@
+import pytest
+
 from hml.physics_objects import SinglePhysicsObject
 
 
@@ -6,8 +8,9 @@ def test_pattern():
     obj2 = SinglePhysicsObject.from_name("Jet0")
     obj3 = SinglePhysicsObject.from_config(
         {
-            "single_physics_object_type": "Jet",
-            "single_physics_object_index": 0,
+            "class_name": "SinglePhysicsObject",
+            "type": "Jet",
+            "index": 0,
         }
     )
 
@@ -16,6 +19,18 @@ def test_pattern():
         assert obj.index == 0
         assert obj.name == "Jet0"
         assert obj.config == {
-            "single_physics_object_type": "Jet",
-            "single_physics_object_index": 0,
+            "class_name": "SinglePhysicsObject",
+            "type": "Jet",
+            "index": 0,
         }
+
+
+def test_bad_class_name():
+    with pytest.raises(ValueError):
+        SinglePhysicsObject.from_config(
+            {
+                "class_name": None,
+                "type": "Jet",
+                "index": 0,
+            }
+        )
