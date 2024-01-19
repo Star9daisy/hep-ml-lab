@@ -5,7 +5,16 @@ from typing import Any
 
 
 def is_collective_physics_object(name: str) -> bool:
-    return bool(re.match(r"[A-Za-z]+\d*:?\d*", name))
+    if re.match(CollectivePhysicsObject.pattern1, name):
+        return True
+    elif re.match(CollectivePhysicsObject.pattern2, name):
+        return True
+    elif re.match(CollectivePhysicsObject.pattern3, name):
+        return True
+    elif re.match(CollectivePhysicsObject.pattern4, name):
+        return True
+    else:
+        return False
 
 
 class CollectivePhysicsObject:
