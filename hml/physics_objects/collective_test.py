@@ -103,6 +103,18 @@ def test_pattern4():
         }
 
 
-def test_wrong_pattern():
+def test_bad_name():
     with pytest.raises(ValueError):
         CollectivePhysicsObject.from_name("Jet0")
+
+
+def test_bad_config():
+    with pytest.raises(ValueError):
+        CollectivePhysicsObject.from_config(
+            {
+                "class_name": None,
+                "type": "Jet",
+                "start": 0,
+                "end": 1,
+            }
+        )

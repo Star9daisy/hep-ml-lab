@@ -25,7 +25,12 @@ def test_pattern():
         }
 
 
-def test_bad_class_name():
+def test_bad_name():
+    with pytest.raises(ValueError):
+        SinglePhysicsObject.from_name("Jet")
+
+
+def test_bad_config():
     with pytest.raises(ValueError):
         SinglePhysicsObject.from_config(
             {
