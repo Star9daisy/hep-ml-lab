@@ -9,6 +9,9 @@ from .single import is_single_physics_object
 
 
 def get(name: str):
+    if name is None:
+        return None
+
     if is_single_physics_object(name):
         obj = SinglePhysicsObject.from_name(name)
     elif is_collective_physics_object(name):
