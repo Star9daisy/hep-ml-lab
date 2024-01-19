@@ -4,6 +4,9 @@ import hml.physics_objects as module
 
 
 def test_get():
+    obj = module.get(None)
+    assert obj is None
+
     obj = module.get("Jet0")
     assert isinstance(obj, module.SinglePhysicsObject)
 
