@@ -70,16 +70,16 @@ class NestedPhysicsObject:
         if config.get("class_name") != "NestedPhysicsObject":
             raise ValueError(f"Cannot parse config as NestedPhysicsObject: {config}")
 
+        module = import_module("hml.physics_objects")
+
         # main --------------------------------------------------------------- #
         main_class_name = config["main_config"]["class_name"]
-        main = getattr(
-            import_module("hml.physics_objects"), main_class_name
-        ).from_config(config["main_config"])
+        main_class = getattr(module, main_class_name)
+        main = main_class.from_config(config["main_config"])
 
         # sub ---------------------------------------------------------------- #
         sub_class_name = config["sub_config"]["class_name"]
-        sub = getattr(import_module("hml.physics_objects"), sub_class_name).from_config(
-            config["sub_config"]
-        )
+        sub_class = getattr(module, sub_class_name)
+        sub = sub_class.from_config(config["sub_config"])
 
         return cls(main, sub)
