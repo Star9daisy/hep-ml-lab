@@ -21,6 +21,9 @@ class SinglePhysicsObject:
 
     @classmethod
     def from_name(cls, name: str) -> SinglePhysicsObject:
+        if (match := re.match(cls.pattern, name)) is None:
+            raise ValueError(f"Could not parse name {name} as a single physics object")
+
         match = re.match(cls.pattern, name)
         type = match.group(1)
         index = int(match.group(2))
