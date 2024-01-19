@@ -6,3 +6,18 @@ from .nested import NestedPhysicsObject
 from .nested import is_nested_physics_object
 from .single import SinglePhysicsObject
 from .single import is_single_physics_object
+
+
+def get(name: str):
+    if is_single_physics_object(name):
+        obj = SinglePhysicsObject.from_name(name)
+    elif is_collective_physics_object(name):
+        obj = CollectivePhysicsObject.from_name(name)
+    elif is_nested_physics_object(name):
+        obj = NestedPhysicsObject.from_name(name)
+    elif is_multiple_physics_object(name):
+        obj = MultiplePhysicsObject.from_name(name)
+    else:
+        raise ValueError(f"Unknown physics object {name}")
+
+    return obj
