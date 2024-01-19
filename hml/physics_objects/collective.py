@@ -53,16 +53,18 @@ class CollectivePhysicsObject:
     @property
     def config(self) -> dict[str, Any]:
         config = {
-            "collective_physics_object_type": self.type,
-            "collective_physics_object_start": self.start,
-            "collective_physics_object_end": self.end,
+            "class_name": "CollectivePhysicsObject",
+            "type": self.type,
+            "start": self.start,
+            "end": self.end,
         }
         return config
 
     @classmethod
     def from_config(cls, config) -> CollectivePhysicsObject:
-        return cls(
-            config["collective_physics_object_type"],
-            config["collective_physics_object_start"],
-            config["collective_physics_object_end"],
-        )
+        if config.get("class_name") != "CollectivePhysicsObject":
+            raise ValueError(
+                f"Cannot parse config as CollectivePhysicsObject: {config}"
+            )
+
+        return cls(config["type"], config["start"], config["end"])
