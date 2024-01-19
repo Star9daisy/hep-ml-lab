@@ -25,14 +25,15 @@ class SinglePhysicsObject:
     @property
     def config(self) -> dict[str, Any]:
         config = {
-            "single_physics_object_type": self.type,
-            "single_physics_object_index": self.index,
+            "class_name": "SinglePhysicsObject",
+            "type": self.type,
+            "index": self.index,
         }
         return config
 
     @classmethod
     def from_config(cls, config: dict[str, Any]) -> SinglePhysicsObject:
-        return cls(
-            config["single_physics_object_type"],
-            config["single_physics_object_index"],
-        )
+        if config.get("class_name") != "SinglePhysicsObject":
+            raise ValueError(f"Cannot parse config as SinglePhysicsObject: {config}")
+
+        return cls(config["type"], config["index"])
