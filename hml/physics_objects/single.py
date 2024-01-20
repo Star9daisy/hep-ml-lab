@@ -6,11 +6,14 @@ from typing import Any
 from .physics_object import PhysicsObject
 
 
-def is_single_physics_object(name: str | None) -> bool:
-    if name is None or name == "":
+def is_single_physics_object(identifier: str | PhysicsObject | None) -> bool:
+    if identifier is None or identifier == "":
         return False
 
-    return bool(re.match(SinglePhysicsObject.pattern, name))
+    if isinstance(identifier, PhysicsObject):
+        identifier = identifier.name
+
+    return bool(re.match(SinglePhysicsObject.pattern, identifier))
 
 
 class SinglePhysicsObject(PhysicsObject):

@@ -6,17 +6,20 @@ from typing import Any
 from .physics_object import PhysicsObject
 
 
-def is_collective_physics_object(name: str | None) -> bool:
-    if name is None or name == "":
+def is_collective_physics_object(identifier: str | PhysicsObject | None) -> bool:
+    if identifier is None or identifier == "":
         return False
 
-    if re.match(CollectivePhysicsObject.pattern1, name):
+    if isinstance(identifier, PhysicsObject):
+        identifier = identifier.name
+
+    if re.match(CollectivePhysicsObject.pattern1, identifier):
         return True
-    elif re.match(CollectivePhysicsObject.pattern2, name):
+    elif re.match(CollectivePhysicsObject.pattern2, identifier):
         return True
-    elif re.match(CollectivePhysicsObject.pattern3, name):
+    elif re.match(CollectivePhysicsObject.pattern3, identifier):
         return True
-    elif re.match(CollectivePhysicsObject.pattern4, name):
+    elif re.match(CollectivePhysicsObject.pattern4, identifier):
         return True
     else:
         return False
