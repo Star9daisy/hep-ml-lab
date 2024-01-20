@@ -26,6 +26,49 @@ class NestedPhysicsObject:
 
         self._name = None
 
+    def read(self, event):
+        ALL_LEAVES = [i.GetName() for i in event.GetListOfLeaves()]
+        if f"{self.main.type}.{self.sub.type}" not in ALL_LEAVES:
+            raise ValueError(
+                f"Leave {self.main.type}.{self.sub.type} not found in event"
+            )
+
+        main_objects = self.main.read(event)
+        main_objects = (
+            main_objects if isinstance(main_objects, list) else [main_objects]
+        )
+
+        sub_objects = []
+        for main_object in main_objects:
+            if main_object is None:
+                if isinstance(self.sub, SinglePhysicsObject):
+                    sub_objects.append(None)
+                else:
+                    sub_objects.append([None])
+            else:
+                leaves = list(getattr(main_object, self.sub.type))
+                if isinstance(self.sub, SinglePhysicsObject):
+                    sub_objects.append(leaves[self.sub.index])
+                else:
+                    if self.sub.start is None and self.sub.end is None:
+                        sub_objects.append(leaves)
+                    elif self.sub.end is None:
+                        sub_objects.append(leaves[self.sub.start :])
+                    elif self.sub.start is None:
+                        objects = leaves[: self.sub.end]
+                        if len(objects) < self.sub.end:
+                            objects += [None] * (self.sub.end - len(objects))
+                        sub_objects.append(objects)
+                    else:
+                        objects = leaves[self.sub.start : self.sub.end]
+                        if len(objects) < self.sub.end - self.sub.start:
+                            objects += [None] * (
+                                self.sub.end - self.sub.start - len(objects)
+                            )
+                        sub_objects.append(objects)
+
+        return sub_objects
+
     @property
     def name(self) -> str:
         if self._name is not None:

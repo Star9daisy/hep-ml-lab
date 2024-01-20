@@ -15,6 +15,17 @@ class SinglePhysicsObject:
         self.type = type
         self.index = index
 
+    def read(self, event):
+        if self.type not in [i.GetName() for i in event.GetListOfBranches()]:
+            raise ValueError(f"Branch {self.type} not found in event")
+
+        branch = getattr(event, self.type)
+
+        if self.index >= branch.GetEntries():
+            return None
+
+        return branch[self.index]
+
     @property
     def name(self) -> str:
         return f"{self.type}{self.index}"

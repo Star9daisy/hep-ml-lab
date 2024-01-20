@@ -30,6 +30,30 @@ class CollectivePhysicsObject:
 
         self._name = None
 
+    def read(self, event):
+        if self.type not in [i.GetName() for i in event.GetListOfBranches()]:
+            raise ValueError(f"Branch {self.type} not found in event")
+
+        branch = list(getattr(event, self.type))
+
+        if self.start is None and self.end is None:
+            return branch
+
+        elif self.start is None:
+            objects = branch[: self.end]
+            if len(objects) < self.end:
+                objects += [None] * (self.end - len(objects))
+            return objects
+
+        elif self.end is None:
+            return branch[self.start :]
+
+        else:
+            objects = branch[self.start : self.end]
+            if len(objects) < self.end - self.start:
+                objects += [None] * (self.end - self.start - len(objects))
+            return objects
+
     @property
     def name(self) -> str:
         if self._name is not None:
