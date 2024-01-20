@@ -1,7 +1,11 @@
 import pytest
 
+from hml.events import DelphesEvents
 from hml.physics_objects import CollectivePhysicsObject
 from hml.physics_objects import is_collective_physics_object
+
+events = DelphesEvents("tests/data/pp2tt/Events/run_01/tag_1_delphes_events.root")
+event = events[0]
 
 
 def test_validation_function():
@@ -130,3 +134,32 @@ def test_bad_config():
                 "end": 1,
             }
         )
+
+
+def test_read():
+    obj1 = CollectivePhysicsObject.from_name("Jet")
+    assert len(obj1.read(event)) > 0
+
+    obj2 = CollectivePhysicsObject.from_name("Jet0:")
+    assert len(obj2.read(event)) > 0
+    assert len(obj1.read(event)) == len(obj2.read(event))
+
+    obj3 = CollectivePhysicsObject.from_name("Jet:1")
+    assert len(obj3.read(event)) == 1
+
+    obj3_with_none = CollectivePhysicsObject.from_name("Jet:100")
+    assert len(obj3_with_none.read(event)) == 100
+
+    obj4 = CollectivePhysicsObject.from_name("Jet0:1")
+    assert len(obj4.read(event)) == 1
+    assert len(obj3.read(event)) == len(obj4.read(event))
+
+    obj4_with_none = CollectivePhysicsObject.from_name("Jet0:100")
+    assert len(obj4_with_none.read(event)) == 100
+    assert len(obj3_with_none.read(event)) == len(obj4_with_none.read(event))
+
+
+def test_read_bad_cases():
+    obj = CollectivePhysicsObject.from_name("BadCollective")
+    with pytest.raises(ValueError):
+        obj.read(event)

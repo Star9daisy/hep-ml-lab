@@ -1,10 +1,14 @@
 import pytest
 
+from hml.events import DelphesEvents
 from hml.physics_objects import CollectivePhysicsObject
 from hml.physics_objects import MultiplePhysicsObject
 from hml.physics_objects import NestedPhysicsObject
 from hml.physics_objects import SinglePhysicsObject
 from hml.physics_objects import is_multiple_physics_object
+
+events = DelphesEvents("tests/data/pp2tt/Events/run_01/tag_1_delphes_events.root")
+event = events[0]
 
 
 def test_validation_function():
@@ -171,3 +175,36 @@ def test_bad_config():
                 ],
             }
         )
+
+
+def test_read():
+    obj = MultiplePhysicsObject.from_name("Jet0,Jet1").read(event)
+    assert len(obj) == 2
+
+    obj = MultiplePhysicsObject.from_name("Jet0,Jet1,Jet2").read(event)
+    assert len(obj) == 3
+
+    obj = MultiplePhysicsObject.from_name("Jet0,Jet:2").read(event)
+    assert len(obj) == 2
+    assert len(obj[1]) == 2
+
+    obj = MultiplePhysicsObject.from_name("Jet0,Jet0.Particles0").read(event)
+    assert len(obj) == 2
+    assert len(obj[1]) == 1
+
+    obj = MultiplePhysicsObject.from_name("Jet:2,Jet0.Particles:100").read(event)
+    assert len(obj) == 2
+    assert len(obj[0]) == 2
+    assert len(obj[1]) == 1
+    assert len(obj[1][0]) == 100
+
+
+def test_read_bad_cases():
+    with pytest.raises(ValueError):
+        MultiplePhysicsObject.from_name("BadSingle0,BadNested0.Particles0").read(event)
+
+    obj = MultiplePhysicsObject.from_name("Jet100,Jet1000.Particles1000").read(event)
+    assert len(obj) == 2
+    assert obj[0] is None
+    assert len(obj[1]) == 1
+    assert obj[1][0] is None
