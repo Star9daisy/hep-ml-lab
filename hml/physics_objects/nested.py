@@ -10,11 +10,14 @@ from .single import SinglePhysicsObject
 from .single import is_single_physics_object
 
 
-def is_nested_physics_object(name: str | None) -> bool:
-    if name is None or name == "":
+def is_nested_physics_object(identifier: str | PhysicsObject | None) -> bool:
+    if identifier is None or identifier == "":
         return False
 
-    return bool(re.match(NestedPhysicsObject.pattern, name))
+    if isinstance(identifier, PhysicsObject):
+        identifier = identifier.name
+
+    return bool(re.match(NestedPhysicsObject.pattern, identifier))
 
 
 class NestedPhysicsObject(PhysicsObject):

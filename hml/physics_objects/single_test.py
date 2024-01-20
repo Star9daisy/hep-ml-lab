@@ -13,6 +13,8 @@ def test_validation_function():
     assert is_single_physics_object(None) is False
 
     assert is_single_physics_object("Jet0") is True
+    assert is_single_physics_object(SinglePhysicsObject.from_name("Jet0")) is True
+
     assert is_single_physics_object("Jet0:") is False
     assert is_single_physics_object("Jet0.Constituents1") is False
 

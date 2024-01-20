@@ -15,6 +15,10 @@ def test_validation_function():
     assert is_nested_physics_object(None) is False
 
     assert is_nested_physics_object("Jet0.Constituents1") is True
+    assert (
+        is_nested_physics_object(NestedPhysicsObject.from_name("Jet0.Constituents1"))
+        is True
+    )
 
     assert is_nested_physics_object("Jet0.") is False
     assert is_nested_physics_object("Jet0") is False

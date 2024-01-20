@@ -16,6 +16,9 @@ def test_validation_function():
     assert is_collective_physics_object("Jet0:") is True
     assert is_collective_physics_object("Jet:1") is True
     assert is_collective_physics_object("Jet0:1") is True
+    assert (
+        is_collective_physics_object(CollectivePhysicsObject.from_name("Jet")) is True
+    )
 
     assert is_collective_physics_object("Jet:") is False
     assert is_collective_physics_object("Jet0") is False

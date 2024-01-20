@@ -14,14 +14,17 @@ from .single import is_single_physics_object
 PATTERN = r"^([A-Za-z]+\d*:?\d*(?:\.[A-Za-z]+\d*:?\d*)*)$"
 
 
-def is_multiple_physics_object(name: str | None) -> bool:
-    if name is None or name == "":
+def is_multiple_physics_object(identifier: str | PhysicsObject | None) -> bool:
+    if identifier is None or identifier == "":
         return False
 
-    if "," not in name:
+    if isinstance(identifier, PhysicsObject):
+        identifier = identifier.name
+
+    if "," not in identifier:
         return False
 
-    physics_object_names = name.split(",")
+    physics_object_names = identifier.split(",")
     for n in physics_object_names:
         if re.match(PATTERN, n) is None:
             return False
