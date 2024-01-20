@@ -290,7 +290,19 @@ def test_read():
     obj = NestedPhysicsObject.from_name("Jet0.Particles0").read(event)
     assert len(obj) == 1
 
+    obj = NestedPhysicsObject.from_name("Jet0.Particles").read(event)
+    assert len(obj) == 1
+    assert len(obj[0]) > 0
+
+    obj = NestedPhysicsObject.from_name("Jet0.Particles1:").read(event)
+    assert len(obj) == 1
+    assert len(obj[0]) > 0
+
     obj = NestedPhysicsObject.from_name("Jet0.Particles:10").read(event)
+    assert len(obj) == 1
+    assert len(obj[0]) == 10
+
+    obj = NestedPhysicsObject.from_name("Jet0.Particles0:10").read(event)
     assert len(obj) == 1
     assert len(obj[0]) == 10
 
@@ -307,3 +319,7 @@ def test_read_bad_cases():
     obj = NestedPhysicsObject.from_name("FatJet100.Particles0").read(event)
     assert len(obj) == 1
     assert obj[0] is None
+
+    obj = NestedPhysicsObject.from_name("Jet100.Particles:10").read(event)
+    assert len(obj) == 1
+    assert obj[0][0] is None
