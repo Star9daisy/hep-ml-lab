@@ -34,6 +34,9 @@ class MultiplePhysicsObject:
 
         self._name = None
 
+    def read(self, event):
+        return [obj.read(event) for obj in self.all]
+
     @property
     def name(self) -> str:
         if self._name is not None:
