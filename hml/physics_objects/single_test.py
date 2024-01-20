@@ -1,7 +1,11 @@
 import pytest
 
+from hml.events import DelphesEvents
 from hml.physics_objects import SinglePhysicsObject
 from hml.physics_objects import is_single_physics_object
+
+events = DelphesEvents("tests/data/pp2tt/Events/run_01/tag_1_delphes_events.root")
+event = events[0]
 
 
 def test_validation_function():
@@ -46,3 +50,17 @@ def test_bad_config():
                 "index": 0,
             }
         )
+
+
+def test_read():
+    obj = SinglePhysicsObject.from_name("Jet0")
+    assert obj.read(event)
+
+
+def test_read_bad_cases():
+    obj = SinglePhysicsObject.from_name("BadSingle0")
+    with pytest.raises(ValueError):
+        obj.read(event)
+
+    obj = SinglePhysicsObject.from_name("FatJet100")
+    assert obj.read(event) is None
