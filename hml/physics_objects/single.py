@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from .physics_object import PhysicsObject
+
 
 def is_single_physics_object(name: str | None) -> bool:
     if name is None or name == "":
@@ -11,7 +13,7 @@ def is_single_physics_object(name: str | None) -> bool:
     return bool(re.match(SinglePhysicsObject.pattern, name))
 
 
-class SinglePhysicsObject:
+class SinglePhysicsObject(PhysicsObject):
     pattern = r"^([A-Za-z]+)(\d+)$"
 
     def __init__(self, type: str, index: int):
