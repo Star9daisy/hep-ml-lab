@@ -32,6 +32,8 @@ class SinglePhysicsObject:
 
     @classmethod
     def from_name(cls, name: str) -> SinglePhysicsObject:
+        name = name.replace(" ", "")
+
         if (match := re.match(cls.pattern, name)) is None:
             raise ValueError(f"Could not parse name {name} as a single physics object")
 

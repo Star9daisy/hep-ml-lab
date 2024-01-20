@@ -46,6 +46,8 @@ class MultiplePhysicsObject:
 
     @classmethod
     def from_name(cls, name: str) -> MultiplePhysicsObject:
+        name = name.replace(" ", "")
+
         if not is_multiple_physics_object(name):
             raise ValueError(
                 f"Could not parse name {name} as a multiple physics object"
