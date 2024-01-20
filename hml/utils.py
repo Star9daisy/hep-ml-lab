@@ -1,9 +1,7 @@
 import fastjet as fj
-import matplotlib.pyplot as plt
 from keras import ops
-from matplotlib import colors
 
-from .types import Observable
+from hml.observables import Observable
 
 
 def get_observable(name: str, *arg, **kwargs):
