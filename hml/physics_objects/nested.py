@@ -78,6 +78,8 @@ class NestedPhysicsObject:
 
     @classmethod
     def from_name(cls, name: str) -> NestedPhysicsObject:
+        name = name.replace(" ", "")
+
         if (match := re.match(cls.pattern, name)) is None:
             raise ValueError(f"Could not parse name {name} as a nested physics object")
 

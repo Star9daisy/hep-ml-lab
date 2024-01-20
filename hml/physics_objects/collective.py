@@ -69,6 +69,8 @@ class CollectivePhysicsObject:
 
     @classmethod
     def from_name(cls, name: str) -> CollectivePhysicsObject:
+        name = name.replace(" ", "")
+
         if m := re.match(cls.pattern1, name):
             instance = cls(m.group(1), None, None)
 
