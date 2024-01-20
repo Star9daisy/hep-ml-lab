@@ -61,13 +61,13 @@ class Observable:
             return self.classname
 
     @classmethod
-    def from_name(cls, name: str) -> Observable:
+    def from_name(cls, name: str, *arg, **kwargs) -> Observable:
         if "." in name:
             physics_object, name = name.split(".")
         else:
             physics_object = None
 
-        return cls(physics_object, name)
+        return cls(*arg, **kwargs, physics_object=physics_object, name=name)
 
     @property
     def config(self) -> dict[str, Any]:
