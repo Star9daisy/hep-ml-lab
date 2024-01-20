@@ -24,14 +24,14 @@ class Observable:
         self,
         physics_object: str | None = None,
         name: str | None = None,
-        support_objects: PhysicsObjectOptions | list[PhysicsObjectOptions] = "all",
+        supported_objects: PhysicsObjectOptions | list[PhysicsObjectOptions] = "all",
     ):
-        if not self._is_valid_physics_object(physics_object, support_objects):
+        if not self._is_valid_physics_object(physics_object, supported_objects):
             raise TypeError(
-                f"Invalid physics_object {physics_object} for support_objects {support_objects}."
+                f"Invalid physics_object {physics_object} for supported_objects {supported_objects}."
             )
         self._physics_object = physics_object
-        self._support_objects = support_objects
+        self._supporedt_objects = supported_objects
         self._name = name
         self._value = None
 
@@ -75,7 +75,7 @@ class Observable:
             "physics_object": self._physics_object,
             "name": self._name,
             "value": self._value,
-            "support_objects": self._support_objects,
+            "supported_objects": self._supporedt_objects,
         }
 
     @classmethod
@@ -92,11 +92,11 @@ class Observable:
         return self._value
 
     @property
-    def support_objects(self) -> list[PhysicsObjectOptions]:
-        if isinstance(self._support_objects, str):
-            return [self._support_objects]
+    def supported_objects(self) -> list[PhysicsObjectOptions]:
+        if isinstance(self._supporedt_objects, str):
+            return [self._supporedt_objects]
 
-        return self._support_objects
+        return self._supporedt_objects
 
     def __repr__(self) -> str:
         return self.fullname
@@ -104,16 +104,16 @@ class Observable:
     def _is_valid_physics_object(
         self,
         physics_object: str,
-        support_objects: PhysicsObjectOptions | list[PhysicsObjectOptions],
+        supported_objects: PhysicsObjectOptions | list[PhysicsObjectOptions],
     ) -> bool:
-        if not isinstance(support_objects, list):
-            support_objects = [support_objects]
+        if not isinstance(supported_objects, list):
+            supported_objects = [supported_objects]
 
-        if "all" in support_objects:
+        if "all" in supported_objects:
             return True
 
         is_valid = False
-        for support_object in support_objects:
+        for support_object in supported_objects:
             if support_object == "single":
                 status = phyobjs.is_single_physics_object(physics_object)
             elif support_object == "collective":
