@@ -8,8 +8,8 @@ from .single import SinglePhysicsObject
 from .single import is_single_physics_object
 
 
-def get(name: str):
-    if name is None:
+def get(name: str | None):
+    if name is None or name == "":
         return None
 
     if is_single_physics_object(name):

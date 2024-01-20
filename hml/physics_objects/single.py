@@ -4,7 +4,10 @@ import re
 from typing import Any
 
 
-def is_single_physics_object(name: str) -> bool:
+def is_single_physics_object(name: str | None) -> bool:
+    if name is None or name == "":
+        return False
+
     return bool(re.match(SinglePhysicsObject.pattern, name))
 
 

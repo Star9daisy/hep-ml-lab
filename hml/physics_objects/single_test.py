@@ -9,6 +9,9 @@ event = events[0]
 
 
 def test_validation_function():
+    assert is_single_physics_object("") is False
+    assert is_single_physics_object(None) is False
+
     assert is_single_physics_object("Jet0") is True
     assert is_single_physics_object("Jet0:") is False
     assert is_single_physics_object("Jet0.Constituents1") is False

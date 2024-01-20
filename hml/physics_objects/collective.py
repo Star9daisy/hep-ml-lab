@@ -4,7 +4,10 @@ import re
 from typing import Any
 
 
-def is_collective_physics_object(name: str) -> bool:
+def is_collective_physics_object(name: str | None) -> bool:
+    if name is None or name == "":
+        return False
+
     if re.match(CollectivePhysicsObject.pattern1, name):
         return True
     elif re.match(CollectivePhysicsObject.pattern2, name):

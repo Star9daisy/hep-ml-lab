@@ -9,7 +9,10 @@ from .single import SinglePhysicsObject
 from .single import is_single_physics_object
 
 
-def is_nested_physics_object(name: str) -> bool:
+def is_nested_physics_object(name: str | None) -> bool:
+    if name is None or name == "":
+        return False
+
     return bool(re.match(NestedPhysicsObject.pattern, name))
 
 
