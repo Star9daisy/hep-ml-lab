@@ -13,7 +13,10 @@ from .single import is_single_physics_object
 PATTERN = r"^([A-Za-z]+\d*:?\d*(?:\.[A-Za-z]+\d*:?\d*)*)$"
 
 
-def is_multiple_physics_object(name: str) -> bool:
+def is_multiple_physics_object(name: str | None) -> bool:
+    if name is None or name == "":
+        return False
+
     if "," not in name:
         return False
 
