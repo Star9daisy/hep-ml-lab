@@ -5,6 +5,7 @@ from importlib import import_module
 from typing import Any
 
 from .collective import CollectivePhysicsObject
+from .physics_object import PhysicsObject
 from .single import SinglePhysicsObject
 from .single import is_single_physics_object
 
@@ -16,7 +17,7 @@ def is_nested_physics_object(name: str | None) -> bool:
     return bool(re.match(NestedPhysicsObject.pattern, name))
 
 
-class NestedPhysicsObject:
+class NestedPhysicsObject(PhysicsObject):
     pattern = r"^([A-Za-z]+\d*:?\d*)\.([A-Za-z]+\d*:?\d*)$"
 
     def __init__(

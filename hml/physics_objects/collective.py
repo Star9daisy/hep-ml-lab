@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from .physics_object import PhysicsObject
+
 
 def is_collective_physics_object(name: str | None) -> bool:
     if name is None or name == "":
@@ -20,7 +22,7 @@ def is_collective_physics_object(name: str | None) -> bool:
         return False
 
 
-class CollectivePhysicsObject:
+class CollectivePhysicsObject(PhysicsObject):
     pattern1 = r"^([A-Za-z]+)$"
     pattern2 = r"^([A-Za-z]+)(\d+):$"
     pattern3 = r"^([A-Za-z]+):(\d+)$"
