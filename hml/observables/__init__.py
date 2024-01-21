@@ -19,6 +19,7 @@ from .observable import Observable
 from .observable import PhysicsObjectOptions
 from .pseudo_rapidity import Eta
 from .pseudo_rapidity import PseudoRapidity
+from .size import Size
 from .transverse_momentum import Pt
 from .transverse_momentum import TransverseMomentum
 
