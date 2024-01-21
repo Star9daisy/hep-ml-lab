@@ -20,6 +20,8 @@ PHYSICS_OBJECT_OPTIONS = ["all", "single", "collective", "nested", "multiple"]
 
 
 class Observable:
+    ALL_OBSERVABLES = {}
+
     def __init__(
         self,
         physics_object: str | None = None,
@@ -131,6 +133,15 @@ class Observable:
                 return True
 
         return False
+
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+        Observable.ALL_OBSERVABLES[cls.__name__] = cls
+
+    @classmethod
+    def add_alias(cls, *alias: str) -> None:
+        for i in alias:
+            Observable.ALL_OBSERVABLES[i] = cls
 
 
 # class Observable(ABC):
