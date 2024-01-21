@@ -92,9 +92,7 @@ class Observable:
 
     @property
     def shape(self):
-        captured_output = io.StringIO()
-        self.to_awkward().type.show(captured_output)
-        return captured_output.getvalue().strip()
+        return str(self.to_awkward().type)
 
     @property
     def dtype(self) -> Any:
