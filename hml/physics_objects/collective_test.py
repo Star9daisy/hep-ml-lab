@@ -4,8 +4,11 @@ from hml.events import DelphesEvents
 from hml.physics_objects import CollectivePhysicsObject
 from hml.physics_objects import is_collective_physics_object
 
-events = DelphesEvents("tests/data/pp2tt/Events/run_01/tag_1_delphes_events.root")
-event = events[0]
+
+@pytest.fixture
+def event():
+    events = DelphesEvents("tests/data/pp2tt/Events/run_01/tag_1_delphes_events.root")
+    yield events[0]
 
 
 def test_validation_function():
@@ -142,7 +145,7 @@ def test_bad_config():
         )
 
 
-def test_read():
+def test_read(event):
     obj1 = CollectivePhysicsObject.from_name("Jet")
     assert len(obj1.read(event)) > 0
 
@@ -165,7 +168,7 @@ def test_read():
     assert len(obj3_with_none.read(event)) == len(obj4_with_none.read(event))
 
 
-def test_read_bad_cases():
+def test_read_bad_cases(event):
     obj = CollectivePhysicsObject.from_name("BadCollective")
     with pytest.raises(ValueError):
         obj.read(event)

@@ -6,8 +6,11 @@ from hml.physics_objects import NestedPhysicsObject
 from hml.physics_objects import SinglePhysicsObject
 from hml.physics_objects import is_nested_physics_object
 
-events = DelphesEvents("tests/data/pp2tt/Events/run_01/tag_1_delphes_events.root")
-event = events[0]
+
+@pytest.fixture
+def event():
+    events = DelphesEvents("tests/data/pp2tt/Events/run_01/tag_1_delphes_events.root")
+    yield events[0]
 
 
 def test_validation_function():
@@ -293,7 +296,7 @@ def test_bad_config():
         )
 
 
-def test_read():
+def test_read(event):
     obj = NestedPhysicsObject.from_name("Jet0.Particles0").read(event)
     assert len(obj) == 1
 
@@ -319,7 +322,7 @@ def test_read():
     assert len(obj[1]) == 10
 
 
-def test_read_bad_cases():
+def test_read_bad_cases(event):
     with pytest.raises(ValueError):
         NestedPhysicsObject.from_name("BadNested0.Particles0").read(event)
 
