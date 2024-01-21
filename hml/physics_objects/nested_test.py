@@ -330,6 +330,14 @@ def test_read_bad_cases(event):
     assert len(obj) == 1
     assert obj[0] is None
 
+    obj = NestedPhysicsObject.from_name("Jet0.Particles1000").read(event)
+    assert len(obj) == 1
+    assert obj[0] is None
+
     obj = NestedPhysicsObject.from_name("Jet100.Particles:10").read(event)
     assert len(obj) == 1
     assert obj[0][0] is None
+
+    obj = NestedPhysicsObject.from_name("Jet0.Particles0:1000").read(event)
+    assert len(obj) == 1
+    assert len(obj[0]) == 1000
