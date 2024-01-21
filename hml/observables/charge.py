@@ -1,20 +1,32 @@
-from ..types import Observable
+from math import nan
+from typing import Any
+
+from ..physics_objects import is_single_physics_object
+from .observable import Observable
+from .observable import PhysicsObjectOptions
 
 
 class Charge(Observable):
-    def get_value(self):
-        if len(self.main_objs) != 1:
-            return
+    def __init__(
+        self,
+        physics_object: str,
+        name: str | None = None,
+        supported_objects: list[PhysicsObjectOptions] = ["single", "collective"],
+        dtype: Any = None,
+    ):
+        super().__init__(physics_object, name, supported_objects, dtype)
 
-        if len(self.sub_objs[0]) != 0:
-            return
+    def read(self, event):
+        if (branch := self.physics_object.read(event)) is None:
+            self._value = nan
 
-        values = []
-        for obj in self.main_objs[0]:
-            value = obj.Charge if obj is not None else float("nan")
-            values.append(value)
+        elif is_single_physics_object(self.physics_object):
+            self._value = branch.Charge
 
-        return values
+        else:
+            self._value = [obj.Charge if obj is not None else nan for obj in branch]
+
+        return self
 
 
 Charge.add_alias("charge")
