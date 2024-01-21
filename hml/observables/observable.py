@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import io
 from math import nan
 from typing import Any
 from typing import Literal
