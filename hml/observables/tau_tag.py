@@ -6,7 +6,7 @@ from .observable import Observable
 from .observable import PhysicsObjectOptions
 
 
-class BTag(Observable):
+class TauTag(Observable):
     def __init__(
         self,
         physics_object: str,
@@ -21,12 +21,12 @@ class BTag(Observable):
             self._value = nan
 
         elif is_single_physics_object(self.physics_object):
-            self._value = branch.BTag
+            self._value = branch.TauTag
 
         else:
-            self._value = [obj.BTag if obj is not None else nan for obj in branch]
+            self._value = [obj.TauTag if obj is not None else nan for obj in branch]
 
         return self
 
 
-BTag.add_alias("b_tag")
+TauTag.add_alias("tau_tag")

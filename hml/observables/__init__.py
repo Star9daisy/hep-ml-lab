@@ -1,5 +1,6 @@
 from .azimuthal_angle import AzimuthalAngle
 from .azimuthal_angle import Phi
+from .b_tag import BTag
 from .energy import E
 from .energy import Energy
 from .mass import M
@@ -20,6 +21,7 @@ from .observable import PhysicsObjectOptions
 from .pseudo_rapidity import Eta
 from .pseudo_rapidity import PseudoRapidity
 from .size import Size
+from .tau_tag import TauTag
 from .transverse_momentum import Pt
 from .transverse_momentum import TransverseMomentum
 
