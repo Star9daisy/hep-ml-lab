@@ -1,3 +1,15 @@
+from .azimuthal_angle import AzimuthalAngle
+from .azimuthal_angle import Phi
+from .energy import E
+from .energy import Energy
+from .mass import M
+from .mass import Mass
+from .momentum_x import MomentumX
+from .momentum_x import Px
+from .momentum_y import MomentumY
+from .momentum_y import Py
+from .momentum_z import MomentumZ
+from .momentum_z import Pz
 from .n_subjettiness import NSubjettiness
 from .n_subjettiness import TauN
 from .n_subjettiness_ratio import NSubjettinessRatio
@@ -5,6 +17,10 @@ from .n_subjettiness_ratio import TauMN
 from .observable import PHYSICS_OBJECT_OPTIONS
 from .observable import Observable
 from .observable import PhysicsObjectOptions
+from .pseudo_rapidity import Eta
+from .pseudo_rapidity import PseudoRapidity
+from .transverse_momentum import Pt
+from .transverse_momentum import TransverseMomentum
 
 
 def get(identifier: str | None, *arg, **kwarg):
