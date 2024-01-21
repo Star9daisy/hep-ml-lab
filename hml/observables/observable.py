@@ -138,8 +138,25 @@ class Observable:
         if not isinstance(supported_objects, list):
             supported_objects = [supported_objects]
 
+        # Avoid the remove method to modify the original list
+        supported_objects = supported_objects.copy()
+
         if "all" in supported_objects:
             return True
+
+        if "multiple" in supported_objects:
+            supported_objects.remove("multiple")
+
+            if len(supported_objects) == 0:
+                raise ValueError(
+                    "Missing basic physics object types like 'single', 'collective', "
+                    "'nested' when specifying 'multiple' as a supported object."
+                )
+            else:
+                if is_multiple_physics_object(physics_object, supported_objects):
+                    return True
+                else:
+                    return False
 
         is_valid = False
         for support_object in supported_objects:
@@ -149,8 +166,6 @@ class Observable:
                 status = is_collective_physics_object(physics_object)
             elif support_object == "nested":
                 status = is_nested_physics_object(physics_object)
-            elif support_object == "multiple":
-                status = is_multiple_physics_object(physics_object)
             else:
                 raise ValueError(f"Unknown support_object {support_object}")
 
