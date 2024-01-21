@@ -1,19 +1,14 @@
 from __future__ import annotations
 
+import io
 from math import nan
 from typing import Any
 from typing import Literal
 
+import awkward as ak
+import numpy as np
+
 import hml.physics_objects as phyobjs
-
-# import io
-# import re
-# from abc import ABC
-# from abc import abstractmethod
-# from typing import Any
-
-# import awkward as ak
-# import numpy as np
 
 PhysicsObjectOptions = Literal["all", "single", "collective", "nested", "multiple"]
 PHYSICS_OBJECT_OPTIONS = ["all", "single", "collective", "nested", "multiple"]
@@ -96,12 +91,36 @@ class Observable:
         return self._value
 
     @property
+    def shape(self):
+        captured_output = io.StringIO()
+        self.to_awkward().type.show(captured_output)
+        return captured_output.getvalue().strip()
+
+    @property
     def dtype(self) -> Any:
         return self._dtype
 
     @dtype.setter
     def dtype(self, dtype: Any) -> Observable:
         self._dtype = dtype
+
+    def to_awkward(self, dtype=None):
+        value = self.value if isinstance(self.value, list) else [self.value]
+        dtype = dtype if dtype is not None else self.dtype
+
+        ak_array = ak.from_iter(value)
+        ak_array = ak.values_astype(ak_array, dtype)
+        try:
+            ak_array = ak.to_regular(ak_array)
+        except ValueError:
+            pass
+        return ak_array
+
+    def to_numpy(self, dtype=None):
+        dtype = dtype if dtype is not None else self.dtype
+        value = self.value if isinstance(self.value, list) else [self.value]
+
+        return np.array(value, dtype=dtype)
 
     @property
     def supported_objects(self) -> list[PhysicsObjectOptions]:
