@@ -42,6 +42,7 @@ ruff = "^0.1.13"
 DEP001 = ["ROOT"]
 DEP002 = ["dill", "tensorflow"]
 DEP003 = ["keras"]
+DEP004 = ["pytest"]
 
 [tool.deptry]
 ignore_notebooks = true
