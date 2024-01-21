@@ -27,6 +27,7 @@ class Observable:
         physics_object: str | None = None,
         name: str | None = None,
         supported_objects: PhysicsObjectOptions | list[PhysicsObjectOptions] = "all",
+        dtype: Any = None,
     ):
         if not self._is_valid_physics_object(physics_object, supported_objects):
             raise TypeError(
@@ -36,6 +37,7 @@ class Observable:
         self._supporedt_objects = supported_objects
         self._name = name
         self._value = None
+        self._dtype = "float64" if dtype is None else dtype
 
     def read(self, event) -> Any:
         raise NotImplementedError
@@ -92,6 +94,14 @@ class Observable:
         if self._value is None:
             return nan
         return self._value
+
+    @property
+    def dtype(self) -> Any:
+        return self._dtype
+
+    @dtype.setter
+    def dtype(self, dtype: Any) -> Observable:
+        self._dtype = dtype
 
     @property
     def supported_objects(self) -> list[PhysicsObjectOptions]:
