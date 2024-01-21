@@ -3,6 +3,7 @@ from math import isnan
 import pytest
 
 from hml.observables import Observable
+from hml.observables import get
 
 
 def test_observable():
@@ -83,3 +84,21 @@ def test_bad_cases():
 
     with pytest.raises(ValueError):
         Observable(physics_object="Jet0", supported_objects=["wrong support object"])
+
+
+def test_get():
+    assert get("") is None
+    assert get(None) is None
+    assert get("UnknownObservable") is None
+
+    assert get("FatJet0.TauN", 1).fullname == "FatJet0.Tau1"
+    assert get("FatJet0.tau_n", 1).fullname == "FatJet0.Tau1"
+    assert get("FatJet0.tau_1").fullname == "FatJet0.Tau1"
+    assert get("FatJet0.Tau1").fullname == "FatJet0.Tau1"
+    assert get("FatJet0.tau1").fullname == "FatJet0.Tau1"
+
+    assert get("FatJet0.TauMN", 2, 1).fullname == "FatJet0.Tau21"
+    assert get("FatJet0.tau_mn", 2, 1).fullname == "FatJet0.Tau21"
+    assert get("FatJet0.tau_21").fullname == "FatJet0.Tau21"
+    assert get("FatJet0.Tau21").fullname == "FatJet0.Tau21"
+    assert get("FatJet0.tau21").fullname == "FatJet0.Tau21"
