@@ -78,7 +78,7 @@ def test_observable():
         physics_object="Jet0,Jet1", supported_objects=["single", "multiple"]
     )
 
-    obs = Observable(physics_object="Jet0", supported_objects=["single", "multiple"])
+    obs = Observable(physics_object="Jet0", supported_objects=["single"])
     obs._value = 0
     assert obs.value == 0
 
