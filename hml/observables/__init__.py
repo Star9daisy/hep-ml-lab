@@ -1,6 +1,7 @@
 from .azimuthal_angle import AzimuthalAngle
 from .azimuthal_angle import Phi
 from .b_tag import BTag
+from .charge import Charge
 from .energy import E
 from .energy import Energy
 from .mass import M
