@@ -1,27 +1,33 @@
-from functools import reduce
+from typing import Any
 
-from ..types import Observable
+from ROOT import TLorentzVector
+
+from ..physics_objects.physics_object import PhysicsObjectOptions
+from .observable import Observable
 
 
 class InvariantMass(Observable):
-    def get_value(self):
-        for subs in self.sub_objs:
-            if len(subs) != 0:
-                return
+    def __init__(
+        self,
+        physics_object: str,
+        name: str | None = None,
+        supported_objects: list[PhysicsObjectOptions] = ["single", "multiple"],
+        dtype: Any = None,
+    ):
+        super().__init__(physics_object, name, supported_objects, dtype)
 
-        values = []
-        flat_objs = []
-        for objs in self.main_objs:
-            for obj in objs:
-                flat_objs.append(obj)
-        self.flat_objs = flat_objs
+    def read(self, event):
+        branch = self.physics_object.read(event)
+        vectors = TLorentzVector()
+        for obj in branch:
+            if obj is not None:
+                vectors += obj.P4()
+            else:
+                vectors += TLorentzVector()
 
-        value = flat_objs[0].P4()
-        for obj in flat_objs[1:]:
-            value = value + obj.P4()
-        values.append(value.M())
+        self._value = vectors.M()
 
-        return values
+        return self
 
 
 class InvMass(InvariantMass):
