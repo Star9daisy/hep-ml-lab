@@ -4,6 +4,9 @@ from .b_tag import BTag
 from .charge import Charge
 from .energy import E
 from .energy import Energy
+from .invariant_mass import InvariantMass
+from .invariant_mass import InvM
+from .invariant_mass import InvMass
 from .mass import M
 from .mass import Mass
 from .momentum_x import MomentumX
