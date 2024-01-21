@@ -88,7 +88,7 @@ class Observable:
         return instance
 
     @property
-    def value(self) -> float:
+    def value(self) -> Any:
         if self._value is None:
             return nan
         return self._value
