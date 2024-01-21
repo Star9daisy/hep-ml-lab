@@ -5,6 +5,11 @@ from typing import Any
 
 from .physics_object import PhysicsObject
 
+PATTERN1 = r"^([A-Za-z]+)$"
+PATTERN2 = r"^([A-Za-z]+)(\d+):$"
+PATTERN3 = r"^([A-Za-z]+):(\d+)$"
+PATTERN4 = r"^([A-Za-z]+)(\d+):(\d+)$"
+
 
 def is_collective_physics_object(identifier: str | PhysicsObject | None) -> bool:
     if identifier is None or identifier == "":
@@ -13,24 +18,19 @@ def is_collective_physics_object(identifier: str | PhysicsObject | None) -> bool
     if isinstance(identifier, PhysicsObject):
         identifier = identifier.name
 
-    if re.match(CollectivePhysicsObject.pattern1, identifier):
+    if re.match(PATTERN1, identifier):
         return True
-    elif re.match(CollectivePhysicsObject.pattern2, identifier):
+    elif re.match(PATTERN2, identifier):
         return True
-    elif re.match(CollectivePhysicsObject.pattern3, identifier):
+    elif re.match(PATTERN3, identifier):
         return True
-    elif re.match(CollectivePhysicsObject.pattern4, identifier):
+    elif re.match(PATTERN4, identifier):
         return True
     else:
         return False
 
 
 class CollectivePhysicsObject(PhysicsObject):
-    pattern1 = r"^([A-Za-z]+)$"
-    pattern2 = r"^([A-Za-z]+)(\d+):$"
-    pattern3 = r"^([A-Za-z]+):(\d+)$"
-    pattern4 = r"^([A-Za-z]+)(\d+):(\d+)$"
-
     def __init__(self, type: str, start: int | None = None, end: int | None = None):
         self.type = type
         self.start = start
@@ -79,16 +79,16 @@ class CollectivePhysicsObject(PhysicsObject):
     def from_name(cls, name: str) -> CollectivePhysicsObject:
         name = name.replace(" ", "")
 
-        if m := re.match(cls.pattern1, name):
+        if m := re.match(PATTERN1, name):
             instance = cls(m.group(1), None, None)
 
-        elif m := re.match(cls.pattern2, name):
+        elif m := re.match(PATTERN2, name):
             instance = cls(m.group(1), int(m.group(2)), None)
 
-        elif m := re.match(cls.pattern3, name):
+        elif m := re.match(PATTERN3, name):
             instance = cls(m.group(1), None, int(m.group(2)))
 
-        elif m := re.match(cls.pattern4, name):
+        elif m := re.match(PATTERN4, name):
             instance = cls(m.group(1), int(m.group(2)), int(m.group(3)))
 
         else:

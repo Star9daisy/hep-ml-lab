@@ -9,6 +9,8 @@ from .physics_object import PhysicsObject
 from .single import SinglePhysicsObject
 from .single import is_single_physics_object
 
+PATTERN = r"^([A-Za-z]+\d*:?\d*)\.([A-Za-z]+\d*:?\d*)$"
+
 
 def is_nested_physics_object(identifier: str | PhysicsObject | None) -> bool:
     if identifier is None or identifier == "":
@@ -17,12 +19,10 @@ def is_nested_physics_object(identifier: str | PhysicsObject | None) -> bool:
     if isinstance(identifier, PhysicsObject):
         identifier = identifier.name
 
-    return bool(re.match(NestedPhysicsObject.pattern, identifier))
+    return bool(re.match(PATTERN, identifier))
 
 
 class NestedPhysicsObject(PhysicsObject):
-    pattern = r"^([A-Za-z]+\d*:?\d*)\.([A-Za-z]+\d*:?\d*)$"
-
     def __init__(
         self,
         main: SinglePhysicsObject | CollectivePhysicsObject,
@@ -90,7 +90,7 @@ class NestedPhysicsObject(PhysicsObject):
     def from_name(cls, name: str) -> NestedPhysicsObject:
         name = name.replace(" ", "")
 
-        if (match := re.match(cls.pattern, name)) is None:
+        if (match := re.match(PATTERN, name)) is None:
             raise ValueError(f"Could not parse name {name} as a nested physics object")
 
         # main --------------------------------------------------------------- #

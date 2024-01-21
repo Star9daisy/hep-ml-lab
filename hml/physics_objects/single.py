@@ -5,6 +5,8 @@ from typing import Any
 
 from .physics_object import PhysicsObject
 
+PATTERN = r"^([A-Za-z]+)(\d+)$"
+
 
 def is_single_physics_object(identifier: str | PhysicsObject | None) -> bool:
     if identifier is None or identifier == "":
@@ -13,12 +15,10 @@ def is_single_physics_object(identifier: str | PhysicsObject | None) -> bool:
     if isinstance(identifier, PhysicsObject):
         identifier = identifier.name
 
-    return bool(re.match(SinglePhysicsObject.pattern, identifier))
+    return bool(re.match(PATTERN, identifier))
 
 
 class SinglePhysicsObject(PhysicsObject):
-    pattern = r"^([A-Za-z]+)(\d+)$"
-
     def __init__(self, type: str, index: int):
         self.type = type
         self.index = index
@@ -42,10 +42,10 @@ class SinglePhysicsObject(PhysicsObject):
     def from_name(cls, name: str) -> SinglePhysicsObject:
         name = name.replace(" ", "")
 
-        if (match := re.match(cls.pattern, name)) is None:
+        if (match := re.match(PATTERN, name)) is None:
             raise ValueError(f"Could not parse name {name} as a single physics object")
 
-        match = re.match(cls.pattern, name)
+        match = re.match(PATTERN, name)
         type = match.group(1)
         index = int(match.group(2))
         return cls(type, index)
