@@ -1,29 +1,54 @@
-from ..types import Observable
+from math import nan
+
+from ..physics_objects import is_single_physics_object
+from .observable import Observable
+from .observable import PhysicsObjectOptions
 
 
 class NSubjettiness(Observable):
-    def __init__(self, physics_object, n, **kwargs):
-        super().__init__(physics_object, **kwargs)
+    def __init__(
+        self,
+        n: int,
+        physics_object: str,
+        name: str | None = None,
+        supported_objects: list[PhysicsObjectOptions] = ["single", "collective"],
+    ):
+        super().__init__(physics_object, name, supported_objects)
         self.n = n
 
-    def get_value(self):
-        if len(self.main_objs) != 1:
-            return
+    def read(self, event):
+        if (branch := self.physics_object.read(event)) is None:
+            self._value = nan
 
-        if len(self.sub_objs[0]) != 0:
-            return
+        elif is_single_physics_object(self.physics_object):
+            self._value = branch.Tau[self.n - 1]
 
-        values = []
-        for obj in self.main_objs[0]:
-            value = obj.Tau[self.n - 1] if obj is not None else float("nan")
-            values.append(value)
+        else:
+            self._value = [
+                obj.Tau[self.n - 1] if obj is not None else nan for obj in branch
+            ]
 
-        return values
+        return self
+
+    @property
+    def config(self):
+        config = super().config
+        config.update({"n": self.n})
+        return config
 
 
 class TauN(NSubjettiness):
-    ...
+    @property
+    def name(self):
+        return f"Tau{self.n}"
 
+    @classmethod
+    def from_name(cls, name: str) -> Observable:
+        if "." in name:
+            physics_object, name = name.split(".")
+        else:
+            physics_object = None
 
-NSubjettiness.add_alias("n_subjettiness")
-TauN.add_alias("tau_n")
+        n = int(name[-1])
+
+        return cls(n, physics_object, name)
