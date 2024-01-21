@@ -76,3 +76,7 @@ def test_pt(event):
     obs.read(event)
     assert len(obs.value) == 2
     assert len(obs.value[0]) == 3
+
+
+def test_bad_case(event):
+    assert isnan(Pt(physics_object="FatJet100").read(event).value)
