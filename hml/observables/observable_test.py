@@ -1,9 +1,17 @@
 from math import isnan
 
+import awkward as ak
 import pytest
 
+from hml.events import DelphesEvents
 from hml.observables import Observable
 from hml.observables import get
+
+
+@pytest.fixture
+def event():
+    events = DelphesEvents("tests/data/pp2zz/Events/run_01/tag_1_delphes_events.root")
+    yield events[0]
 
 
 def test_observable():
@@ -102,3 +110,37 @@ def test_get():
     assert get("FatJet0.tau_21").fullname == "FatJet0.Tau21"
     assert get("FatJet0.Tau21").fullname == "FatJet0.Tau21"
     assert get("FatJet0.tau21").fullname == "FatJet0.Tau21"
+
+
+def test_to_numpy(event):
+    assert get("Jet0.Pt").read(event).to_numpy().shape == (1,)
+    assert get("Jet0.Particles:5.Pt").read(event).to_numpy().shape == (1, 5)
+
+    with pytest.raises(ValueError):
+        get("Jet.Particles.Pt").read(event).to_numpy()
+
+
+def test_to_awkward(event):
+    assert ak.count(get("Jet0.Pt").read(event).to_awkward()) == 1
+    assert ak.count(get("Jet0.Particles:5.Pt").read(event).to_awkward()) == 5
+    assert ak.is_valid(get("Jet0.Particles.Pt").read(event).to_awkward())
+
+
+def test_shape(event):
+    assert get("Jet0.Pt").read(event).shape == "1 * float64"
+    assert get("Jet0.Particles:5.Pt").read(event).shape == "1 * 5 * float64"
+    assert get("Jet:10.Particles.Pt").read(event).shape == "10 * var * float64"
+
+    assert get("FatJet10:.Pt").read(event).shape == "0 * unknown"
+    assert get("FatJet10:.Constituents.Pt").read(event).shape == "0 * unknown"
+
+
+def test_dtype(event):
+    obs = get("Jet0.Pt").read(event)
+    assert obs.dtype == "float64"
+
+    obs.dtype = "float32"
+    assert obs.dtype == "float32"
+
+    assert obs.to_numpy(dtype="float16").dtype == "float16"
+    assert str(obs.to_awkward(dtype="float16").type) == "1 * float16"
