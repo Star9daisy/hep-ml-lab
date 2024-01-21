@@ -7,14 +7,19 @@ from typing import Any
 from .collective import CollectivePhysicsObject
 from .collective import is_collective_physics_object
 from .nested import NestedPhysicsObject
+from .nested import is_nested_physics_object
 from .physics_object import PhysicsObject
+from .physics_object import PhysicsObjectOptions
 from .single import SinglePhysicsObject
 from .single import is_single_physics_object
 
 PATTERN = r"^([A-Za-z]+\d*:?\d*(?:\.[A-Za-z]+\d*:?\d*)*)$"
 
 
-def is_multiple_physics_object(identifier: str | PhysicsObject | None) -> bool:
+def is_multiple_physics_object(
+    identifier: str | PhysicsObject | None,
+    supported_objects: PhysicsObjectOptions | list[PhysicsObjectOptions] = "all",
+) -> bool:
     if identifier is None or identifier == "":
         return False
 
@@ -25,11 +30,24 @@ def is_multiple_physics_object(identifier: str | PhysicsObject | None) -> bool:
         return False
 
     physics_object_names = identifier.split(",")
-    for n in physics_object_names:
-        if re.match(PATTERN, n) is None:
-            return False
 
-    return True
+    if supported_objects == "all":
+        for n in physics_object_names:
+            if re.match(PATTERN, n) is None:
+                return False
+        return True
+    else:
+        for n in physics_object_names:
+            status = []
+            if "single" in supported_objects:
+                status.append(is_single_physics_object(n))
+            if "collective" in supported_objects:
+                status.append(is_collective_physics_object(n))
+            if "nested" in supported_objects:
+                status.append(is_nested_physics_object(n))
+            if not any(status):
+                return False
+        return True
 
 
 class MultiplePhysicsObject(PhysicsObject):
