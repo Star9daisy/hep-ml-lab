@@ -55,7 +55,10 @@ class NestedPhysicsObject(PhysicsObject):
             else:
                 leaves = list(getattr(main_object, self.sub.type))
                 if isinstance(self.sub, SinglePhysicsObject):
-                    sub_objects.append(leaves[self.sub.index])
+                    if self.sub.index >= len(leaves):
+                        sub_objects.append(None)
+                    else:
+                        sub_objects.append(leaves[self.sub.index])
                 else:
                     if self.sub.start is None and self.sub.end is None:
                         sub_objects.append(leaves)
