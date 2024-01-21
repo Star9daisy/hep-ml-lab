@@ -1,7 +1,7 @@
 from typing import Any
 
+from ..physics_objects.physics_object import PhysicsObjectOptions
 from .observable import Observable
-from .observable import PhysicsObjectOptions
 
 
 class Size(Observable):

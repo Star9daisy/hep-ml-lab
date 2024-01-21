@@ -2,9 +2,9 @@ from math import isnan
 
 import pytest
 
-from hml.events import DelphesEvents
-from hml.observables import E
-from hml.observables import Energy
+from ..events.delphes_events import DelphesEvents
+from ..observables.energy import E
+from ..observables.energy import Energy
 
 
 @pytest.fixture

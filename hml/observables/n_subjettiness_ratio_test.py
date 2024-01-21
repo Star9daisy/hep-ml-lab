@@ -2,9 +2,9 @@ from math import isnan
 
 import pytest
 
-from hml.events import DelphesEvents
-from hml.observables import NSubjettinessRatio
-from hml.observables import TauMN
+from ..events.delphes_events import DelphesEvents
+from .n_subjettiness_ratio import NSubjettinessRatio
+from .n_subjettiness_ratio import TauMN
 
 
 @pytest.fixture

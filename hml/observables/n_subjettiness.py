@@ -1,8 +1,8 @@
 from math import nan
 
-from ..physics_objects import is_single_physics_object
+from ..physics_objects.physics_object import PhysicsObjectOptions
+from ..physics_objects.single import is_single_physics_object
 from .observable import Observable
-from .observable import PhysicsObjectOptions
 
 
 class NSubjettiness(Observable):

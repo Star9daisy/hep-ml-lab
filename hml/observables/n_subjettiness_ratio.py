@@ -2,10 +2,10 @@ from math import isnan
 from math import nan
 from typing import Any
 
-from ..physics_objects import is_single_physics_object
+from ..physics_objects.physics_object import PhysicsObjectOptions
+from ..physics_objects.single import is_single_physics_object
 from .n_subjettiness import NSubjettiness
 from .observable import Observable
-from .observable import PhysicsObjectOptions
 
 
 class NSubjettinessRatio(Observable):

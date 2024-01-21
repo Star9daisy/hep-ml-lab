@@ -2,8 +2,8 @@ from math import isnan
 
 import pytest
 
-from hml.events import DelphesEvents
-from hml.observables import BTag
+from ..events.delphes_events import DelphesEvents
+from ..observables.b_tag import BTag
 
 
 @pytest.fixture

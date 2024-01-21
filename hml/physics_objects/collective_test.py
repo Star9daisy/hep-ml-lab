@@ -1,8 +1,8 @@
 import pytest
 
-from hml.events import DelphesEvents
-from hml.physics_objects import CollectivePhysicsObject
-from hml.physics_objects import is_collective_physics_object
+from ..events.delphes_events import DelphesEvents
+from .collective import CollectivePhysicsObject
+from .collective import is_collective_physics_object
 
 
 @pytest.fixture

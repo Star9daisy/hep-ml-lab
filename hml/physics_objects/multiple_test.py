@@ -1,11 +1,11 @@
 import pytest
 
-from hml.events import DelphesEvents
-from hml.physics_objects import CollectivePhysicsObject
-from hml.physics_objects import MultiplePhysicsObject
-from hml.physics_objects import NestedPhysicsObject
-from hml.physics_objects import SinglePhysicsObject
-from hml.physics_objects import is_multiple_physics_object
+from ..events.delphes_events import DelphesEvents
+from .collective import CollectivePhysicsObject
+from .multiple import MultiplePhysicsObject
+from .multiple import is_multiple_physics_object
+from .nested import NestedPhysicsObject
+from .single_test import SinglePhysicsObject
 
 
 @pytest.fixture

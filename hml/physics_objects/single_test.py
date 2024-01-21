@@ -1,8 +1,8 @@
 import pytest
 
-from hml.events import DelphesEvents
-from hml.physics_objects import SinglePhysicsObject
-from hml.physics_objects import is_single_physics_object
+from ..events.delphes_events import DelphesEvents
+from ..physics_objects.single import SinglePhysicsObject
+from ..physics_objects.single import is_single_physics_object
 
 
 @pytest.fixture
