@@ -12,7 +12,11 @@ def get(identifier: str | None, *arg, **kwarg):
         return None
 
     if "." in identifier:
-        physics_object, name = identifier.split(".")
+        # Each nested physics object has one dot, so there may be multiple dots.
+        # So we only take the last dot as the separator between physics object
+        # and observable name.
+        physics_object = ".".join(identifier.split(".")[:-1])
+        name = identifier.split(".")[-1]
         kwarg["physics_object"] = physics_object
 
         # Check if the observable name is a valid NSubjettiness
