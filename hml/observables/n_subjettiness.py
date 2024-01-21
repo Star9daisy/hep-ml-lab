@@ -52,3 +52,7 @@ class TauN(NSubjettiness):
         n = int(name[-1])
 
         return cls(n, physics_object, name)
+
+
+NSubjettiness.add_alias("n_subjettiness")
+TauN.add_alias("tau_n")

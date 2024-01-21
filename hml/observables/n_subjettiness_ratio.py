@@ -64,3 +64,7 @@ class TauMN(NSubjettinessRatio):
         n = int(name[-1])
 
         return cls(m, n, physics_object, name)
+
+
+NSubjettinessRatio.add_alias("n_subjettiness_ratio")
+TauMN.add_alias("tau_mn")
