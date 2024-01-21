@@ -13,7 +13,7 @@ def test_observable():
     assert obs.name == "Observable"
     assert isnan(obs.value)
     assert obs.fullname == "Observable"
-    assert obs.fullname == repr(obs)
+    assert repr(obs) == f"{obs.fullname}: {obs.value}"
     assert obs.classname == "Observable"
     assert obs.physics_object is None
     assert obs.config == {
@@ -31,7 +31,7 @@ def test_observable():
     assert obs.name == "Observable"
     assert isnan(obs.value)
     assert obs.fullname == "Jet.Observable"
-    assert obs.fullname == repr(obs)
+    assert repr(obs) == f"{obs.fullname}: {obs.value}"
     assert obs.classname == "Observable"
     assert obs.physics_object.name == "Jet"
     assert obs.config == {
@@ -49,7 +49,7 @@ def test_observable():
     assert obs.name == "MyObservable"
     assert isnan(obs.value)
     assert obs.fullname == "Jet.MyObservable"
-    assert obs.fullname == repr(obs)
+    assert repr(obs) == f"{obs.fullname}: {obs.value}"
     assert obs.classname == "Observable"
     assert obs.physics_object.name == "Jet"
     assert obs.config == {
