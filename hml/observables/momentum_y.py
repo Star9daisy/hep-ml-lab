@@ -1,25 +1,43 @@
-from ..types import Observable
+from math import nan
+from typing import Any
+
+from ..physics_objects import is_collective_physics_object
+from ..physics_objects import is_single_physics_object
+from .observable import Observable
+from .observable import PhysicsObjectOptions
 
 
 class MomentumY(Observable):
-    def get_value(self):
-        if len(self.main_objs) != 1:
-            return
+    def __init__(
+        self,
+        physics_object: str,
+        name: str | None = None,
+        supported_objects: list[PhysicsObjectOptions] = [
+            "single",
+            "collective",
+            "nested",
+        ],
+        dtype: Any = None,
+    ):
+        super().__init__(physics_object, name, supported_objects, dtype)
 
-        values = []
-        if len(self.sub_objs[0]) == 0:
-            for obj in self.main_objs[0]:
-                value = obj.P4().Py() if obj is not None else float("nan")
-                values.append(value)
+    def read(self, event):
+        if (branch := self.physics_object.read(event)) is None:
+            self._value = nan
+
+        elif is_single_physics_object(self.physics_object):
+            self._value = branch.P4().Py()
+
+        elif is_collective_physics_object(self.physics_object):
+            self._value = [obj.P4().Py() if obj is not None else nan for obj in branch]
+
         else:
-            for main in self.sub_objs[0]:
-                values_per_main = []
-                for sub in main:
-                    value = sub.P4().Py() if sub is not None else float("nan")
-                    values_per_main.append(value)
-                values.append(values_per_main)
+            self._value = []
+            for main in branch:
+                sub_values = [sub.P4().Py() if sub is not None else nan for sub in main]
+                self._value.append(sub_values)
 
-        return values
+        return self
 
 
 class Py(MomentumY):
