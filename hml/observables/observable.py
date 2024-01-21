@@ -101,7 +101,7 @@ class Observable:
         return self._supporedt_objects
 
     def __repr__(self) -> str:
-        return self.fullname
+        return f"{self.fullname}: {self.value}"
 
     def _is_valid_physics_object(
         self,

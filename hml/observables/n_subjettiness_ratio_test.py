@@ -22,7 +22,7 @@ def test_n_subjettiness(event):
     assert obs.name == "NSubjettinessRatio"
     assert isnan(obs.value)
     assert obs.fullname == "FatJet0.NSubjettinessRatio"
-    assert obs.fullname == repr(obs)
+    assert repr(obs) == f"{obs.fullname}: {obs.value}"
     assert obs.classname == "NSubjettinessRatio"
     assert obs.config == {
         "m": 2,
@@ -49,7 +49,7 @@ def test_n_subjettiness(event):
     assert obs.name == "NSubjettinessRatio"
     assert isnan(obs.value)
     assert obs.fullname == "FatJet:5.NSubjettinessRatio"
-    assert obs.fullname == repr(obs)
+    assert repr(obs) == f"{obs.fullname}: {obs.value}"
     assert obs.classname == "NSubjettinessRatio"
     assert obs.physics_object.name == "FatJet:5"
     assert obs.config == {
@@ -79,7 +79,7 @@ def test_tau_m_n(event):
     assert obs.name == "Tau21"
     assert isnan(obs.value)
     assert obs.fullname == "FatJet0.Tau21"
-    assert obs.fullname == repr(obs)
+    assert repr(obs) == f"{obs.fullname}: {obs.value}"
     assert obs.classname == "TauMN"
     assert obs.config == {
         "m": 2,
@@ -103,7 +103,7 @@ def test_tau_m_n(event):
     assert obs.name == "Tau21"
     assert isnan(obs.value)
     assert obs.fullname == "FatJet:5.Tau21"
-    assert obs.fullname == repr(obs)
+    assert repr(obs) == f"{obs.fullname}: {obs.value}"
     assert obs.classname == "TauMN"
     assert obs.config == {
         "m": 2,
