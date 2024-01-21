@@ -25,9 +25,17 @@ class Observable:
         dtype: Any = None,
     ):
         if not self._is_valid_physics_object(physics_object, supported_objects):
-            raise TypeError(
-                f"Invalid physics_object {physics_object} for supported_objects {supported_objects}."
-            )
+            if "multiple" in supported_objects:
+                supported_objects.remove("multiple")
+                raise TypeError(
+                    f"Invalid physics object {physics_object}\n"
+                    f"Supported objects are multiple of {supported_objects}."
+                )
+            else:
+                raise TypeError(
+                    f"Invalid physics object {physics_object}\n"
+                    f"Supported objects are {supported_objects}."
+                )
         self._physics_object = physics_object
         self._supporedt_objects = supported_objects
         self._name = name
