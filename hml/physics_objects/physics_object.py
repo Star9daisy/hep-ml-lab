@@ -3,6 +3,10 @@ from abc import abstractclassmethod
 from abc import abstractmethod
 from abc import abstractproperty
 from typing import Any
+from typing import Literal
+
+PhysicsObjectOptions = Literal["all", "single", "collective", "nested", "multiple"]
+PHYSICS_OBJECT_OPTIONS = ["all", "single", "collective", "nested", "multiple"]
 
 
 class PhysicsObject(ABC):

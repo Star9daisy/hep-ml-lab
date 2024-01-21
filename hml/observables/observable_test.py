@@ -3,9 +3,9 @@ from math import isnan
 import awkward as ak
 import pytest
 
-from hml.events import DelphesEvents
-from hml.observables import Observable
-from hml.observables import get
+from ..events.delphes_events import DelphesEvents
+from . import get
+from .observable import Observable
 
 
 @pytest.fixture

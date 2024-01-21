@@ -2,9 +2,9 @@ from math import isnan
 
 import pytest
 
-from hml.events import DelphesEvents
-from hml.observables import Pt
-from hml.observables import TransverseMomentum
+from ..events.delphes_events import DelphesEvents
+from .transverse_momentum import Pt
+from .transverse_momentum import TransverseMomentum
 
 
 @pytest.fixture

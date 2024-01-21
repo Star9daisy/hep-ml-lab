@@ -2,9 +2,9 @@ from math import isnan
 
 import pytest
 
-from hml.events import DelphesEvents
-from hml.observables import MomentumZ
-from hml.observables import Pz
+from ..events.delphes_events import DelphesEvents
+from ..observables.momentum_z import MomentumZ
+from ..observables.momentum_z import Pz
 
 
 @pytest.fixture

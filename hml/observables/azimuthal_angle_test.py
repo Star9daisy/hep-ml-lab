@@ -2,9 +2,9 @@ from math import isnan
 
 import pytest
 
-from hml.events import DelphesEvents
-from hml.observables import AzimuthalAngle
-from hml.observables import Phi
+from ..events.delphes_events import DelphesEvents
+from .azimuthal_angle import AzimuthalAngle
+from .azimuthal_angle import Phi
 
 
 @pytest.fixture

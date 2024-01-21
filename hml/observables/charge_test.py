@@ -2,8 +2,8 @@ from math import isnan
 
 import pytest
 
-from hml.events import DelphesEvents
-from hml.observables import Charge
+from ..events.delphes_events import DelphesEvents
+from ..observables.charge import Charge
 
 
 @pytest.fixture

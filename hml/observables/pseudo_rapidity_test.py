@@ -2,9 +2,9 @@ from math import isnan
 
 import pytest
 
-from hml.events import DelphesEvents
-from hml.observables import Eta
-from hml.observables import PseudoRapidity
+from ..events.delphes_events import DelphesEvents
+from .pseudo_rapidity import Eta
+from .pseudo_rapidity import PseudoRapidity
 
 
 @pytest.fixture

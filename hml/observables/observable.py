@@ -2,15 +2,16 @@ from __future__ import annotations
 
 from math import nan
 from typing import Any
-from typing import Literal
 
 import awkward as ak
 import numpy as np
 
-import hml.physics_objects as phyobjs
-
-PhysicsObjectOptions = Literal["all", "single", "collective", "nested", "multiple"]
-PHYSICS_OBJECT_OPTIONS = ["all", "single", "collective", "nested", "multiple"]
+from ..physics_objects import get
+from ..physics_objects.collective import is_collective_physics_object
+from ..physics_objects.multiple import is_multiple_physics_object
+from ..physics_objects.nested import is_nested_physics_object
+from ..physics_objects.physics_object import PhysicsObjectOptions
+from ..physics_objects.single import is_single_physics_object
 
 
 class Observable:
@@ -38,7 +39,7 @@ class Observable:
 
     @property
     def physics_object(self):
-        return phyobjs.get(self._physics_object)
+        return get(self._physics_object)
 
     @property
     def classname(self) -> str:
@@ -143,13 +144,13 @@ class Observable:
         is_valid = False
         for support_object in supported_objects:
             if support_object == "single":
-                status = phyobjs.is_single_physics_object(physics_object)
+                status = is_single_physics_object(physics_object)
             elif support_object == "collective":
-                status = phyobjs.is_collective_physics_object(physics_object)
+                status = is_collective_physics_object(physics_object)
             elif support_object == "nested":
-                status = phyobjs.is_nested_physics_object(physics_object)
+                status = is_nested_physics_object(physics_object)
             elif support_object == "multiple":
-                status = phyobjs.is_multiple_physics_object(physics_object)
+                status = is_multiple_physics_object(physics_object)
             else:
                 raise ValueError(f"Unknown support_object {support_object}")
 

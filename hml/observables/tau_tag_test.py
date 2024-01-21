@@ -2,8 +2,8 @@ from math import isnan
 
 import pytest
 
-from hml.events import DelphesEvents
-from hml.observables import TauTag
+from ..events.delphes_events import DelphesEvents
+from .tau_tag import TauTag
 
 
 @pytest.fixture
