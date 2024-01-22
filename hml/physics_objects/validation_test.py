@@ -1,3 +1,6 @@
+from .collective import is_collective
+from .multiple import is_multiple
+from .nested import is_nested
 from .single import is_single
 
 test_single_cases = ["Jet0"]
@@ -29,8 +32,8 @@ test_multiple_cases = [
     "Jet0,Jet1",
     "Jet0,Jet1,Jet2",
     "Jet0,Jet:",
-    "Jet0,Jet0.Particles",
-    "Jet0.Particles,Jet0.Particles",
+    "Jet0,Jet0.Particles:",
+    "Jet0.Particles:,Jet0.Particles:",
 ]
 
 
@@ -46,3 +49,45 @@ def test_is_single():
 
     for case in test_multiple_cases:
         assert is_single(case) is False
+
+
+def test_is_collective():
+    for case in test_single_cases:
+        assert is_collective(case) is False
+
+    for case in test_collective_cases:
+        assert is_collective(case) is True
+
+    for case in test_nested_cases:
+        assert is_collective(case) is False
+
+    for case in test_multiple_cases:
+        assert is_collective(case) is False
+
+
+def test_is_nested():
+    for case in test_single_cases:
+        assert is_nested(case) is False
+
+    for case in test_collective_cases:
+        assert is_nested(case) is False
+
+    for case in test_nested_cases:
+        assert is_nested(case) is True
+
+    for case in test_multiple_cases:
+        assert is_nested(case) is False
+
+
+def test_is_multiple():
+    for case in test_single_cases:
+        assert is_multiple(case) is False
+
+    for case in test_collective_cases:
+        assert is_multiple(case) is False
+
+    for case in test_nested_cases:
+        assert is_multiple(case) is False
+
+    for case in test_multiple_cases:
+        assert is_multiple(case) is True

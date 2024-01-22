@@ -1,8 +1,7 @@
 import pytest
 
 from ..events.delphes_events import DelphesEvents
-from .collective import CollectivePhysicsObject
-from .collective import is_collective_physics_object
+from .collective import Collective
 
 
 @pytest.fixture
@@ -11,164 +10,80 @@ def event():
     yield events[0]
 
 
-def test_validation_function():
-    assert is_collective_physics_object("") is False
-    assert is_collective_physics_object(None) is False
+def test_attributes():
+    obj = Collective("Jet", 1, 3)
+    assert obj.name == "Jet"
+    assert obj.start == 1
+    assert obj.stop == 3
+    assert obj.objects == []
+    assert obj.identifier == "Jet1:3"
+    assert repr(obj) == "Jet1:3"
+    assert obj.config == {
+        "classname": "Collective",
+        "name": "Jet",
+        "start": 1,
+        "stop": 3,
+    }
 
-    assert is_collective_physics_object("Jet") is True
-    assert is_collective_physics_object("Jet0:") is True
-    assert is_collective_physics_object("Jet:1") is True
-    assert is_collective_physics_object("Jet0:1") is True
-    assert (
-        is_collective_physics_object(CollectivePhysicsObject.from_name("Jet")) is True
-    )
-
-    assert is_collective_physics_object("Jet:") is False
-    assert is_collective_physics_object("Jet0") is False
-    assert is_collective_physics_object("Jet0.Constituents1") is False
-
-
-def test_pattern1():
-    obj1 = CollectivePhysicsObject("Jet")
-    obj2 = CollectivePhysicsObject.from_name("Jet")
-    obj3 = CollectivePhysicsObject.from_config(
-        {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
-            "start": None,
-            "end": None,
-        }
-    )
-
-    for obj in [obj1, obj2, obj3]:
-        assert obj.type == "Jet"
-        assert obj.start is None
-        assert obj.end is None
-        assert obj.name == "Jet"
-        assert obj.config == {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
-            "start": None,
-            "end": None,
-        }
+    assert Collective("Jet").identifier == "Jet:"
+    assert Collective("Jet", 1).identifier == "Jet1:"
+    assert Collective("Jet", stop=3).identifier == "Jet:3"
+    assert Collective("Jet", 1, 3).identifier == "Jet1:3"
 
 
-def test_pattern2():
-    obj1 = CollectivePhysicsObject("Jet", 0)
-    obj2 = CollectivePhysicsObject.from_name("Jet0:")
-    obj3 = CollectivePhysicsObject.from_config(
-        {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
-            "start": 0,
-            "end": None,
-        }
-    )
+def test_from_identifier():
+    assert Collective.from_identifier("Jet1:3") == Collective("Jet", 1, 3)
+    assert Collective.from_identifier("Jet1:3") != Collective("Jet", 1, 4)
 
-    for obj in [obj1, obj2, obj3]:
-        assert obj.type == "Jet"
-        assert obj.start == 0
-        assert obj.end is None
-        assert obj.name == "Jet0:"
-        assert obj.config == {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
-            "start": 0,
-            "end": None,
-        }
-
-
-def test_pattern3():
-    obj1 = CollectivePhysicsObject("Jet", None, 1)
-    obj2 = CollectivePhysicsObject.from_name("Jet:1")
-    obj3 = CollectivePhysicsObject.from_config(
-        {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
-            "start": None,
-            "end": 1,
-        }
-    )
-
-    for obj in [obj1, obj2, obj3]:
-        assert obj.type == "Jet"
-        assert obj.start is None
-        assert obj.end == 1
-        assert obj.name == "Jet:1"
-        assert obj.config == {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
-            "start": None,
-            "end": 1,
-        }
-
-
-def test_pattern4():
-    obj1 = CollectivePhysicsObject("Jet", 0, 1)
-    obj2 = CollectivePhysicsObject.from_name("Jet0:1")
-    obj3 = CollectivePhysicsObject.from_config(
-        {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
-            "start": 0,
-            "end": 1,
-        }
-    )
-
-    for obj in [obj1, obj2, obj3]:
-        assert obj.type == "Jet"
-        assert obj.start == 0
-        assert obj.end == 1
-        assert obj.name == "Jet0:1"
-        assert obj.config == {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
-            "start": 0,
-            "end": 1,
-        }
-
-
-def test_bad_name():
     with pytest.raises(ValueError):
-        CollectivePhysicsObject.from_name("Jet0")
+        Collective.from_identifier("Jet1")
 
-
-def test_bad_config():
     with pytest.raises(ValueError):
-        CollectivePhysicsObject.from_config(
-            {
-                "class_name": None,
-                "type": "Jet",
-                "start": 0,
-                "end": 1,
-            }
-        )
+        Collective.from_identifier("Jet1.Constituents1")
+
+    with pytest.raises(ValueError):
+        Collective.from_identifier("Jet0, Jet1")
+
+
+def test_from_config():
+    obj = Collective("Jet", 1, 3)
+    assert obj == Collective.from_config(obj.config)
+
+    with pytest.raises(ValueError):
+        Collective.from_config({"classname": "Unknown"})
 
 
 def test_read(event):
-    obj1 = CollectivePhysicsObject.from_name("Jet")
-    assert len(obj1.read(event)) > 0
+    obj = Collective("Jet", 1).read(event)
+    assert len(obj.objects) >= 1
+    assert all(obj.objects) is True
 
-    obj2 = CollectivePhysicsObject.from_name("Jet0:")
-    assert len(obj2.read(event)) > 0
-    assert len(obj1.read(event)) == len(obj2.read(event))
+    obj = Collective("Jet", 1, 3).read(event)
+    assert len(obj.objects) == 2
+    assert all(obj.objects) is True
 
-    obj3 = CollectivePhysicsObject.from_name("Jet:1")
-    assert len(obj3.read(event)) == 1
+    obj = Collective("Jet", 3, 6).read(event)
+    assert len(obj.objects) == 3
+    assert any(obj.objects) is True
 
-    obj3_with_none = CollectivePhysicsObject.from_name("Jet:100")
-    assert len(obj3_with_none.read(event)) == 100
+    obj = Collective("Jet", 100, 101).read(event)
+    assert len(obj.objects) == 1
+    assert all(obj.objects) is False
 
-    obj4 = CollectivePhysicsObject.from_name("Jet0:1")
-    assert len(obj4.read(event)) == 1
-    assert len(obj3.read(event)) == len(obj4.read(event))
-
-    obj4_with_none = CollectivePhysicsObject.from_name("Jet0:100")
-    assert len(obj4_with_none.read(event)) == 100
-    assert len(obj3_with_none.read(event)) == len(obj4_with_none.read(event))
-
-
-def test_read_bad_cases(event):
-    obj = CollectivePhysicsObject.from_name("BadCollective")
     with pytest.raises(ValueError):
-        obj.read(event)
+        Collective("Unknown", 0, 1).read(event)
+
+    obj = Collective("Particles", 1, 3).read(event.Jet[0])
+    assert len(obj.objects) == 2
+    assert all(obj.objects) is True
+
+    obj = Collective("Particles", 10, 110).read(event.Jet[0])
+    assert len(obj.objects) == 100
+    assert any(obj.objects) is True
+
+    obj = Collective("Particles", 100, 101).read(event.Jet[0])
+    assert len(obj.objects) == 1
+    assert all(obj.objects) is False
+
+    with pytest.raises(ValueError):
+        Collective("Unknown", 0, 1).read(event.Jet[0])

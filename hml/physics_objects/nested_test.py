@@ -1,10 +1,9 @@
 import pytest
 
 from ..events.delphes_events import DelphesEvents
-from .collective import CollectivePhysicsObject
-from .nested import NestedPhysicsObject
-from .nested import is_nested_physics_object
-from .single import SinglePhysicsObject
+from .collective import Collective
+from .nested import Nested
+from .single import Single
 
 
 @pytest.fixture
@@ -13,331 +12,114 @@ def event():
     yield events[0]
 
 
-def test_validation_function():
-    assert is_nested_physics_object("") is False
-    assert is_nested_physics_object(None) is False
-
-    assert is_nested_physics_object("Jet0.Constituents1") is True
-    assert (
-        is_nested_physics_object(NestedPhysicsObject.from_name("Jet0.Constituents1"))
-        is True
-    )
-
-    assert is_nested_physics_object("Jet0.") is False
-    assert is_nested_physics_object("Jet0") is False
-    assert is_nested_physics_object("Jet0:") is False
-
-
-def test_pattern_single_single():
-    obj1 = NestedPhysicsObject(
-        SinglePhysicsObject("Jet", 0),
-        SinglePhysicsObject("Constituents", 1),
-    )
-    obj2 = NestedPhysicsObject.from_name("Jet0.Constituents1")
-    obj3 = NestedPhysicsObject.from_config(
-        {
-            "class_name": "NestedPhysicsObject",
-            "main_config": {
-                "class_name": "SinglePhysicsObject",
-                "type": "Jet",
-                "index": 0,
-            },
-            "sub_config": {
-                "class_name": "SinglePhysicsObject",
-                "type": "Constituents",
-                "index": 1,
-            },
-        }
-    )
-
-    for obj in [obj1, obj2, obj3]:
-        assert obj.main.type == "Jet"
-        assert obj.main.index == 0
-        assert obj.main.name == "Jet0"
-        assert obj.main.config == {
-            "class_name": "SinglePhysicsObject",
-            "type": "Jet",
+def test_attributes():
+    obj = Nested(Single("Jet", 0), Single("Particles", 0))
+    assert obj.main_object == Single("Jet", 0)
+    assert obj.sub_object == Single("Particles", 0)
+    assert obj.objects == []
+    assert obj.identifier == "Jet0.Particles0"
+    assert repr(obj) == "Jet0.Particles0"
+    assert obj.config == {
+        "classname": "Nested",
+        "main_object_config": {
+            "classname": "Single",
+            "name": "Jet",
             "index": 0,
-        }
-
-        assert obj.sub.type == "Constituents"
-        assert obj.sub.index == 1
-        assert obj.sub.name == "Constituents1"
-        assert obj.sub.config == {
-            "class_name": "SinglePhysicsObject",
-            "type": "Constituents",
-            "index": 1,
-        }
-
-        assert obj.name == "Jet0.Constituents1"
-        assert obj.config == {
-            "class_name": "NestedPhysicsObject",
-            "main_config": {
-                "class_name": "SinglePhysicsObject",
-                "type": "Jet",
-                "index": 0,
-            },
-            "sub_config": {
-                "class_name": "SinglePhysicsObject",
-                "type": "Constituents",
-                "index": 1,
-            },
-        }
-
-
-def test_pattern_single_collective():
-    obj1 = NestedPhysicsObject(
-        SinglePhysicsObject("Jet", 0),
-        CollectivePhysicsObject("Constituents", 1),
-    )
-    obj2 = NestedPhysicsObject.from_name("Jet0.Constituents1:")
-    obj3 = NestedPhysicsObject.from_config(
-        {
-            "class_name": "NestedPhysicsObject",
-            "main_config": {
-                "class_name": "SinglePhysicsObject",
-                "type": "Jet",
-                "index": 0,
-            },
-            "sub_config": {
-                "class_name": "CollectivePhysicsObject",
-                "type": "Constituents",
-                "start": 1,
-                "end": None,
-            },
-        }
-    )
-
-    for obj in [obj1, obj2, obj3]:
-        assert obj.main.type == "Jet"
-        assert obj.main.index == 0
-        assert obj.main.name == "Jet0"
-        assert obj.main.config == {
-            "class_name": "SinglePhysicsObject",
-            "type": "Jet",
+        },
+        "sub_object_config": {
+            "classname": "Single",
+            "name": "Particles",
             "index": 0,
-        }
+        },
+    }
 
-        assert obj.sub.type == "Constituents"
-        assert obj.sub.start == 1
-        assert obj.sub.end is None
-        assert obj.sub.name == "Constituents1:"
-        assert obj.sub.config == {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Constituents",
-            "start": 1,
-            "end": None,
-        }
-
-        assert obj.name == "Jet0.Constituents1:"
-        assert obj.config == {
-            "class_name": "NestedPhysicsObject",
-            "main_config": {
-                "class_name": "SinglePhysicsObject",
-                "type": "Jet",
-                "index": 0,
-            },
-            "sub_config": {
-                "class_name": "CollectivePhysicsObject",
-                "type": "Constituents",
-                "start": 1,
-                "end": None,
-            },
-        }
-
-
-def test_pattern_collective_single():
-    obj1 = NestedPhysicsObject(
-        CollectivePhysicsObject("Jet", 0),
-        SinglePhysicsObject("Constituents", 1),
-    )
-    obj2 = NestedPhysicsObject.from_name("Jet0:.Constituents1")
-    obj3 = NestedPhysicsObject.from_config(
-        {
-            "class_name": "NestedPhysicsObject",
-            "main_config": {
-                "class_name": "CollectivePhysicsObject",
-                "type": "Jet",
-                "start": 0,
-                "end": None,
-            },
-            "sub_config": {
-                "class_name": "SinglePhysicsObject",
-                "type": "Constituents",
-                "index": 1,
-            },
-        }
-    )
-
-    for obj in [obj1, obj2, obj3]:
-        assert obj.main.type == "Jet"
-        assert obj.main.start == 0
-        assert obj.main.end is None
-        assert obj.main.name == "Jet0:"
-        assert obj.main.config == {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
+    obj = Nested(Collective("Jet", 0, 2), Collective("Particles", 0, 3))
+    assert obj.main_object == Collective("Jet", 0, 2)
+    assert obj.sub_object == Collective("Particles", 0, 3)
+    assert obj.objects == []
+    assert obj.identifier == "Jet:2.Particles:3"
+    assert repr(obj) == "Jet:2.Particles:3"
+    assert obj.config == {
+        "classname": "Nested",
+        "main_object_config": {
+            "classname": "Collective",
+            "name": "Jet",
             "start": 0,
-            "end": None,
-        }
-
-        assert obj.sub.type == "Constituents"
-        assert obj.sub.index == 1
-        assert obj.sub.name == "Constituents1"
-        assert obj.sub.config == {
-            "class_name": "SinglePhysicsObject",
-            "type": "Constituents",
-            "index": 1,
-        }
-
-        assert obj.name == "Jet0:.Constituents1"
-        assert obj.config == {
-            "class_name": "NestedPhysicsObject",
-            "main_config": {
-                "class_name": "CollectivePhysicsObject",
-                "type": "Jet",
-                "start": 0,
-                "end": None,
-            },
-            "sub_config": {
-                "class_name": "SinglePhysicsObject",
-                "type": "Constituents",
-                "index": 1,
-            },
-        }
-
-
-def test_pattern_collective_collective():
-    obj1 = NestedPhysicsObject(
-        CollectivePhysicsObject("Jet", 0),
-        CollectivePhysicsObject("Constituents", 1),
-    )
-    obj2 = NestedPhysicsObject.from_name("Jet0:.Constituents1:")
-    obj3 = NestedPhysicsObject.from_config(
-        {
-            "class_name": "NestedPhysicsObject",
-            "main_config": {
-                "class_name": "CollectivePhysicsObject",
-                "type": "Jet",
-                "start": 0,
-                "end": None,
-            },
-            "sub_config": {
-                "class_name": "CollectivePhysicsObject",
-                "type": "Constituents",
-                "start": 1,
-                "end": None,
-            },
-        }
-    )
-
-    for obj in [obj1, obj2, obj3]:
-        assert obj.main.type == "Jet"
-        assert obj.main.start == 0
-        assert obj.main.end is None
-        assert obj.main.name == "Jet0:"
-        assert obj.main.config == {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
+            "stop": 2,
+        },
+        "sub_object_config": {
+            "classname": "Collective",
+            "name": "Particles",
             "start": 0,
-            "end": None,
-        }
-
-        assert obj.sub.type == "Constituents"
-        assert obj.sub.start == 1
-        assert obj.sub.end is None
-        assert obj.sub.name == "Constituents1:"
-        assert obj.sub.config == {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Constituents",
-            "start": 1,
-            "end": None,
-        }
-
-        assert obj.name == "Jet0:.Constituents1:"
-        assert obj.config == {
-            "class_name": "NestedPhysicsObject",
-            "main_config": {
-                "class_name": "CollectivePhysicsObject",
-                "type": "Jet",
-                "start": 0,
-                "end": None,
-            },
-            "sub_config": {
-                "class_name": "CollectivePhysicsObject",
-                "type": "Constituents",
-                "start": 1,
-                "end": None,
-            },
-        }
+            "stop": 3,
+        },
+    }
 
 
-def test_bad_name():
+def test_from_identifier():
+    assert Nested.from_identifier("Jet0.Particles0") == Nested(
+        Single("Jet", 0), Single("Particles", 0)
+    )
+    assert Nested.from_identifier("Jet0.Particles1") != Nested(
+        Single("Jet", 0), Single("Particles", 0)
+    )
+
     with pytest.raises(ValueError):
-        NestedPhysicsObject.from_name("Jet0")
+        Nested.from_identifier("Jet0")
 
-
-def test_bad_config():
     with pytest.raises(ValueError):
-        NestedPhysicsObject.from_config(
-            {
-                "class_name": None,
-                "main_config": {
-                    "class_name": "SinglePhysicsObject",
-                    "type": "Jet",
-                    "index": 0,
-                },
-                "sub_config": {
-                    "class_name": "SinglePhysicsObject",
-                    "type": "Constituents",
-                    "index": 1,
-                },
-            }
-        )
+        Nested.from_identifier("Jet")
+
+    with pytest.raises(ValueError):
+        Nested.from_identifier("Jet0,Jet1")
+
+
+def test_from_config():
+    obj = Nested(Single("Jet", 0), Single("Particles", 0))
+    assert obj == Nested.from_config(obj.config)
+
+    obj = Nested(Collective("Jet", 0, 2), Collective("Particles", 0, 3))
+    assert obj == Nested.from_config(obj.config)
+
+    with pytest.raises(ValueError):
+        Nested.from_config({"classname": "Unknown"})
 
 
 def test_read(event):
-    obj = NestedPhysicsObject.from_name("Jet0.Particles0").read(event)
-    assert len(obj) == 1
+    obj = Nested.from_identifier("Jet0.Particles0").read(event)
+    assert len(obj.objects) == 1
+    assert len(obj.objects[0]) == 1
+    assert obj.objects[0][0] is not None
 
-    obj = NestedPhysicsObject.from_name("Jet0.Particles").read(event)
-    assert len(obj) == 1
-    assert len(obj[0]) > 0
+    obj = Nested.from_identifier("Jet0.Particles100").read(event)
+    assert len(obj.objects) == 1
+    assert len(obj.objects[0]) == 1
+    assert obj.objects[0][0] is None
 
-    obj = NestedPhysicsObject.from_name("Jet0.Particles1:").read(event)
-    assert len(obj) == 1
-    assert len(obj[0]) > 0
+    obj = Nested.from_identifier("Jet:2.Particles100").read(event)
+    assert len(obj.objects) == 2
+    for i in range(2):
+        assert len(obj.objects[i]) == 1
+        assert obj.objects[i][0] is None
 
-    obj = NestedPhysicsObject.from_name("Jet0.Particles:10").read(event)
-    assert len(obj) == 1
-    assert len(obj[0]) == 10
+    obj = Nested.from_identifier("Jet100.Particles0").read(event)
+    assert len(obj.objects) == 1
+    assert len(obj.objects[0]) == 1
+    assert obj.objects[0][0] is None
 
-    obj = NestedPhysicsObject.from_name("Jet0.Particles0:10").read(event)
-    assert len(obj) == 1
-    assert len(obj[0]) == 10
+    obj = Nested.from_identifier("Jet100.Particles100:110").read(event)
+    assert len(obj.objects) == 1
+    assert len(obj.objects[0]) == 10
+    assert any(obj.objects[0]) is False
 
-    obj = NestedPhysicsObject.from_name("Jet:2.Particles:10").read(event)
-    assert len(obj) == 2
-    assert len(obj[0]) == 10
-    assert len(obj[1]) == 10
+    obj = Nested.from_identifier("Jet3:6.Particles100").read(event)
+    assert len(obj.objects) == 3
+    for i in range(3):
+        assert len(obj.objects[i]) == 1
+        assert obj.objects[i][0] is None
 
-
-def test_read_bad_cases(event):
-    with pytest.raises(ValueError):
-        NestedPhysicsObject.from_name("BadNested0.Particles0").read(event)
-
-    obj = NestedPhysicsObject.from_name("FatJet100.Particles0").read(event)
-    assert len(obj) == 1
-    assert obj[0] is None
-
-    obj = NestedPhysicsObject.from_name("Jet0.Particles1000").read(event)
-    assert len(obj) == 1
-    assert obj[0] is None
-
-    obj = NestedPhysicsObject.from_name("Jet100.Particles:10").read(event)
-    assert len(obj) == 1
-    assert obj[0][0] is None
-
-    obj = NestedPhysicsObject.from_name("Jet0.Particles0:1000").read(event)
-    assert len(obj) == 1
-    assert len(obj[0]) == 1000
+    obj = Nested.from_identifier("Jet:3.Particles:10").read(event)
+    assert len(obj.objects) == 3
+    for i in range(3):
+        assert len(obj.objects[i]) == 10
+        assert all(obj.objects[i]) is True

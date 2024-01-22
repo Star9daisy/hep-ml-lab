@@ -1,30 +1,30 @@
 import pytest
 
-from . import CollectivePhysicsObject
-from . import MultiplePhysicsObject
-from . import NestedPhysicsObject
-from . import SinglePhysicsObject
 from . import get
+from .collective import Collective
+from .multiple import Multiple
+from .nested import Nested
+from .single import Single
 
 
 def test_get():
-    obj = get(None)
-    assert obj is None
-
     obj = get("Jet0")
-    assert isinstance(obj, SinglePhysicsObject)
+    assert isinstance(obj, Single)
 
-    for name in ["Jet", "Jet1:", "Jet:3", "Jet1:3"]:
+    for name in ["Jet:", "Jet1:", "Jet:3", "Jet1:3"]:
         obj = get(name)
-        assert isinstance(obj, CollectivePhysicsObject)
+        assert isinstance(obj, Collective)
 
-    for name in ["Jet1.Constituents2", "Jet1.Constituents"]:
+    for name in ["Jet1.Constituents2", "Jet1.Constituents:"]:
         obj = get(name)
-        assert isinstance(obj, NestedPhysicsObject)
+        assert isinstance(obj, Nested)
 
-    for name in ["Jet1,Jet2", "Jet.Constituents,Jet0"]:
+    for name in ["Jet1,Jet2", "Jet:.Constituents:,Jet0"]:
         obj = get(name)
-        assert isinstance(obj, MultiplePhysicsObject)
+        assert isinstance(obj, Multiple)
 
     with pytest.raises(ValueError):
         get("Jet1.Constituents2.Constituents2")
+
+    with pytest.raises(ValueError):
+        get("Jet.Constituents")

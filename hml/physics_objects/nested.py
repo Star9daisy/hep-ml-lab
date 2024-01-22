@@ -1,140 +1,121 @@
 from __future__ import annotations
 
-import re
-from importlib import import_module
 from typing import Any
 
-from .collective import CollectivePhysicsObject
+from .collective import Collective
 from .physics_object import PhysicsObject
-from .single import SinglePhysicsObject
-from .single import is_single_physics_object
-
-PATTERN = r"^([A-Za-z]+\d*:?\d*)\.([A-Za-z]+\d*:?\d*)$"
+from .single import Single
+from .single import is_single
 
 
-def is_nested_physics_object(identifier: str | PhysicsObject | None) -> bool:
-    if identifier is None or identifier == "":
+def is_nested(identifier: str) -> bool:
+    try:
+        Nested.from_identifier(identifier)
+        return True
+    except Exception:
         return False
 
-    if isinstance(identifier, PhysicsObject):
-        identifier = identifier.name
 
-    return bool(re.match(PATTERN, identifier))
-
-
-class NestedPhysicsObject(PhysicsObject):
+class Nested(PhysicsObject):
     def __init__(
         self,
-        main: SinglePhysicsObject | CollectivePhysicsObject,
-        sub: SinglePhysicsObject | CollectivePhysicsObject,
+        main_object: Single | Collective,
+        sub_object: Single | Collective,
     ):
-        self.main = main
-        self.sub = sub
+        self.main_object = main_object
+        self.sub_object = sub_object
+        self.objects = []
 
-        self._name = None
+    def read(self, source: Any):
+        self.objects = []
 
-    def read(self, event):
-        ALL_LEAVES = [i.GetName() for i in event.GetListOfLeaves()]
-        if f"{self.main.type}.{self.sub.type}" not in ALL_LEAVES:
-            raise ValueError(
-                f"Leave {self.main.type}.{self.sub.type} not found in event"
-            )
-
-        main_objects = self.main.read(event)
-        main_objects = (
-            main_objects if isinstance(main_objects, list) else [main_objects]
-        )
-
-        sub_objects = []
-        for main_object in main_objects:
-            if main_object is None:
-                if isinstance(self.sub, SinglePhysicsObject):
-                    sub_objects.append(None)
+        self.main_object.read(source)
+        for obj in self.main_object.objects:
+            if obj is None:
+                if (
+                    isinstance(self.sub_object, Collective)
+                    and self.sub_object.stop != -1
+                ):
+                    length = self.sub_object.stop - self.sub_object.start
+                    self.objects.append([None] * length)
                 else:
-                    sub_objects.append([None])
+                    self.objects.append([None])
             else:
-                leaves = list(getattr(main_object, self.sub.type))
-                if isinstance(self.sub, SinglePhysicsObject):
-                    if self.sub.index >= len(leaves):
-                        sub_objects.append(None)
-                    else:
-                        sub_objects.append(leaves[self.sub.index])
-                else:
-                    if self.sub.start is None and self.sub.end is None:
-                        sub_objects.append(leaves)
-                    elif self.sub.end is None:
-                        sub_objects.append(leaves[self.sub.start :])
-                    elif self.sub.start is None:
-                        objects = leaves[: self.sub.end]
-                        if len(objects) < self.sub.end:
-                            objects += [None] * (self.sub.end - len(objects))
-                        sub_objects.append(objects)
-                    else:
-                        objects = leaves[self.sub.start : self.sub.end]
-                        if len(objects) < self.sub.end - self.sub.start:
-                            objects += [None] * (
-                                self.sub.end - self.sub.start - len(objects)
-                            )
-                        sub_objects.append(objects)
+                self.objects.append(self.sub_object.read(obj).objects)
 
-        return sub_objects
+        return self
 
     @property
-    def name(self) -> str:
-        if self._name is not None:
-            return self._name
-
-        return f"{self.main.name}.{self.sub.name}"
+    def identifier(self) -> str:
+        return f"{self.main_object.identifier}.{self.sub_object.identifier}"
 
     @classmethod
-    def from_name(cls, name: str) -> NestedPhysicsObject:
-        name = name.replace(" ", "")
+    def from_identifier(cls, identifier) -> Nested:
+        if "." not in identifier:
+            raise ValueError(
+                "Invalid identifier.\n"
+                "':' in the identifier indicates this is a collective physics object.\n"
+                f"Use `Collective.from_identifier('{identifier}')` instead."
+            )
 
-        if (match := re.match(PATTERN, name)) is None:
-            raise ValueError(f"Could not parse name {name} as a nested physics object")
+        if "," in identifier:
+            raise ValueError(
+                "Invalid identifier.\n"
+                "',' in the identifier indicates this is a multiple physics object.\n"
+                f"Use `Multiple.from_identifier('{identifier}')` instead."
+            )
 
-        # main --------------------------------------------------------------- #
-        main_match = match.group(1)
-        if is_single_physics_object(main_match):
-            main = SinglePhysicsObject.from_name(main_match)
-        else:
-            main = CollectivePhysicsObject.from_name(main_match)
+        main_identifier, sub_identifier = identifier.split(".")
 
-        # sub ---------------------------------------------------------------- #
-        sub_match = match.group(2)
-        if is_single_physics_object(sub_match):
-            sub = SinglePhysicsObject.from_name(sub_match)
-        else:
-            sub = CollectivePhysicsObject.from_name(sub_match)
+        main_identifier = (
+            Single.from_identifier(main_identifier)
+            if is_single(main_identifier)
+            else Collective.from_identifier(main_identifier)
+        )
 
-        instance = cls(main, sub)
-        instance._name = name
-        return instance
+        sub_identifier = (
+            Single.from_identifier(sub_identifier)
+            if is_single(sub_identifier)
+            else Collective.from_identifier(sub_identifier)
+        )
+
+        return cls(main_identifier, sub_identifier)
 
     @property
     def config(self) -> dict[str, Any]:
-        config = {
-            "class_name": "NestedPhysicsObject",
-            "main_config": self.main.config,
-            "sub_config": self.sub.config,
+        return {
+            "classname": "Nested",
+            "main_object_config": self.main_object.config,
+            "sub_object_config": self.sub_object.config,
         }
-        return config
 
     @classmethod
-    def from_config(cls, config: dict[str, Any]) -> NestedPhysicsObject:
-        if config.get("class_name") != "NestedPhysicsObject":
-            raise ValueError(f"Cannot parse config as NestedPhysicsObject: {config}")
+    def from_config(cls, config: dict[str, Any]) -> Nested:
+        if config.get("classname") != "Nested":
+            raise ValueError(
+                f"Invalid classname. Expected 'Nested', got {config['classname']}"
+            )
 
-        module = import_module("hml.physics_objects")
+        if config["main_object_config"].get("classname") == "Single":
+            main_object = Single.from_config(config["main_object_config"])
+        else:
+            main_object = Collective.from_config(config["main_object_config"])
 
-        # main --------------------------------------------------------------- #
-        main_class_name = config["main_config"]["class_name"]
-        main_class = getattr(module, main_class_name)
-        main = main_class.from_config(config["main_config"])
+        if config["sub_object_config"].get("classname") == "Single":
+            sub_object = Single.from_config(config["sub_object_config"])
+        else:
+            sub_object = Collective.from_config(config["sub_object_config"])
 
-        # sub ---------------------------------------------------------------- #
-        sub_class_name = config["sub_config"]["class_name"]
-        sub_class = getattr(module, sub_class_name)
-        sub = sub_class.from_config(config["sub_config"])
+        return cls(main_object, sub_object)
 
-        return cls(main, sub)
+    def __repr__(self) -> str:
+        return self.identifier
+
+    def __eq__(self, other: Nested) -> bool:
+        if (
+            self.main_object == other.main_object
+            and self.sub_object == other.sub_object
+        ):
+            return True
+        else:
+            return False
