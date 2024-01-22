@@ -14,8 +14,8 @@ def event():
 
 def test_attributes():
     obj = Nested(Single("Jet", 0), Single("Particles", 0))
-    assert obj.main_object == Single("Jet", 0)
-    assert obj.sub_object == Single("Particles", 0)
+    assert obj.main == Single("Jet", 0)
+    assert obj.sub == Single("Particles", 0)
     assert obj.objects == []
     assert obj.identifier == "Jet0.Particles0"
     assert repr(obj) == "Jet0.Particles0"
@@ -34,8 +34,8 @@ def test_attributes():
     }
 
     obj = Nested(Collective("Jet", 0, 2), Collective("Particles", 0, 3))
-    assert obj.main_object == Collective("Jet", 0, 2)
-    assert obj.sub_object == Collective("Particles", 0, 3)
+    assert obj.main == Collective("Jet", 0, 2)
+    assert obj.sub == Collective("Particles", 0, 3)
     assert obj.objects == []
     assert obj.identifier == "Jet:2.Particles:3"
     assert repr(obj) == "Jet:2.Particles:3"
