@@ -1,11 +1,10 @@
 import pytest
 
 from ..events.delphes_events import DelphesEvents
-from .collective import CollectivePhysicsObject
-from .multiple import MultiplePhysicsObject
-from .multiple import is_multiple_physics_object
-from .nested import NestedPhysicsObject
-from .single_test import SinglePhysicsObject
+from .collective import Collective
+from .multiple import Multiple
+from .nested import Nested
+from .single_test import Single
 
 
 @pytest.fixture
@@ -14,204 +13,100 @@ def event():
     yield events[0]
 
 
-def test_validation_function():
-    assert is_multiple_physics_object("") is False
-    assert is_multiple_physics_object(None) is False
-
-    assert is_multiple_physics_object("Jet0,Jet0") is True
-    assert is_multiple_physics_object("Jet0,Jet0,Jet0") is True
-    assert is_multiple_physics_object("Jet0,Jet0:1,Jet0.Constituents") is True
-    assert is_multiple_physics_object(MultiplePhysicsObject.from_name("Jet0,Jet1"))
-
-    assert is_multiple_physics_object("Jet0,") is False
-    assert is_multiple_physics_object(",") is False
-    assert is_multiple_physics_object("Jet0") is False
-    assert is_multiple_physics_object("Jet0:") is False
-
-
-def test_pattern():
-    obj1 = MultiplePhysicsObject(
-        SinglePhysicsObject("Jet", 0),
-        NestedPhysicsObject(
-            SinglePhysicsObject("Jet", 0),
-            SinglePhysicsObject("Constituents", 0),
-        ),
-        CollectivePhysicsObject("Jet", 1, 2),
+def test_attributes():
+    obj = Multiple(
+        Single("Jet", 0),
+        Collective("Jet", 0, 2),
+        Nested(Single("Jet", 0), Collective("Particles", 0, 2)),
     )
-    obj2 = MultiplePhysicsObject.from_name("Jet0,Jet0.Constituents0,Jet1:2")
-    obj3 = MultiplePhysicsObject.from_config(
-        {
-            "class_name": "MultiplePhysicsObject",
-            "all_configs": [
-                {
-                    "class_name": "SinglePhysicsObject",
-                    "type": "Jet",
-                    "index": 0,
-                },
-                {
-                    "class_name": "NestedPhysicsObject",
-                    "main_config": {
-                        "class_name": "SinglePhysicsObject",
-                        "type": "Jet",
-                        "index": 0,
-                    },
-                    "sub_config": {
-                        "class_name": "SinglePhysicsObject",
-                        "type": "Constituents",
-                        "index": 0,
-                    },
-                },
-                {
-                    "class_name": "CollectivePhysicsObject",
-                    "type": "Jet",
-                    "start": 1,
-                    "end": 2,
-                },
-            ],
-        }
-    )
-
-    for obj in [obj1, obj2, obj3]:
-        assert obj.all[0].type == "Jet"
-        assert obj.all[0].index == 0
-        assert obj.all[0].name == "Jet0"
-        assert obj.all[0].config == {
-            "class_name": "SinglePhysicsObject",
-            "type": "Jet",
-            "index": 0,
-        }
-
-        assert obj.all[1].main.type == "Jet"
-        assert obj.all[1].main.index == 0
-        assert obj.all[1].main.name == "Jet0"
-        assert obj.all[1].main.config == {
-            "class_name": "SinglePhysicsObject",
-            "type": "Jet",
-            "index": 0,
-        }
-        assert obj.all[1].sub.type == "Constituents"
-        assert obj.all[1].sub.index == 0
-        assert obj.all[1].sub.name == "Constituents0"
-        assert obj.all[1].sub.config == {
-            "class_name": "SinglePhysicsObject",
-            "type": "Constituents",
-            "index": 0,
-        }
-
-        assert obj.all[2].type == "Jet"
-        assert obj.all[2].start == 1
-        assert obj.all[2].end == 2
-        assert obj.all[2].name == "Jet1:2"
-        assert obj.all[2].config == {
-            "class_name": "CollectivePhysicsObject",
-            "type": "Jet",
-            "start": 1,
-            "end": 2,
-        }
-
-        assert obj.name == "Jet0,Jet0.Constituents0,Jet1:2"
-        assert obj.config == {
-            "class_name": "MultiplePhysicsObject",
-            "all_configs": [
-                {
-                    "class_name": "SinglePhysicsObject",
-                    "type": "Jet",
-                    "index": 0,
-                },
-                {
-                    "class_name": "NestedPhysicsObject",
-                    "main_config": {
-                        "class_name": "SinglePhysicsObject",
-                        "type": "Jet",
-                        "index": 0,
-                    },
-                    "sub_config": {
-                        "class_name": "SinglePhysicsObject",
-                        "type": "Constituents",
-                        "index": 0,
-                    },
-                },
-                {
-                    "class_name": "CollectivePhysicsObject",
-                    "type": "Jet",
-                    "start": 1,
-                    "end": 2,
-                },
-            ],
-        }
-
-
-def test_bad_name():
-    with pytest.raises(ValueError):
-        MultiplePhysicsObject.from_name("Jet0")
-
-    with pytest.raises(ValueError):
-        MultiplePhysicsObject.from_name("Jet0,???")
-
-
-def test_bad_config():
-    with pytest.raises(ValueError):
-        MultiplePhysicsObject.from_config(
+    assert obj.all[0] == Single("Jet", 0)
+    assert obj.all[1] == Collective("Jet", 0, 2)
+    assert obj.all[2] == Nested(Single("Jet", 0), Collective("Particles", 0, 2))
+    assert obj.objects == []
+    assert obj.identifier == "Jet0,Jet:2,Jet0.Particles:2"
+    assert repr(obj) == "Jet0,Jet:2,Jet0.Particles:2"
+    assert obj.config == {
+        "classname": "Multiple",
+        "configs": [
+            {"classname": "Single", "name": "Jet", "index": 0},
+            {"classname": "Collective", "name": "Jet", "start": 0, "stop": 2},
             {
-                "class_name": None,
-                "all_configs": [
+                "classname": "Nested",
+                "main_object_config": {
+                    "classname": "Single",
+                    "name": "Jet",
+                    "index": 0,
+                },
+                "sub_object_config": {
+                    "classname": "Collective",
+                    "name": "Particles",
+                    "start": 0,
+                    "stop": 2,
+                },
+            },
+        ],
+    }
+
+
+def test_from_identifier():
+    assert Multiple.from_identifier("Jet0,Jet:2,Jet0.Particles:2") == Multiple(
+        Single("Jet", 0),
+        Collective("Jet", 0, 2),
+        Nested(Single("Jet", 0), Collective("Particles", 0, 2)),
+    )
+    assert Multiple.from_identifier("Jet0,Jet:2,Jet0.Particles:2") != Multiple(
+        Single("Jet", 0),
+        Collective("Jet", 0, 2),
+        Nested(Single("Jet", 0), Collective("Particles", 0, 3)),
+    )
+
+    with pytest.raises(ValueError):
+        Multiple.from_identifier("Jet0")
+
+    with pytest.raises(ValueError):
+        Multiple.from_identifier("Jet")
+
+    with pytest.raises(ValueError):
+        Multiple.from_identifier("Jet.Constituents")
+
+    with pytest.raises(ValueError):
+        Multiple.from_identifier("Jet,Jet")
+
+
+def test_from_config():
+    obj = Multiple(
+        Single("Jet", 0),
+        Collective("Jet", 0, 2),
+        Nested(Single("Jet", 0), Collective("Particles", 0, 2)),
+    )
+    assert Multiple.from_config(obj.config) == obj
+
+    with pytest.raises(ValueError):
+        Multiple.from_config({"classname": "Unknown", "configs": []})
+
+    with pytest.raises(ValueError):
+        Multiple.from_config(
+            {
+                "classname": "Multiple",
+                "configs": [
                     {
-                        "class_name": "SinglePhysicsObject",
-                        "type": "Jet",
+                        "classname": "Unknown",
+                        "name": "Jet",
                         "index": 0,
-                    },
-                    {
-                        "class_name": "NestedPhysicsObject",
-                        "main_config": {
-                            "class_name": "SinglePhysicsObject",
-                            "type": "Jet",
-                            "index": 0,
-                        },
-                        "sub_config": {
-                            "class_name": "SinglePhysicsObject",
-                            "type": "Constituents",
-                            "index": 0,
-                        },
-                    },
-                    {
-                        "class_name": "CollectivePhysicsObject",
-                        "type": "Jet",
-                        "start": 1,
-                        "end": 2,
-                    },
+                    }
                 ],
             }
         )
 
 
 def test_read(event):
-    obj = MultiplePhysicsObject.from_name("Jet0,Jet1").read(event)
-    assert len(obj) == 2
-
-    obj = MultiplePhysicsObject.from_name("Jet0,Jet1,Jet2").read(event)
-    assert len(obj) == 3
-
-    obj = MultiplePhysicsObject.from_name("Jet0,Jet:2").read(event)
-    assert len(obj) == 2
-    assert len(obj[1]) == 2
-
-    obj = MultiplePhysicsObject.from_name("Jet0,Jet0.Particles0").read(event)
-    assert len(obj) == 2
-    assert len(obj[1]) == 1
-
-    obj = MultiplePhysicsObject.from_name("Jet:2,Jet0.Particles:100").read(event)
-    assert len(obj) == 2
-    assert len(obj[0]) == 2
-    assert len(obj[1]) == 1
-    assert len(obj[1][0]) == 100
-
-
-def test_read_bad_cases(event):
-    with pytest.raises(ValueError):
-        MultiplePhysicsObject.from_name("BadSingle0,BadNested0.Particles0").read(event)
-
-    obj = MultiplePhysicsObject.from_name("Jet100,Jet1000.Particles1000").read(event)
-    assert len(obj) == 2
-    assert obj[0] is None
-    assert len(obj[1]) == 1
-    assert obj[1][0] is None
+    obj = Multiple(
+        Single("Jet", 0),
+        Collective("Jet", 0, 2),
+        Nested(Single("Jet", 0), Collective("Particles", 0, 2)),
+    )
+    assert obj.read(event).objects == [
+        [event.Jet[0]],
+        [event.Jet[0], event.Jet[1]],
+        [[event.Jet[0].Particles[0], event.Jet[0].Particles[1]]],
+    ]

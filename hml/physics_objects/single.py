@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .physics_object import PhysicsObject
+
 
 def is_single(identifier: str) -> bool:
     """Checks if an identifier can be used to create an instance of the `Single` class.
@@ -35,7 +37,7 @@ def is_single(identifier: str) -> bool:
         return False
 
 
-class Single:
+class Single(PhysicsObject):
     """A single physics object.
 
     It represents a specific object in an event or a branch. For example, the
@@ -153,30 +155,30 @@ class Single:
         ValueError
             When there's any of the comma`,`, the perioid`.`, or the colon`:`.
         """
-        number = "".join(filter(lambda x: x.isdigit(), identifier))
-        name = identifier.replace(number, "")
-        index = int(number)
-
-        if "," in name:
+        if "," in identifier:
             raise ValueError(
                 "Invalid identifier.\n"
                 "',' in the identifier indicates this is a multiple physics object.\n"
                 f"Use `Multiple.from_identifier('{identifier}')` instead."
             )
 
-        if "." in name:
+        if "." in identifier:
             raise ValueError(
                 "Invalid identifier.\n"
                 "'.' in the identifier indicates this is a nested physics object.\n"
                 f"Use `Nested.from_identifier('{identifier}')` instead."
             )
 
-        if ":" in name:
+        if ":" in identifier:
             raise ValueError(
                 "Invalid identifier.\n"
                 "':' in the identifier indicates this is a collective physics object.\n"
                 f"Use `Collective.from_identifier('{identifier}')` instead."
             )
+
+        number = "".join(filter(lambda x: x.isdigit(), identifier))
+        name = identifier.replace(number, "")
+        index = int(number)
 
         return cls(name, index)
 

@@ -1,28 +1,24 @@
-from .collective import CollectivePhysicsObject
-from .collective import is_collective_physics_object
-from .multiple import MultiplePhysicsObject
-from .multiple import is_multiple_physics_object
-from .nested import NestedPhysicsObject
-from .nested import is_nested_physics_object
-from .physics_object import PHYSICS_OBJECT_OPTIONS
+from .collective import Collective
+from .collective import is_collective
+from .multiple import Multiple
+from .multiple import is_multiple
+from .nested import Nested
+from .nested import is_nested
 from .physics_object import PhysicsObject
-from .single import SinglePhysicsObject
-from .single import is_single_physics_object
+from .single import Single
+from .single import is_single
 
 
-def get(name: str | None):
-    if name is None or name == "":
-        return None
-
-    if is_single_physics_object(name):
-        obj = SinglePhysicsObject.from_name(name)
-    elif is_collective_physics_object(name):
-        obj = CollectivePhysicsObject.from_name(name)
-    elif is_nested_physics_object(name):
-        obj = NestedPhysicsObject.from_name(name)
-    elif is_multiple_physics_object(name):
-        obj = MultiplePhysicsObject.from_name(name)
+def get(identifier: str):
+    if is_single(identifier):
+        obj = Single.from_identifier(identifier)
+    elif is_collective(identifier):
+        obj = Collective.from_identifier(identifier)
+    elif is_nested(identifier):
+        obj = Nested.from_identifier(identifier)
+    elif is_multiple(identifier):
+        obj = Multiple.from_identifier(identifier)
     else:
-        raise ValueError(f"Unknown physics object {name}")
+        raise ValueError(f"Unknown physics object {identifier}")
 
     return obj
