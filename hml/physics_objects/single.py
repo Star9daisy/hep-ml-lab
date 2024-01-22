@@ -6,33 +6,36 @@ from .physics_object import PhysicsObject
 
 
 def is_single(identifier: str) -> bool:
-    """Checks if an identifier can be used to create an instance of the `Single` class.
+    """Check if an identifier can be used to create an instance of the `Single`
+    class.
 
     Parameters
     ----------
     identifier : str
-        The `identifier` parameter is a string that represents an identifier for a
-        single object.
+        A string that represents a single object.
 
     Returns
     -------
     result : bool
-        True if the identifier is valid for a Single object, False otherwise.
 
     Examples
     --------
     >>> is_single("Jet0")
     True
+
     >>> is_single("Jet:") # Collective
     False
-    >>> is_single("Jet0.Particles") # Nested
+
+    >>> is_single("Jet0.Particles:100") # Nested
     False
+
     >>> is_single("Jet0,Jet1") # Multiple
     False
     """
     try:
         Single.from_identifier(identifier)
         return True
+
     except Exception:
         return False
 
@@ -40,8 +43,11 @@ def is_single(identifier: str) -> bool:
 class Single(PhysicsObject):
     """A single physics object.
 
-    It represents a specific object in an event or a branch. For example, the
-    leading jet or the first constituent of the leading jet.
+    It represents one specific object in an event or one sub-object of an object.
+    For example, the leading jet, the first constituent of that jet, etc.
+
+    This class works like proxy of a real object. After reading a source, use
+    `objects` to show the corresponding object(s).
 
     Parameters
     ----------
@@ -52,17 +58,17 @@ class Single(PhysicsObject):
 
     Examples
     --------
-    Create a single object by its name and index:
+    Create a single physics object by its name and index:
     >>> from hml.physics_objects import Single
     >>> obj = Single("Jet", 0)
-
-    Every kind of physics objects has a unique identifier:
     >>> obj
     'Jet0'
+
+    The identifier of a single object is composed of its name and index:
     >>> obj.identifier
     'Jet0'
 
-    Also, we can create a single object from an identifier:
+    Also, you can create a single object from such an identifier:
     >>> obj = Single.from_identifier("Jet0")
     >>> obj == Single("Jet", 0)
     True
@@ -74,21 +80,25 @@ class Single(PhysicsObject):
         self.objects = []
 
     def read(self, source: Any):
-        """Read a single object from an event or a branch.
+        """Read a single physics object from an event or a branch.
+
+        Each time it reads a source, it will refresh the `objects` list. The
+        `objects` are a list of only one element.
 
         Parameters
         ----------
         source : Any
-            An event(entry) or a branch read by PyROOT.
+            An event(entry) or a branch loaded by PyROOT.
 
         Raises
         ------
         ValueError
             If the name is not a valid branch in the event or a valid leaf of
-            the branch
+            the branch.
 
         Examples
         --------
+        You can use `DelphesEvents` to read events from a ROOT file:
         >>> from hml.events import DelphesEvents
         >>> events = DelphesEvents("tag_1_delphes_events.root")
 
@@ -104,19 +114,26 @@ class Single(PhysicsObject):
         >>> obj.objects
         [<cppyy.gbl.GenParticle object at 0x7a2ee90>]
 
+        It supports method chaining:
+        >>> Single("Jet", 0).read(events[0]).objects
+        [<cppyy.gbl.Jet object at 0x9a7f9c0>]
+        >>> Single("Particles", 0).read(events[0].Jet[0]).objects
+        [<cppyy.gbl.GenParticle object at 0x7a2ee90>]
+
         If the index is out of range, the object will be None:
         >>> obj = Single("Jet", 100)
         >>> obj.read(events[0])
         >>> obj.objects
         [None]
         """
-        # Reset the object list every time we read a new event
         self.objects = []
 
         object = getattr(source, self.name, None)
         if object is None:
             raise ValueError(
-                f"Could not find object {self.name} in such type {type(source)}"
+                f"Could not find {self.name} in the source of type {type(source)}\n"
+                "Use `dir(source)` to check all the available "
+                "attributes of the source."
             )
 
         if self.index >= object.GetEntries():
@@ -128,17 +145,19 @@ class Single(PhysicsObject):
 
     @property
     def identifier(self) -> str:
-        """The identifier of the single object.
+        """The identifier of the single physics object.
 
-        It is the name followed by the index of the object, e.g. Jet0, Jet1, etc.
+        It is the name followed by the index of the physics object, e.g. Jet0,
+        Jet1, etc.
         """
         return f"{self.name}{self.index}"
 
     @classmethod
     def from_identifier(cls, identifier: str):
-        """Create a single object from an identifier.
+        """Create a single physics object from an identifier.
 
-        It will parse the identifier to get the name and index of the object.
+        It will break down the identifier to get the name and index for the
+        physics object.
 
         Parameters
         ----------
@@ -147,32 +166,32 @@ class Single(PhysicsObject):
 
         Returns
         -------
-        object : Single
-            The single object.
+        physics object : Single
+            The single physics object.
 
         Raises
         ------
         ValueError
-            When there's any of the comma`,`, the perioid`.`, or the colon`:`.
+            If there is any of the comma`,`, the period`.`, or the colon`:`.
         """
         if "," in identifier:
             raise ValueError(
-                "Invalid identifier.\n"
-                "',' in the identifier indicates this is a multiple physics object.\n"
+                "Invalid identifier for Single. The comma',' indicates it "
+                "corresponds to a multiple physics object.\n"
                 f"Use `Multiple.from_identifier('{identifier}')` instead."
             )
 
         if "." in identifier:
             raise ValueError(
-                "Invalid identifier.\n"
-                "'.' in the identifier indicates this is a nested physics object.\n"
+                "Invalid identifier for Single. The period'.' indicates it "
+                "corresponds to a nested physics object.\n"
                 f"Use `Nested.from_identifier('{identifier}')` instead."
             )
 
         if ":" in identifier:
             raise ValueError(
-                "Invalid identifier.\n"
-                "':' in the identifier indicates this is a collective physics object.\n"
+                "Invalid identifier for Single. The colon':' indicates it "
+                "corresponds to a collective physics object.\n"
                 f"Use `Collective.from_identifier('{identifier}')` instead."
             )
 
@@ -184,7 +203,7 @@ class Single(PhysicsObject):
 
     @property
     def config(self):
-        """Configurations of a single object."""
+        """The configurations for serialization"""
         return {
             "classname": self.__class__.__name__,
             "name": self.name,
@@ -192,13 +211,13 @@ class Single(PhysicsObject):
         }
 
     @classmethod
-    def from_config(cls, config):
-        """Create a single object from a configuration.
+    def from_config(cls, config: dict[str, Any]):
+        """Create a single physics object from configurations.
 
         Raises
         ------
         ValueError
-            If `classname` in the configuration is not "Single"
+            If `classname` in the configurations is not "Single".
 
         """
         if config.get("classname") != "Single":
