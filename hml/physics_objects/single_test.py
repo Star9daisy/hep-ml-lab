@@ -1,8 +1,10 @@
 import pytest
 
 from ..events.delphes_events import DelphesEvents
-from ..physics_objects.single import SinglePhysicsObject
-from ..physics_objects.single import is_single_physics_object
+from ..physics_objects.single import Single
+
+# from ..physics_objects.single import SinglePhysicsObject
+# from ..physics_objects.single import is_single_physics_object
 
 
 @pytest.fixture
@@ -11,64 +13,61 @@ def event():
     yield events[0]
 
 
-def test_validation_function():
-    assert is_single_physics_object("") is False
-    assert is_single_physics_object(None) is False
-
-    assert is_single_physics_object("Jet0") is True
-    assert is_single_physics_object(SinglePhysicsObject.from_name("Jet0")) is True
-
-    assert is_single_physics_object("Jet0:") is False
-    assert is_single_physics_object("Jet0.Constituents1") is False
-
-
-def test_pattern():
-    obj1 = SinglePhysicsObject("Jet", 0)
-    obj2 = SinglePhysicsObject.from_name("Jet0")
-    obj3 = SinglePhysicsObject.from_config(
-        {
-            "class_name": "SinglePhysicsObject",
-            "type": "Jet",
-            "index": 0,
-        }
-    )
-
-    for obj in [obj1, obj2, obj3]:
-        assert obj.type == "Jet"
-        assert obj.index == 0
-        assert obj.name == "Jet0"
-        assert obj.config == {
-            "class_name": "SinglePhysicsObject",
-            "type": "Jet",
-            "index": 0,
-        }
+def test_attributes():
+    obj = Single("Jet", 0)
+    assert obj.name == "Jet"
+    assert obj.index == 0
+    assert obj.objects == []
+    assert obj.identifier == "Jet0"
+    assert repr(obj) == "Jet0"
+    assert obj.config == {
+        "classname": "Single",
+        "name": "Jet",
+        "index": 0,
+    }
 
 
-def test_bad_name():
+def test_from_identifier():
+    assert Single.from_identifier("Jet0") == Single("Jet", 0)
+    assert Single.from_identifier("Jet1") != Single("Jet", 0)
+
     with pytest.raises(ValueError):
-        SinglePhysicsObject.from_name("Jet")
+        Single.from_identifier("Jet0,Jet1")
 
-
-def test_bad_config():
     with pytest.raises(ValueError):
-        SinglePhysicsObject.from_config(
-            {
-                "class_name": None,
-                "type": "Jet",
-                "index": 0,
-            }
-        )
+        Single.from_identifier("Jet0.Constituents0")
+
+    with pytest.raises(ValueError):
+        Single.from_identifier("Jet1:3")
+
+
+def test_from_config():
+    obj = Single("Jet", 0)
+    assert obj == Single.from_config(obj.config)
+
+    with pytest.raises(ValueError):
+        Single.from_config({"classname": "Unknown"})
 
 
 def test_read(event):
-    obj = SinglePhysicsObject.from_name("Jet0")
-    assert obj.read(event)
+    obj = Single("Jet", 0).read(event)
+    assert len(obj.objects) == 1
+    assert obj.objects[0] is not None
 
+    obj = Single("Jet", 100).read(event)
+    assert len(obj.objects) == 1
+    assert obj.objects[0] is None
 
-def test_read_bad_cases(event):
-    obj = SinglePhysicsObject.from_name("BadSingle0")
     with pytest.raises(ValueError):
-        obj.read(event)
+        Single("Unknown", 0).read(event)
 
-    obj = SinglePhysicsObject.from_name("FatJet100")
-    assert obj.read(event) is None
+    obj = Single("Particles", 0).read(event.Jet[0])
+    assert len(obj.objects) == 1
+    assert obj.objects[0] is not None
+
+    obj = Single("Particles", 100).read(event.Jet[0])
+    assert len(obj.objects) == 1
+    assert obj.objects[0] is None
+
+    with pytest.raises(ValueError):
+        Single("Unknown", 0).read(event.Jet[0])
