@@ -6,13 +6,12 @@ from .physics_object import PhysicsObject
 
 
 def is_single(identifier: str) -> bool:
-    """Check if an identifier can be used to create an instance of the `Single`
-    class.
+    """Check if an identifier can be used to create a single physics object.
 
     Parameters
     ----------
     identifier : str
-        A string that represents a single object.
+        A string that represents a single physics object.
 
     Returns
     -------
@@ -43,11 +42,11 @@ def is_single(identifier: str) -> bool:
 class Single(PhysicsObject):
     """A single physics object.
 
-    It represents one specific object in an event or one sub-object of an object.
-    For example, the leading jet, the first constituent of that jet, etc.
+    It represents one specific object in an event or a branch. For example, the
+    leading jet, the first constituent of that jet, etc.
 
     This class works like proxy of a real object. After reading a source, use
-    `objects` to show the corresponding object(s).
+    `objects` to show the corresponding objects.
 
     Parameters
     ----------
@@ -59,12 +58,12 @@ class Single(PhysicsObject):
     Examples
     --------
     Create a single physics object by its name and index:
-    >>> from hml.physics_objects import Single
     >>> obj = Single("Jet", 0)
     >>> obj
     'Jet0'
 
     The identifier of a single object is composed of its name and index:
+    >>> obj = Single("Jet", 0)
     >>> obj.identifier
     'Jet0'
 
@@ -98,31 +97,27 @@ class Single(PhysicsObject):
 
         Examples
         --------
-        You can use `DelphesEvents` to read events from a ROOT file:
-        >>> from hml.events import DelphesEvents
-        >>> events = DelphesEvents("tag_1_delphes_events.root")
-
         Read an event to fetch the leading jet:
         >>> obj = Single("Jet", 0)
-        >>> obj.read(events[0])
+        >>> obj.read(event)
         >>> obj.objects
         [<cppyy.gbl.Jet object at 0x9a7f9c0>]
 
         Or read the jet branch to fetch the leading particle of the leading jet:
         >>> obj = Single("Particles", 0)
-        >>> obj.read(events[0].Jet[0])
+        >>> obj.read(event.Jet[0])
         >>> obj.objects
         [<cppyy.gbl.GenParticle object at 0x7a2ee90>]
 
         It supports method chaining:
-        >>> Single("Jet", 0).read(events[0]).objects
+        >>> Single("Jet", 0).read(event).objects
         [<cppyy.gbl.Jet object at 0x9a7f9c0>]
-        >>> Single("Particles", 0).read(events[0].Jet[0]).objects
+        >>> Single("Particles", 0).read(event.Jet[0]).objects
         [<cppyy.gbl.GenParticle object at 0x7a2ee90>]
 
         If the index is out of range, the object will be None:
         >>> obj = Single("Jet", 100)
-        >>> obj.read(events[0])
+        >>> obj.read(event)
         >>> obj.objects
         [None]
         """
@@ -162,7 +157,7 @@ class Single(PhysicsObject):
         Parameters
         ----------
         identifier : str
-            The identifier of the single object.
+            The identifier of a single physics object.
 
         Returns
         -------
@@ -213,6 +208,16 @@ class Single(PhysicsObject):
     @classmethod
     def from_config(cls, config: dict[str, Any]):
         """Create a single physics object from configurations.
+
+        Parameters
+        ----------
+        config : dict
+            Configurations for a single physics object.
+
+        Returns
+        -------
+        physics object : Single
+            The single physics object.
 
         Raises
         ------
