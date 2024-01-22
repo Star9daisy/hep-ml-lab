@@ -206,8 +206,14 @@ class Collective(PhysicsObject):
         Raises
         ------
         ValueError
-            If there's any of the comma`,`, the period`.`.
+            If there's no colon`:` or there's any comma`,` or period`.` in the identifier.
         """
+        if ":" not in identifier:
+            raise ValueError(
+                "Invalid identifier for Collective. The colon':' is missing.\n"
+                "Correct the identifier like 'Jet:'."
+            )
+
         if "," in identifier:
             raise ValueError(
                 "Invalid identifier for Collective. The comma',' indicates it "
