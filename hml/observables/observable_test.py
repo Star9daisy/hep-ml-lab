@@ -5,7 +5,6 @@ import numpy as np
 import pytest
 
 from ..events.delphes_events import DelphesEvents
-from ..physics_objects import get
 from .observable import Observable
 
 
