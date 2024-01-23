@@ -8,6 +8,13 @@ from .physics_object import PhysicsObject
 from .single import Single
 from .single import is_single
 
+ALL_OBJECTS_DICT = {
+    "single": Single,
+    "collective": Collective,
+    "nested": Nested,
+    "multiple": Multiple,
+}
+
 
 def get(identifier: str) -> PhysicsObject:
     """Retrieve a physics object from an identifier.
