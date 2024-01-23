@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from math import isnan
 from math import nan
 from typing import Any
 
@@ -76,12 +75,6 @@ class Observable:
         return cls(**config)
 
     def to_awkward(self, dtype=None):
-        if isnan(self.value):
-            raise ValueError(
-                "Cannot convert nan value to awkward array. \n"
-                "This happens when self._value has no value. Please overwrite `read` method to set self._value."
-            )
-
         value = self.value if isinstance(self.value, list) else [self.value]
         dtype = dtype if dtype is not None else self.dtype
 
