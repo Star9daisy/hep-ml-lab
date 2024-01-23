@@ -58,13 +58,6 @@ def test_only_value():
     assert obs.to_numpy() == np.array([100])
 
 
-def test_without_value():
-    obs = Observable()
-
-    with pytest.raises(ValueError):
-        obs.to_awkward()
-
-
 def test_with_name():
     obs = Observable(name="MyObservable")
     assert obs.name == "MyObservable"

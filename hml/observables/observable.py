@@ -19,8 +19,8 @@ class Observable:
         physics_object: str | None = None,
         supported_types: list[str] | None = None,
         name: str | None = None,
-        value: Any = None,
         dtype: Any = None,
+        value: Any = None,
     ):
         if physics_object is not None and supported_types is not None:
             self._validate_physics_object(physics_object, supported_types)
@@ -28,8 +28,8 @@ class Observable:
         self.physics_object = get(physics_object) if physics_object else None
         self.supported_types = supported_types
         self.name = name if name else self.__class__.__name__
-        self.value = value if value else nan
         self.dtype = dtype if dtype else "float64"
+        self.value = value if value else nan
 
     def read(self, entry) -> Any:
         raise NotImplementedError
@@ -48,11 +48,13 @@ class Observable:
     @property
     def config(self) -> dict[str, Any]:
         return {
-            "physics_object": self.physics_object.identifier,
+            "physics_object": self.physics_object.identifier
+            if self.physics_object
+            else None,
             "supported_types": self.supported_types,
             "name": self.name,
-            "value": self.value,
             "dtype": self.dtype,
+            "value": self.value,
         }
 
     def __repr__(self) -> str:
