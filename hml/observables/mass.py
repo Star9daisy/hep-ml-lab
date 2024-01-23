@@ -1,9 +1,8 @@
 from math import nan
 from typing import Any
 
-from ..physics_objects.collective import is_collective_physics_object
-from ..physics_objects.physics_object import PhysicsObjectOptions
-from ..physics_objects.single import is_single_physics_object
+from ..physics_objects.collective import is_collective
+from ..physics_objects.single import is_single
 from .observable import Observable
 
 
@@ -12,30 +11,31 @@ class Mass(Observable):
         self,
         physics_object: str,
         name: str | None = None,
-        supported_objects: list[PhysicsObjectOptions] = [
-            "single",
-            "collective",
-            "nested",
-        ],
+        value: Any = None,
         dtype: Any = None,
     ):
-        super().__init__(physics_object, name, supported_objects, dtype)
+        supported_types = ["single", "collective", "nested"]
+        super().__init__(physics_object, supported_types, name, value, dtype)
 
     def read(self, event):
-        if (branch := self.physics_object.read(event)) is None:
-            self._value = nan
+        self.physics_object.read(event)
 
-        elif is_single_physics_object(self.physics_object):
-            self._value = branch.P4().M()
+        if is_single(self.physics_object):
+            self._value = self.physics_object.objects[0].P4().M()
 
-        elif is_collective_physics_object(self.physics_object):
-            self._value = [obj.P4().M() if obj is not None else nan for obj in branch]
+        elif is_collective(self.physics_object):
+            self._value = []
+            for obj in self.physics_object.objects:
+                if obj is not None:
+                    self._value.append(obj.P4().M())
+                else:
+                    self._value.append(nan)
 
         else:
             self._value = []
-            for main in branch:
-                sub_values = [sub.P4().M() if sub is not None else nan for sub in main]
-                self._value.append(sub_values)
+            for i in self.physics_object.objects:
+                values = [j.P4().M() if j is not None else nan for j in i]
+                self._value.append(values)
 
         return self
 

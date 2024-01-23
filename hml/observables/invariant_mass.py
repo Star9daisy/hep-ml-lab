@@ -2,7 +2,6 @@ from typing import Any
 
 from ROOT import TLorentzVector
 
-from ..physics_objects.physics_object import PhysicsObjectOptions
 from .observable import Observable
 
 
@@ -11,15 +10,17 @@ class InvariantMass(Observable):
         self,
         physics_object: str,
         name: str | None = None,
-        supported_objects: list[PhysicsObjectOptions] = ["single", "multiple"],
+        value: Any = None,
         dtype: Any = None,
     ):
-        super().__init__(physics_object, name, supported_objects, dtype)
+        supported_objects = ["single", "multiple"]
+        super().__init__(physics_object, supported_objects, name, value, dtype)
 
     def read(self, event):
-        branch = self.physics_object.read(event)
+        self.physics_object.read(event)
         vectors = TLorentzVector()
-        for obj in branch:
+        for obj in self.physics_object.objects:
+            obj = obj[0]
             if obj is not None:
                 vectors += obj.P4()
             else:

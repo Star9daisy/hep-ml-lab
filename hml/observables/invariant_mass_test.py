@@ -3,9 +3,9 @@ from math import isnan
 import pytest
 
 from ..events.delphes_events import DelphesEvents
-from ..observables.invariant_mass import InvariantMass
-from ..observables.invariant_mass import InvM
-from ..observables.invariant_mass import InvMass
+from .invariant_mass import InvariantMass
+from .invariant_mass import InvM
+from .invariant_mass import InvMass
 
 
 @pytest.fixture
@@ -14,77 +14,37 @@ def event():
     yield events[0]
 
 
-def test_invariant_mass(event):
-    obs = InvariantMass(physics_object="Jet0,Jet1")
-    assert obs.physics_object.name == "Jet0,Jet1"
-    assert obs.supported_objects == ["single", "multiple"]
+def test_attributes():
+    obs = InvariantMass("Jet0,Jet1")
+
+    assert obs.physics_object.identifier == "Jet0,Jet1"
+    assert obs.supported_types == ["single", "multiple"]
     assert obs.name == "InvariantMass"
     assert isnan(obs.value)
-    assert obs.fullname == "Jet0,Jet1.InvariantMass"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "InvariantMass"
+    assert obs.dtype == "float64"
+
+    assert obs.shape == "1 * float64"
+    assert obs.identifier == "Jet0,Jet1.InvariantMass"
     assert obs.config == {
-        "physics_object": "Jet0,Jet1",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "multiple"],
+        "physics_object": obs.physics_object.identifier,
+        "name": obs.name,
+        "value": obs.value,
+        "dtype": obs.dtype,
     }
-    assert InvariantMass.from_name("Jet0,Jet1.InvariantMass").fullname == obs.fullname
-    assert InvariantMass.from_config(obs.config).fullname == obs.fullname
+    assert repr(obs) == "Jet0,Jet1.InvariantMass"
 
-    obs.read(event)
-    assert isinstance(obs.value, float)
+    assert InvariantMass.from_identifier("Jet0,Jet1.InvariantMass").config == obs.config
 
-
-def test_inv_mass(event):
-    obs = InvMass(physics_object="Jet0,Jet1")
-    assert obs.physics_object.name == "Jet0,Jet1"
-    assert obs.supported_objects == ["single", "multiple"]
+    obs = InvMass("Jet0,Jet1")
     assert obs.name == "InvMass"
-    assert isnan(obs.value)
-    assert obs.fullname == "Jet0,Jet1.InvMass"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "InvMass"
-    assert obs.config == {
-        "physics_object": "Jet0,Jet1",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "multiple"],
-    }
-    assert InvMass.from_name("Jet0,Jet1.InvMass").fullname == obs.fullname
-    assert InvMass.from_config(obs.config).fullname == obs.fullname
+    assert obs.identifier == "Jet0,Jet1.InvMass"
 
-    obs.read(event)
-    assert isinstance(obs.value, float)
-
-
-def test_inv_m(event):
-    obs = InvM(physics_object="Jet0,Jet1")
-    assert obs.physics_object.name == "Jet0,Jet1"
-    assert obs.supported_objects == ["single", "multiple"]
+    obs = InvM("Jet0,Jet1")
     assert obs.name == "InvM"
-    assert isnan(obs.value)
-    assert obs.fullname == "Jet0,Jet1.InvM"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "InvM"
-    assert obs.config == {
-        "physics_object": "Jet0,Jet1",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "multiple"],
-    }
-    assert InvM.from_name("Jet0,Jet1.InvM").fullname == obs.fullname
-    assert InvM.from_config(obs.config).fullname == obs.fullname
+    assert obs.identifier == "Jet0,Jet1.InvM"
 
-    obs.read(event)
+
+def test_read(event):
+    obs = InvM("Jet0,Jet1").read(event)
     assert isinstance(obs.value, float)
-
-
-def bad_case(event):
-    # Unsupported physics object
-    with pytest.raises(ValueError):
-        InvariantMass(physics_object="Jet0.Particles")
-
-    # Too big index
-    assert InvariantMass(physics_object="Jet100,Jet1").value == event.Jet1.Mass
-    assert InvariantMass(physics_object="Jet100,Jet100").value == 0
+    assert obs.shape == "1 * float64"

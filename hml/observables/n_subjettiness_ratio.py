@@ -1,10 +1,10 @@
-from math import isnan
+from __future__ import annotations
+
 from math import nan
 from typing import Any
 
-from ..physics_objects.physics_object import PhysicsObjectOptions
-from ..physics_objects.single import is_single_physics_object
-from .n_subjettiness import NSubjettiness
+from ..physics_objects.single import is_single
+from .n_subjettiness import TauN
 from .observable import Observable
 
 
@@ -15,29 +15,31 @@ class NSubjettinessRatio(Observable):
         n: int,
         physics_object: str,
         name: str | None = None,
-        supported_objects: list[PhysicsObjectOptions] = ["single", "collective"],
+        value: Any = None,
+        dtype: Any = None,
     ):
-        super().__init__(physics_object, name, supported_objects)
+        supported_types = ["single", "collective"]
+        super().__init__(physics_object, supported_types, name, value, dtype)
         self.m = m
         self.n = n
 
-        self.tau_m = NSubjettiness(m, physics_object)
-        self.tau_n = NSubjettiness(n, physics_object)
-
     def read(self, event) -> Any:
-        self.tau_m.read(event)
-        self.tau_n.read(event)
+        self.physics_object.read(event)
 
-        if is_single_physics_object(self.physics_object):
-            if isnan(self.tau_m.value) or isnan(self.tau_n.value):
-                self._value = nan
-            else:
-                self._value = self.tau_m.value / self.tau_n.value
+        if is_single(self.physics_object):
+            obj = self.physics_object.objects[0]
+            tau_m = obj.Tau[self.m - 1] if obj else nan
+            tau_n = obj.Tau[self.n - 1] if obj else nan
+            self._value = tau_m / tau_n
         else:
-            self._value = [
-                m / n if not isnan(m) and not isnan(n) else nan
-                for m, n in zip(self.tau_m.value, self.tau_n.value)
-            ]
+            self._value = []
+            for obj in self.physics_object.objects:
+                if obj is not None:
+                    tau_m = obj.Tau[self.m - 1]
+                    tau_n = obj.Tau[self.n - 1]
+                    self._value.append(tau_m / tau_n)
+                else:
+                    self._value.append(nan)
 
         return self
 
@@ -54,16 +56,20 @@ class TauMN(NSubjettinessRatio):
         return f"Tau{self.m}{self.n}"
 
     @classmethod
-    def from_name(cls, name: str) -> Observable:
-        if "." in name:
-            physics_object, name = name.split(".")
-        else:
-            physics_object = None
+    def from_identifier(cls, identifier: str, **kwargs) -> TauMN:
+        if "." not in identifier:
+            raise ValueError(f"Invalid identifier {identifier}.")
+
+        physics_object, name = identifier.split(".")
 
         m = int(name[-2])
         n = int(name[-1])
+        kwargs["m"] = m
+        kwargs["n"] = n
+        kwargs["physics_object"] = physics_object
+        kwargs["name"] = name
 
-        return cls(m, n, physics_object, name)
+        return cls(**kwargs)
 
 
 NSubjettinessRatio.add_alias("n_subjettiness_ratio")

@@ -1,8 +1,7 @@
 from math import nan
 from typing import Any
 
-from ..physics_objects.physics_object import PhysicsObjectOptions
-from ..physics_objects.single import is_single_physics_object
+from ..physics_objects.single import is_single
 from .observable import Observable
 
 
@@ -11,20 +10,26 @@ class Charge(Observable):
         self,
         physics_object: str,
         name: str | None = None,
-        supported_objects: list[PhysicsObjectOptions] = ["single", "collective"],
+        value: Any = None,
         dtype: Any = None,
     ):
-        super().__init__(physics_object, name, supported_objects, dtype)
+        supported_types = ["single", "collective"]
+        super().__init__(physics_object, supported_types, name, value, dtype)
 
     def read(self, event):
-        if (branch := self.physics_object.read(event)) is None:
-            self._value = nan
+        self.physics_object.read(event)
 
-        elif is_single_physics_object(self.physics_object):
-            self._value = branch.Charge
+        if is_single(self.physics_object):
+            obj = self.physics_object.objects[0]
+            self._value = obj.Charge if obj else nan
 
         else:
-            self._value = [obj.Charge if obj is not None else nan for obj in branch]
+            self._value = []
+            for obj in self.physics_object.objects:
+                if obj:
+                    self._value.append(obj.Charge)
+                else:
+                    self._value.append(nan)
 
         return self
 

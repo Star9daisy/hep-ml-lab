@@ -12,51 +12,33 @@ def event():
     yield events[0]
 
 
-def test_tau_tag(event):
-    obs = TauTag(physics_object="FatJet0")
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective"]
+def test_attributes():
+    obs = TauTag("FatJet0")
+
+    assert obs.physics_object.identifier == "FatJet0"
+    assert obs.supported_types == ["single", "collective"]
     assert obs.name == "TauTag"
     assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.TauTag"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "TauTag"
+    assert obs.dtype == "float64"
+
+    assert obs.shape == "1 * float64"
+    assert obs.identifier == "FatJet0.TauTag"
     assert obs.config == {
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective"],
+        "physics_object": obs.physics_object.identifier,
+        "name": obs.name,
+        "value": obs.value,
+        "dtype": obs.dtype,
     }
-    assert TauTag.from_name("FatJet0.TauTag").fullname == obs.fullname
-    assert TauTag.from_config(obs.config).fullname == obs.fullname
+    assert repr(obs) == "FatJet0.TauTag"
 
-    obs.read(event)
-    assert isinstance(obs.value, int)
-
-    obs = TauTag(physics_object="FatJet:5")
-    assert obs.physics_object.name == "FatJet:5"
-    assert obs.supported_objects == ["single", "collective"]
-    assert obs.name == "TauTag"
-    assert isnan(obs.value)
-    assert obs.fullname == "FatJet:5.TauTag"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "TauTag"
-    assert obs.config == {
-        "physics_object": "FatJet:5",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective"],
-    }
-    assert TauTag.from_name("FatJet:5.TauTag").fullname == obs.fullname
-    assert TauTag.from_config(obs.config).fullname == obs.fullname
-
-    obs.read(event)
-    assert len(obs.value) == 5
+    assert TauTag.from_identifier("FatJet0.TauTag").config == obs.config
 
 
-def test_bad_case(event):
-    # Bad index
-    assert isnan(TauTag(physics_object="FatJet100").read(event).value)
+def test_read(event):
+    obs = TauTag("FatJet0").read(event)
+    assert isinstance(obs.value, float)
+    assert obs.shape == "1 * float64"
 
-    # Bad start index
-    assert TauTag(physics_object="FatJet100:").read(event).value == []
+    obs = TauTag("FatJet:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "5 * float64"

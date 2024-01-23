@@ -3,7 +3,7 @@ from math import isnan
 import pytest
 
 from ..events.delphes_events import DelphesEvents
-from ..observables.b_tag import BTag
+from .b_tag import BTag
 
 
 @pytest.fixture
@@ -12,51 +12,33 @@ def event():
     yield events[0]
 
 
-def test_b_tag(event):
-    obs = BTag(physics_object="FatJet0")
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective"]
+def test_attributes():
+    obs = BTag("FatJet0")
+
+    assert obs.physics_object.identifier == "FatJet0"
+    assert obs.supported_types == ["single", "collective"]
     assert obs.name == "BTag"
     assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.BTag"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "BTag"
+    assert obs.dtype == "float64"
+
+    assert obs.shape == "1 * float64"
+    assert obs.identifier == "FatJet0.BTag"
     assert obs.config == {
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective"],
+        "physics_object": obs.physics_object.identifier,
+        "name": obs.name,
+        "value": obs.value,
+        "dtype": obs.dtype,
     }
-    assert BTag.from_name("FatJet0.BTag").fullname == obs.fullname
-    assert BTag.from_config(obs.config).fullname == obs.fullname
+    assert repr(obs) == "FatJet0.BTag"
 
-    obs.read(event)
-    assert isinstance(obs.value, int)
-
-    obs = BTag(physics_object="FatJet:5")
-    assert obs.physics_object.name == "FatJet:5"
-    assert obs.supported_objects == ["single", "collective"]
-    assert obs.name == "BTag"
-    assert isnan(obs.value)
-    assert obs.fullname == "FatJet:5.BTag"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "BTag"
-    assert obs.config == {
-        "physics_object": "FatJet:5",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective"],
-    }
-    assert BTag.from_name("FatJet:5.BTag").fullname == obs.fullname
-    assert BTag.from_config(obs.config).fullname == obs.fullname
-
-    obs.read(event)
-    assert len(obs.value) == 5
+    assert BTag.from_identifier("FatJet0.BTag").config == obs.config
 
 
-def test_bad_case(event):
-    # Bad index
-    assert isnan(BTag(physics_object="FatJet100").read(event).value)
+def test_read(event):
+    obs = BTag("FatJet0").read(event)
+    assert isinstance(obs.value, float)
+    assert obs.shape == "1 * float64"
 
-    # Bad start index
-    assert BTag(physics_object="FatJet100:").read(event).value == []
+    obs = BTag("FatJet:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "5 * float64"
