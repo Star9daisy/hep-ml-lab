@@ -29,7 +29,7 @@ plugins:
             members_order: source
             docstring_style: numpy
             separate_signature: true
-            docstring_section_style: spacy
+            docstring_section_style: table
   - mkdocs-jupyter
 
 markdown_extensions:
@@ -75,6 +75,11 @@ nav:
     - example: examples/example.ipynb
   - API:
       - hml.generators: api/hml.generators.md
+      - physics_objects:
+          - single: api/physics_objects/single.md
+          - collective: api/physics_objects/collective.md
+          - nested: api/physics_objects/nested.md
+          - multiple: api/physics_objects/multiple.md
       - hml.observables: api/hml.observables.md
       - hml.representations: api/hml.representations.md
       - hml.datasets: api/hml.datasets.md
