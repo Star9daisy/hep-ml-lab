@@ -48,7 +48,7 @@ class Observable:
     @property
     def config(self) -> dict[str, Any]:
         return {
-            "physics_object": self.physics_object,
+            "physics_object": self.physics_object.identifier,
             "supported_types": self.supported_types,
             "name": self.name,
             "value": self.value,
