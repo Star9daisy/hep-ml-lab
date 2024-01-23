@@ -9,27 +9,31 @@ from .single import Single
 from .single import is_single
 
 
-def get(identifier: str) -> PhysicsObject:
-    """Retrieve a physics object from an identifier.
+def get(classname: str) -> PhysicsObject:
+    """Retrieve a physics object class from a name.
 
     Parameters
     ----------
-    identifier : str
-        A unique string for a physics object.
+    classname : str
+        A unique string for a physics object class.
 
     Returns
     -------
     physics object : PhysicsObject
     """
-    if is_single(identifier):
-        obj = Single.from_identifier(identifier)
-    elif is_collective(identifier):
-        obj = Collective.from_identifier(identifier)
-    elif is_nested(identifier):
-        obj = Nested.from_identifier(identifier)
-    elif is_multiple(identifier):
-        obj = Multiple.from_identifier(identifier)
-    else:
-        raise ValueError(f"Unknown physics object {identifier}")
+    name = classname.lower()
 
-    return obj
+    if name == "single":
+        return Single
+
+    elif name == "collective":
+        return Collective
+
+    elif name == "nested":
+        return Nested
+
+    elif name == "multiple":
+        return Multiple
+
+    else:
+        raise ValueError(f"Unknown physics object type {classname}")
