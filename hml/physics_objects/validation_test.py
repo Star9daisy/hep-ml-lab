@@ -1,3 +1,5 @@
+import pytest
+
 from .collective import is_collective
 from .multiple import is_multiple
 from .nested import is_nested
@@ -91,3 +93,12 @@ def test_is_multiple():
 
     for case in test_multiple_cases:
         assert is_multiple(case) is True
+
+
+def test_is_multiple_with_supported_types():
+    assert is_multiple("Jet0,Jet1", ["single"]) is True
+    assert is_multiple("Jet0,Jet1", ["collective"]) is False
+    assert is_multiple("Jet0,Jet1", ["nested"]) is False
+
+    with pytest.raises(ValueError):
+        is_multiple("Jet0,Jet1", ["unknown"])
