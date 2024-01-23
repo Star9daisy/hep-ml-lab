@@ -9,9 +9,7 @@ import numpy as np
 
 from ..physics_objects import ALL_OBJECTS_DICT
 from ..physics_objects import get
-from ..physics_objects.multiple import Multiple
 from ..physics_objects.multiple import is_multiple
-from ..physics_objects.physics_object import PhysicsObject
 
 
 class Observable:
