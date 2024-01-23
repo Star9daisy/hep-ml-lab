@@ -5,13 +5,13 @@ from typing import Any
 from .physics_object import PhysicsObject
 
 
-def is_single(identifier: str) -> bool:
-    """Check if an identifier corresponds to a single physics object.
+def is_single(identifier: str | PhysicsObject) -> bool:
+    """Check if an identifier or an instance corresponds to a single physics object.
 
     Parameters
     ----------
-    identifier : str
-        A unique string for a physics object.
+    identifier : str | PhysicsObject
+        A unique string for a physics object or an instance of a physics object.
 
     Returns
     -------
@@ -31,6 +31,9 @@ def is_single(identifier: str) -> bool:
     >>> is_single("Jet0,Jet1") # Multiple
     False
     """
+    if isinstance(identifier, PhysicsObject):
+        return isinstance(identifier, Single)
+
     try:
         Single.from_identifier(identifier)
         return True

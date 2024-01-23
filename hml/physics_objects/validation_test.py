@@ -1,5 +1,6 @@
 import pytest
 
+from . import get
 from .collective import is_collective
 from .multiple import is_multiple
 from .nested import is_nested
@@ -42,57 +43,73 @@ test_multiple_cases = [
 def test_is_single():
     for case in test_single_cases:
         assert is_single(case) is True
+        assert is_single(get(case)) is True
 
     for case in test_collective_cases:
         assert is_single(case) is False
+        assert is_single(get(case)) is False
 
     for case in test_nested_cases:
         assert is_single(case) is False
+        assert is_single(get(case)) is False
 
     for case in test_multiple_cases:
         assert is_single(case) is False
+        assert is_single(get(case)) is False
 
 
 def test_is_collective():
     for case in test_single_cases:
         assert is_collective(case) is False
+        assert is_collective(get(case)) is False
 
     for case in test_collective_cases:
         assert is_collective(case) is True
+        assert is_collective(get(case)) is True
 
     for case in test_nested_cases:
         assert is_collective(case) is False
+        assert is_collective(get(case)) is False
 
     for case in test_multiple_cases:
         assert is_collective(case) is False
+        assert is_collective(get(case)) is False
 
 
 def test_is_nested():
     for case in test_single_cases:
         assert is_nested(case) is False
+        assert is_nested(get(case)) is False
 
     for case in test_collective_cases:
         assert is_nested(case) is False
+        assert is_nested(get(case)) is False
 
     for case in test_nested_cases:
         assert is_nested(case) is True
+        assert is_nested(get(case)) is True
 
     for case in test_multiple_cases:
         assert is_nested(case) is False
+        assert is_nested(get(case)) is False
 
 
 def test_is_multiple():
     for case in test_single_cases:
         assert is_multiple(case) is False
+        assert is_multiple(get(case)) is False
 
     for case in test_collective_cases:
         assert is_multiple(case) is False
+        assert is_multiple(get(case)) is False
 
     for case in test_nested_cases:
         assert is_multiple(case) is False
+        assert is_multiple(get(case)) is False
 
     for case in test_multiple_cases:
         assert is_multiple(case) is True
+        assert is_multiple(get(case)) is True
 
 
 def test_is_multiple_with_supported_types():
@@ -102,3 +119,10 @@ def test_is_multiple_with_supported_types():
 
     with pytest.raises(ValueError):
         is_multiple("Jet0,Jet1", ["unknown"])
+
+    assert is_multiple(get("Jet0,Jet1"), ["single"]) is True
+    assert is_multiple(get("Jet0,Jet1"), ["collective"]) is False
+    assert is_multiple(get("Jet0,Jet1"), ["nested"]) is False
+
+    with pytest.raises(ValueError):
+        is_multiple(get("Jet0,Jet1"), ["unknown"])
