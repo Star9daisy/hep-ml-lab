@@ -11,13 +11,19 @@ from .single import Single
 from .single import is_single
 
 
-def is_multiple(identifier: str) -> bool:
+def is_multiple(
+    identifier: str,
+    supported_types: list[str] | None = None,
+) -> bool:
     """Check if an identifier corresponds to a multiple physics object.
 
     Parameters
     ----------
     identifier : str
         A unique string for a physics object.
+    supported_types : list[str], optional
+        The supported types of physics objects it contains. Valid values are
+        "single", "collective", and "nested". If None, all types are supported.
 
     Returns
     -------
@@ -25,6 +31,7 @@ def is_multiple(identifier: str) -> bool:
 
     Examples
     --------
+    By default, all types are supported for each physics object:
     >>> is_multiple("Jet0,Jet1")
     True
 
@@ -36,13 +43,45 @@ def is_multiple(identifier: str) -> bool:
 
     >>> is_multiple("Jet0.Constituents:") # Nested
     False
+
+    Specify the supported types to check strictly:
+    >>> is_multiple("Jet0,Jet1", ["single"])
+    True
+
+    >>> is_multiple("Jet0,Jet1", ["collective"])
+    False
+
+    >>> is_multiple("Jet0,Jet1", ["nested"])
+    False
     """
     try:
-        Multiple.from_identifier(identifier)
-        return True
+        obj = Multiple.from_identifier(identifier)
 
     except Exception:
         return False
+
+    if supported_types is None:
+        return True
+
+    supported_classes = []
+    for classname in supported_types:
+        if classname.lower() == "single":
+            supported_classes.append(Single)
+        elif classname.lower() == "collective":
+            supported_classes.append(Collective)
+        elif classname.lower() == "nested":
+            supported_classes.append(Nested)
+        else:
+            raise ValueError(
+                f"Invalid supported type {classname}. "
+                f"Valid values are 'single', 'collective', and 'nested'."
+            )
+
+    for i in obj.all:
+        if type(i) not in supported_classes:
+            return False
+
+    return True
 
 
 class Multiple(PhysicsObject):
