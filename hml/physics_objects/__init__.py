@@ -10,6 +10,17 @@ from .single import is_single
 
 
 def get(identifier: str) -> PhysicsObject:
+    """Retrieve a physics object from an identifier.
+
+    Parameters
+    ----------
+    identifier : str
+        A unique string for a physics object.
+
+    Returns
+    -------
+    physics object : PhysicsObject
+    """
     if is_single(identifier):
         obj = Single.from_identifier(identifier)
     elif is_collective(identifier):
