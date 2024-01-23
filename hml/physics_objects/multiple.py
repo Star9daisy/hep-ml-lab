@@ -12,15 +12,15 @@ from .single import is_single
 
 
 def is_multiple(
-    identifier: str,
+    identifier: str | PhysicsObject,
     supported_types: list[str] | None = None,
 ) -> bool:
-    """Check if an identifier corresponds to a multiple physics object.
+    """Check if an identifier or an instance corresponds to a multiple physics object.
 
     Parameters
     ----------
-    identifier : str
-        A unique string for a physics object.
+    identifier : str | PhysicsObject
+        A unique string for a physics object or an instance of a physics object.
     supported_types : list[str], optional
         The supported types of physics objects it contains. Valid values are
         "single", "collective", and "nested". If None, all types are supported.
@@ -54,6 +54,9 @@ def is_multiple(
     >>> is_multiple("Jet0,Jet1", ["nested"])
     False
     """
+    if isinstance(identifier, PhysicsObject):
+        identifier = identifier.identifier
+
     try:
         obj = Multiple.from_identifier(identifier)
 

@@ -8,13 +8,13 @@ from .single import Single
 from .single import is_single
 
 
-def is_nested(identifier: str) -> bool:
-    """Checks if an identifier corresponds a nested physics object.
+def is_nested(identifier: str | PhysicsObject) -> bool:
+    """Check if an identifier or an instance corresponds to a nested physics object.
 
     Parameters
     ----------
-    identifier : str
-        A unique string for a physics object.
+    identifier : str | PhysicsObject
+        A unique string for a physics object or an instance of a physics object.
 
     Returns
     -------
@@ -34,6 +34,9 @@ def is_nested(identifier: str) -> bool:
     >>> is_nested("Jet0,Jet1") # Multiple
     False
     """
+    if isinstance(identifier, PhysicsObject):
+        return isinstance(identifier, Nested)
+
     try:
         Nested.from_identifier(identifier)
         return True
