@@ -9,12 +9,12 @@ from .single import is_single
 
 
 def is_nested(identifier: str) -> bool:
-    """Checks if an identifier can be used to create a nested physics object.
+    """Checks if an identifier corresponds a nested physics object.
 
     Parameters
     ----------
     identifier : str
-        A string that represents a nested physics object.
+        A unique string for a physics object.
 
     Returns
     -------
@@ -22,7 +22,7 @@ def is_nested(identifier: str) -> bool:
 
     Examples
     --------
-    >>> is_nested("Jet0.Particles:")
+    >>> is_nested("Jet0.Constituents:")
     True
 
     >>> is_nested("Jet0") # Single
@@ -45,13 +45,9 @@ def is_nested(identifier: str) -> bool:
 class Nested(PhysicsObject):
     """A nested physics object.
 
-    It represents a nested collection of physics objects in an event or a branch.
-    It has main and sub objects. For example, all the constituents of the
-    leading jet, the first 100 constituents of the first three leading jets, etc.
-
-    This class works like proxy of a real object. Before reading a source, use
-    `main` and `sub` to show the object proxies that will be used. After calling
-    `read(event)`, use `objects` to show the corresponding objects.
+    It represents a nested physics objects, which is a combination of single and
+    collective physics objects. For example, the constituents of the leading jet,
+    the first 100 constituents of the first three leading jets, etc.
 
     Parameters
     ----------
@@ -63,20 +59,20 @@ class Nested(PhysicsObject):
     Examples
     --------
     Create a nested physics object by its main and sub objects:
-    >>> obj = Nested(Single("Jet", 0), Collective("Particles"))
+    >>> obj = Nested(Single("Jet", 0), Collective("Constituents"))
+    >>> obj.main, obj.sub
+    (Jet0, Constituents:)
+
+    It is represented by the identifier:
+    >>> obj = Nested(Single("Jet", 0), Collective("Constituents"))
     >>> obj
-    'Jet0.Particles:'
-
-    The identifier of a nested physics object is the combination of identifiers
-    from the main and sub objects:
-    >>> obj = Nested(Single("Jet", 0), Collective("Particles"))
+    Jet0.Constituents:
     >>> obj.identifier
-    'Jet0.Particles:'
+    Jet0.Constituents:
 
-    Also, you can create a nested physics object by its identifier:
-    >>> obj = Nested.from_identifier("Jet0.Particles:")
-    >>> obj == Nested(Single("Jet", 0), Collective("Particles"))
-    True
+    Create a nested physics object from an identifier:
+    >>> Nested.from_identifier("Jet0.Constituents:")
+    Jet0.Constituents:
     """
 
     def __init__(
@@ -88,9 +84,135 @@ class Nested(PhysicsObject):
         self.sub = sub
         self.objects = []
 
-    def read(self, source: Any):
+    def read(self, entry: Any):
+        """Read an entry to fetch the objects.
+
+        Since nested physics objects are fetched by a hierarchy of main and sub
+        objects, the entry is expected to be an event.
+
+        Parameters
+        ----------
+        entry : Any
+            An event read by PyROOT.
+
+        Returns
+        -------
+        self : Nested
+
+        Examples
+        --------
+        Read an event to fetch the first three constituents of the leading jet:
+        >>> obj = Nested(Single("Jet", 0), Collective("Constituents", 0, 3))
+        >>> obj.read(event).objects
+        [[<cppyy.gbl.Tower object at 0x8f59ed0>,
+        <cppyy.gbl.Track object at 0x7360700>,
+        <cppyy.gbl.Track object at 0x7360430>]]
+
+        Use `main` and `sub` to show details:
+        >>> obj.main
+        Jet0
+        >>> obj.main.objects
+        [<cppyy.gbl.Jet object at 0x7eb6ed0>]
+        >>> obj.sub
+        Constituents:3
+        >>> obj.sub.objects
+        [<cppyy.gbl.Tower object at 0x8f59ed0>,
+        <cppyy.gbl.Track object at 0x7360700>,
+        <cppyy.gbl.Track object at 0x7360430>]
+
+        The lengths of objects keep nested:
+
+        - Single + Single -> 1, 1
+        >>> obj = Nested.from_identifier("Jet0.Constituents0").read(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 1)
+
+        ! If the index is out of range, the object fetched will be None but in
+        the same shape:
+        >>> obj = Nested.from_identifier("Jet100.Constituents0").read(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 1, True)
+        >>> obj.objects
+        [[None]]
+        >>> obj = Nested.from_identifier("Jet0.Constituents100").read(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 1)
+        >>> obj.objects
+        [[None]]
+
+        - Single + Collective -> 1, var (depending on the stopping index)
+        >>> obj = Nested.from_identifier("Jet0.Constituents:").read(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 20)
+        >>> obj = Nested.from_identifier("Jet0.Constituents:10").read(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 10)
+        >>> obj = Nested.from_identifier("FatJet0.Constituents:").read(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 28)
+        >>> obj = Nested.from_identifier("FatJet0.Constituents:10").read(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 10)
+
+        ! If the index of the single is out of range:
+        >>> obj = Nested.from_identifier("Jet100.Constituents:").read(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 1)
+        >>> obj.objects
+        [[None]]
+
+        ! If the starting index of the collective is out of range:
+        >>> obj = Nested.from_identifier("Jet0.Constituents:100").read(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 0)
+        >>> obj.objects
+        [[]]
+
+        ! If the stopping index of the collective is out of range:
+        >>> obj = Nested.from_identifier("Jet0.Constituents18:22").read(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 4)
+        >>> obj.objects
+        [[<cppyy.gbl.Track object at 0x8580260>,
+        <cppyy.gbl.Track object at 0x8580350>,
+        None,
+        None]]
+
+        3. Collective + Collective -> var, var (depending on the stopping indices)
+        >>> obj = Nested.from_identifier("Jet:.Constituents:").read(event)
+        >>> len(obj.objects), [len(x) for x in obj.objects]
+        (4, [20, 18, 12, 8])
+        >>> obj = Nested.from_identifier("Jet:3.Constituents:5").read(event)
+        >>> len(obj.objects), [len(x) for x in obj.objects]
+        (3, [5, 5, 5])
+
+        ! If the first starting index is out of range:
+        >>> obj = Nested.from_identifier("Jet5:.Constituents:").read(event)
+        >>> len(obj.objects), [len(x) for x in obj.objects]
+        (0, [])
+
+        ! If the second starting index is out of range:
+        >>> obj = Nested.from_identifier("Jet:.Constituents100:").read(event)
+        >>> len(obj.objects), [len(x) for x in obj.objects]
+        (4, [0, 0, 0, 0])
+
+        ! If the first stopping index is out of range and no stopping index for
+        the second:
+        >>> obj = Nested.from_identifier("Jet:10.Constituents:").read(event)
+        >>> len(obj.objects), [len(x) for x in obj.objects]
+        (10, [20, 18, 12, 8, 1, 1, 1, 1, 1, 1])
+
+        ! If the first stopping index is out of range and the second has a stopping
+        index:
+        >>> obj = Nested.from_identifier("Jet:10.Constituents:20").read(event)
+        >>> len(obj.objects), [len(x) for x in obj.objects]
+        (10, [20, 20, 20, 20, 20, 20, 20, 20, 20, 20])
+
+        The stopping index leads to proper padding of `None` to ensure the shape
+        of the objects.
+        """
         self.objects = []
-        self.main.read(source)
+        self.main.read(entry)
 
         for obj in self.main.objects:
             if obj is None:
@@ -106,10 +228,17 @@ class Nested(PhysicsObject):
 
     @property
     def identifier(self) -> str:
-        """The identifier of the nested physics object.
+        """The unique string for a nested physics object.
 
-        It is the combination of identifiers from the main and sub objects, e.g.
-        Jet0.Constituents, Jet:3.Constituents:100, etc.
+        It consists of the identifiers of the main and sub objects, and a period`.`
+        is used to separate them.
+
+        Examples
+        --------
+        >>> Nested(Single("Jet", 0), Collective("Constituents")).identifier
+        Jet0.Constituents:
+        >>> Nested(Collective("Jet"), Collective("Constituents")).identifier
+        Jet:.Constituents:
         """
         return f"{self.main.identifier}.{self.sub.identifier}"
 
@@ -117,22 +246,22 @@ class Nested(PhysicsObject):
     def from_identifier(cls, identifier) -> Nested:
         """Create a nested physics object from an identifier.
 
-        It will break down the identifier to get the main and sub objects.
+        It decomposes the identifier into the identifiers of the main and sub physics
+        objects.
 
         Parameters
         ----------
         identifier : str
-            The identifier of a nested physics object.
+            A unique string for a physics object.
 
         Returns
         -------
         physics object : Nested
-            The nested physics object.
 
         Raises
         ------
         ValueError
-            If there's no period`.` or there's any comma`,` in the identifier.
+            No period`.` or there's any comma`,`.
         """
         if "." not in identifier:
             raise ValueError(
@@ -179,21 +308,19 @@ class Nested(PhysicsObject):
         Parameters
         ----------
         config : dict
-            The configurations for a nested physics object.
 
         Returns
         -------
         physics object : Nested
-            The nested physics object.
 
         Raises
         ------
         ValueError
-            If `classname` in the configurations is not `Nested`.
+            If `classname` in the configurations is not "Nested".
         """
         if config.get("classname") != "Nested":
             raise ValueError(
-                f"Invalid classname. Expected 'Nested', got {config['classname']}"
+                f"Invalid classname {config['classname']}. Expected 'Nested'."
             )
 
         if config["main_object_config"].get("classname") == "Single":

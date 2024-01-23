@@ -6,12 +6,12 @@ from .physics_object import PhysicsObject
 
 
 def is_single(identifier: str) -> bool:
-    """Check if an identifier can be used to create a single physics object.
+    """Check if an identifier corresponds to a single physics object.
 
     Parameters
     ----------
     identifier : str
-        A string that represents a single physics object.
+        A unique string for a physics object.
 
     Returns
     -------
@@ -25,7 +25,7 @@ def is_single(identifier: str) -> bool:
     >>> is_single("Jet:") # Collective
     False
 
-    >>> is_single("Jet0.Particles:100") # Nested
+    >>> is_single("Jet0.Constituents:100") # Nested
     False
 
     >>> is_single("Jet0,Jet1") # Multiple
@@ -42,11 +42,8 @@ def is_single(identifier: str) -> bool:
 class Single(PhysicsObject):
     """A single physics object.
 
-    It represents one specific object in an event or a branch. For example, the
-    leading jet, the first constituent of that jet, etc.
-
-    This class works like proxy of a real object. After reading a source, use
-    `objects` to show the corresponding objects.
+    It represents one specific object, e.g. the leading jet, the first constituent
+    of the leading jet, etc.
 
     Parameters
     ----------
@@ -59,18 +56,19 @@ class Single(PhysicsObject):
     --------
     Create a single physics object by its name and index:
     >>> obj = Single("Jet", 0)
-    >>> obj
-    'Jet0'
+    >>> obj.name, obj.index
+    ('Jet', 0)
 
-    The identifier of a single object is composed of its name and index:
+    It is represented by the identifier:
     >>> obj = Single("Jet", 0)
+    >>> obj
+    Jet0
     >>> obj.identifier
-    'Jet0'
+    Jet0
 
-    Also, you can create a single object from such an identifier:
-    >>> obj = Single.from_identifier("Jet0")
-    >>> obj == Single("Jet", 0)
-    True
+    Create a single physics object from an identifier:
+    >>> Single.from_identifier("Jet0")
+    Jet0
     """
 
     def __init__(self, name: str, index: int):
@@ -78,57 +76,46 @@ class Single(PhysicsObject):
         self.index = index
         self.objects = []
 
-    def read(self, source: Any):
-        """Read a single physics object from an event or a branch.
+    def read(self, entry: Any):
+        """Read an entry to fetch the objects.
 
-        Each time it reads a source, it will refresh the `objects` list. The
-        `objects` are a list of only one element.
+        Every time it is called, the objects will be cleared and re-filled.
 
         Parameters
         ----------
-        source : Any
-            An event(entry) or a branch loaded by PyROOT.
+        entry : Any
+            An event or a branch read by PyROOT.
+
+        Returns
+        -------
+        self : Single
 
         Raises
         ------
         ValueError
-            If the name is not a valid branch in the event or a valid leaf of
-            the branch.
+            If the name is not a valid attribute of the entry.
 
         Examples
         --------
         Read an event to fetch the leading jet:
-        >>> obj = Single("Jet", 0)
-        >>> obj.read(event)
-        >>> obj.objects
-        [<cppyy.gbl.Jet object at 0x9a7f9c0>]
-
-        Or read the jet branch to fetch the leading particle of the leading jet:
-        >>> obj = Single("Particles", 0)
-        >>> obj.read(event.Jet[0])
-        >>> obj.objects
-        [<cppyy.gbl.GenParticle object at 0x7a2ee90>]
-
-        It supports method chaining:
         >>> Single("Jet", 0).read(event).objects
         [<cppyy.gbl.Jet object at 0x9a7f9c0>]
-        >>> Single("Particles", 0).read(event.Jet[0]).objects
-        [<cppyy.gbl.GenParticle object at 0x7a2ee90>]
 
-        If the index is out of range, the object will be None:
-        >>> obj = Single("Jet", 100)
-        >>> obj.read(event)
-        >>> obj.objects
+        Read the leading jet to fetch the first constituent:
+        >>> Single("Constituents", 0).read(event.Jet[0]).objects
+        [<cppyy.gbl.Tower object at 0x8f59ed0>]
+
+        ! If the index is out of range, the object will be None:
+        >>> Single("Jet", 100).read(event).objects
         [None]
         """
         self.objects = []
 
-        object = getattr(source, self.name, None)
+        object = getattr(entry, self.name, None)
         if object is None:
             raise ValueError(
-                f"Could not find {self.name} in the source of type {type(source)}\n"
-                "Use `dir(source)` to check all the available "
-                "attributes of the source."
+                f"Could not fetch {self.name} in the entry {type(entry)}\n"
+                "Use `dir(entry)` to check all the available attributes."
             )
 
         if self.index >= object.GetEntries():
@@ -140,10 +127,14 @@ class Single(PhysicsObject):
 
     @property
     def identifier(self) -> str:
-        """The identifier of the single physics object.
+        """The unique string for a single physics object.
 
-        It is the name followed by the index of the physics object, e.g. Jet0,
-        Jet1, etc.
+        It consists of the name and the index.
+
+        Examples
+        --------
+        >>> Single("Jet", 0).identifier
+        Jet0
         """
         return f"{self.name}{self.index}"
 
@@ -151,23 +142,22 @@ class Single(PhysicsObject):
     def from_identifier(cls, identifier: str):
         """Create a single physics object from an identifier.
 
-        It will break down the identifier to get the name and index for the
-        physics object.
+        It decomposes the identifier into a name and an index to construct a
+        single physics object.
 
         Parameters
         ----------
         identifier : str
-            The identifier of a single physics object.
+            A unique string for a physics object.
 
         Returns
         -------
         physics object : Single
-            The single physics object.
 
         Raises
         ------
         ValueError
-            If there is any of the comma`,`, the period`.`, or the colon`:`.
+            If there's any of the comma`,`, the period`.`, or the colon`:`.
         """
         if "," in identifier:
             raise ValueError(
@@ -212,12 +202,10 @@ class Single(PhysicsObject):
         Parameters
         ----------
         config : dict
-            Configurations for a single physics object.
 
         Returns
         -------
         physics object : Single
-            The single physics object.
 
         Raises
         ------
