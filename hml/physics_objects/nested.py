@@ -84,7 +84,7 @@ class Nested(PhysicsObject):
         self.sub = sub
         self.objects = []
 
-    def read(self, entry: Any):
+    def read(self, entry: Any) -> Nested:
         """Read an entry to fetch the objects.
 
         Since nested physics objects are fetched by a hierarchy of main and sub
@@ -178,7 +178,7 @@ class Nested(PhysicsObject):
         None,
         None]]
 
-        3. Collective + Collective -> var, var (depending on the stopping indices)
+        - Collective + Collective -> var, var (depending on the stopping indices)
         >>> obj = Nested.from_identifier("Jet:.Constituents:").read(event)
         >>> len(obj.objects), [len(x) for x in obj.objects]
         (4, [20, 18, 12, 8])
@@ -243,7 +243,7 @@ class Nested(PhysicsObject):
         return f"{self.main.identifier}.{self.sub.identifier}"
 
     @classmethod
-    def from_identifier(cls, identifier) -> Nested:
+    def from_identifier(cls, identifier: str) -> Nested:
         """Create a nested physics object from an identifier.
 
         It decomposes the identifier into the identifiers of the main and sub physics

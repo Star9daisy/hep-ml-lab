@@ -76,7 +76,7 @@ class Single(PhysicsObject):
         self.index = index
         self.objects = []
 
-    def read(self, entry: Any):
+    def read(self, entry: Any) -> Single:
         """Read an entry to fetch the objects.
 
         Every time it is called, the objects will be cleared and re-filled.
@@ -139,7 +139,7 @@ class Single(PhysicsObject):
         return f"{self.name}{self.index}"
 
     @classmethod
-    def from_identifier(cls, identifier: str):
+    def from_identifier(cls, identifier: str) -> Single:
         """Create a single physics object from an identifier.
 
         It decomposes the identifier into a name and an index to construct a
@@ -187,7 +187,7 @@ class Single(PhysicsObject):
         return cls(name, index)
 
     @property
-    def config(self):
+    def config(self) -> dict[str, Any]:
         """The configurations for serialization"""
         return {
             "classname": self.__class__.__name__,
@@ -196,7 +196,7 @@ class Single(PhysicsObject):
         }
 
     @classmethod
-    def from_config(cls, config: dict[str, Any]):
+    def from_config(cls, config: dict[str, Any]) -> Single:
         """Create a single physics object from configurations.
 
         Parameters
