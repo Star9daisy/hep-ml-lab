@@ -17,7 +17,7 @@ def event():
 def test_only_value():
     # Pretend to have overwritten the read method.
     obs = Observable()
-    obs.value = 100
+    obs._value = 100
 
     # attributes
     assert obs.physics_object is None
@@ -31,7 +31,6 @@ def test_only_value():
     assert obs.identifier == "Observable"
     assert obs.config == {
         "physics_object": None,
-        "supported_types": None,
         "name": "Observable",
         "value": 100,
         "dtype": "float64",
@@ -44,7 +43,6 @@ def test_only_value():
         Observable.from_config(
             {
                 "physics_object": None,
-                "supported_types": None,
                 "name": "Observable",
                 "value": 100,
                 "dtype": "float64",
