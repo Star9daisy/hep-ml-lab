@@ -1,17 +1,17 @@
 from __future__ import annotations
 
+from math import isnan
 from math import nan
 from typing import Any
 
 import awkward as ak
 import numpy as np
 
+from ..physics_objects import ALL_OBJECTS_DICT
 from ..physics_objects import get
-from ..physics_objects.collective import is_collective_physics_object
-from ..physics_objects.multiple import is_multiple_physics_object
-from ..physics_objects.nested import is_nested_physics_object
-from ..physics_objects.physics_object import PhysicsObjectOptions
-from ..physics_objects.single import is_single_physics_object
+from ..physics_objects.multiple import Multiple
+from ..physics_objects.multiple import is_multiple
+from ..physics_objects.physics_object import PhysicsObject
 
 
 class Observable:
@@ -20,97 +20,70 @@ class Observable:
     def __init__(
         self,
         physics_object: str | None = None,
+        supported_types: list[str] | None = None,
         name: str | None = None,
-        supported_objects: PhysicsObjectOptions | list[PhysicsObjectOptions] = "all",
+        value: Any = None,
         dtype: Any = None,
     ):
-        if not self._is_valid_physics_object(physics_object, supported_objects):
-            if "multiple" in supported_objects:
-                supported_objects.remove("multiple")
-                raise TypeError(
-                    f"Invalid physics object {physics_object}\n"
-                    f"Supported objects are multiple of {supported_objects}."
-                )
-            else:
-                raise TypeError(
-                    f"Invalid physics object {physics_object}\n"
-                    f"Supported objects are {supported_objects}."
-                )
-        self._physics_object = physics_object
-        self._supporedt_objects = supported_objects
-        self._name = name
-        self._value = None
-        self._dtype = "float64" if dtype is None else dtype
+        if physics_object is not None and supported_types is not None:
+            self._validate_physics_object(physics_object, supported_types)
 
-    def read(self, event) -> Any:
+        self.physics_object = get(physics_object) if physics_object else None
+        self.supported_types = supported_types
+        self.name = name if name else self.__class__.__name__
+        self.value = value if value else nan
+        self.dtype = dtype if dtype else "float64"
+
+    def read(self, entry) -> Any:
         raise NotImplementedError
-
-    @property
-    def physics_object(self):
-        return get(self._physics_object)
-
-    @property
-    def classname(self) -> str:
-        return self.__class__.__name__
-
-    @property
-    def fullname(self) -> str:
-        if self.physics_object is None:
-            return self.name
-        else:
-            return f"{self.physics_object.name}.{self.name}"
-
-    @property
-    def name(self) -> str:
-        if self._name is not None:
-            return self._name
-        else:
-            return self.classname
-
-    @classmethod
-    def from_name(cls, name: str, *arg, **kwargs) -> Observable:
-        if "." in name:
-            physics_object, name = name.split(".")
-        else:
-            physics_object = None
-
-        return cls(*arg, **kwargs, physics_object=physics_object, name=name)
-
-    @property
-    def config(self) -> dict[str, Any]:
-        return {
-            "physics_object": self._physics_object,
-            "name": self._name,
-            "value": self._value,
-            "supported_objects": self._supporedt_objects,
-        }
-
-    @classmethod
-    def from_config(cls, config: dict[str, Any]) -> Observable:
-        value = config.pop("value")
-        instance = cls(**config)
-        instance._value = value
-        return instance
-
-    @property
-    def value(self) -> Any:
-        if self._value is None:
-            return nan
-        return self._value
 
     @property
     def shape(self):
         return str(self.to_awkward().type)
 
     @property
-    def dtype(self) -> Any:
-        return self._dtype
+    def identifier(self) -> str:
+        if self.physics_object:
+            return f"{self.physics_object.identifier}.{self.name}"
 
-    @dtype.setter
-    def dtype(self, dtype: Any) -> Observable:
-        self._dtype = dtype
+        return self.name
+
+    @property
+    def config(self) -> dict[str, Any]:
+        return {
+            "physics_object": self.physics_object,
+            "supported_types": self.supported_types,
+            "name": self.name,
+            "value": self.value,
+            "dtype": self.dtype,
+        }
+
+    def __repr__(self) -> str:
+        return self.identifier
+
+    @classmethod
+    def from_identifier(cls, identifier: str, **kwargs) -> Observable:
+        if "." in identifier:
+            physics_object, name = identifier.split(".")
+        else:
+            physics_object, name = None, identifier
+
+        kwargs["physics_object"] = physics_object
+        kwargs["name"] = name
+
+        return cls(**kwargs)
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> Observable:
+        return cls(**config)
 
     def to_awkward(self, dtype=None):
+        if isnan(self.value):
+            raise ValueError(
+                "Cannot convert nan value to awkward array. \n"
+                "This happens when self._value has no value. Please overwrite `read` method to set self._value."
+            )
+
         value = self.value if isinstance(self.value, list) else [self.value]
         dtype = dtype if dtype is not None else self.dtype
 
@@ -128,61 +101,30 @@ class Observable:
 
         return np.array(value, dtype=dtype)
 
-    @property
-    def supported_objects(self) -> list[PhysicsObjectOptions]:
-        if isinstance(self._supporedt_objects, str):
-            return [self._supporedt_objects]
-
-        return self._supporedt_objects
-
-    def __repr__(self) -> str:
-        return f"{self.fullname}: {self.value}"
-
-    def _is_valid_physics_object(
+    def _validate_physics_object(
         self,
-        physics_object: str,
-        supported_objects: PhysicsObjectOptions | list[PhysicsObjectOptions],
+        identifier: str,
+        supported_types: list[str],
     ) -> bool:
-        if not isinstance(supported_objects, list):
-            supported_objects = [supported_objects]
-
         # Avoid the remove method to modify the original list
-        supported_objects = supported_objects.copy()
+        supported_types = supported_types.copy()
 
-        if "all" in supported_objects:
-            return True
+        if "multiple" in supported_types:
+            supported_types.remove("multiple")
 
-        if "multiple" in supported_objects:
-            supported_objects.remove("multiple")
-
-            if len(supported_objects) == 0:
+            if not is_multiple(identifier, supported_types):
                 raise ValueError(
-                    "Missing basic physics object types like 'single', 'collective', "
-                    "'nested' when specifying 'multiple' as a supported object."
+                    f"{identifier} is not a valid identifier for a multiple physics object."
                 )
-            else:
-                if is_multiple_physics_object(physics_object, supported_objects):
-                    return True
-                else:
-                    return False
 
-        is_valid = False
-        for support_object in supported_objects:
-            if support_object == "single":
-                status = is_single_physics_object(physics_object)
-            elif support_object == "collective":
-                status = is_collective_physics_object(physics_object)
-            elif support_object == "nested":
-                status = is_nested_physics_object(physics_object)
-            else:
-                raise ValueError(f"Unknown support_object {support_object}")
-
-            is_valid = is_valid or status
-
-            if is_valid:
-                return True
-
-        return False
+        else:
+            obj = get(identifier)
+            supported_classes = [ALL_OBJECTS_DICT[i] for i in supported_types]
+            if type(obj) not in supported_classes:
+                raise ValueError(
+                    f"Physics object {obj} is not supported."
+                    f"It is type {type(obj)} but should be one of {supported_types}"
+                )
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
@@ -192,186 +134,3 @@ class Observable:
     def add_alias(cls, *alias: str) -> None:
         for i in alias:
             Observable.ALL_OBSERVABLES[i] = cls
-
-
-# class Observable(ABC):
-#     ALL_OBSERVABLES = {}
-
-#     def __init__(self, physics_object: str | None = None, name: str | None = None):
-#         self.physics_object = physics_object
-#         if self.physics_object is not None:
-#             self.objs = self.parse_physics_object(self.physics_object)
-#         else:
-#             self.objs = []
-
-#         self._name = self.__class__.__name__ if name is None else name
-#         self._value = None
-
-#     def read(self, event):
-#         self.main_objs = []
-#         self.sub_objs = []
-#         self.event = event
-
-#         if self.physics_object:
-#             for obj in self.objs:
-#                 main_name = obj["main"][0]
-#                 main_start = obj["main"][1]
-#                 main_end = obj["main"][2]
-
-#                 main_objs = list(getattr(event, main_name))
-#                 clipped_main_objs = main_objs[slice(main_start, main_end)]
-#                 required_main_length = (
-#                     main_end - main_start if main_end is not None else None
-#                 )
-#                 actual_main_length = len(clipped_main_objs)
-
-#                 if (
-#                     required_main_length is not None
-#                     and required_main_length > actual_main_length
-#                 ):
-#                     main_padding_length = main_end - main_start - len(clipped_main_objs)
-#                     padded_main_objs = clipped_main_objs + [None] * main_padding_length
-#                     prepared_main_objs = padded_main_objs
-#                 else:
-#                     prepared_main_objs = clipped_main_objs
-#                 self.main_objs.append(prepared_main_objs)
-
-#                 if obj.get("sub") is None:
-#                     self.sub_objs.append([])
-#                     continue
-
-#                 sub_name = obj["sub"][0]
-#                 sub_start = obj["sub"][1]
-#                 sub_end = obj["sub"][2]
-
-#                 sub_objs_per_main = []
-#                 for main_obj in prepared_main_objs:
-#                     if main_obj is None:
-#                         if sub_end is None:
-#                             sub_objs_per_main.append([None])
-#                         else:
-#                             sub_objs_per_main.append([None] * required_sub_length)
-#                         continue
-
-#                     sub_objs = list(getattr(main_obj, sub_name))
-#                     clipped_sub_objs = sub_objs[slice(sub_start, sub_end)]
-#                     required_sub_length = (
-#                         sub_end - sub_start if sub_end is not None else None
-#                     )
-#                     acutal_sub_length = len(clipped_sub_objs)
-
-#                     if (
-#                         required_sub_length is not None
-#                         and required_sub_length > acutal_sub_length
-#                     ):
-#                         sub_padding_length = required_sub_length - acutal_sub_length
-#                         padded_sub_objs = clipped_sub_objs + [None] * sub_padding_length
-#                         prepared_sub_objs = padded_sub_objs
-#                     else:
-#                         prepared_sub_objs = clipped_sub_objs
-#                     sub_objs_per_main.append(prepared_sub_objs)
-
-#                 self.sub_objs.append(sub_objs_per_main)
-
-#         self._value = self.get_value()
-
-#         return self
-
-#     @property
-#     def name(self):
-#         if self.physics_object:
-#             return f"{self.physics_object}.{self._name}"
-#         else:
-#             return self._name
-
-#     @property
-#     def value(self):
-#         return self._value
-
-#     @value.setter
-#     def value(self, value):
-#         self._value = value
-
-#     @property
-#     def shape(self):
-#         captured_output = io.StringIO()
-#         self.to_awkward().type.show(captured_output)
-#         return captured_output.getvalue().strip()
-
-#     def to_awkward(self, dtype=None):
-#         ak_array = ak.from_iter(self.value)
-#         ak_array = ak.values_astype(ak_array, dtype)
-#         try:
-#             ak_array = ak.to_regular(ak_array)
-#         except ValueError:
-#             pass
-#         return ak_array
-
-#     def to_numpy(self, keepdims=None, dtype=None):
-#         if keepdims is not None:
-#             return np.array(self._value, dtype=dtype)
-#         else:
-#             return np.squeeze(np.array(self._value, dtype=dtype))
-
-#     @abstractmethod
-#     def get_value(self) -> Any:
-#         ...
-
-#     def parse_branch(self, branch: str):
-#         if re.match(r"^([A-Za-z]+)$", branch):
-#             branch += ":"
-
-#         if match := re.match(r"^([A-Za-z]+)(\d+)$", branch):
-#             obj, index = match.groups()
-#             start = int(index)
-#             stop = start + 1
-#         elif match := re.match(r"^([A-Za-z]+)(\d*:?\d*)$", branch):
-#             obj, agnostic_index = match.groups()
-#             indices = agnostic_index.split(":")
-#             if indices[0] == "" and indices[1] == "":
-#                 start = 0
-#                 stop = None
-#             elif indices[0] == "" and indices[1] != "":
-#                 start = 0
-#                 stop = int(indices[1])
-#             elif indices[0] != "" and indices[1] == "":
-#                 start = int(indices[0])
-#                 stop = None
-#             else:
-#                 start = int(indices[0])
-#                 stop = int(indices[1])
-#         else:
-#             return
-
-#         return obj, start, stop
-
-#     def parse_physics_object(self, physics_object: str):
-#         output = []
-#         for phyobj_name in physics_object.split(","):
-#             item = {}
-
-#             if "." not in phyobj_name:
-#                 item["main"] = self.parse_branch(phyobj_name)
-#                 output.append(item)
-#             else:
-#                 main, sub = phyobj_name.split(".")
-#                 item["main"] = self.parse_branch(main)
-#                 item["sub"] = self.parse_branch(sub)
-#                 output.append(item)
-#         return output
-
-#     def __repr__(self) -> str:
-#         return f"{self.name}: {self.value}"
-
-#     def __eq__(self, other: Observable) -> bool:
-#         return self.name == other.name
-
-#     def __init_subclass__(cls, **kwargs) -> None:
-#         super().__init_subclass__(**kwargs)
-#         Observable.ALL_OBSERVABLES[cls.__name__] = cls
-
-#     @classmethod
-#     def add_alias(cls, *alias: str) -> None:
-#         """Add alias for the class name."""
-#         for i in alias:
-#             Observable.ALL_OBSERVABLES[i] = cls
