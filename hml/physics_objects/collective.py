@@ -97,7 +97,7 @@ class Collective(PhysicsObject):
         self.stop = stop
         self.objects = []
 
-    def read(self, entry: Any):
+    def read(self, entry: Any) -> Collective:
         """Read an entry to fetch the objects.
 
         Every time it is called, the objects will be cleared and re-filled.
@@ -190,7 +190,7 @@ class Collective(PhysicsObject):
             return f"{self.name}{self.start}:{self.stop}"
 
     @classmethod
-    def from_identifier(cls, identifier: str):
+    def from_identifier(cls, identifier: str) -> Collective:
         """Create a collective physics object from an identifier.
 
         It decomposes the identifier into a name, a starting index, and a stopping

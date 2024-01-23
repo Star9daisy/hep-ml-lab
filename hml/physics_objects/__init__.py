@@ -9,7 +9,7 @@ from .single import Single
 from .single import is_single
 
 
-def get(identifier: str):
+def get(identifier: str) -> PhysicsObject:
     if is_single(identifier):
         obj = Single.from_identifier(identifier)
     elif is_collective(identifier):

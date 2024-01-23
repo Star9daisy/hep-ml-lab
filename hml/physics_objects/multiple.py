@@ -88,7 +88,7 @@ class Multiple(PhysicsObject):
         self.all = physics_objects
         self.objects = []
 
-    def read(self, entry: Any):
+    def read(self, entry: Any) -> Multiple:
         """Read an entry to fetch the objects.
 
         Since a multiple physics object may contain nested ones, the entry is
@@ -209,11 +209,11 @@ class Multiple(PhysicsObject):
                 raise ValueError(f"Invalid config for {cls.__name__}")
         return cls(*objects)
 
+    def __repr__(self) -> str:
+        return self.identifier
+
     def __eq__(self, other: Multiple) -> bool:
         for obj1, obj2 in zip(self.all, other.all):
             if obj1 != obj2:
                 return False
         return True
-
-    def __repr__(self):
-        return self.identifier
