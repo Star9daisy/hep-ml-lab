@@ -3,8 +3,8 @@ from math import isnan
 import pytest
 
 from ..events.delphes_events import DelphesEvents
-from ..observables.momentum_y import MomentumY
-from ..observables.momentum_y import Py
+from .momentum_y import MomentumY
+from .momentum_y import Py
 
 
 @pytest.fixture
@@ -13,67 +13,41 @@ def event():
     yield events[0]
 
 
-def test_momentum_y(event):
-    obs = MomentumY(physics_object="FatJet0")
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective", "nested"]
+def test_attributes():
+    obs = MomentumY("Jet0")
+
+    assert obs.physics_object.identifier == "Jet0"
+    assert obs.supported_types == ["single", "collective", "nested"]
     assert obs.name == "MomentumY"
     assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.MomentumY"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "MomentumY"
+    assert obs.dtype == "float64"
+
+    assert obs.shape == "1 * float64"
+    assert obs.identifier == "Jet0.MomentumY"
     assert obs.config == {
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective", "nested"],
+        "physics_object": obs.physics_object.identifier,
+        "name": obs.name,
+        "value": obs.value,
+        "dtype": obs.dtype,
     }
-    assert MomentumY.from_name("FatJet0.MomentumY").fullname == obs.fullname
-    assert MomentumY.from_config(obs.config).fullname == obs.fullname
+    assert repr(obs) == "Jet0.MomentumY"
 
-    obs.read(event)
-    assert isinstance(obs.value, float)
+    assert MomentumY.from_identifier("Jet0.MomentumY").config == obs.config
 
-    obs = MomentumY(physics_object="FatJet:5")
-    obs.read(event)
-    assert len(obs.value) == 5
-
-    obs = MomentumY(physics_object="Jet:2.Particles:3")
-    obs.read(event)
-    assert len(obs.value) == 2
-    assert len(obs.value[0]) == 3
-
-
-def test_py(event):
-    obs = Py(physics_object="FatJet0")
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective", "nested"]
+    obs = Py("Jet0")
     assert obs.name == "Py"
-    assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.Py"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "Py"
-    assert obs.config == {
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective", "nested"],
-    }
-    assert Py.from_name("FatJet0.Py").fullname == obs.fullname
-    assert Py.from_config(obs.config).fullname == obs.fullname
+    assert obs.identifier == "Jet0.Py"
 
-    obs.read(event)
+
+def test_read(event):
+    obs = Py("Jet0").read(event)
     assert isinstance(obs.value, float)
+    assert obs.shape == "1 * float64"
 
-    obs = Py(physics_object="FatJet:5")
-    obs.read(event)
-    assert len(obs.value) == 5
+    obs = Py("Jet:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "5 * float64"
 
-    obs = Py(physics_object="Jet:2.Particles:3")
-    obs.read(event)
-    assert len(obs.value) == 2
-    assert len(obs.value[0]) == 3
-
-
-def test_bad_case(event):
-    assert isnan(Py(physics_object="FatJet100").read(event).value)
+    obs = Py("Jet:2.Constituents:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "2 * 5 * float64"

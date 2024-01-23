@@ -13,67 +13,41 @@ def event():
     yield events[0]
 
 
-def test_azimuthal_angle(event):
-    obs = AzimuthalAngle(physics_object="FatJet0")
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective", "nested"]
+def test_attributes():
+    obs = AzimuthalAngle("Jet0")
+
+    assert obs.physics_object.identifier == "Jet0"
+    assert obs.supported_types == ["single", "collective", "nested"]
     assert obs.name == "AzimuthalAngle"
     assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.AzimuthalAngle"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "AzimuthalAngle"
+    assert obs.dtype == "float64"
+
+    assert obs.shape == "1 * float64"
+    assert obs.identifier == "Jet0.AzimuthalAngle"
     assert obs.config == {
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective", "nested"],
+        "physics_object": obs.physics_object.identifier,
+        "name": obs.name,
+        "value": obs.value,
+        "dtype": obs.dtype,
     }
-    assert AzimuthalAngle.from_name("FatJet0.AzimuthalAngle").fullname == obs.fullname
-    assert AzimuthalAngle.from_config(obs.config).fullname == obs.fullname
+    assert repr(obs) == "Jet0.AzimuthalAngle"
 
-    obs.read(event)
-    assert isinstance(obs.value, float)
+    assert AzimuthalAngle.from_identifier("Jet0.AzimuthalAngle").config == obs.config
 
-    obs = AzimuthalAngle(physics_object="FatJet:5")
-    obs.read(event)
-    assert len(obs.value) == 5
-
-    obs = AzimuthalAngle(physics_object="Jet:2.Particles:3")
-    obs.read(event)
-    assert len(obs.value) == 2
-    assert len(obs.value[0]) == 3
-
-
-def test_phi(event):
-    obs = Phi(physics_object="FatJet0")
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective", "nested"]
+    obs = Phi("Jet0")
     assert obs.name == "Phi"
-    assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.Phi"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "Phi"
-    assert obs.config == {
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective", "nested"],
-    }
-    assert Phi.from_name("FatJet0.Phi").fullname == obs.fullname
-    assert Phi.from_config(obs.config).fullname == obs.fullname
+    assert obs.identifier == "Jet0.Phi"
 
-    obs.read(event)
+
+def test_read(event):
+    obs = Phi("Jet0").read(event)
     assert isinstance(obs.value, float)
+    assert obs.shape == "1 * float64"
 
-    obs = Phi(physics_object="FatJet:5")
-    obs.read(event)
-    assert len(obs.value) == 5
+    obs = Phi("Jet:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "5 * float64"
 
-    obs = Phi(physics_object="Jet:2.Particles:3")
-    obs.read(event)
-    assert len(obs.value) == 2
-    assert len(obs.value[0]) == 3
-
-
-def test_bad_case(event):
-    assert isnan(Phi(physics_object="FatJet100").read(event).value)
+    obs = Phi("Jet:2.Constituents:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "2 * 5 * float64"

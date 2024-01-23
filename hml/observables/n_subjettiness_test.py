@@ -13,103 +13,49 @@ def event():
     yield events[0]
 
 
-def test_n_subjettiness(event):
-    obs = NSubjettiness(n=1, physics_object="FatJet0")
+def test_attributes():
+    obs = NSubjettiness(1, "FatJet0")
+
     assert obs.n == 1
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective"]
+    assert obs.physics_object.identifier == "FatJet0"
+    assert obs.supported_types == ["single", "collective"]
     assert obs.name == "NSubjettiness"
     assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.NSubjettiness"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "NSubjettiness"
+    assert obs.dtype == "float64"
+
+    assert obs.shape == "1 * float64"
+    assert obs.identifier == "FatJet0.NSubjettiness"
     assert obs.config == {
         "n": 1,
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective"],
+        "physics_object": obs.physics_object.identifier,
+        "name": obs.name,
+        "value": obs.value,
+        "dtype": obs.dtype,
     }
-    assert NSubjettiness.from_name("FatJet0.NSubjettiness", 1).fullname == obs.fullname
-    assert NSubjettiness.from_config(obs.config).fullname == obs.fullname
+    assert repr(obs) == "FatJet0.NSubjettiness"
 
-    obs.read(event)
-    assert isinstance(obs.value, float)
+    assert (
+        NSubjettiness.from_identifier("FatJet0.NSubjettiness", n=1).config == obs.config
+    )
 
-    obs = NSubjettiness(n=1, physics_object="FatJet:5")
-    assert obs.n == 1
-    assert obs.physics_object.name == "FatJet:5"
-    assert obs.supported_objects == ["single", "collective"]
-    assert obs.name == "NSubjettiness"
-    assert isnan(obs.value)
-    assert obs.fullname == "FatJet:5.NSubjettiness"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "NSubjettiness"
-    assert obs.physics_object.name == "FatJet:5"
-    assert obs.config == {
-        "n": 1,
-        "physics_object": "FatJet:5",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective"],
-    }
-    assert NSubjettiness.from_name("FatJet:5.NSubjettiness", 1).fullname == obs.fullname
-    assert NSubjettiness.from_config(obs.config).fullname == obs.fullname
-
-    obs.read(event)
-    assert len(obs.value) == 5
-
-
-def test_tau_n(event):
-    obs = TauN(n=1, physics_object="FatJet0")
-    assert obs.n == 1
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective"]
+    obs = TauN(1, "FatJet0")
     assert obs.name == "Tau1"
-    assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.Tau1"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "TauN"
-    assert obs.config == {
-        "n": 1,
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective"],
-    }
-    assert TauN.from_name("FatJet0.Tau1").fullname == obs.fullname
-    assert TauN.from_config(obs.config).fullname == obs.fullname
+    assert obs.identifier == "FatJet0.Tau1"
 
-    obs.read(event)
+
+def test_read(event):
+    obs = TauN(1, "FatJet0").read(event)
     assert isinstance(obs.value, float)
+    assert obs.shape == "1 * float64"
 
-    obs = TauN(n=1, physics_object="FatJet:5")
+    obs = TauN(1, "FatJet:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "5 * float64"
+
+
+def test_from_identifier():
+    obs = TauN.from_identifier("FatJet0.Tau1")
     assert obs.n == 1
-    assert obs.physics_object.name == "FatJet:5"
-    assert obs.supported_objects == ["single", "collective"]
-    assert obs.name == "Tau1"
-    assert isnan(obs.value)
-    assert obs.fullname == "FatJet:5.Tau1"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "TauN"
-    assert obs.physics_object.name == "FatJet:5"
-    assert obs.config == {
-        "n": 1,
-        "physics_object": "FatJet:5",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective"],
-    }
-    assert TauN.from_name("FatJet:5.Tau1").fullname == obs.fullname
-    assert TauN.from_config(obs.config).fullname == obs.fullname
 
-    obs.read(event)
-    assert len(obs.value) == 5
-
-
-def test_bad_cases(event):
-    assert isnan(TauN(n=1, physics_object="Jet100").read(event).value)
-    assert len(TauN(n=1, physics_object="Jet100:").read(event).value) == 0
-
-    with pytest.raises(TypeError):
-        TauN.from_name("Tau1")
+    with pytest.raises(ValueError):
+        TauN.from_identifier("Tau1")

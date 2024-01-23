@@ -1,7 +1,9 @@
-from math import nan
+from __future__ import annotations
 
-from ..physics_objects.physics_object import PhysicsObjectOptions
-from ..physics_objects.single import is_single_physics_object
+from math import nan
+from typing import Any
+
+from ..physics_objects.single import is_single
 from .observable import Observable
 
 
@@ -11,22 +13,27 @@ class NSubjettiness(Observable):
         n: int,
         physics_object: str,
         name: str | None = None,
-        supported_objects: list[PhysicsObjectOptions] = ["single", "collective"],
+        value: Any = None,
+        dtype: Any = None,
     ):
-        super().__init__(physics_object, name, supported_objects)
+        supported_types = ["single", "collective"]
+        super().__init__(physics_object, supported_types, name, value, dtype)
         self.n = n
 
     def read(self, event):
-        if (branch := self.physics_object.read(event)) is None:
-            self._value = nan
+        self.physics_object.read(event)
 
-        elif is_single_physics_object(self.physics_object):
-            self._value = branch.Tau[self.n - 1]
+        if is_single(self.physics_object):
+            obj = self.physics_object.objects[0]
+            self._value = obj.Tau[self.n - 1] if obj else nan
 
         else:
-            self._value = [
-                obj.Tau[self.n - 1] if obj is not None else nan for obj in branch
-            ]
+            self._value = []
+            for obj in self.physics_object.objects:
+                if obj:
+                    self._value.append(obj.Tau[self.n - 1])
+                else:
+                    self._value.append(nan)
 
         return self
 
@@ -43,15 +50,18 @@ class TauN(NSubjettiness):
         return f"Tau{self.n}"
 
     @classmethod
-    def from_name(cls, name: str) -> Observable:
-        if "." in name:
-            physics_object, name = name.split(".")
-        else:
-            physics_object = None
+    def from_identifier(cls, identifier: str, **kwargs) -> TauN:
+        if "." not in identifier:
+            raise ValueError(f"Invalid identifier {identifier}.")
+
+        physics_object, name = identifier.split(".")
 
         n = int(name[-1])
+        kwargs["n"] = n
+        kwargs["physics_object"] = physics_object
+        kwargs["name"] = name
 
-        return cls(n, physics_object, name)
+        return cls(**kwargs)
 
 
 NSubjettiness.add_alias("n_subjettiness")

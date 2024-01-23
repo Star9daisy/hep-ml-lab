@@ -13,67 +13,41 @@ def event():
     yield events[0]
 
 
-def test_pseudo_rapidity(event):
-    obs = PseudoRapidity(physics_object="FatJet0")
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective", "nested"]
+def test_attributes():
+    obs = PseudoRapidity("Jet0")
+
+    assert obs.physics_object.identifier == "Jet0"
+    assert obs.supported_types == ["single", "collective", "nested"]
     assert obs.name == "PseudoRapidity"
     assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.PseudoRapidity"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "PseudoRapidity"
+    assert obs.dtype == "float64"
+
+    assert obs.shape == "1 * float64"
+    assert obs.identifier == "Jet0.PseudoRapidity"
     assert obs.config == {
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective", "nested"],
+        "physics_object": obs.physics_object.identifier,
+        "name": obs.name,
+        "value": obs.value,
+        "dtype": obs.dtype,
     }
-    assert PseudoRapidity.from_name("FatJet0.PseudoRapidity").fullname == obs.fullname
-    assert PseudoRapidity.from_config(obs.config).fullname == obs.fullname
+    assert repr(obs) == "Jet0.PseudoRapidity"
 
-    obs.read(event)
-    assert isinstance(obs.value, float)
+    assert PseudoRapidity.from_identifier("Jet0.PseudoRapidity").config == obs.config
 
-    obs = PseudoRapidity(physics_object="FatJet:5")
-    obs.read(event)
-    assert len(obs.value) == 5
-
-    obs = PseudoRapidity(physics_object="Jet:2.Particles:3")
-    obs.read(event)
-    assert len(obs.value) == 2
-    assert len(obs.value[0]) == 3
-
-
-def test_eta(event):
-    obs = Eta(physics_object="FatJet0")
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective", "nested"]
+    obs = Eta("Jet0")
     assert obs.name == "Eta"
-    assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.Eta"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "Eta"
-    assert obs.config == {
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective", "nested"],
-    }
-    assert Eta.from_name("FatJet0.Eta").fullname == obs.fullname
-    assert Eta.from_config(obs.config).fullname == obs.fullname
+    assert obs.identifier == "Jet0.Eta"
 
-    obs.read(event)
+
+def test_read(event):
+    obs = Eta("Jet0").read(event)
     assert isinstance(obs.value, float)
+    assert obs.shape == "1 * float64"
 
-    obs = Eta(physics_object="FatJet:5")
-    obs.read(event)
-    assert len(obs.value) == 5
+    obs = Eta("Jet:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "5 * float64"
 
-    obs = Eta(physics_object="Jet:2.Particles:3")
-    obs.read(event)
-    assert len(obs.value) == 2
-    assert len(obs.value[0]) == 3
-
-
-def test_bad_case(event):
-    assert isnan(Eta(physics_object="FatJet100").read(event).value)
+    obs = Eta("Jet:2.Constituents:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "2 * 5 * float64"

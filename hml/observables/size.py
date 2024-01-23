@@ -1,6 +1,5 @@
 from typing import Any
 
-from ..physics_objects.physics_object import PhysicsObjectOptions
 from .observable import Observable
 
 
@@ -9,14 +8,15 @@ class Size(Observable):
         self,
         physics_object: str,
         name: str | None = None,
-        supported_objects: list[PhysicsObjectOptions] = ["collective"],
+        value: Any = None,
         dtype: Any = None,
     ):
-        super().__init__(physics_object, name, supported_objects, dtype)
+        supported_types = ["collective"]
+        super().__init__(physics_object, supported_types, name, value, dtype)
 
     def read(self, event):
-        branch = self.physics_object.read(event)
-        self._value = len(branch)
+        self.physics_object.read(event)
+        self._value = len(self.physics_object.objects)
 
         return self
 

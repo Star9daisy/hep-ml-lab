@@ -13,70 +13,44 @@ def event():
     yield events[0]
 
 
-def test_transverse_momentum(event):
-    obs = TransverseMomentum(physics_object="FatJet0")
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective", "nested"]
+def test_attributes():
+    obs = TransverseMomentum("Jet0")
+
+    assert obs.physics_object.identifier == "Jet0"
+    assert obs.supported_types == ["single", "collective", "nested"]
     assert obs.name == "TransverseMomentum"
     assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.TransverseMomentum"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "TransverseMomentum"
+    assert obs.dtype == "float64"
+
+    assert obs.shape == "1 * float64"
+    assert obs.identifier == "Jet0.TransverseMomentum"
     assert obs.config == {
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective", "nested"],
+        "physics_object": obs.physics_object.identifier,
+        "name": obs.name,
+        "value": obs.value,
+        "dtype": obs.dtype,
     }
+    assert repr(obs) == "Jet0.TransverseMomentum"
+
     assert (
-        TransverseMomentum.from_name("FatJet0.TransverseMomentum").fullname
-        == obs.fullname
+        TransverseMomentum.from_identifier("Jet0.TransverseMomentum").config
+        == obs.config
     )
-    assert TransverseMomentum.from_config(obs.config).fullname == obs.fullname
 
-    obs.read(event)
-    assert isinstance(obs.value, float)
-
-    obs = TransverseMomentum(physics_object="FatJet:5")
-    obs.read(event)
-    assert len(obs.value) == 5
-
-    obs = TransverseMomentum(physics_object="Jet:2.Particles:3")
-    obs.read(event)
-    assert len(obs.value) == 2
-    assert len(obs.value[0]) == 3
-
-
-def test_pt(event):
-    obs = Pt(physics_object="FatJet0")
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_objects == ["single", "collective", "nested"]
+    obs = Pt("Jet0")
     assert obs.name == "Pt"
-    assert isnan(obs.value)
-    assert obs.fullname == "FatJet0.Pt"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "Pt"
-    assert obs.config == {
-        "physics_object": "FatJet0",
-        "name": None,
-        "value": None,
-        "supported_objects": ["single", "collective", "nested"],
-    }
-    assert Pt.from_name("FatJet0.Pt").fullname == obs.fullname
-    assert Pt.from_config(obs.config).fullname == obs.fullname
+    assert obs.identifier == "Jet0.Pt"
 
-    obs.read(event)
+
+def test_read(event):
+    obs = Pt("Jet0").read(event)
     assert isinstance(obs.value, float)
+    assert obs.shape == "1 * float64"
 
-    obs = Pt(physics_object="FatJet:5")
-    obs.read(event)
-    assert len(obs.value) == 5
+    obs = Pt("Jet:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "5 * float64"
 
-    obs = Pt(physics_object="Jet:2.Particles:3")
-    obs.read(event)
-    assert len(obs.value) == 2
-    assert len(obs.value[0]) == 3
-
-
-def test_bad_case(event):
-    assert isnan(Pt(physics_object="FatJet100").read(event).value)
+    obs = Pt("Jet:2.Constituents:5").read(event)
+    assert isinstance(obs.value, list)
+    assert obs.shape == "2 * 5 * float64"

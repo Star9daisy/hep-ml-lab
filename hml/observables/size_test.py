@@ -12,32 +12,33 @@ def event():
     yield events[0]
 
 
-def test_size(event):
-    obs = Size(physics_object="FatJet")
-    assert obs.physics_object.name == "FatJet"
-    assert obs.supported_objects == ["collective"]
+def test_attributes():
+    obs = Size("FatJet:")
+
+    assert obs.physics_object.identifier == "FatJet:"
+    assert obs.supported_types == ["collective"]
     assert obs.name == "Size"
     assert isnan(obs.value)
-    assert obs.fullname == "FatJet.Size"
-    assert repr(obs) == f"{obs.fullname}: {obs.value}"
-    assert obs.classname == "Size"
+    assert obs.dtype == "float64"
+
+    assert obs.shape == "1 * float64"
+    assert obs.identifier == "FatJet:.Size"
     assert obs.config == {
-        "physics_object": "FatJet",
-        "name": None,
-        "value": None,
-        "supported_objects": ["collective"],
+        "physics_object": obs.physics_object.identifier,
+        "name": obs.name,
+        "value": obs.value,
+        "dtype": obs.dtype,
     }
-    assert Size.from_name("FatJet.Size").fullname == obs.fullname
-    assert Size.from_config(obs.config).fullname == obs.fullname
+    assert repr(obs) == "FatJet:.Size"
 
-    obs.read(event)
+    assert Size.from_identifier("FatJet:.Size").config == obs.config
+
+
+def test_read(event):
+    obs = Size("FatJet:").read(event)
     assert isinstance(obs.value, int)
+    assert obs.shape == "1 * float64"
 
-
-def test_bad_case(event):
-    # Not supported physics object
-    with pytest.raises(TypeError):
-        Size(physics_object="FatJet0")
-
-    # Bad start index
-    assert Size(physics_object="FatJet100:").read(event).value == 0
+    obs = Size("FatJet:5").read(event)
+    assert isinstance(obs.value, int)
+    assert obs.shape == "1 * float64"
