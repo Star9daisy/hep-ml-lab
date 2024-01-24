@@ -4,7 +4,6 @@ from math import nan
 from typing import Any
 
 from ..physics_objects.single import is_single
-from .n_subjettiness import TauN
 from .observable import Observable
 
 
@@ -25,19 +24,15 @@ class NSubjettinessRatio(Observable):
 
     def read(self, event) -> Any:
         self.physics_object.read(event)
+        self._value = []
 
-        if is_single(self.physics_object):
-            obj = self.physics_object.objects[0]
-            tau_m = obj.Tau[self.m - 1] if obj else nan
-            tau_n = obj.Tau[self.n - 1] if obj else nan
-            self._value = tau_m / tau_n
-        else:
-            self._value = []
-            for obj in self.physics_object.objects:
+        for obj in self.physics_object.objects:
+            if is_single(self.physics_object):
+                self._value.append(obj.Tau[self.m - 1] / obj.Tau[self.n - 1])
+
+            else:
                 if obj is not None:
-                    tau_m = obj.Tau[self.m - 1]
-                    tau_n = obj.Tau[self.n - 1]
-                    self._value.append(tau_m / tau_n)
+                    self._value.append(obj.Tau[self.m - 1] / obj.Tau[self.n - 1])
                 else:
                     self._value.append(nan)
 
