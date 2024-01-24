@@ -50,24 +50,14 @@ def test_from_config():
 
 
 def test_read(event):
-    obj = Single("Jet", 0).read(event)
-    assert len(obj.objects) == 1
-    assert obj.objects[0] is not None
-
-    obj = Single("Jet", 100).read(event)
-    assert len(obj.objects) == 1
-    assert obj.objects[0] is None
+    assert len(Single("Jet", 0).read(event).objects) == 1
+    assert len(Single("Jet", 100).read(event).objects) == 0
 
     with pytest.raises(ValueError):
         Single("Unknown", 0).read(event)
 
-    obj = Single("Particles", 0).read(event.Jet[0])
-    assert len(obj.objects) == 1
-    assert obj.objects[0] is not None
-
-    obj = Single("Particles", 100).read(event.Jet[0])
-    assert len(obj.objects) == 1
-    assert obj.objects[0] is None
+    assert len(Single("Constituents", 0).read(event.Jet[0]).objects) == 1
+    assert len(Single("Constituents", 100).read(event.Jet[0]).objects) == 0
 
     with pytest.raises(ValueError):
         Single("Unknown", 0).read(event.Jet[0])

@@ -108,9 +108,9 @@ class Single(PhysicsObject):
         >>> Single("Constituents", 0).read(event.Jet[0]).objects
         [<cppyy.gbl.Tower object at 0x8f59ed0>]
 
-        ! If the index is out of range, the object will be None:
+        ! If the index is out of range, the objects will be empty:
         >>> Single("Jet", 100).read(event).objects
-        [None]
+        []
         """
         self.objects = []
 
@@ -121,9 +121,7 @@ class Single(PhysicsObject):
                 "Use `dir(entry)` to check all the available attributes."
             )
 
-        if self.index >= object.GetEntries():
-            self.objects.append(None)
-        else:
+        if self.index < object.GetEntries():
             self.objects.append(object[self.index])
 
         return self
