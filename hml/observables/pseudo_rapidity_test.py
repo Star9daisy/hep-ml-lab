@@ -30,7 +30,7 @@ def test_attributes():
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "Jet0.PseudoRapidity"
+    assert repr(obs) == "Jet0.PseudoRapidity : nan"
 
     assert PseudoRapidity.from_identifier("Jet0.PseudoRapidity").config == obs.config
 

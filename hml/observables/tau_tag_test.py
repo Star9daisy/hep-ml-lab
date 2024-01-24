@@ -29,7 +29,7 @@ def test_attributes():
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "FatJet0.TauTag"
+    assert repr(obs) == "FatJet0.TauTag : nan"
 
     assert TauTag.from_identifier("FatJet0.TauTag").config == obs.config
 

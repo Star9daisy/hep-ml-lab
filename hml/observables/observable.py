@@ -82,7 +82,7 @@ class Observable:
         }
 
     def __repr__(self) -> str:
-        return self.identifier
+        return f"{self.identifier} : {self.value}"
 
     @classmethod
     def from_identifier(cls, identifier: str, **kwargs) -> Observable:

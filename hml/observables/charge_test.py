@@ -29,7 +29,7 @@ def test_attributes():
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "FatJet0.Charge"
+    assert repr(obs) == "FatJet0.Charge : nan"
 
     assert Charge.from_identifier("FatJet0.Charge").config == obs.config
 

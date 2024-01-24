@@ -30,7 +30,7 @@ def test_attributes():
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "Jet0,Jet1.AngularDistance"
+    assert repr(obs) == "Jet0,Jet1.AngularDistance : nan"
 
     assert (
         AngularDistance.from_identifier("Jet0,Jet1.AngularDistance").config

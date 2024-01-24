@@ -30,7 +30,7 @@ def test_attributes():
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "Jet0.AzimuthalAngle"
+    assert repr(obs) == "Jet0.AzimuthalAngle : nan"
 
     assert AzimuthalAngle.from_identifier("Jet0.AzimuthalAngle").config == obs.config
 

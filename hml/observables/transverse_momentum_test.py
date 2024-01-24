@@ -30,7 +30,7 @@ def test_attributes():
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "Jet0.TransverseMomentum"
+    assert repr(obs) == "Jet0.TransverseMomentum : nan"
 
     assert (
         TransverseMomentum.from_identifier("Jet0.TransverseMomentum").config

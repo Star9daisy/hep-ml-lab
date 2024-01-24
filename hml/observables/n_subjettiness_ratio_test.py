@@ -34,7 +34,7 @@ def test_n_subjettiness(event):
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "FatJet0.NSubjettinessRatio"
+    assert repr(obs) == "FatJet0.NSubjettinessRatio : nan"
 
     assert (
         NSubjettinessRatio.from_identifier(

@@ -30,7 +30,7 @@ def test_attributes():
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "Jet0.MomentumX"
+    assert repr(obs) == "Jet0.MomentumX : nan"
 
     assert MomentumX.from_identifier("Jet0.MomentumX").config == obs.config
 

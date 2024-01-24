@@ -29,7 +29,7 @@ def test_attributes():
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "FatJet:.Size"
+    assert repr(obs) == "FatJet:.Size : nan"
 
     assert Size.from_identifier("FatJet:.Size").config == obs.config
 
