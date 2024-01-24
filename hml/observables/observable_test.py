@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from ..events.delphes_events import DelphesEvents
+from . import get
 from .observable import Observable
 
 
@@ -84,3 +85,14 @@ def test_with_supported_types():
         Observable("Jet0", supported_types=["multiple"])
     with pytest.raises(ValueError):
         Observable("Jet0", supported_types=["single", "multiple"])
+
+
+def test_get():
+    assert get("Unknown") is None
+    assert get("Dummy") is not None
+    assert get("dummy") is not None
+    assert get("FatJet0.tau_21") is not None
+    assert get("FatJet0.tau21") is not None
+    assert get("FatJet0.tau1") is not None
+    assert get("FatJet0.tau2") is not None
+    assert get("Jet0.Pt") is not None

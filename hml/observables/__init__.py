@@ -31,10 +31,7 @@ from .transverse_momentum import Pt
 from .transverse_momentum import TransverseMomentum
 
 
-def get(identifier: str | None, *arg, **kwarg):
-    if identifier == "" or identifier is None:
-        return None
-
+def get(identifier: str, *arg, **kwarg):
     if "." in identifier:
         # Each nested physics object has one dot, so there may be multiple dots.
         # So we only take the last dot as the separator between physics object
