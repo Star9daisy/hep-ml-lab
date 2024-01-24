@@ -12,3 +12,5 @@
 # from hml import types
 # from hml import utils
 # from hml.version import __version__
+
+__version__ = "0.3.1"
