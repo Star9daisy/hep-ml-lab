@@ -24,17 +24,17 @@ class NSubjettinessRatio(Observable):
 
     def read(self, event) -> Any:
         self.physics_object.read(event)
-        self._value = []
+        objs = self.physics_object.objects
 
-        for obj in self.physics_object.objects:
-            if is_single(self.physics_object):
-                self._value.append(obj.Tau[self.m - 1] / obj.Tau[self.n - 1])
+        if is_single(self.physics_object):
+            tau_m = objs[0].Tau[self.m - 1] if objs != [] else nan
+            tau_n = objs[0].Tau[self.n - 1] if objs != [] else nan
+            self._value = tau_m / tau_n
 
-            else:
-                if obj is not None:
-                    self._value.append(obj.Tau[self.m - 1] / obj.Tau[self.n - 1])
-                else:
-                    self._value.append(nan)
+        else:
+            tau_m = [obj.Tau[self.m - 1] if obj is not None else nan for obj in objs]
+            tau_n = [obj.Tau[self.n - 1] if obj is not None else nan for obj in objs]
+            self._value = [i / j for i, j in zip(tau_m, tau_n)]
 
         return self
 

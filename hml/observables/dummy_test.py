@@ -37,4 +37,4 @@ def test_attributes():
 
 
 def test_read(event):
-    assert Dummy().read(event).value == [1]
+    assert Dummy().read(event).value == 1
