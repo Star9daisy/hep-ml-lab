@@ -41,6 +41,9 @@ def test_attributes():
     assert obs.name == "DeltaR"
     assert obs.identifier == "Jet0,Jet1.DeltaR"
 
+    with pytest.raises(ValueError):
+        AngularDistance("Jet0,Jet1,Jet2")
+
 
 def test_read(event):
     # (0, v) -> 0

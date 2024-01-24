@@ -64,6 +64,13 @@ def test_with_name():
     assert obs.identifier == "MyObservable"
 
 
+def test_new_dtype():
+    obs = Observable(dtype="int32")
+    assert obs.dtype == "int32"
+    obs.dtype = "float64"
+    assert obs.dtype == "float64"
+
+
 def test_with_physics_object():
     obs = Observable("Jet:")
     assert obs.physics_object.identifier == "Jet:"

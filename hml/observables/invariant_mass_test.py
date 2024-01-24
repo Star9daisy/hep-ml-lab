@@ -48,3 +48,7 @@ def test_read(event):
     obs = InvM("Jet0,Jet1").read(event)
     assert isinstance(obs.value, float)
     assert obs.shape == "1 * float64"
+
+    obs = InvM("Jet0,Jet100").read(event)
+    assert isinstance(obs.value, float)
+    assert obs.shape == "1 * float64"
