@@ -19,21 +19,19 @@ class Mass(Observable):
 
     def read(self, event):
         self.physics_object.read(event)
-        self._value = []
+        objs = self.physics_object.objects
 
-        for obj in self.physics_object.objects:
-            if is_single(self.physics_object):
-                self._value.append(obj.P4().M())
+        if is_single(self.physics_object):
+            self._value = objs[0].P4().M() if objs != [] else nan
 
-            elif is_collective(self.physics_object):
-                if obj is not None:
-                    self._value.append(obj.P4().M())
-                else:
-                    self._value.append(nan)
+        elif is_collective(self.physics_object):
+            self._value = [obj.P4().M() if obj is not None else nan for obj in objs]
 
-            else:
-                values = [sub.P4().M() if sub is not None else nan for sub in obj]
-                self._value.append(values)
+        else:
+            self._value = [
+                [sub.P4().M() if sub is not None else nan for sub in obj]
+                for obj in objs
+            ]
 
         return self
 

@@ -22,17 +22,15 @@ class NSubjettiness(Observable):
 
     def read(self, event):
         self.physics_object.read(event)
-        self._value = []
+        objs = self.physics_object.objects
 
-        for obj in self.physics_object.objects:
-            if is_single(self.physics_object):
-                self._value.append(obj.Tau[self.n - 1])
+        if is_single(self.physics_object):
+            self._value = objs[0].Tau[self.n - 1] if objs != [] else nan
 
-            else:
-                if obj is not None:
-                    self._value.append(obj.Tau[self.n - 1])
-                else:
-                    self._value.append(nan)
+        else:
+            self._value = [
+                obj.Tau[self.n - 1] if obj is not None else nan for obj in objs
+            ]
 
         return self
 

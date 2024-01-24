@@ -46,8 +46,10 @@ def test_attributes():
 
 
 def test_read(event):
+    assert DeltaR("Jet100,Jet1").read(event).shape == "1 * 1 * float64"
+    assert DeltaR("Jet0,Jet100").read(event).shape == "1 * 1 * float64"
+
     # (0, v) -> 0
-    assert DeltaR("Jet100,Jet1").read(event).shape == "0 * unknown"
     assert DeltaR("Jet100:,Jet1").read(event).shape == "0 * unknown"
     assert DeltaR("Jet100.Constituents:,Jet1").read(event).shape == "0 * unknown"
     assert DeltaR("Jet100:.Constituents:,Jet1").read(event).shape == "0 * unknown"
@@ -55,7 +57,6 @@ def test_read(event):
     assert DeltaR("Jet0.Constituents100:,Jet1").read(event).shape == "0 * unknown"
 
     # (v, v) -> (v, v)
-    assert DeltaR("Jet0,Jet100").read(event).shape == "1 * 0 * unknown"
     assert DeltaR("Jet0,Jet100:").read(event).shape == "1 * 0 * unknown"
     assert DeltaR("Jet0,Jet100.Constituents:").read(event).shape == "1 * 0 * unknown"
     assert DeltaR("Jet0,Jet100:.Constituents:").read(event).shape == "1 * 0 * unknown"
