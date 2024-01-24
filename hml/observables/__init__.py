@@ -1,3 +1,5 @@
+from .angular_distance import AngularDistance
+from .angular_distance import DeltaR
 from .azimuthal_angle import AzimuthalAngle
 from .azimuthal_angle import Phi
 from .b_tag import BTag
