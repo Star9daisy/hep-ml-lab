@@ -19,22 +19,20 @@ class AzimuthalAngle(Observable):
 
     def read(self, event):
         self.physics_object.read(event)
+        self._value = []
 
-        if is_single(self.physics_object):
-            self._value = self.physics_object.objects[0].P4().Phi()
+        for obj in self.physics_object.objects:
+            if is_single(self.physics_object):
+                self._value.append(obj.P4().Phi())
 
-        elif is_collective(self.physics_object):
-            self._value = []
-            for obj in self.physics_object.objects:
+            elif is_collective(self.physics_object):
                 if obj is not None:
                     self._value.append(obj.P4().Phi())
                 else:
                     self._value.append(nan)
 
-        else:
-            self._value = []
-            for i in self.physics_object.objects:
-                values = [j.P4().Phi() if j is not None else nan for j in i]
+            else:
+                values = [sub.P4().Phi() if sub is not None else nan for sub in obj]
                 self._value.append(values)
 
         return self

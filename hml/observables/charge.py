@@ -18,15 +18,14 @@ class Charge(Observable):
 
     def read(self, event):
         self.physics_object.read(event)
+        self._value = []
 
-        if is_single(self.physics_object):
-            obj = self.physics_object.objects[0]
-            self._value = obj.Charge if obj else nan
+        for obj in self.physics_object.objects:
+            if is_single(self.physics_object):
+                self._value.append(obj.Charge)
 
-        else:
-            self._value = []
-            for obj in self.physics_object.objects:
-                if obj:
+            else:
+                if obj is not None:
                     self._value.append(obj.Charge)
                 else:
                     self._value.append(nan)

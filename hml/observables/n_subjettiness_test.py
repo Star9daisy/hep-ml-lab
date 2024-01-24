@@ -45,11 +45,9 @@ def test_attributes():
 
 def test_read(event):
     obs = TauN(1, "FatJet0").read(event)
-    assert isinstance(obs.value, float)
     assert obs.shape == "1 * float64"
 
     obs = TauN(1, "FatJet:5").read(event)
-    assert isinstance(obs.value, list)
     assert obs.shape == "5 * float64"
 
 

@@ -41,13 +41,10 @@ def test_attributes():
 
 def test_read(event):
     obs = M("Jet0").read(event)
-    assert isinstance(obs.value, float)
     assert obs.shape == "1 * float64"
 
     obs = M("Jet:5").read(event)
-    assert isinstance(obs.value, list)
     assert obs.shape == "5 * float64"
 
     obs = M("Jet:2.Constituents:5").read(event)
-    assert isinstance(obs.value, list)
     assert obs.shape == "2 * 5 * float64"

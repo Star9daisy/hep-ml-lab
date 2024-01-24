@@ -50,11 +50,9 @@ def test_n_subjettiness(event):
 
 def test_read(event):
     obs = TauMN(2, 1, "FatJet0").read(event)
-    assert isinstance(obs.value, float)
     assert obs.shape == "1 * float64"
 
     obs = TauMN(2, 1, "FatJet:5").read(event)
-    assert isinstance(obs.value, list)
     assert obs.shape == "5 * float64"
 
 
