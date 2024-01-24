@@ -20,9 +20,8 @@ class InvariantMass(Observable):
         self.physics_object.read(event)
         vectors = TLorentzVector()
         for obj in self.physics_object.objects:
-            obj = obj[0]
-            if obj is not None:
-                vectors += obj.P4()
+            if obj != []:
+                vectors += obj[0].P4()
             else:
                 vectors += TLorentzVector()
 
