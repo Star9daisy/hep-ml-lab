@@ -36,7 +36,7 @@ def test_only_value():
         "value": 100,
         "dtype": "float64",
     }
-    assert repr(obs) == "Observable"
+    assert repr(obs) == "Observable : 100"
 
     # class methods
     assert Observable.from_identifier("Observable", value=100).config == obs.config

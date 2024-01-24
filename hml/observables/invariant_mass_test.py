@@ -31,7 +31,7 @@ def test_attributes():
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "Jet0,Jet1.InvariantMass"
+    assert repr(obs) == "Jet0,Jet1.InvariantMass : nan"
 
     assert InvariantMass.from_identifier("Jet0,Jet1.InvariantMass").config == obs.config
 

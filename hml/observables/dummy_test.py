@@ -31,7 +31,7 @@ def test_attributes():
         "dtype": "float64",
     }
 
-    assert repr(obs) == "Dummy"
+    assert repr(obs) == "Dummy : nan"
 
     assert Dummy.from_identifier("Dummy").config == obs.config
 

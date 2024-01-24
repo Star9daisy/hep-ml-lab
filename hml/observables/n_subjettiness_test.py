@@ -32,7 +32,7 @@ def test_attributes():
         "value": obs.value,
         "dtype": obs.dtype,
     }
-    assert repr(obs) == "FatJet0.NSubjettiness"
+    assert repr(obs) == "FatJet0.NSubjettiness : nan"
 
     assert (
         NSubjettiness.from_identifier("FatJet0.NSubjettiness", n=1).config == obs.config
