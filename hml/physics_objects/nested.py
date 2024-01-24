@@ -218,14 +218,7 @@ class Nested(PhysicsObject):
         self.main.read(entry)
 
         for obj in self.main.objects:
-            if obj is None:
-                if isinstance(self.sub, Collective) and self.sub.stop != -1:
-                    length = self.sub.stop - self.sub.start
-                    self.objects.append([None] * length)
-                else:
-                    self.objects.append([None])
-            else:
-                self.objects.append(self.sub.read(obj).objects)
+            self.objects.append(self.sub.read(obj).objects)
 
         return self
 

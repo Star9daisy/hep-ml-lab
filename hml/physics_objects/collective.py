@@ -144,23 +144,14 @@ class Collective(PhysicsObject):
         None]
         """
         self.objects = []
+
         object = getattr(entry, self.name, None)
+        n_entries = object.GetEntries() if object is not None else 0
+        stop = self.stop if self.stop != -1 else n_entries
 
-        if object is None:
-            raise ValueError(
-                f"Could not find object {self.name} in such type {type(entry)}"
-            )
-
-        if self.stop == -1:
-            self.objects = [
-                Single(self.name, i).read(entry).objects[0]
-                for i in range(self.start, object.GetEntries())
-            ]
-        else:
-            self.objects = [
-                Single(self.name, i).read(entry).objects[0]
-                for i in range(self.start, self.stop)
-            ]
+        for i in range(self.start, stop):
+            single_objects = Single(self.name, i).read(entry).objects
+            self.objects += single_objects if len(single_objects) != 0 else [None]
 
         return self
 

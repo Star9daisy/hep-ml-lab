@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from ..events.delphes_events import DelphesEvents
@@ -86,40 +87,24 @@ def test_from_config():
 
 
 def test_read(event):
-    obj = Nested.from_identifier("Jet0.Particles0").read(event)
-    assert len(obj.objects) == 1
-    assert len(obj.objects[0]) == 1
-    assert obj.objects[0][0] is not None
+    # (v, v)
+    # v != 0
+    obj = Nested.from_identifier("Jet0.Particles0")
+    assert np.array(obj.read(event).objects).shape == (1, 1)
 
-    obj = Nested.from_identifier("Jet0.Particles100").read(event)
-    assert len(obj.objects) == 1
-    assert len(obj.objects[0]) == 1
-    assert obj.objects[0][0] is None
+    obj = Nested.from_identifier("Jet:10.Particles:10")
+    assert np.array(obj.read(event).objects).shape == (10, 10)
 
-    obj = Nested.from_identifier("Jet:2.Particles100").read(event)
-    assert len(obj.objects) == 2
-    for i in range(2):
-        assert len(obj.objects[i]) == 1
-        assert obj.objects[i][0] is None
+    # v == 0
+    # (0, v) -> (0,)
+    obj = Nested.from_identifier("Jet100.Particles0")
+    assert np.array(obj.read(event).objects).shape == (0,)
 
-    obj = Nested.from_identifier("Jet100.Particles0").read(event)
-    assert len(obj.objects) == 1
-    assert len(obj.objects[0]) == 1
-    assert obj.objects[0][0] is None
+    obj = Nested.from_identifier("Jet0.Particles100")
+    assert np.array(obj.read(event).objects).shape == (1, 0)
 
-    obj = Nested.from_identifier("Jet100.Particles100:110").read(event)
-    assert len(obj.objects) == 1
-    assert len(obj.objects[0]) == 10
-    assert any(obj.objects[0]) is False
+    obj = Nested.from_identifier("Jet100:.Particles100")
+    assert np.array(obj.read(event).objects).shape == (0,)
 
-    obj = Nested.from_identifier("Jet3:6.Particles100").read(event)
-    assert len(obj.objects) == 3
-    for i in range(3):
-        assert len(obj.objects[i]) == 1
-        assert obj.objects[i][0] is None
-
-    obj = Nested.from_identifier("Jet:3.Particles:10").read(event)
-    assert len(obj.objects) == 3
-    for i in range(3):
-        assert len(obj.objects[i]) == 10
-        assert all(obj.objects[i]) is True
+    obj = Nested.from_identifier("Jet:10.Particles100:")
+    assert np.array(obj.read(event).objects).shape == (10, 0)

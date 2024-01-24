@@ -114,6 +114,9 @@ class Single(PhysicsObject):
         """
         self.objects = []
 
+        if entry is None:
+            return self
+
         object = getattr(entry, self.name, None)
         if object is None:
             raise ValueError(
