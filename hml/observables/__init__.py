@@ -4,6 +4,7 @@ from .azimuthal_angle import AzimuthalAngle
 from .azimuthal_angle import Phi
 from .b_tag import BTag
 from .charge import Charge
+from .dummy import Dummy
 from .energy import E
 from .energy import Energy
 from .invariant_mass import InvariantMass
