@@ -35,7 +35,7 @@ def is_single(identifier: str | PhysicsObject) -> bool:
         return isinstance(identifier, Single)
 
     try:
-        Single.from_identifier(identifier)
+        Single.from_id(identifier)
         return True
 
     except Exception:
@@ -74,12 +74,12 @@ class Single(PhysicsObject):
     Jet0
     """
 
-    def __init__(self, name: str, index: int):
-        self.name = name
+    def __init__(self, field: str, index: int):
+        self.field = field
         self.index = index
         self.objects = []
 
-    def read(self, entry: Any) -> Single:
+    def read_ttree(self, ttree: Any) -> Single:
         """Read an entry to fetch the objects.
 
         Every time it is called, the objects will be cleared and re-filled.
@@ -114,13 +114,13 @@ class Single(PhysicsObject):
         """
         self.objects = []
 
-        if entry is None:
+        if ttree is None:
             return self
 
-        object = getattr(entry, self.name, None)
+        object = getattr(ttree, self.field, None)
         if object is None:
             raise ValueError(
-                f"Could not fetch {self.name} in the entry {type(entry)}\n"
+                f"Could not fetch {self.field} in the entry {type(ttree)}\n"
                 "Use `dir(entry)` to check all the available attributes."
             )
 
@@ -130,7 +130,7 @@ class Single(PhysicsObject):
         return self
 
     @property
-    def identifier(self) -> str:
+    def id(self) -> str:
         """The unique string for a single physics object.
 
         It consists of the name and the index.
@@ -140,10 +140,10 @@ class Single(PhysicsObject):
         >>> Single("Jet", 0).identifier
         Jet0
         """
-        return f"{self.name}{self.index}"
+        return f"{self.field}{self.index}"
 
     @classmethod
-    def from_identifier(cls, identifier: str) -> Single:
+    def from_id(cls, id: str) -> Single:
         """Create a single physics object from an identifier.
 
         It decomposes the identifier into a name and an index to construct a
@@ -163,29 +163,29 @@ class Single(PhysicsObject):
         ValueError
             If there's any of the comma`,`, the period`.`, or the colon`:`.
         """
-        if "," in identifier:
+        if "," in id:
             raise ValueError(
                 "Invalid identifier for Single. The comma',' indicates it "
                 "corresponds to a multiple physics object.\n"
-                f"Use `Multiple.from_identifier('{identifier}')` instead."
+                f"Use `Multiple.from_identifier('{id}')` instead."
             )
 
-        if "." in identifier:
+        if "." in id:
             raise ValueError(
                 "Invalid identifier for Single. The period'.' indicates it "
                 "corresponds to a nested physics object.\n"
-                f"Use `Nested.from_identifier('{identifier}')` instead."
+                f"Use `Nested.from_identifier('{id}')` instead."
             )
 
-        if ":" in identifier:
+        if ":" in id:
             raise ValueError(
                 "Invalid identifier for Single. The colon':' indicates it "
                 "corresponds to a collective physics object.\n"
-                f"Use `Collective.from_identifier('{identifier}')` instead."
+                f"Use `Collective.from_identifier('{id}')` instead."
             )
 
-        number = "".join(filter(lambda x: x.isdigit(), identifier))
-        name = identifier.replace(number, "")
+        number = "".join(filter(lambda x: x.isdigit(), id))
+        name = id.replace(number, "")
         index = int(number)
 
         return cls(name, index)
@@ -195,7 +195,7 @@ class Single(PhysicsObject):
         """The configurations for serialization"""
         return {
             "classname": self.__class__.__name__,
-            "name": self.name,
+            "field": self.field,
             "index": self.index,
         }
 
@@ -222,13 +222,4 @@ class Single(PhysicsObject):
                 f"Invalid classname {config.get('classname')}. Expected 'Single'."
             )
 
-        return cls(config["name"], config["index"])
-
-    def __repr__(self) -> str:
-        return f"{self.identifier}"
-
-    def __eq__(self, other: Single) -> bool:
-        if self.name == other.name and self.index == other.index:
-            return True
-        else:
-            return False
+        return cls(config["field"], config["index"])

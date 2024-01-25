@@ -6,7 +6,7 @@ from .physics_object import PhysicsObject
 from .single import Single
 
 
-def is_collective(identifier: str | PhysicsObject) -> bool:
+def is_collective(object: str | PhysicsObject) -> bool:
     """Check if an identifier or an instance corresponds to a collective physics
     object.
 
@@ -33,11 +33,11 @@ def is_collective(identifier: str | PhysicsObject) -> bool:
     >>> is_collective("Jet0,Jet1") # Multiple
     False
     """
-    if isinstance(identifier, PhysicsObject):
-        return isinstance(identifier, Collective)
+    if isinstance(object, PhysicsObject):
+        return isinstance(object, Collective)
 
     try:
-        Collective.from_identifier(identifier)
+        Collective.from_id(object)
         return True
 
     except Exception:
@@ -95,13 +95,13 @@ class Collective(PhysicsObject):
     Jet1:2
     """
 
-    def __init__(self, name: str, start: int = 0, stop: int = -1):
-        self.name = name
+    def __init__(self, field: str, start: int = 0, stop: int = -1):
+        self.field = field
         self.start = start
         self.stop = stop
         self.objects = []
 
-    def read(self, entry: Any) -> Collective:
+    def read_ttree(self, ttree: Any) -> Collective:
         """Read an entry to fetch the objects.
 
         Every time it is called, the objects will be cleared and re-filled.
@@ -145,18 +145,18 @@ class Collective(PhysicsObject):
         """
         self.objects = []
 
-        object = getattr(entry, self.name, None)
+        object = getattr(ttree, self.field, None)
         n_entries = object.GetEntries() if object is not None else 0
         stop = self.stop if self.stop != -1 else n_entries
 
         for i in range(self.start, stop):
-            single_objects = Single(self.name, i).read(entry).objects
+            single_objects = Single(self.field, i).read_ttree(ttree).objects
             self.objects += single_objects if len(single_objects) != 0 else [None]
 
         return self
 
     @property
-    def identifier(self) -> str:
+    def id(self) -> str:
         """The unique string for a collective physics object.
 
         It consists of the name, the starting and stopping indices, and a colon`:`.
@@ -173,19 +173,19 @@ class Collective(PhysicsObject):
         Jet1:2
         """
         if self.start == 0 and self.stop == -1:
-            return f"{self.name}:"
+            return f"{self.field}:"
 
         elif self.start == 0:
-            return f"{self.name}:{self.stop}"
+            return f"{self.field}:{self.stop}"
 
         elif self.stop == -1:
-            return f"{self.name}{self.start}:"
+            return f"{self.field}{self.start}:"
 
         else:
-            return f"{self.name}{self.start}:{self.stop}"
+            return f"{self.field}{self.start}:{self.stop}"
 
     @classmethod
-    def from_identifier(cls, identifier: str) -> Collective:
+    def from_id(cls, id: str) -> Collective:
         """Create a collective physics object from an identifier.
 
         It decomposes the identifier into a name, a starting index, and a stopping
@@ -205,27 +205,27 @@ class Collective(PhysicsObject):
         ValueError
             No colon`:` or there's any of comma`,` or period`.`.
         """
-        if ":" not in identifier:
+        if ":" not in id:
             raise ValueError(
                 "Invalid identifier for Collective. The colon':' is missing.\n"
                 "Correct the identifier like 'Jet:'."
             )
 
-        if "," in identifier:
+        if "," in id:
             raise ValueError(
                 "Invalid identifier for Collective. The comma',' indicates it "
                 "corresponds to a multiple physics object.\n"
-                f"Use `Multiple.from_identifier('{identifier}')` instead."
+                f"Use `Multiple.from_identifier('{id}')` instead."
             )
 
-        if "." in identifier:
+        if "." in id:
             raise ValueError(
                 "Invalid identifier for Collective. The period'.' indicates it "
                 "corresponds to a nested physics object.\n"
-                f"Use `Nested.from_identifier('{identifier}')` instead."
+                f"Use `Nested.from_identifier('{id}')` instead."
             )
 
-        first, second = identifier.split(":")
+        first, second = id.split(":")
         start = "".join(filter(lambda x: x.isdigit(), first))
         name = first.replace(start, "")
         start = int(start) if start != "" else 0
@@ -238,7 +238,7 @@ class Collective(PhysicsObject):
         """The configurations for serialization"""
         return {
             "classname": "Collective",
-            "name": self.name,
+            "field": self.field,
             "start": self.start,
             "stop": self.stop,
         }
@@ -265,17 +265,4 @@ class Collective(PhysicsObject):
                 f"Invalid classname {config.get('classname')}. Expected 'Collective'."
             )
 
-        return cls(config["name"], config["start"], config["stop"])
-
-    def __repr__(self) -> str:
-        return f"{self.identifier}"
-
-    def __eq__(self, other: Collective) -> bool:
-        if (
-            self.name == other.name
-            and self.start == other.start
-            and self.stop == other.stop
-        ):
-            return True
-
-        return False
+        return cls(config["field"], config["start"], config["stop"])

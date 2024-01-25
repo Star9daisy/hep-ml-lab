@@ -15,30 +15,30 @@ def event():
 
 def test_attributes():
     obj = Single("Jet", 0)
-    assert obj.name == "Jet"
+    assert obj.field == "Jet"
     assert obj.index == 0
     assert obj.objects == []
-    assert obj.identifier == "Jet0"
-    assert repr(obj) == "Jet0"
+    assert obj.id == "Jet0"
+    assert repr(obj) == "Single: Jet0"
     assert obj.config == {
         "classname": "Single",
-        "name": "Jet",
+        "field": "Jet",
         "index": 0,
     }
 
 
 def test_from_identifier():
-    assert Single.from_identifier("Jet0") == Single("Jet", 0)
-    assert Single.from_identifier("Jet1") != Single("Jet", 0)
+    assert Single.from_id("Jet0") == Single("Jet", 0)
+    assert Single.from_id("Jet1") != Single("Jet", 0)
 
     with pytest.raises(ValueError):
-        Single.from_identifier("Jet0,Jet1")
+        Single.from_id("Jet0,Jet1")
 
     with pytest.raises(ValueError):
-        Single.from_identifier("Jet0.Constituents0")
+        Single.from_id("Jet0.Constituents0")
 
     with pytest.raises(ValueError):
-        Single.from_identifier("Jet1:3")
+        Single.from_id("Jet1:3")
 
 
 def test_from_config():
@@ -50,14 +50,14 @@ def test_from_config():
 
 
 def test_read(event):
-    assert len(Single("Jet", 0).read(event).objects) == 1
-    assert len(Single("Jet", 100).read(event).objects) == 0
+    assert len(Single("Jet", 0).read_ttree(event).objects) == 1
+    assert len(Single("Jet", 100).read_ttree(event).objects) == 0
 
     with pytest.raises(ValueError):
-        Single("Unknown", 0).read(event)
+        Single("Unknown", 0).read_ttree(event)
 
-    assert len(Single("Constituents", 0).read(event.Jet[0]).objects) == 1
-    assert len(Single("Constituents", 100).read(event.Jet[0]).objects) == 0
+    assert len(Single("Constituents", 0).read_ttree(event.Jet[0]).objects) == 1
+    assert len(Single("Constituents", 100).read_ttree(event.Jet[0]).objects) == 0
 
     with pytest.raises(ValueError):
-        Single("Unknown", 0).read(event.Jet[0])
+        Single("Unknown", 0).read_ttree(event.Jet[0])
