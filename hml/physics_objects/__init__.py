@@ -29,16 +29,16 @@ def get(identifier: str) -> PhysicsObject:
     physics object : PhysicsObject
     """
     if is_single(identifier):
-        obj = Single.from_identifier(identifier)
+        obj = Single.from_id(identifier)
 
     elif is_collective(identifier):
-        obj = Collective.from_identifier(identifier)
+        obj = Collective.from_id(identifier)
 
     elif is_nested(identifier):
-        obj = Nested.from_identifier(identifier)
+        obj = Nested.from_id(identifier)
 
     elif is_multiple(identifier):
-        obj = Multiple.from_identifier(identifier)
+        obj = Multiple.from_id(identifier)
 
     else:
         raise ValueError(f"Unknown physics object {identifier}")

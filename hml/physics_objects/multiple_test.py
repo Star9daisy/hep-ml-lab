@@ -23,23 +23,23 @@ def test_attributes():
     assert obj.all[1] == Collective("Jet", 0, 2)
     assert obj.all[2] == Nested(Single("Jet", 0), Collective("Particles", 0, 2))
     assert obj.objects == []
-    assert obj.identifier == "Jet0,Jet:2,Jet0.Particles:2"
-    assert repr(obj) == "Jet0,Jet:2,Jet0.Particles:2"
+    assert obj.id == "Jet0,Jet:2,Jet0.Particles:2"
+    assert repr(obj) == "Multiple: Jet0,Jet:2,Jet0.Particles:2"
     assert obj.config == {
         "classname": "Multiple",
-        "configs": [
-            {"classname": "Single", "name": "Jet", "index": 0},
-            {"classname": "Collective", "name": "Jet", "start": 0, "stop": 2},
+        "all_configs": [
+            {"classname": "Single", "field": "Jet", "index": 0},
+            {"classname": "Collective", "field": "Jet", "start": 0, "stop": 2},
             {
                 "classname": "Nested",
-                "main_object_config": {
+                "main_config": {
                     "classname": "Single",
-                    "name": "Jet",
+                    "field": "Jet",
                     "index": 0,
                 },
-                "sub_object_config": {
+                "sub_config": {
                     "classname": "Collective",
-                    "name": "Particles",
+                    "field": "Particles",
                     "start": 0,
                     "stop": 2,
                 },
@@ -48,29 +48,29 @@ def test_attributes():
     }
 
 
-def test_from_identifier():
-    assert Multiple.from_identifier("Jet0,Jet:2,Jet0.Particles:2") == Multiple(
+def test_from_id():
+    assert Multiple.from_id("Jet0,Jet:2,Jet0.Particles:2") == Multiple(
         Single("Jet", 0),
         Collective("Jet", 0, 2),
         Nested(Single("Jet", 0), Collective("Particles", 0, 2)),
     )
-    assert Multiple.from_identifier("Jet0,Jet:2,Jet0.Particles:2") != Multiple(
+    assert Multiple.from_id("Jet0,Jet:2,Jet0.Particles:2") != Multiple(
         Single("Jet", 0),
         Collective("Jet", 0, 2),
         Nested(Single("Jet", 0), Collective("Particles", 0, 3)),
     )
 
     with pytest.raises(ValueError):
-        Multiple.from_identifier("Jet0")
+        Multiple.from_id("Jet0")
 
     with pytest.raises(ValueError):
-        Multiple.from_identifier("Jet")
+        Multiple.from_id("Jet")
 
     with pytest.raises(ValueError):
-        Multiple.from_identifier("Jet.Constituents")
+        Multiple.from_id("Jet.Constituents")
 
     with pytest.raises(ValueError):
-        Multiple.from_identifier("Jet,Jet")
+        Multiple.from_id("Jet,Jet")
 
 
 def test_from_config():
@@ -82,16 +82,16 @@ def test_from_config():
     assert Multiple.from_config(obj.config) == obj
 
     with pytest.raises(ValueError):
-        Multiple.from_config({"classname": "Unknown", "configs": []})
+        Multiple.from_config({"classname": "Unknown", "all_configs": []})
 
     with pytest.raises(ValueError):
         Multiple.from_config(
             {
                 "classname": "Multiple",
-                "configs": [
+                "all_configs": [
                     {
                         "classname": "Unknown",
-                        "name": "Jet",
+                        "field": "Jet",
                         "index": 0,
                     }
                 ],
@@ -105,7 +105,7 @@ def test_read(event):
         Collective("Jet", 0, 2),
         Nested(Single("Jet", 0), Collective("Particles", 0, 2)),
     )
-    assert obj.read(event).objects == [
+    assert obj.read_ttree(event).objects == [
         [event.Jet[0]],
         [event.Jet[0], event.Jet[1]],
         [[event.Jet[0].Particles[0], event.Jet[0].Particles[1]]],

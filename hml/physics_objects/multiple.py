@@ -12,7 +12,7 @@ from .single import is_single
 
 
 def is_multiple(
-    identifier: str | PhysicsObject,
+    physics_object: str | PhysicsObject,
     supported_types: list[str] | None = None,
 ) -> bool:
     """Check if an identifier or an instance corresponds to a multiple physics object.
@@ -54,11 +54,11 @@ def is_multiple(
     >>> is_multiple("Jet0,Jet1", ["nested"])
     False
     """
-    if isinstance(identifier, PhysicsObject):
-        identifier = identifier.identifier
+    if isinstance(physics_object, PhysicsObject):
+        physics_object = physics_object.id
 
     try:
-        obj = Multiple.from_identifier(identifier)
+        obj = Multiple.from_id(physics_object)
 
     except Exception:
         return False
@@ -130,7 +130,7 @@ class Multiple(PhysicsObject):
         self.all = physics_objects
         self.objects = []
 
-    def read(self, entry: Any) -> Multiple:
+    def read_ttree(self, ttree: Any) -> Multiple:
         """Read an entry to fetch the objects.
 
         Since a multiple physics object may contain nested ones, the entry is
@@ -163,20 +163,20 @@ class Multiple(PhysicsObject):
         ! For any failure cases, check the doc for `Single.read`, `Collective.read`,
         and `Nested.read`.
         """
-        self.objects = [obj.read(entry).objects for obj in self.all]
+        self.objects = [obj.read_ttree(ttree).objects for obj in self.all]
         return self
 
     @property
-    def identifier(self) -> str:
+    def id(self) -> str:
         """The unique string for a multiple physics object.
 
         It consists of the identifiers of all physics objects it contains, and a
         comma is used to separate them.
         """
-        return ",".join([obj.identifier for obj in self.all])
+        return ",".join([obj.id for obj in self.all])
 
     @classmethod
-    def from_identifier(cls, identifier: str) -> Multiple:
+    def from_id(cls, id: str) -> Multiple:
         """Create a multiple physics object from an identifier.
 
         It decomposes the identifier into identifiers that may correspond to
@@ -196,19 +196,19 @@ class Multiple(PhysicsObject):
         ValueError
             No comma`,` or invalid identifier.
         """
-        if "," not in identifier:
-            raise ValueError(f"Invalid identifier {identifier} for {cls.__name__}")
+        if "," not in id:
+            raise ValueError(f"Invalid identifier {id} for {cls.__name__}")
 
         objects = []
-        for i in identifier.split(","):
+        for i in id.split(","):
             if is_single(i):
-                objects.append(Single.from_identifier(i))
+                objects.append(Single.from_id(i))
             elif is_collective(i):
-                objects.append(Collective.from_identifier(i))
+                objects.append(Collective.from_id(i))
             elif is_nested(i):
-                objects.append(Nested.from_identifier(i))
+                objects.append(Nested.from_id(i))
             else:
-                raise ValueError(f"Invalid identifier {identifier} for {cls.__name__}")
+                raise ValueError(f"Invalid identifier {id} for {cls.__name__}")
         return cls(*objects)
 
     @property
@@ -216,7 +216,7 @@ class Multiple(PhysicsObject):
         """The configurations for serialization."""
         return {
             "classname": "Multiple",
-            "configs": [obj.config for obj in self.all],
+            "all_configs": [obj.config for obj in self.all],
         }
 
     @classmethod
@@ -240,22 +240,13 @@ class Multiple(PhysicsObject):
             raise ValueError(f"Invalid config for {cls.__name__}")
 
         objects = []
-        for obj in config.get("configs"):
-            if obj.get("classname") == "Single":
-                objects.append(Single.from_config(obj))
-            elif obj.get("classname") == "Collective":
-                objects.append(Collective.from_config(obj))
-            elif obj.get("classname") == "Nested":
-                objects.append(Nested.from_config(obj))
+        for obj_config in config.get("all_configs"):
+            if obj_config.get("classname") == "Single":
+                objects.append(Single.from_config(obj_config))
+            elif obj_config.get("classname") == "Collective":
+                objects.append(Collective.from_config(obj_config))
+            elif obj_config.get("classname") == "Nested":
+                objects.append(Nested.from_config(obj_config))
             else:
                 raise ValueError(f"Invalid config for {cls.__name__}")
         return cls(*objects)
-
-    def __repr__(self) -> str:
-        return self.identifier
-
-    def __eq__(self, other: Multiple) -> bool:
-        for obj1, obj2 in zip(self.all, other.all):
-            if obj1 != obj2:
-                return False
-        return True

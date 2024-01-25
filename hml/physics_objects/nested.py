@@ -8,7 +8,7 @@ from .single import Single
 from .single import is_single
 
 
-def is_nested(identifier: str | PhysicsObject) -> bool:
+def is_nested(physics_object: str | PhysicsObject) -> bool:
     """Check if an identifier or an instance corresponds to a nested physics object.
 
     Parameters
@@ -34,11 +34,11 @@ def is_nested(identifier: str | PhysicsObject) -> bool:
     >>> is_nested("Jet0,Jet1") # Multiple
     False
     """
-    if isinstance(identifier, PhysicsObject):
-        return isinstance(identifier, Nested)
+    if isinstance(physics_object, PhysicsObject):
+        return isinstance(physics_object, Nested)
 
     try:
-        Nested.from_identifier(identifier)
+        Nested.from_id(physics_object)
         return True
 
     except Exception:
@@ -87,7 +87,7 @@ class Nested(PhysicsObject):
         self.sub = sub
         self.objects = []
 
-    def read(self, entry: Any) -> Nested:
+    def read_ttree(self, ttree: Any) -> Nested:
         """Read an entry to fetch the objects.
 
         Since nested physics objects are fetched by a hierarchy of main and sub
@@ -215,15 +215,15 @@ class Nested(PhysicsObject):
         of the objects.
         """
         self.objects = []
-        self.main.read(entry)
+        self.main.read_ttree(ttree)
 
         for obj in self.main.objects:
-            self.objects.append(self.sub.read(obj).objects)
+            self.objects.append(self.sub.read_ttree(obj).objects)
 
         return self
 
     @property
-    def identifier(self) -> str:
+    def id(self) -> str:
         """The unique string for a nested physics object.
 
         It consists of the identifiers of the main and sub objects, and a period`.`
@@ -236,10 +236,10 @@ class Nested(PhysicsObject):
         >>> Nested(Collective("Jet"), Collective("Constituents")).identifier
         Jet:.Constituents:
         """
-        return f"{self.main.identifier}.{self.sub.identifier}"
+        return f"{self.main.id}.{self.sub.id}"
 
     @classmethod
-    def from_identifier(cls, identifier: str) -> Nested:
+    def from_id(cls, identifier: str) -> Nested:
         """Create a nested physics object from an identifier.
 
         It decomposes the identifier into the identifiers of the main and sub physics
@@ -272,29 +272,19 @@ class Nested(PhysicsObject):
                 f"Use `Multiple.from_identifier('{identifier}')` instead."
             )
 
-        main_identifier, sub_identifier = identifier.split(".")
+        mid, sid = identifier.split(".")
+        main = Single.from_id(mid) if is_single(mid) else Collective.from_id(mid)
+        sub = Single.from_id(sid) if is_single(sid) else Collective.from_id(sid)
 
-        main_identifier = (
-            Single.from_identifier(main_identifier)
-            if is_single(main_identifier)
-            else Collective.from_identifier(main_identifier)
-        )
-
-        sub_identifier = (
-            Single.from_identifier(sub_identifier)
-            if is_single(sub_identifier)
-            else Collective.from_identifier(sub_identifier)
-        )
-
-        return cls(main_identifier, sub_identifier)
+        return cls(main, sub)
 
     @property
     def config(self) -> dict[str, Any]:
         """The configurations for serialization"""
         return {
             "classname": "Nested",
-            "main_object_config": self.main.config,
-            "sub_object_config": self.sub.config,
+            "main_config": self.main.config,
+            "sub_config": self.sub.config,
         }
 
     @classmethod
@@ -319,23 +309,14 @@ class Nested(PhysicsObject):
                 f"Invalid classname {config['classname']}. Expected 'Nested'."
             )
 
-        if config["main_object_config"].get("classname") == "Single":
-            main_object = Single.from_config(config["main_object_config"])
+        if config["main_config"].get("classname") == "Single":
+            main = Single.from_config(config["main_config"])
         else:
-            main_object = Collective.from_config(config["main_object_config"])
+            main = Collective.from_config(config["main_config"])
 
-        if config["sub_object_config"].get("classname") == "Single":
-            sub_object = Single.from_config(config["sub_object_config"])
+        if config["sub_config"].get("classname") == "Single":
+            sub = Single.from_config(config["sub_config"])
         else:
-            sub_object = Collective.from_config(config["sub_object_config"])
+            sub = Collective.from_config(config["sub_config"])
 
-        return cls(main_object, sub_object)
-
-    def __repr__(self) -> str:
-        return self.identifier
-
-    def __eq__(self, other: Nested) -> bool:
-        if self.main == other.main and self.sub == other.sub:
-            return True
-        else:
-            return False
+        return cls(main, sub)
