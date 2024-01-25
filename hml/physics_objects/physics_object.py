@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC
 from abc import abstractclassmethod
 from abc import abstractmethod
@@ -7,15 +9,15 @@ from typing import Any
 
 class PhysicsObject(ABC):
     @abstractmethod
-    def read(self, event):
+    def read_ttree(self, ttree):
         ...
 
     @abstractproperty
-    def identifier(self):
+    def id(self):
         ...
 
     @abstractclassmethod
-    def from_identifier(cls, identifier: str):
+    def from_id(cls, id: str):
         ...
 
     @abstractproperty
@@ -25,3 +27,9 @@ class PhysicsObject(ABC):
     @abstractclassmethod
     def from_config(cls, config: dict[str, Any]):
         ...
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.id}"
+
+    def __eq__(self, other: PhysicsObject) -> bool:
+        return self.config == other.config
