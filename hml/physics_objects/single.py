@@ -105,7 +105,7 @@ class Single(PhysicsObject):
 
         Read the leading jet to fetch the first constituent:
         >>> obj = Single(branch="Constituents", index=0)
-        >>> obj.read(event.Jet[0])
+        >>> obj.read_ttree(event.Jet[0])
         >>> obj.value
         <cppyy.gbl.Tower object at 0x8f59ed0>
 
