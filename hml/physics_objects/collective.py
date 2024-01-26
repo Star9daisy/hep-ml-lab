@@ -196,9 +196,12 @@ class Collective(PhysicsObject):
         ValueError
             If the name is invalid.
         """
-        if (match := re.match(r"^([a-zA-Z]+)(\d+)$", name)) is None:
+
+        if (match := re.match(r"^([a-zA-Z]+)(\d*):(\d*)$", name)) is None:
             raise ValueError(f"Invalid name '{name}' for {cls.__name__}")
 
-        branch, index = match.groups()
+        name, start, stop = match.groups()
+        start = int(start) if start else 0
+        stop = int(stop) if stop else -1
 
-        return cls(branch, int(index))
+        return cls(name, start, stop)
