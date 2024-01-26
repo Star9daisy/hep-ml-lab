@@ -58,6 +58,13 @@ class Nested(PhysicsObject):
     sub : Single | Collective
         The sub physics object.
 
+    Attributes
+    ----------
+    name : str
+        The name of the physics object.
+    value : list[Any]
+        The fetched values of the physics objects.
+
     Examples
     --------
     Create a nested physics object by its main and sub physics objects:
