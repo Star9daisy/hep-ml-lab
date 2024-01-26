@@ -1,19 +1,21 @@
 from __future__ import annotations
 
+import re
+from dataclasses import dataclass
+from dataclasses import field
 from typing import Any
 
 from .physics_object import PhysicsObject
 from .single import Single
 
 
-def is_collective(object: str | PhysicsObject) -> bool:
-    """Check if an identifier or an instance corresponds to a collective physics
-    object.
+def is_collective(identifier: str | PhysicsObject) -> bool:
+    """Check if an identifier corresponds to a collective physics object.
 
     Parameters
     ----------
     identifier : str | PhysicsObject
-        A unique string for a physics object or an instance of a physics object.
+        A string name or a physics object instance.
 
     Returns
     -------
@@ -24,177 +26,165 @@ def is_collective(object: str | PhysicsObject) -> bool:
     >>> is_collective("Jet:")
     True
 
-    >>> is_collective("Jet0") # Single
-    False
-
-    >>> is_collective("Jet0.Constituents:100") # Nested
-    False
-
-    >>> is_collective("Jet0,Jet1") # Multiple
-    False
+    >>> obj = Collective(branch="Jet", start=0, end=-1)
+    >>> is_collective(obj)
+    True
     """
-    if isinstance(object, PhysicsObject):
-        return isinstance(object, Collective)
+    if isinstance(identifier, PhysicsObject):
+        return isinstance(identifier, Collective)
 
     try:
-        Collective.from_id(object)
+        Collective.from_name(identifier)
         return True
 
     except Exception:
         return False
 
 
+@dataclass
 class Collective(PhysicsObject):
-    """A collective physics object.
+    """The data class that represents a collective physics object.
 
-    It represents a collection of physics objects. For example, the leading
-    three jets, all the constituents of the leading jet, etc.
+    For example, the leading three jets, all the constituents of the leading jet,
+    etc.
 
     Parameters
     ----------
-    name : str
-        The name of the physics object.
+    branch : str
+        The branch of the physics object.
     start : int
         The starting index of the physics object.
     stop : int
         The stopping index of the physics object.
 
+    Attributes
+    ----------
+    name : str
+        The name of the physics object.
+    value : list[Any]
+        The fetched values of the physics objects.
+
     Examples
     --------
-    Create a collective physics object by its name, starting and stopping indices:
-    >>> obj = Collective("Jet", 1, 2)
-    >>> obj.name, obj.start, obj.stop
-    ('Jet', 1, 2)
+    Create a collective physics object by its name, start and stop indices:
+    >>> Collective(branch="Jet", start=1, stop=2)
+    Collective(name='Jet1:3', value=[])
 
-    Four cases for the starting and stopping indices:
-    1. Default is 0 and -1, which means all objects:
-    >>> Collective("Jet")
-    Jet:
+    Create a collective physics object from its name:
+    >>> Collective.from_name("Jet:")
+    Collective(name='Jet:', value=[])
+    >>> Collective.from_name("Jet1:")
+    Collective(name='Jet1:', value=[])
+    >>> Collective.from_name("Jet:3")
+    Collective(name='Jet:3', value=[])
+    >>> Collective.from_name("Jet1:3")
+    Collective(name='Jet1:3', value=[])
 
-    2. Starting index is a positive integer:
-    >>> Collective("Jet", 1)
-    Jet1:
-
-    3. Stopping index is a positive integer:
-    >>> Collective("Jet", stop=2)
-    Jet:2
-
-    4. Both starting and stopping indices are positive integers:
-    >>> Collective("Jet", 1, 2)
-    Jet1:2
-
-    It is represented by the identifier:
-    >>> obj = Collective("Jet", 1, 2)
-    >>> obj
-    Jet1:2
-    >>> obj.identifier
-    Jet1:2
-
-    Create a collective physics object from an identifier:
-    >>> Collective.from_identifier("Jet1:2")
-    Jet1:2
+    Read an event to fetch the leading three jets:
+    >>> Collective(branch="Jet", stop=3).read_ttree(event).value
+    [<cppyy.gbl.Jet object at 0xa0be000>,
+     <cppyy.gbl.Jet object at 0xa0be630>,
+     <cppyy.gbl.Jet object at 0xa0bec60>]
     """
 
-    def __init__(self, field: str, start: int = 0, stop: int = -1):
-        self.field = field
-        self.start = start
-        self.stop = stop
-        self.objects = []
+    branch: str = field(repr=False)
+    start: int = field(default=0, repr=False)
+    stop: int = field(default=-1, repr=False)
+    name: str = field(init=False, compare=False)
+    value: list[Any] = field(default_factory=list, init=False, compare=False)
 
-    def read_ttree(self, ttree: Any) -> Collective:
-        """Read an entry to fetch the objects.
+    def __post_init__(self):
+        if self.start == 0 and self.stop == -1:
+            self.name = f"{self.branch}:"
+        elif self.start == 0:
+            self.name = f"{self.branch}:{self.stop}"
+        elif self.stop == -1:
+            self.name = f"{self.branch}{self.start}:"
+        else:
+            self.name = f"{self.branch}{self.start}:{self.stop}"
 
-        Every time it is called, the objects will be cleared and re-filled.
+    def read_ttree(self, event: Any) -> Collective:
+        """Read an event to fetch the value.
 
         Parameters
         ----------
-        entry : Any
+        event : TTree
             An event or a branch read by PyROOT.
 
         Returns
         -------
         self : Collective
 
-        Raises
-        ------
-        ValueError
-            If the name is not a valid attribute of the entry.
-
         Examples
         --------
-        Read an event to fetch all jets:
-        >>> Collective("Jet", 0, 3).read(event).objects
-        [<cppyy.gbl.Jet object at 0x8ec8850>,
-        <cppyy.gbl.Jet object at 0x8ec8e80>,
-        <cppyy.gbl.Jet object at 0x8ec94b0>]
+        Four cases:
+        1. Keep start and stop indices as default to fetch all objects:
+        >>> obj = Collective(branch="Jet")
+        >>> obj.read_ttree(event)
+        >>> obj.value
+        [<cppyy.gbl.Jet object at 0xa0be000>,
+         <cppyy.gbl.Jet object at 0xa0be630>,
+         <cppyy.gbl.Jet object at 0xa0bec60>,
+         <cppyy.gbl.Jet object at 0xa0bf290>,
+         <cppyy.gbl.Jet object at 0xa0bf8c0>]
 
-        Read the leading jet to fetch all constituents:
-        >>> len(Collective("Constituents").read(event.Jet[0]).objects)
-        20
+        2. Only set start index to fetch objects from it:
+        >>> obj = Collective(branch="Jet", start=1)
+        >>> obj.read_ttree(event)
+        >>> obj.value
+        [<cppyy.gbl.Jet object at 0xa0be630>,
+         <cppyy.gbl.Jet object at 0xa0bec60>,
+         <cppyy.gbl.Jet object at 0xa0bf290>,
+         <cppyy.gbl.Jet object at 0xa0bf8c0>]
 
-        ! If the starting index is out of range, an empty list will be returned:
-        >>> Collective("Jet", 100).read(event).objects
+        3. Only set stop index to fetch objects before it:
+        >>> obj = Collective(branch="Jet", stop=3)
+        >>> obj.read_ttree(event)
+        >>> obj.value
+        [<cppyy.gbl.Jet object at 0xa0be000>,
+         <cppyy.gbl.Jet object at 0xa0be630>,
+         <cppyy.gbl.Jet object at 0xa0bec60>]
+
+        4. Set both start and stop indices to fetch objects between them:
+        >>> obj = Collective(branch="Jet", start=1, stop=3)
+        >>> obj.read_ttree(event)
+        >>> obj.value
+        [<cppyy.gbl.Jet object at 0xa0be630>, <cppyy.gbl.Jet object at 0xa0bec60>]
+
+
+        ! If the start index is out of range, an empty list will be returned:
+        >>> obj = Collective(branch="Jet", start=100)
+        >>> obj.read_ttree(event)
+        >>> obj.value
         []
 
-        ! If the stopping index is out of range, `None` will be filled to ensure
-        the length of the objects:
-        >>> Collective("Jet", 3, 6).read(event).objects
-        [<cppyy.gbl.Jet object at 0x920a1f0>,
-        <cppyy.gbl.Jet object at 0x920a820>,
-        None]
+        ! If the stop index is out of range, `None` will be filled:
+        >>> obj = Collective(branch="Jet", start=3, stop=6)
+        >>> obj.read_ttree(event)
+        >>> obj.value
+        [<cppyy.gbl.Jet object at 0xa0bf290>,
+         <cppyy.gbl.Jet object at 0xa0bf8c0>,
+         None]
         """
-        self.objects = []
+        self.value = []
 
-        object = getattr(ttree, self.field, None)
-        n_entries = object.GetEntries() if object is not None else 0
+        branch = getattr(event, self.branch, None)
+        n_entries = branch.GetEntries() if branch is not None else 0
         stop = self.stop if self.stop != -1 else n_entries
 
         for i in range(self.start, stop):
-            single_objects = Single(self.field, i).read_ttree(ttree).objects
-            self.objects += single_objects if len(single_objects) != 0 else [None]
+            single = Single(self.branch, i).read_ttree(event)
+            self.value.append(single.value)
 
         return self
 
-    @property
-    def id(self) -> str:
-        """The unique string for a collective physics object.
-
-        It consists of the name, the starting and stopping indices, and a colon`:`.
-
-        Examples
-        --------
-        >>> Collective("Jet").identifier
-        Jet:
-        >>> Collective("Jet", 1).identifier
-        Jet1:
-        >>> Collective("Jet", stop=2).identifier
-        Jet:2
-        >>> Collective("Jet", 1, 2).identifier
-        Jet1:2
-        """
-        if self.start == 0 and self.stop == -1:
-            return f"{self.field}:"
-
-        elif self.start == 0:
-            return f"{self.field}:{self.stop}"
-
-        elif self.stop == -1:
-            return f"{self.field}{self.start}:"
-
-        else:
-            return f"{self.field}{self.start}:{self.stop}"
-
     @classmethod
-    def from_id(cls, id: str) -> Collective:
-        """Create a collective physics object from an identifier.
-
-        It decomposes the identifier into a name, a starting index, and a stopping
-        index to construct a collective physics object.
+    def from_name(cls, name: str) -> Collective:
+        """Create a collective physics object from its name.
 
         Parameters
         ----------
-        identifier : str
-            A unique string for a physics object.
+        name : str
 
         Returns
         -------
@@ -203,66 +193,11 @@ class Collective(PhysicsObject):
         Raises
         ------
         ValueError
-            No colon`:` or there's any of comma`,` or period`.`.
+            If the name is invalid.
         """
-        if ":" not in id:
-            raise ValueError(
-                "Invalid identifier for Collective. The colon':' is missing.\n"
-                "Correct the identifier like 'Jet:'."
-            )
+        if (match := re.match(r"^([a-zA-Z]+)(\d+)$", name)) is None:
+            raise ValueError(f"Invalid name '{name}' for {cls.__name__}")
 
-        if "," in id:
-            raise ValueError(
-                "Invalid identifier for Collective. The comma',' indicates it "
-                "corresponds to a multiple physics object.\n"
-                f"Use `Multiple.from_identifier('{id}')` instead."
-            )
+        branch, index = match.groups()
 
-        if "." in id:
-            raise ValueError(
-                "Invalid identifier for Collective. The period'.' indicates it "
-                "corresponds to a nested physics object.\n"
-                f"Use `Nested.from_identifier('{id}')` instead."
-            )
-
-        first, second = id.split(":")
-        start = "".join(filter(lambda x: x.isdigit(), first))
-        name = first.replace(start, "")
-        start = int(start) if start != "" else 0
-        stop = int(second) if second != "" else -1
-
-        return cls(name, start, stop)
-
-    @property
-    def config(self) -> dict[str, Any]:
-        """The configurations for serialization"""
-        return {
-            "classname": "Collective",
-            "field": self.field,
-            "start": self.start,
-            "stop": self.stop,
-        }
-
-    @classmethod
-    def from_config(cls, config: dict[str, Any]) -> Collective:
-        """Create a collective physics object from configurations.
-
-        Parameters
-        ----------
-        config : dict
-
-        Returns
-        -------
-        physics object : Collective
-
-        Raises
-        ------
-        ValueError
-            If `classname` in the configurations is not "Collective".
-        """
-        if config["classname"] != "Collective":
-            raise ValueError(
-                f"Invalid classname {config.get('classname')}. Expected 'Collective'."
-            )
-
-        return cls(config["field"], config["start"], config["stop"])
+        return cls(branch, int(index))
