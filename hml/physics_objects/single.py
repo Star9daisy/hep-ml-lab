@@ -42,7 +42,7 @@ def is_single(identifier: str | PhysicsObject) -> bool:
 
 @dataclass
 class Single(PhysicsObject):
-    """The data class represents a single physics object.
+    """The data class that represents a single physics object.
 
     For example, the leading jet, the first constituent, the second electron, etc.
 
