@@ -118,7 +118,8 @@ class Collective(PhysicsObject):
         Examples
         --------
         Four cases:
-        1. Keep start and stop indices as default to fetch all objects:
+
+        - Keep start and stop indices as default to fetch all objects:
         >>> obj = Collective(branch="Jet")
         >>> obj.read_ttree(event)
         >>> obj.value
@@ -128,7 +129,7 @@ class Collective(PhysicsObject):
          <cppyy.gbl.Jet object at 0xa0bf290>,
          <cppyy.gbl.Jet object at 0xa0bf8c0>]
 
-        2. Only set start index to fetch objects from it:
+        - Only set start index to fetch objects from it:
         >>> obj = Collective(branch="Jet", start=1)
         >>> obj.read_ttree(event)
         >>> obj.value
@@ -137,7 +138,7 @@ class Collective(PhysicsObject):
          <cppyy.gbl.Jet object at 0xa0bf290>,
          <cppyy.gbl.Jet object at 0xa0bf8c0>]
 
-        3. Only set stop index to fetch objects before it:
+        - Only set stop index to fetch objects before it:
         >>> obj = Collective(branch="Jet", stop=3)
         >>> obj.read_ttree(event)
         >>> obj.value
@@ -145,7 +146,7 @@ class Collective(PhysicsObject):
          <cppyy.gbl.Jet object at 0xa0be630>,
          <cppyy.gbl.Jet object at 0xa0bec60>]
 
-        4. Set both start and stop indices to fetch objects between them:
+        - Set both start and stop indices to fetch objects between them:
         >>> obj = Collective(branch="Jet", start=1, stop=3)
         >>> obj.read_ttree(event)
         >>> obj.value
