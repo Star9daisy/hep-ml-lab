@@ -23,9 +23,9 @@ def is_multiple(
     ----------
     identifier : str | PhysicsObject
         A string name or a physics object instance.
-    supported_types : list[str], optional
+    supported_types : list[str] | None
         Supported types of the physics objects. Valid values are "single",
-        "collective", and "nested". If None, all types are supported.
+        "collective", and "nested". If `None`, all types are supported.
 
     Returns
     -------
@@ -91,7 +91,7 @@ class Multiple(PhysicsObject):
     ----------
     name : str
         The name of the physics object.
-    value : list[Any]
+    value : list[Any] | None
         The fetched values of the physics objects.
 
     Examples
@@ -107,11 +107,11 @@ class Multiple(PhysicsObject):
     ...         ),
     ...     ]
     ... )
-    Multiple(name='Jet0,Jet1:3,Jet0.Constituents:100', value=[])
+    Multiple(name='Jet0,Jet1:3,Jet0.Constituents:100', value=None)
 
     Create a multiple physics object from its name:
     >>> Multiple.from_name("Jet0,Jet1:3,Jet0.Constituents:100")
-    Multiple(name='Jet0,Jet1:3,Jet0.Constituents:100', value=[])
+    Multiple(name='Jet0,Jet1:3,Jet0.Constituents:100', value=None)
 
     Read an event to fetch the leading jet and the  sub-leading jet:
     >>> obj = Multiple(
@@ -132,7 +132,7 @@ class Multiple(PhysicsObject):
 
     physics_objects: list[PhysicsObject] = field(default_factory=list, repr=False)
     name: str = field(init=False, compare=False)
-    value: list[Any] = field(default_factory=list, init=False, compare=False)
+    value: list[Any] | None = field(default=None, init=False, compare=False)
 
     def __post_init__(self):
         self.name = ",".join([obj.name for obj in self.physics_objects])
