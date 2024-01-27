@@ -10,13 +10,13 @@ from .single import Single
 from .single import is_single
 
 
-def is_nested(identifier: str | PhysicsObject) -> bool:
-    """Check if an identifier corresponds to a nested physics object.
+def is_nested(name: str) -> bool:
+    """Check if a name corresponds to a nested physics object.
 
     Parameters
     ----------
-    identifier : str | PhysicsObject
-        A string name or a physics object instance.
+    name : str
+        The name of a physics object.
 
     Returns
     -------
@@ -26,18 +26,9 @@ def is_nested(identifier: str | PhysicsObject) -> bool:
     --------
     >>> is_nested("Jet0.Constituents:")
     True
-
-    >>> main = Single(branch="Jet", index=0)
-    >>> sub = Collective(branch="Constituents", start=0, stop=3)
-    >>> obj = Nested(main=main, sub=sub)
-    >>> is_nested(obj)
-    >>> True
     """
-    if isinstance(identifier, PhysicsObject):
-        return isinstance(identifier, Nested)
-
     try:
-        Nested.from_name(identifier)
+        Nested.from_name(name)
         return True
 
     except Exception:

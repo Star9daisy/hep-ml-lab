@@ -8,13 +8,13 @@ from typing import Any
 from .physics_object import PhysicsObject
 
 
-def is_single(identifier: str | PhysicsObject) -> bool:
-    """Check if an identifier corresponds to a single physics object.
+def is_single(name: str) -> bool:
+    """Check if a name corresponds to a single physics object.
 
     Parameters
     ----------
-    identifier : str | PhysicsObject
-        A string name or a physics object instance.
+    name : str
+        The name of a physics object.
 
     Returns
     -------
@@ -24,16 +24,9 @@ def is_single(identifier: str | PhysicsObject) -> bool:
     --------
     >>> is_single("Jet0")
     True
-
-    >>> obj = Single(branch="Jet", index=0)
-    >>> is_single(obj)
-    True
     """
-    if isinstance(identifier, PhysicsObject):
-        return isinstance(identifier, Single)
-
     try:
-        Single.from_name(identifier)
+        Single.from_name(name)
         return True
 
     except Exception:
@@ -115,6 +108,8 @@ class Single(PhysicsObject):
         >>> print(obj.value)
         None
         """
+        self.value = None
+
         if hasattr(event, self.branch):
             branch = getattr(event, self.branch)
 

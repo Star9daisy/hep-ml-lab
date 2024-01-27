@@ -9,13 +9,13 @@ from .physics_object import PhysicsObject
 from .single import Single
 
 
-def is_collective(identifier: str | PhysicsObject) -> bool:
-    """Check if an identifier corresponds to a collective physics object.
+def is_collective(name: str) -> bool:
+    """Check if a name corresponds to a collective physics object.
 
     Parameters
     ----------
-    identifier : str | PhysicsObject
-        A string name or a physics object instance.
+    name : str
+        The name of a physics object.
 
     Returns
     -------
@@ -25,16 +25,9 @@ def is_collective(identifier: str | PhysicsObject) -> bool:
     --------
     >>> is_collective("Jet:")
     True
-
-    >>> obj = Collective(branch="Jet", start=0, end=-1)
-    >>> is_collective(obj)
-    True
     """
-    if isinstance(identifier, PhysicsObject):
-        return isinstance(identifier, Collective)
-
     try:
-        Collective.from_name(identifier)
+        Collective.from_name(name)
         return True
 
     except Exception:
