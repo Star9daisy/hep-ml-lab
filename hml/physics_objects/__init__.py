@@ -16,31 +16,31 @@ ALL_OBJECTS_DICT = {
 }
 
 
-def get(identifier: str) -> PhysicsObject:
-    """Retrieve a physics object from an identifier.
+def get_physics_object(name: str) -> PhysicsObject:
+    """Retrieve a physics object from its name.
 
     Parameters
     ----------
-    identifier : str
-        A unique string for a physics object.
+    name : str
+        The name of a physics object.
 
     Returns
     -------
     physics object : PhysicsObject
     """
-    if is_single(identifier):
-        obj = Single.from_id(identifier)
+    if is_single(name):
+        obj = Single.from_name(name)
 
-    elif is_collective(identifier):
-        obj = Collective.from_id(identifier)
+    elif is_collective(name):
+        obj = Collective.from_name(name)
 
-    elif is_nested(identifier):
-        obj = Nested.from_id(identifier)
+    elif is_nested(name):
+        obj = Nested.from_name(name)
 
-    elif is_multiple(identifier):
-        obj = Multiple.from_id(identifier)
+    elif is_multiple(name):
+        obj = Multiple.from_name(name)
 
     else:
-        raise ValueError(f"Unknown physics object {identifier}")
+        raise ValueError(f"Unknown physics object {name}")
 
     return obj
