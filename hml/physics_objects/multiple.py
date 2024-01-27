@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+from dataclasses import field
 from typing import Any
 
 from .collective import Collective
@@ -12,18 +14,18 @@ from .single import is_single
 
 
 def is_multiple(
-    physics_object: str | PhysicsObject,
+    identifier: str | PhysicsObject,
     supported_types: list[str] | None = None,
 ) -> bool:
-    """Check if an identifier or an instance corresponds to a multiple physics object.
+    """Check if an identifier corresponds to a multiple physics object.
 
     Parameters
     ----------
     identifier : str | PhysicsObject
-        A unique string for a physics object or an instance of a physics object.
+        A string name or a physics object instance.
     supported_types : list[str], optional
-        The supported types of physics objects it contains. Valid values are
-        "single", "collective", and "nested". If None, all types are supported.
+        Supported types of the physics objects. Valid values are "single",
+        "collective", and "nested". If None, all types are supported.
 
     Returns
     -------
@@ -31,34 +33,20 @@ def is_multiple(
 
     Examples
     --------
-    By default, all types are supported for each physics object:
     >>> is_multiple("Jet0,Jet1")
     True
 
-    >>> is_multiple("Jet0") # Single
-    False
-
-    >>> is_multiple("Jet:") # Collective
-    False
-
-    >>> is_multiple("Jet0.Constituents:") # Nested
-    False
-
-    Specify the supported types to check strictly:
-    >>> is_multiple("Jet0,Jet1", ["single"])
+    >>> is_multiple(Multiple(physics_objects=[Single("Jet", 0), Single("Jet", 1)]))
     True
 
-    >>> is_multiple("Jet0,Jet1", ["collective"])
-    False
-
-    >>> is_multiple("Jet0,Jet1", ["nested"])
-    False
+    >>> is_multiple("Jet0,Jet1", ["single", "collective"])
+    True
     """
-    if isinstance(physics_object, PhysicsObject):
-        physics_object = physics_object.id
+    if isinstance(identifier, PhysicsObject):
+        identifier = identifier.name
 
     try:
-        obj = Multiple.from_id(physics_object)
+        obj = Multiple.from_name(identifier)
 
     except Exception:
         return False
@@ -76,69 +64,85 @@ def is_multiple(
             supported_classes.append(Nested)
         else:
             raise ValueError(
-                f"Invalid supported type {classname}. "
+                f"Invalid supported type '{classname}'. "
                 f"Valid values are 'single', 'collective', and 'nested'."
             )
 
-    for i in obj.all:
-        if type(i) not in supported_classes:
+    for phyobj in obj.physics_objects:
+        if not isinstance(phyobj, tuple(supported_classes)):
             return False
 
     return True
 
 
+@dataclass
 class Multiple(PhysicsObject):
-    """A multiple physics object.
+    """The data class that represents multiple physics objects.
 
-    It represents multiple physics objects in combination of single, collective,
-    and nested physics objects. For example, three leading jets, all jets and all
-    electrons, constituents of the leading jet and sub-leading jet, etc.
+    For example, three leading jets, all jets and all electrons, constituents of
+    the leading jet and sub-leading jet, etc.
 
     Parameters
     ----------
-    *physics_objects : Single | Collective | Nested
-        The physics objects.
+    physics_objects : list[Single | Collective | Nested]
+        A list of physics objects.
+
+    Attributes
+    ----------
+    name : str
+        The name of the physics object.
+    value : list[Any]
+        The fetched values of the physics objects.
 
     Examples
     --------
     Create a multiple physics object by its physics objects:
-    >>> obj = Multiple(Single("Jet", 0), Single("Jet", 1))
-    >>> obj
-    Jet0,Jet1
-    >>> obj.all
-    (Jet0, Jet1)
+    >>> Multiple(
+    ...     physics_objects=[
+    ...         Single(branch="Jet", index=0),
+    ...         Collective(branch="Jet", start=1, stop=3),
+    ...         Nested(
+    ...             main=Single(branch="Jet", index=0),
+    ...             sub=Collective(branch="Constituents", stop=100),
+    ...         ),
+    ...     ]
+    ... )
+    Multiple(name='Jet0,Jet1:3,Jet0.Constituents:100', value=[])
 
-    >>> obj = Multiple(Collective("Jet"), Collective("Electron"))
-    >>> obj
-    Jet:,Electron:
-    >>> obj.all
-    (Jet:, Electron:)
+    Create a multiple physics object from its name:
+    >>> Multiple.from_name("Jet0,Jet1:3,Jet0.Constituents:100")
+    Multiple(name='Jet0,Jet1:3,Jet0.Constituents:100', value=[])
 
-    It is represented by the identifier:
-    >>> obj = Multiple(Single("Jet", 0), Single("Jet", 1))
+    Read an event to fetch the leading jet and the  sub-leading jet:
+    >>> obj = Multiple(
+    ...     physics_objects=[
+    ...         Single(branch="Jet", index=0),
+    ...         Single(branch="Jet", index=1),
+    ...     ]
+    ... )
+    >>> obj.read_ttree(event)
     >>> obj
-    Jet0,Jet1
-    >>> obj.identifier
-    Jet0,Jet1
+    Multiple(name='Jet0,Jet1', value=[<cppyy.gbl.Jet object at 0xa574af0>, <cppyy.gbl.Jet object at 0xa575120>])
 
-    Create a multiple physics object from an identifier:
-    >>> Multiple.from_identifier("Jet0,Jet1")
-    Jet0,Jet1
+    Use `physics_objects` to show details:
+    >>> obj.physics_objects
+    [Single(name='Jet0', value=<cppyy.gbl.Jet object at 0xa574af0>),
+     Single(name='Jet1', value=<cppyy.gbl.Jet object at 0xa575120>)]
     """
 
-    def __init__(self, *physics_objects: Single | Collective | Nested):
-        self.all = physics_objects
-        self.objects = []
+    physics_objects: list[PhysicsObject] = field(default_factory=list, repr=False)
+    name: str = field(init=False, compare=False)
+    value: list[Any] = field(default_factory=list, init=False, compare=False)
 
-    def read_ttree(self, ttree: Any) -> Multiple:
-        """Read an entry to fetch the objects.
+    def __post_init__(self):
+        self.name = ",".join([obj.name for obj in self.physics_objects])
 
-        Since a multiple physics object may contain nested ones, the entry is
-        expected to be an event.
+    def read_ttree(self, event: Any) -> Multiple:
+        """Read an event to fetch the value.
 
         Parameters
         ----------
-        entry : Any
+        event : TTree
             An event read by PyROOT.
 
         Returns
@@ -147,45 +151,45 @@ class Multiple(PhysicsObject):
 
         Examples
         --------
-        Read an event to fetch the leading three jets:
-        >>> obj = Multiple.from_identifier("Jet0,Jet1,Jet2").read(event)
-        >>> obj.objects
-        [[<cppyy.gbl.Jet object at 0x7eb6ed0>],
-        [<cppyy.gbl.Jet object at 0x7eb7500>],
-        [<cppyy.gbl.Jet object at 0x7eb7b30>]]
+        Read an event to fetch the leading two jets:
+        >>> obj = Multiple.from_name("Jet0,Jet1")
+        >>> obj.read_ttree(event)
+        >>> obj.value
+        [<cppyy.gbl.Jet object at 0xa574af0>, <cppyy.gbl.Jet object at 0xa575120>]
 
-        Use `all` to show details:
-        >>> obj.all
-        (Jet0, Jet1, Jet2)
-        >>> obj.all[0].objects
-        [<cppyy.gbl.Jet object at 0x7eb6ed0>]
+        Read an event to fetch the first 5 constituents of the leading two jets:
+        >>> obj = Multiple.from_name("Jet0.Constituents:5,Jet1.Constituents:5")
+        >>> obj.read_ttree(event)
+        >>> obj.value
+        [[[<cppyy.gbl.Tower object at 0x9b6ab30>,
+           <cppyy.gbl.Track object at 0x9528c10>,
+           <cppyy.gbl.Track object at 0x9528fd0>,
+           <cppyy.gbl.Tower object at 0x9b6ac50>,
+           <cppyy.gbl.Track object at 0x9528a30>]],
+         [[<cppyy.gbl.Tower object at 0x9b6a7d0>,
+           <cppyy.gbl.Track object at 0x95280d0>,
+           <cppyy.gbl.Tower object at 0x9b6a980>,
+           <cppyy.gbl.Track object at 0x89fb410>,
+           <cppyy.gbl.Track object at 0x9527b30>]]]
 
-        ! For any failure cases, check the doc for `Single.read`, `Collective.read`,
-        and `Nested.read`.
+        ! For any failure cases, check the docs of `Single.read_ttree`,
+        `Collective.read_ttree` and `Nested.read_ttree`.
         """
-        self.objects = [obj.read_ttree(ttree).objects for obj in self.all]
+        self.value = []
+
+        for phyobj in self.physics_objects:
+            phyobj.read_ttree(event)
+            self.value.append(phyobj.value)
+
         return self
 
-    @property
-    def id(self) -> str:
-        """The unique string for a multiple physics object.
-
-        It consists of the identifiers of all physics objects it contains, and a
-        comma is used to separate them.
-        """
-        return ",".join([obj.id for obj in self.all])
-
     @classmethod
-    def from_id(cls, id: str) -> Multiple:
+    def from_name(cls, name: str) -> Multiple:
         """Create a multiple physics object from an identifier.
 
-        It decomposes the identifier into identifiers that may correspond to
-        single, collective, or nested physics objects.
-
         Parameters
         ----------
-        identifier : str
-            A unique string for a physics object.
+        name : str
 
         Returns
         -------
@@ -194,59 +198,20 @@ class Multiple(PhysicsObject):
         Raises
         ------
         ValueError
-            No comma`,` or invalid identifier.
+            If the name is invalid.
         """
-        if "," not in id:
-            raise ValueError(f"Invalid identifier {id} for {cls.__name__}")
+        if "," not in name:
+            raise ValueError(f"Invalid name '{name}' for {cls.__name__}")
 
-        objects = []
-        for i in id.split(","):
+        physics_objects = []
+        for i in name.split(","):
             if is_single(i):
-                objects.append(Single.from_id(i))
+                physics_objects.append(Single.from_name(i))
             elif is_collective(i):
-                objects.append(Collective.from_id(i))
+                physics_objects.append(Collective.from_name(i))
             elif is_nested(i):
-                objects.append(Nested.from_id(i))
+                physics_objects.append(Nested.from_name(i))
             else:
-                raise ValueError(f"Invalid identifier {id} for {cls.__name__}")
-        return cls(*objects)
+                raise ValueError(f"Invalid '{name}' for {cls.__name__}")
 
-    @property
-    def config(self) -> dict[str, Any]:
-        """The configurations for serialization."""
-        return {
-            "classname": "Multiple",
-            "all_configs": [obj.config for obj in self.all],
-        }
-
-    @classmethod
-    def from_config(cls, config: dict[str, Any]) -> Multiple:
-        """Create a multiple physics object from configurations.
-
-        Parameters
-        ----------
-        config : dict
-
-        Returns
-        -------
-        physics object : Multiple
-
-        Raises
-        ------
-        ValueError
-            If `classname` in the configurations is not "Multiple".
-        """
-        if config.get("classname") != "Multiple":
-            raise ValueError(f"Invalid config for {cls.__name__}")
-
-        objects = []
-        for obj_config in config.get("all_configs"):
-            if obj_config.get("classname") == "Single":
-                objects.append(Single.from_config(obj_config))
-            elif obj_config.get("classname") == "Collective":
-                objects.append(Collective.from_config(obj_config))
-            elif obj_config.get("classname") == "Nested":
-                objects.append(Nested.from_config(obj_config))
-            else:
-                raise ValueError(f"Invalid config for {cls.__name__}")
-        return cls(*objects)
+        return cls(physics_objects)
