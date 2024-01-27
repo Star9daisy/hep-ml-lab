@@ -61,24 +61,24 @@ class Collective(PhysicsObject):
     ----------
     name : str
         The name of the physics object.
-    value : list[Any]
+    value : list[Any] | None
         The fetched values of the physics objects.
 
     Examples
     --------
     Create a collective physics object by its name, start and stop indices:
     >>> Collective(branch="Jet", start=1, stop=2)
-    Collective(name='Jet1:3', value=[])
+    Collective(name='Jet1:3', value=None)
 
     Create a collective physics object from its name:
     >>> Collective.from_name("Jet:")
-    Collective(name='Jet:', value=[])
+    Collective(name='Jet:', value=None)
     >>> Collective.from_name("Jet1:")
-    Collective(name='Jet1:', value=[])
+    Collective(name='Jet1:', value=None)
     >>> Collective.from_name("Jet:3")
-    Collective(name='Jet:3', value=[])
+    Collective(name='Jet:3', value=None)
     >>> Collective.from_name("Jet1:3")
-    Collective(name='Jet1:3', value=[])
+    Collective(name='Jet1:3', value=None)
 
     Read an event to fetch the leading three jets:
     >>> Collective(branch="Jet", stop=3).read_ttree(event).value
@@ -91,7 +91,7 @@ class Collective(PhysicsObject):
     start: int = field(default=0, repr=False)
     stop: int = field(default=-1, repr=False)
     name: str = field(init=False, compare=False)
-    value: list[Any] = field(default_factory=list, init=False, compare=False)
+    value: list[Any] | None = field(default=None, init=False, compare=False)
 
     def __post_init__(self):
         if self.start == 0 and self.stop == -1:

@@ -62,7 +62,7 @@ class Nested(PhysicsObject):
     ----------
     name : str
         The name of the physics object.
-    value : list[Any]
+    value : list[Any] | None
         The fetched values of the physics objects.
 
     Examples
@@ -71,11 +71,11 @@ class Nested(PhysicsObject):
     >>> main = Single(branch="Jet", index=0)
     >>> sub = Collective(branch="Constituents", start=3, stop=6)
     >>> Nested(main=main, sub=sub)
-    Nested(name='Jet0.Constituents3:6', value=[])
+    Nested(name='Jet0.Constituents3:6', value=None)
 
     Create a nested physics object from its name:
     >>> Nested.from_name("Jet0.Constituents3:6")
-    Nested(name='Jet0.Constituents3:6', value=[])
+    Nested(name='Jet0.Constituents3:6', value=None)
 
     Read an event to fetch the first three constituents of the leading jet:
     >>> main = Single(branch="Jet", index=0)
@@ -94,7 +94,7 @@ class Nested(PhysicsObject):
     main: Single | Collective = field(repr=False)
     sub: Single | Collective = field(repr=False)
     name: str = field(init=False, compare=False)
-    value: list[Any] = field(default_factory=list, init=False, compare=False)
+    value: list[Any] | None = field(default=None, init=False, compare=False)
 
     def __post_init__(self):
         self.name = f"{self.main.name}.{self.sub.name}"
