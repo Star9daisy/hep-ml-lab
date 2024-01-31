@@ -16,7 +16,7 @@ ALL_OBJECTS_DICT = {
 }
 
 
-def get_physics_object(name: str) -> PhysicsObject:
+def get_physics_object(name: str | None) -> PhysicsObject | None:
     """Retrieve a physics object from its name.
 
     Parameters
@@ -28,7 +28,10 @@ def get_physics_object(name: str) -> PhysicsObject:
     -------
     physics object : PhysicsObject
     """
-    if is_single(name):
+    if name is None:
+        return None
+
+    elif is_single(name):
         obj = Single.from_name(name)
 
     elif is_collective(name):
