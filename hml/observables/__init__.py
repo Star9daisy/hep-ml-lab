@@ -31,13 +31,13 @@ from .transverse_momentum import Pt
 from .transverse_momentum import TransverseMomentum
 
 
-def get(identifier: str, *arg, **kwarg):
-    if "." in identifier:
+def get_observable(name: str, *arg, **kwarg):
+    if "." in name:
         # Each nested physics object has one dot, so there may be multiple dots.
         # So we only take the last dot as the separator between physics object
         # and observable name.
-        physics_object = ".".join(identifier.split(".")[:-1])
-        name = identifier.split(".")[-1]
+        physics_object = ".".join(name.split(".")[:-1])
+        name = name.split(".")[-1]
         kwarg["physics_object"] = physics_object
 
         # Check if the observable name is a valid NSubjettiness
@@ -45,14 +45,14 @@ def get(identifier: str, *arg, **kwarg):
             if name[-2].isdigit():
                 m = int(name[-2])
                 n = int(name[-1])
-                return TauMN(m, n, physics_object, name)
+                return TauMN(physics_object, m, n)
             if name[-1].isdigit():
                 n = int(name[-1])
-                return TauN(n, physics_object, name)
+                return TauN(physics_object, n)
 
-        identifier = name
+        name = name
 
-    if identifier not in Observable.ALL_OBSERVABLES:
+    if name not in Observable.ALL_OBSERVABLES:
         return None
     else:
-        return Observable.ALL_OBSERVABLES[identifier](*arg, **kwarg)
+        return Observable.ALL_OBSERVABLES[name](*arg, **kwarg)

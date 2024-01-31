@@ -1,31 +1,28 @@
 from __future__ import annotations
 
 from math import nan
-from typing import Any
 
 from ..physics_objects.single import is_single
 from .observable import Observable
 
 
 class NSubjettiness(Observable):
-    def __init__(
-        self,
-        n: int,
-        physics_object: str,
-        name: str | None = None,
-        value: Any = None,
-        dtype: Any = None,
-    ):
-        supported_types = ["single", "collective"]
-        super().__init__(physics_object, supported_types, name, value, dtype)
+    def __init__(self, physics_object: str, n: int):
         self.n = n
+        supported_types = ["single", "collective"]
 
-    def read(self, event):
-        self.physics_object.read(event)
-        objs = self.physics_object.objects
+        super().__init__(physics_object, supported_types)
 
-        if is_single(self.physics_object):
-            self._value = objs[0].Tau[self.n - 1] if objs != [] else nan
+    def read_ttree(self, event):
+        self.physics_object.read_ttree(event)
+        objs = (
+            self.physics_object.value
+            if isinstance(self.physics_object.value, list)
+            else [self.physics_object.value]
+        )
+
+        if is_single(self.physics_object.name):
+            self._value = objs[0].Tau[self.n - 1] if objs != [None] else nan
 
         else:
             self._value = [
@@ -44,21 +41,17 @@ class NSubjettiness(Observable):
 class TauN(NSubjettiness):
     @property
     def name(self):
-        return f"Tau{self.n}"
+        return f"{self.physics_object.name}.Tau{self.n}"
 
     @classmethod
-    def from_identifier(cls, identifier: str, **kwargs) -> TauN:
-        if "." not in identifier:
-            raise ValueError(f"Invalid identifier {identifier}.")
+    def from_name(cls, name: str, **kwargs) -> TauN:
+        if "." not in name:
+            raise ValueError(f"Invalid name {name}.")
 
-        physics_object, name = identifier.split(".")
+        physics_object, class_name = name.split(".")
+        n = int(class_name[-1])
 
-        n = int(name[-1])
-        kwargs["n"] = n
-        kwargs["physics_object"] = physics_object
-        kwargs["name"] = name
-
-        return cls(**kwargs)
+        return cls(physics_object, n, **kwargs)
 
 
 NSubjettiness.add_alias("n_subjettiness")

@@ -1,27 +1,19 @@
-from typing import Any
-
 from ROOT import TLorentzVector
 
 from .observable import Observable
 
 
 class InvariantMass(Observable):
-    def __init__(
-        self,
-        physics_object: str,
-        name: str | None = None,
-        value: Any = None,
-        dtype: Any = None,
-    ):
+    def __init__(self, physics_object: str):
         supported_objects = ["single", "multiple"]
-        super().__init__(physics_object, supported_objects, name, value, dtype)
+        super().__init__(physics_object, supported_objects)
 
-    def read(self, event):
-        self.physics_object.read(event)
+    def read_ttree(self, event):
+        self.physics_object.read_ttree(event)
         vectors = TLorentzVector()
-        for obj in self.physics_object.objects:
-            if obj != []:
-                vectors += obj[0].P4()
+        for obj in self.physics_object.value:
+            if obj is not None:
+                vectors += obj.P4()
             else:
                 vectors += TLorentzVector()
 

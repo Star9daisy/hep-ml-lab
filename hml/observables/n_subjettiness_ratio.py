@@ -8,27 +8,24 @@ from .observable import Observable
 
 
 class NSubjettinessRatio(Observable):
-    def __init__(
-        self,
-        m: int,
-        n: int,
-        physics_object: str,
-        name: str | None = None,
-        value: Any = None,
-        dtype: Any = None,
-    ):
-        supported_types = ["single", "collective"]
-        super().__init__(physics_object, supported_types, name, value, dtype)
+    def __init__(self, physics_object: str, m: int, n: int):
         self.m = m
         self.n = n
+        supported_types = ["single", "collective"]
 
-    def read(self, event) -> Any:
-        self.physics_object.read(event)
-        objs = self.physics_object.objects
+        super().__init__(physics_object, supported_types)
 
-        if is_single(self.physics_object):
-            tau_m = objs[0].Tau[self.m - 1] if objs != [] else nan
-            tau_n = objs[0].Tau[self.n - 1] if objs != [] else nan
+    def read_ttree(self, event) -> Any:
+        self.physics_object.read_ttree(event)
+        objs = (
+            self.physics_object.value
+            if isinstance(self.physics_object.value, list)
+            else [self.physics_object.value]
+        )
+
+        if is_single(self.physics_object.name):
+            tau_m = objs[0].Tau[self.m - 1] if objs != [None] else nan
+            tau_n = objs[0].Tau[self.n - 1] if objs != [None] else nan
             self._value = tau_m / tau_n
 
         else:
@@ -48,23 +45,18 @@ class NSubjettinessRatio(Observable):
 class TauMN(NSubjettinessRatio):
     @property
     def name(self):
-        return f"Tau{self.m}{self.n}"
+        return f"{self.physics_object.name}.Tau{self.m}{self.n}"
 
     @classmethod
-    def from_identifier(cls, identifier: str, **kwargs) -> TauMN:
-        if "." not in identifier:
-            raise ValueError(f"Invalid identifier {identifier}.")
+    def from_name(cls, name: str, **kwargs) -> TauMN:
+        if "." not in name:
+            raise ValueError(f"Invalid identifier {name}.")
 
-        physics_object, name = identifier.split(".")
-
+        physics_object, name = name.split(".")
         m = int(name[-2])
         n = int(name[-1])
-        kwargs["m"] = m
-        kwargs["n"] = n
-        kwargs["physics_object"] = physics_object
-        kwargs["name"] = name
 
-        return cls(**kwargs)
+        return cls(physics_object, m, n, **kwargs)
 
 
 NSubjettinessRatio.add_alias("n_subjettiness_ratio")
