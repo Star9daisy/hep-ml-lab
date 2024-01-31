@@ -2,7 +2,7 @@ from .observable import Observable
 
 
 class Dummy(Observable):
-    def read(self, event):
+    def read_ttree(self, event):
         self._value = 1
         return self
 

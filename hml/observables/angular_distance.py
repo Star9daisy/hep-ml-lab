@@ -1,5 +1,3 @@
-from typing import Any
-
 import awkward as ak
 import numpy as np
 
@@ -9,26 +7,23 @@ from .pseudo_rapidity import Eta
 
 
 class AngularDistance(Observable):
-    def __init__(
-        self,
-        physics_object: str,
-        name: str | None = None,
-        value: Any = None,
-        dtype: Any = None,
-    ):
+    def __init__(self, physics_object: str):
         supported_objects = ["single", "collective", "nested", "multiple"]
-        super().__init__(physics_object, supported_objects, name, value, dtype)
-        if len(self.physics_object.all) != 2:
+        super().__init__(physics_object, supported_objects)
+
+        objs = self.physics_object.physics_objects
+        if len(objs) != 2:
             raise ValueError(
                 "AngularDistance requires exactly two physics objects, but got"
-                f" {len(self.physics_object.all)}"
+                f" {len(objs)}"
             )
 
-    def read(self, event):
-        eta1 = Eta(self.physics_object.all[0].identifier).read(event)
-        eta2 = Eta(self.physics_object.all[1].identifier).read(event)
-        phi1 = Phi(self.physics_object.all[0].identifier).read(event)
-        phi2 = Phi(self.physics_object.all[1].identifier).read(event)
+    def read_ttree(self, event):
+        objs = self.physics_object.physics_objects
+        eta1 = Eta(objs[0].name).read_ttree(event)
+        eta2 = Eta(objs[1].name).read_ttree(event)
+        phi1 = Phi(objs[0].name).read_ttree(event)
+        phi2 = Phi(objs[1].name).read_ttree(event)
 
         eta1_values = eta1.to_awkward()
         eta1_values = ak.flatten(eta1_values, axis=None)
