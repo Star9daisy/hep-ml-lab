@@ -12,6 +12,14 @@ def test_init():
     # Attributes ------------------------------------------------------------- #
     assert obj.name == "Jet0"
     assert obj.value is None
+    assert obj.config == {"branch": "Jet", "index": 0}
+
+
+def test_class_methods():
+    obj = Single(branch="Jet", index=0)
+    assert repr(obj) == "Single(name='Jet0', value=None)"
+    assert obj == Single.from_name("Jet0")
+    assert obj == Single.from_config(obj.config)
 
 
 def test_read_ttree(event):

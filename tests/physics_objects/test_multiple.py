@@ -24,7 +24,49 @@ def test_init():
 
     # Attributes ------------------------------------------------------------- #
     assert obj.name == "Jet0,Jet1:3,Jet0.Constituents:5"
-    assert obj.value is None
+    assert obj.value == [None, None, None]
+    assert obj.config == {
+        "physics_object_0": {
+            "class_name": "Single",
+            "config": {"branch": "Jet", "index": 0},
+        },
+        "physics_object_1": {
+            "class_name": "Collective",
+            "config": {"branch": "Jet", "start": 1, "stop": 3},
+        },
+        "physics_object_2": {
+            "class_name": "Nested",
+            "config": {
+                "main": {
+                    "class_name": "Single",
+                    "config": {"branch": "Jet", "index": 0},
+                },
+                "sub": {
+                    "class_name": "Collective",
+                    "config": {"branch": "Constituents", "start": 0, "stop": 5},
+                },
+            },
+        },
+    }
+
+
+def test_class_methods():
+    obj = Multiple(
+        physics_objects=[
+            Single(branch="Jet", index=0),
+            Collective(branch="Jet", start=1, stop=3),
+            Nested(
+                main=Single(branch="Jet", index=0),
+                sub=Collective(branch="Constituents", stop=5),
+            ),
+        ]
+    )
+    assert (
+        repr(obj)
+        == "Multiple(name='Jet0,Jet1:3,Jet0.Constituents:5', value=[None, None, None])"
+    )
+    assert obj == Multiple.from_name("Jet0,Jet1:3,Jet0.Constituents:5")
+    assert obj == Multiple.from_config(obj.config)
 
 
 def test_read_ttree(event):

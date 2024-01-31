@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from dataclasses import field
 from typing import Any
 
 from .collective import Collective
@@ -66,7 +64,6 @@ def is_multiple(name: str, supported_types: list[str] | None = None) -> bool:
     return True
 
 
-@dataclass
 class Multiple(PhysicsObject):
     """The data class that represents multiple physics objects.
 
@@ -121,12 +118,8 @@ class Multiple(PhysicsObject):
      Single(name='Jet1', value=<cppyy.gbl.Jet object at 0xa575120>)]
     """
 
-    physics_objects: list[PhysicsObject] = field(default_factory=list, repr=False)
-    name: str = field(init=False, compare=False)
-    value: list[Any] | None = field(default=None, init=False, compare=False)
-
-    def __post_init__(self):
-        self.name = ",".join([obj.name for obj in self.physics_objects])
+    def __init__(self, physics_objects: list[Single | Collective | Nested]):
+        self.physics_objects = physics_objects
 
     def read_ttree(self, event: Any) -> Multiple:
         """Read an event to fetch the value.
@@ -166,13 +159,31 @@ class Multiple(PhysicsObject):
         ! For any failure cases, check the docs of `Single.read_ttree`,
         `Collective.read_ttree` and `Nested.read_ttree`.
         """
-        self.value = []
+        self._value = []
 
         for phyobj in self.physics_objects:
             phyobj.read_ttree(event)
-            self.value.append(phyobj.value)
+            self._value.append(phyobj.value)
 
         return self
+
+    @property
+    def name(self) -> str:
+        return ",".join([i.name for i in self.physics_objects])
+
+    @property
+    def value(self) -> Any:
+        return [i.value for i in self.physics_objects]
+
+    @property
+    def config(self) -> dict[str, Any]:
+        return {
+            f"physics_object_{i}": {
+                "class_name": physics_object.__class__.__name__,
+                "config": physics_object.config,
+            }
+            for i, physics_object in enumerate(self.physics_objects)
+        }
 
     @classmethod
     def from_name(cls, name: str) -> Multiple:
@@ -204,5 +215,22 @@ class Multiple(PhysicsObject):
                 physics_objects.append(Nested.from_name(i))
             else:
                 raise ValueError(f"Invalid '{name}' for {cls.__name__}")
+
+        return cls(physics_objects)
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> Multiple:
+        class_dict = {
+            "Single": Single,
+            "Collective": Collective,
+            "Nested": Nested,
+        }
+        physics_objects = []
+
+        for physics_object in config:
+            physics_object_cls = class_dict[config[physics_object]["class_name"]]
+            physics_objects.append(
+                physics_object_cls.from_config(config[physics_object]["config"])
+            )
 
         return cls(physics_objects)
