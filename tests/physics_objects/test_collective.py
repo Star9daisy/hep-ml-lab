@@ -13,6 +13,19 @@ def test_init():
     # Attributes ------------------------------------------------------------- #
     assert obj.name == "Jet1:3"
     assert obj.value is None
+    assert obj.config == {"branch": "Jet", "start": 1, "stop": 3}
+
+    # other names
+    assert Collective(branch="Jet").name == "Jet:"
+    assert Collective(branch="Jet", start=1).name == "Jet1:"
+    assert Collective(branch="Jet", stop=3).name == "Jet:3"
+
+
+def test_class_methods():
+    obj = Collective(branch="Jet", start=1, stop=3)
+    assert repr(obj) == "Collective(name='Jet1:3', value=None)"
+    assert obj == Collective.from_name("Jet1:3")
+    assert obj == Collective.from_config(obj.config)
 
 
 def test_read_ttree(event):

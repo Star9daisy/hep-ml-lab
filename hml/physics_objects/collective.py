@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
-from dataclasses import field
 from typing import Any
 
 from .physics_object import PhysicsObject
@@ -34,7 +32,6 @@ def is_collective(name: str) -> bool:
         return False
 
 
-@dataclass
 class Collective(PhysicsObject):
     """The data class that represents a collective physics object.
 
@@ -80,21 +77,10 @@ class Collective(PhysicsObject):
      <cppyy.gbl.Jet object at 0xa0bec60>]
     """
 
-    branch: str = field(repr=False)
-    start: int = field(default=0, repr=False)
-    stop: int = field(default=-1, repr=False)
-    name: str = field(init=False, compare=False)
-    value: list[Any] | None = field(default=None, init=False, compare=False)
-
-    def __post_init__(self):
-        if self.start == 0 and self.stop == -1:
-            self.name = f"{self.branch}:"
-        elif self.start == 0:
-            self.name = f"{self.branch}:{self.stop}"
-        elif self.stop == -1:
-            self.name = f"{self.branch}{self.start}:"
-        else:
-            self.name = f"{self.branch}{self.start}:{self.stop}"
+    def __init__(self, branch: str, start: int = 0, stop: int = -1):
+        self.branch = branch
+        self.start = start
+        self.stop = stop
 
     def read_ttree(self, event: Any) -> Collective:
         """Read an event to fetch the value.
@@ -160,7 +146,7 @@ class Collective(PhysicsObject):
          <cppyy.gbl.Jet object at 0xa0bf8c0>,
          None]
         """
-        self.value = []
+        self._value = []
 
         branch = getattr(event, self.branch, None)
         n_entries = branch.GetEntries() if branch is not None else 0
@@ -168,9 +154,33 @@ class Collective(PhysicsObject):
 
         for i in range(self.start, stop):
             single = Single(self.branch, i).read_ttree(event)
-            self.value.append(single.value)
+            self._value.append(single.value)
 
         return self
+
+    @property
+    def name(self) -> str:
+        if self.start == 0 and self.stop == -1:
+            return f"{self.branch}:"
+        elif self.start == 0:
+            return f"{self.branch}:{self.stop}"
+        elif self.stop == -1:
+            return f"{self.branch}{self.start}:"
+        else:
+            return f"{self.branch}{self.start}:{self.stop}"
+
+    @property
+    def value(self) -> Any:
+        if hasattr(self, "_value"):
+            return self._value
+
+    @property
+    def config(self) -> dict[str, Any]:
+        return {
+            "branch": self.branch,
+            "start": self.start,
+            "stop": self.stop,
+        }
 
     @classmethod
     def from_name(cls, name: str) -> Collective:

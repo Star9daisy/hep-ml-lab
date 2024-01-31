@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
-from dataclasses import field
 from typing import Any
 
 from .physics_object import PhysicsObject
@@ -33,7 +31,6 @@ def is_single(name: str) -> bool:
         return False
 
 
-@dataclass
 class Single(PhysicsObject):
     """The data class that represents a single physics object.
 
@@ -68,20 +65,16 @@ class Single(PhysicsObject):
     Single(name='Jet0', value=<cppyy.gbl.Jet object at 0x81e4940>)
     """
 
-    branch: str = field(repr=False)
-    index: int = field(repr=False)
-    name: str = field(init=False, compare=False)
-    value: Any = field(default=None, init=False, compare=False)
-
-    def __post_init__(self) -> None:
-        self.name = f"{self.branch}{self.index}"
+    def __init__(self, branch: str, index: int):
+        self.branch = branch
+        self.index = index
 
     def read_ttree(self, event: Any) -> Single:
         """Read an event of TTree to fetch the value.
 
         Parameters
         ----------
-        entry : TTree
+        event : TTree
             An event or a branch read by PyROOT.
 
         Returns
@@ -108,15 +101,31 @@ class Single(PhysicsObject):
         >>> print(obj.value)
         None
         """
-        self.value = None
+        self._value = None
 
         if hasattr(event, self.branch):
             branch = getattr(event, self.branch)
 
             if self.index < branch.GetEntries():
-                self.value = branch[self.index]
+                self._value = branch[self.index]
 
         return self
+
+    @property
+    def name(self) -> str:
+        return f"{self.branch}{self.index}"
+
+    @property
+    def value(self) -> Any:
+        if hasattr(self, "_value"):
+            return self._value
+
+    @property
+    def config(self) -> dict[str, Any]:
+        return {
+            "branch": self.branch,
+            "index": self.index,
+        }
 
     @classmethod
     def from_name(cls, name: str) -> Single:

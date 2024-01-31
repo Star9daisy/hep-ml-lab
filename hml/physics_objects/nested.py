@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from dataclasses import field
 from typing import Any
 
 from .collective import Collective
@@ -35,7 +33,6 @@ def is_nested(name: str) -> bool:
         return False
 
 
-@dataclass
 class Nested(PhysicsObject):
     """The data class that represents a nested physics object.
 
@@ -82,13 +79,9 @@ class Nested(PhysicsObject):
     Collective(name='Constituents:3', value=[<cppyy.gbl.Tower object at 0x9683af0>, <cppyy.gbl.Track object at 0x9041bd0>, <cppyy.gbl.Track object at 0x9041f90>])
     """
 
-    main: Single | Collective = field(repr=False)
-    sub: Single | Collective = field(repr=False)
-    name: str = field(init=False, compare=False)
-    value: list[Any] | None = field(default=None, init=False, compare=False)
-
-    def __post_init__(self):
-        self.name = f"{self.main.name}.{self.sub.name}"
+    def __init__(self, main: Single | Collective, sub: Single | Collective):
+        self.main = main
+        self.sub = sub
 
     def read_ttree(self, event: Any) -> Nested:
         """Read an event to fetch the value.
@@ -172,7 +165,7 @@ class Nested(PhysicsObject):
         - "?": some of the objects are `None`
 
         """
-        self.value = []
+        self._value = []
 
         self.main.read_ttree(event)
         main_values = (
@@ -184,9 +177,31 @@ class Nested(PhysicsObject):
             sub_values = (
                 [self.sub.value] if isinstance(self.sub, Single) else self.sub.value
             )
-            self.value.append(sub_values)
+            self._value.append(sub_values)
 
         return self
+
+    @property
+    def name(self) -> str:
+        return f"{self.main.name}.{self.sub.name}"
+
+    @property
+    def value(self) -> Any:
+        if hasattr(self, "_value"):
+            return self._value
+
+    @property
+    def config(self) -> dict[str, Any]:
+        return {
+            "main": {
+                "class_name": self.main.__class__.__name__,
+                "config": self.main.config,
+            },
+            "sub": {
+                "class_name": self.sub.__class__.__name__,
+                "config": self.sub.config,
+            },
+        }
 
     @classmethod
     def from_name(cls, name: str) -> Nested:
@@ -216,5 +231,20 @@ class Nested(PhysicsObject):
             if is_single(sub_name)
             else Collective.from_name(sub_name)
         )
+
+        return cls(main, sub)
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> Nested:
+        class_dict = {
+            "Single": Single,
+            "Collective": Collective,
+        }
+
+        main_cls = class_dict[config["main"]["class_name"]]
+        main = main_cls.from_config(config["main"]["config"])
+
+        sub_cls = class_dict[config["sub"]["class_name"]]
+        sub = sub_cls.from_config(config["sub"]["config"])
 
         return cls(main, sub)

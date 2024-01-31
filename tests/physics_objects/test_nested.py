@@ -21,6 +21,30 @@ def test_init():
     # Attributes ------------------------------------------------------------- #
     assert obj.name == "Jet0.Constituents1:3"
     assert obj.value is None
+    assert obj.config == {
+        "main": {
+            "class_name": "Single",
+            "config": {"branch": "Jet", "index": 0},
+        },
+        "sub": {
+            "class_name": "Collective",
+            "config": {
+                "branch": "Constituents",
+                "start": 1,
+                "stop": 3,
+            },
+        },
+    }
+
+
+def test_class_methods():
+    obj = Nested(
+        main=Single(branch="Jet", index=0),
+        sub=Collective(branch="Constituents", start=1, stop=3),
+    )
+    assert repr(obj) == "Nested(name='Jet0.Constituents1:3', value=None)"
+    assert obj == Nested.from_name("Jet0.Constituents1:3")
+    assert obj == Nested.from_config(obj.config)
 
 
 def test_read_ttree(event):
