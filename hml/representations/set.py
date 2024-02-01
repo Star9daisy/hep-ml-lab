@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 from hml.types import Observable
 from hml.utils import get_observable
@@ -52,6 +51,3 @@ class Set:
     @property
     def values(self):
         return self._values
-
-    def to_pandas(self):
-        return pd.DataFrame(self.values, columns=self.names)
