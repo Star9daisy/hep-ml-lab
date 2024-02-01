@@ -5,11 +5,10 @@ from ROOT import gSystem
 from hml.types import Path
 from hml.types import PathLike
 
-gSystem.Load("libDelphes")
-
 
 class DelphesEvents:
     def __init__(self, filepath: PathLike):
+        gSystem.Load("libDelphes")
         self.filepath = Path(filepath)
         if self.filepath.suffix != ".root":
             raise ValueError(f"Expected .root file, got '{self.filepath.suffix}'")
