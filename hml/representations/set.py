@@ -1,7 +1,7 @@
 import numpy as np
 
-from hml.types import Observable
-from hml.utils import get_observable
+from hml.observables import Observable
+from hml.observables import get_observable
 
 
 class Set:
@@ -27,11 +27,11 @@ class Set:
 
         self._values = None
 
-    def read(self, event):
+    def read_ttree(self, event):
         self._values = []
 
         for i in self.observables:
-            value = i.read(event).to_numpy()
+            value = i.read_ttree(event).to_numpy()
 
             # Check if the observable is a scalar
             if value.shape != ():
