@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from fastjet import ClusterSequence, JetDefinition, PseudoJet
+from fastjet import ClusterSequence
+from fastjet import JetDefinition
+from fastjet import PseudoJet
 
-from hml.utils import get_jet_algorithm, get_observable
+from hml.observables import get_observable
+from hml.utils import get_jet_algorithm
 
 
 class Image:
@@ -16,15 +19,15 @@ class Image:
         self.registered_methods = []
         self.status = True
 
-    def read(self, event):
+    def read_ttree(self, event):
         self.been_pixelized = None
         self.been_read = False
         self.status = True
 
         self.event = event
-        self.height.read(event)
-        self.width.read(event)
-        self.channel.read(event) if self.channel is not None else None
+        self.height.read_ttree(event)
+        self.width.read_ttree(event)
+        self.channel.read_ttree(event) if self.channel is not None else None
         self.been_read = True
 
         for method, kwargs in self.registered_methods:
@@ -34,10 +37,10 @@ class Image:
 
     def with_subjets(self, constituents, algorithm, r, min_pt):
         if self.been_read:
-            px = get_observable(f"{constituents}.Px").read(self.event).value[0]
-            py = get_observable(f"{constituents}.Py").read(self.event).value[0]
-            pz = get_observable(f"{constituents}.Pz").read(self.event).value[0]
-            e = get_observable(f"{constituents}.E").read(self.event).value[0]
+            px = get_observable(f"{constituents}.Px").read_ttree(self.event).value[0]
+            py = get_observable(f"{constituents}.Py").read_ttree(self.event).value[0]
+            pz = get_observable(f"{constituents}.Pz").read_ttree(self.event).value[0]
+            e = get_observable(f"{constituents}.E").read_ttree(self.event).value[0]
 
             particles = [PseudoJet(px[i], py[i], pz[i], e[i]) for i in range(len(px))]
             subjet_def = JetDefinition(get_jet_algorithm(algorithm), r)
@@ -64,7 +67,8 @@ class Image:
             origin_height = get_observable(f"{origin}.{self.height.__class__.__name__}")
             origin_width = get_observable(f"{origin}.{self.width.__class__.__name__}")
 
-            obj, index, _ = origin_height.objs[0]["main"]
+            obj = origin_height.physics_object.branch
+            index = origin_height.physics_object.index
 
             if obj != "SubJet":
                 raise ValueError(f"{obj} is not supported yet!")
@@ -83,12 +87,10 @@ class Image:
             self.origin_height = origin_height
             self.origin_width = origin_width
 
-            self.height._value = (
-                self.height.to_numpy(keepdims=True) - origin_height.to_numpy()
-            ).tolist()
-            self.width._value = (
-                self.width.to_numpy(keepdims=True) - origin_width.to_numpy()
-            ).tolist()
+            translated_height = self.height.to_numpy() - origin_height.to_numpy()
+            translated_width = self.width.to_numpy() - origin_width.to_numpy()
+            self.height._value = translated_height.tolist()
+            self.width._value = translated_width.tolist()
 
         else:
             self.registered_methods.append(
@@ -105,7 +107,8 @@ class Image:
             axis_height = get_observable(f"{axis}.{self.height.__class__.__name__}")
             axis_width = get_observable(f"{axis}.{self.width.__class__.__name__}")
 
-            obj, index, _ = axis_height.objs[0]["main"]
+            obj = axis_height.physics_object.branch
+            index = axis_height.physics_object.index
 
             if obj != "SubJet":
                 raise ValueError(f"{obj} is not supported yet!")
@@ -136,12 +139,12 @@ class Image:
             rotated_points = np.dot(rotation_matrix, points)
             self.width._value = (
                 rotated_points[0]
-                .reshape(self.width.to_numpy(keepdims=True).shape)
+                .reshape(self.width.to_numpy(squeeze=False).shape)
                 .tolist()
             )
             self.height._value = (
                 rotated_points[1]
-                .reshape(self.height.to_numpy(keepdims=True).shape)
+                .reshape(self.height.to_numpy(squeeze=False).shape)
                 .tolist()
             )
 
@@ -164,7 +167,7 @@ class Image:
                 self.height.to_numpy(), self.h_bins
             )
             pixelized_values = pixelized_values.reshape(
-                self.height.to_numpy(keepdims=True).shape
+                self.height.to_numpy(squeeze=False).shape
             )
             self.height._value = pixelized_values.tolist()
 
@@ -172,7 +175,7 @@ class Image:
                 self.width.to_numpy(), self.w_bins
             )
             pixelized_values = pixelized_values.reshape(
-                self.width.to_numpy(keepdims=True).shape
+                self.width.to_numpy(squeeze=False).shape
             )
             self.width._value = pixelized_values.tolist()
 
