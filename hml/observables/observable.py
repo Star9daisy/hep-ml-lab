@@ -48,10 +48,12 @@ class Observable:
             pass
         return ak_array
 
-    def to_numpy(self, dtype=None):
+    def to_numpy(self, squeeze=True, dtype=None):
         value = self.value if isinstance(self.value, list) else [self.value]
-
-        return np.array(value, dtype=dtype)
+        if squeeze:
+            return np.squeeze(np.array(value, dtype=dtype))
+        else:
+            return np.array(value, dtype=dtype)
 
     @property
     def name(self):
