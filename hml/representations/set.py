@@ -1,3 +1,5 @@
+from importlib import import_module
+
 import numpy as np
 
 from hml.observables import Observable
@@ -13,30 +15,30 @@ class Set:
 
     Parameters
     ----------
-    *observables : [Observable | str]
+    *observables : list[Observable | str]
         A list of observables or their names.
     """
 
     def __init__(self, *observables: str | Observable):
         self.observables = []
-        for i in observables:
-            if isinstance(i, str):
-                self.observables.append(get_observable(i))
-            else:
-                self.observables.append(i)
+        for obs in observables:
+            if isinstance(obs, str):
+                obs = get_observable(obs)
+
+            self.observables.append(obs)
 
         self._values = None
 
     def read_ttree(self, event):
         self._values = []
 
-        for i in self.observables:
-            value = i.read_ttree(event).to_numpy()
+        for obs in self.observables:
+            value = obs.read_ttree(event).to_numpy()
 
             # Check if the observable is a scalar
             if value.shape != ():
                 raise ValueError(
-                    f"Observable {i.name} has shape {value.shape} "
+                    f"Observable {obs.name} has shape {obs.to_numpy().shape} "
                     "but should be a scalar."
                 )
 
@@ -53,3 +55,22 @@ class Set:
     @property
     def values(self):
         return self._values
+
+    @property
+    def config(self):
+        return {
+            "observable_configs": {
+                i.__class__.__name__: i.config for i in self.observables
+            },
+        }
+
+    @classmethod
+    def from_config(cls, config):
+        observables = []
+        module = import_module("hml.observables")
+
+        for class_name, class_config in config["observable_configs"].items():
+            class_ = getattr(module, class_name)
+            observables.append(class_.from_config(class_config))
+
+        return cls(*observables)
