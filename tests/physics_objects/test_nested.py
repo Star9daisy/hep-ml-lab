@@ -10,7 +10,7 @@ def test_init():
         sub=Collective(branch="Constituents", start=1, stop=3),
     )
 
-    # Parameters ------------------------------------------------------------- #
+    # Attributes ------------------------------------------------------------- #
     assert obj.main.branch == "Jet"
     assert obj.main.index == 0
 
@@ -18,9 +18,8 @@ def test_init():
     assert obj.sub.start == 1
     assert obj.sub.stop == 3
 
-    # Attributes ------------------------------------------------------------- #
     assert obj.name == "Jet0.Constituents1:3"
-    assert obj.value is None
+    assert obj.objects is None
     assert obj.config == {
         "main": {
             "class_name": "Single",
@@ -37,92 +36,110 @@ def test_init():
     }
 
 
+def test_special_methods():
+    obj = Nested(
+        main=Single(branch="Jet", index=0),
+        sub=Collective(branch="Constituents", start=1, stop=3),
+    )
+
+    # __eq__ ----------------------------------------------------------------- #
+    assert (
+        Nested(
+            main=Single(branch="Jet", index=0),
+            sub=Collective(branch="Constituents", start=1, stop=3),
+        )
+        == obj
+    )
+
+    # __repr__ --------------------------------------------------------------- #
+    assert repr(obj) == "Nested(name='Jet0.Constituents1:3', objects=None)"
+
+
 def test_class_methods():
     obj = Nested(
         main=Single(branch="Jet", index=0),
         sub=Collective(branch="Constituents", start=1, stop=3),
     )
-    assert repr(obj) == "Nested(name='Jet0.Constituents1:3', value=None)"
+
+    # from_name -------------------------------------------------------------- #
     assert obj == Nested.from_name("Jet0.Constituents1:3")
+
+    # from_config ------------------------------------------------------------ #
     assert obj == Nested.from_config(obj.config)
 
 
 def test_read_ttree(event):
-    # Valid cases ------------------------------------------------------------ #
+    # Common cases ----------------------------------------------------------- #
     obj = Nested.from_name("Jet0.Constituents0").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (1, 1)
-    assert obj.value[0][0] is not None
+    assert (len(obj.objects), len(obj.objects[0])) == (1, 1)
+    assert None not in obj.objects[0]
 
     obj = Nested.from_name("Jet0.Constituents:3").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (1, 3)
-    assert all(obj.value[0]) is True
+    assert (len(obj.objects), len(obj.objects[0])) == (1, 3)
+    assert None not in obj.objects[0]
 
     obj = Nested.from_name("Jet:3.Constituents:3").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (3, 3)
-    assert all([j for i in obj.value for j in i]) is True
+    assert (len(obj.objects), len(obj.objects[0])) == (3, 3)
+    assert None not in [j for i in obj.objects for j in i]
 
-    # Invalid cases ---------------------------------------------------------- #
+    # Edge cases ------------------------------------------------------------- #
     obj = Nested.from_name("Jet0.Constituents100").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (1, 1)
-    assert obj.value[0][0] is None
+    assert (len(obj.objects), len(obj.objects[0])) == (1, 0)
+    assert obj.objects == [[]]
 
     # None-filled cases
     obj = Nested.from_name("Jet0.Constituents:100").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (1, 100)
-    assert all([j for i in obj.value for j in i]) is False
-    assert any([j for i in obj.value for j in i]) is True
+    assert (len(obj.objects), len(obj.objects[0])) == (1, 100)
+    assert all([j for i in obj.objects for j in i]) is False
+    assert any([j for i in obj.objects for j in i]) is True
 
     obj = Nested.from_name("Jet0.Constituents100:").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (1, 0)
-    assert obj.value[0] == []
+    assert (len(obj.objects), len(obj.objects[0])) == (1, 0)
+    assert obj.objects == [[]]
 
     obj = Nested.from_name("Jet100.Constituents0").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (1, 1)
-    assert obj.value[0][0] is None
+    assert obj.objects == []
 
     obj = Nested.from_name("Jet100.Constituents100").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (1, 1)
-    assert obj.value[0][0] is None
+    assert obj.objects == []
 
     obj = Nested.from_name("Jet100.Constituents:100").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (1, 100)
-    assert any([j for i in obj.value for j in i]) is False
+    assert obj.objects == []
 
     obj = Nested.from_name("Jet100.Constituents100:").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (1, 0)
-    assert obj.value[0] == []
+    assert obj.objects == []
 
     # None-filled cases
     obj = Nested.from_name("Jet:100.Constituents0").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (100, 1)
-    assert all([j for i in obj.value for j in i]) is False
-    assert any([j for i in obj.value for j in i]) is True
+    assert (len(obj.objects), len(obj.objects[0])) == (100, 1)
+    for i in obj.objects:
+        assert len(i) in [0, 1]
 
     obj = Nested.from_name("Jet:100.Constituents100").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (100, 1)
-    assert any([j for i in obj.value for j in i]) is False
+    assert (len(obj.objects), len(obj.objects[0])) == (100, 0)
+    assert [j for i in obj.objects for j in i] == []
 
     # None-filled cases
     obj = Nested.from_name("Jet:100.Constituents:100").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (100, 100)
-    assert all([j for i in obj.value for j in i]) is False
-    assert any([j for i in obj.value for j in i]) is True
+    assert (len(obj.objects), len(obj.objects[0])) == (100, 100)
+    assert all([j for i in obj.objects for j in i]) is False
+    assert any([j for i in obj.objects for j in i]) is True
 
     obj = Nested.from_name("Jet:100.Constituents100:").read_ttree(event)
-    assert (len(obj.value), len(obj.value[0])) == (100, 0)
-    assert [j for i in obj.value for j in i] == []
+    assert (len(obj.objects), len(obj.objects[0])) == (100, 0)
+    assert [j for i in obj.objects for j in i] == []
 
     obj = Nested.from_name("Jet100:.Constituents0").read_ttree(event)
-    assert obj.value == []
+    assert obj.objects == []
 
     obj = Nested.from_name("Jet100:.Constituents100").read_ttree(event)
-    assert obj.value == []
+    assert obj.objects == []
 
     obj = Nested.from_name("Jet100:.Constituents:100").read_ttree(event)
-    assert obj.value == []
+    assert obj.objects == []
 
     obj = Nested.from_name("Jet100:.Constituents100:").read_ttree(event)
-    assert obj.value == []
+    assert obj.objects == []
 
 
 def test_is_nested(single_names, collective_names, nested_names, multiple_names):

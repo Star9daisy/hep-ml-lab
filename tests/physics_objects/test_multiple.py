@@ -19,12 +19,11 @@ def test_init():
         ]
     )
 
-    # Parameters ------------------------------------------------------------- #
+    # Attributes ------------------------------------------------------------- #
     assert len(obj.physics_objects) == 3
 
-    # Attributes ------------------------------------------------------------- #
     assert obj.name == "Jet0,Jet1:3,Jet0.Constituents:5"
-    assert obj.value == [None, None, None]
+    assert obj.objects == [None, None, None]
     assert obj.config == {
         "physics_object_0": {
             "class_name": "Single",
@@ -50,6 +49,40 @@ def test_init():
     }
 
 
+def test_special_methods():
+    obj = Multiple(
+        physics_objects=[
+            Single(branch="Jet", index=0),
+            Collective(branch="Jet", start=1, stop=3),
+            Nested(
+                main=Single(branch="Jet", index=0),
+                sub=Collective(branch="Constituents", stop=5),
+            ),
+        ]
+    )
+
+    # __eq__ ----------------------------------------------------------------- #
+    assert (
+        Multiple(
+            physics_objects=[
+                Single(branch="Jet", index=0),
+                Collective(branch="Jet", start=1, stop=3),
+                Nested(
+                    main=Single(branch="Jet", index=0),
+                    sub=Collective(branch="Constituents", stop=5),
+                ),
+            ]
+        )
+        == obj
+    )
+
+    # __repr__ --------------------------------------------------------------- #
+    assert (
+        repr(obj)
+        == "Multiple(name='Jet0,Jet1:3,Jet0.Constituents:5', objects=[None, None, None])"
+    )
+
+
 def test_class_methods():
     obj = Multiple(
         physics_objects=[
@@ -61,11 +94,11 @@ def test_class_methods():
             ),
         ]
     )
-    assert (
-        repr(obj)
-        == "Multiple(name='Jet0,Jet1:3,Jet0.Constituents:5', value=[None, None, None])"
-    )
+
+    # from_name -------------------------------------------------------------- #
     assert obj == Multiple.from_name("Jet0,Jet1:3,Jet0.Constituents:5")
+
+    # from_config ------------------------------------------------------------ #
     assert obj == Multiple.from_config(obj.config)
 
 
@@ -82,9 +115,10 @@ def test_read_ttree(event):
     )
     obj.read_ttree(event)
 
-    assert obj.physics_objects[0].value is not None
-    assert any(obj.physics_objects[1].value) is True
-    assert any([j for i in obj.physics_objects[2].value for j in i]) is True
+    assert len(obj.physics_objects[0].objects) == 1
+    assert len(obj.physics_objects[1].objects) == 2
+    assert len(obj.physics_objects[2].objects) == 1
+    assert len(obj.physics_objects[2].objects[0]) == 5
 
 
 def test_is_multiple(single_names, collective_names, nested_names, multiple_names):
