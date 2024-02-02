@@ -11,9 +11,9 @@ class InvariantMass(Observable):
     def read_ttree(self, event):
         self.physics_object.read_ttree(event)
         vectors = TLorentzVector()
-        for obj in self.physics_object.value:
-            if obj is not None:
-                vectors += obj.P4()
+        for obj in self.physics_object.objects:
+            if obj != []:
+                vectors += obj[0].P4()
             else:
                 vectors += TLorentzVector()
 

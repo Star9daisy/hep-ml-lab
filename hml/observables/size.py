@@ -8,7 +8,7 @@ class Size(Observable):
 
     def read_ttree(self, event):
         self.physics_object.read_ttree(event)
-        self._value = len(self.physics_object.value)
+        self._value = len(self.physics_object.objects)
 
         return self
 

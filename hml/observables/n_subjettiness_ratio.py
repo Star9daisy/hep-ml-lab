@@ -16,16 +16,11 @@ class NSubjettinessRatio(Observable):
         super().__init__(physics_object, supported_types)
 
     def read_ttree(self, event) -> Any:
-        self.physics_object.read_ttree(event)
-        objs = (
-            self.physics_object.value
-            if isinstance(self.physics_object.value, list)
-            else [self.physics_object.value]
-        )
+        objs = self.physics_object.read_ttree(event).objects
 
         if is_single(self.physics_object.name):
-            tau_m = objs[0].Tau[self.m - 1] if objs != [None] else nan
-            tau_n = objs[0].Tau[self.n - 1] if objs != [None] else nan
+            tau_m = objs[0].Tau[self.m - 1] if objs != [] else nan
+            tau_n = objs[0].Tau[self.n - 1] if objs != [] else nan
             self._value = tau_m / tau_n
 
         else:
