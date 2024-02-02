@@ -14,13 +14,13 @@ class Image:
         self.width = get_observable(width)
         self.channel = get_observable(channel) if channel is not None else None
 
-        self.been_pixelized = None
+        self.been_pixelated = None
         self.been_read = False
         self.registered_methods = []
         self.status = True
 
     def read_ttree(self, event):
-        self.been_pixelized = None
+        self.been_pixelated = None
         self.been_read = False
         self.status = True
 
@@ -155,7 +155,7 @@ class Image:
 
         return self
 
-    def pixelize(self, size, range):
+    def pixelated(self, size, range):
         if self.been_read:
             if self.status is False:
                 return self
@@ -163,29 +163,29 @@ class Image:
             self.h_bins = np.linspace(*range[0], size[0] + 1)
             self.w_bins = np.linspace(*range[1], size[1] + 1)
 
-            pixelized_values = self.continuous_to_center(
+            pixelated_values = self.continuous_to_center(
                 self.height.to_numpy(), self.h_bins
             )
-            pixelized_values = pixelized_values.reshape(
+            pixelated_values = pixelated_values.reshape(
                 self.height.to_numpy(squeeze=False).shape
             )
-            self.height._value = pixelized_values.tolist()
+            self.height._value = pixelated_values.tolist()
 
-            pixelized_values = self.continuous_to_center(
+            pixelated_values = self.continuous_to_center(
                 self.width.to_numpy(), self.w_bins
             )
-            pixelized_values = pixelized_values.reshape(
+            pixelated_values = pixelated_values.reshape(
                 self.width.to_numpy(squeeze=False).shape
             )
-            self.width._value = pixelized_values.tolist()
+            self.width._value = pixelated_values.tolist()
 
-            self.been_pixelized = True
+            self.been_pixelated = True
 
         else:
             self.registered_methods.append(
                 ("pixelize", {"size": size, "range": range}),
             )
-            self.been_pixelized = True
+            self.been_pixelated = True
 
         return self
 
@@ -204,7 +204,7 @@ class Image:
 
     @property
     def values(self):
-        if self.been_pixelized is not None:
+        if self.been_pixelated is not None:
             if self.channel is not None:
                 hist, _, _ = np.histogram2d(
                     self.width.to_numpy(),
@@ -232,7 +232,7 @@ class Image:
     ):
         plt.figure()
 
-        if not self.been_pixelized:
+        if not self.been_pixelated:
             plt.scatter(
                 x=self.width.to_numpy(),
                 y=self.height.to_numpy(),
