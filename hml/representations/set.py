@@ -13,7 +13,7 @@ class Set:
 
     Parameters
     ----------
-    observables : list[Observable | str]
+    *observables : [Observable | str]
         A list of observables or their names.
     """
 
@@ -43,6 +43,8 @@ class Set:
             self._values.append(value)
 
         self._values = np.array(self._values)
+
+        return self
 
     @property
     def names(self):
