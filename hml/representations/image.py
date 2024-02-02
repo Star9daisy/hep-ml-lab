@@ -155,7 +155,7 @@ class Image:
 
         return self
 
-    def pixelated(self, size, range):
+    def pixelate(self, size, range):
         if self.been_read:
             if self.status is False:
                 return self
@@ -183,7 +183,7 @@ class Image:
 
         else:
             self.registered_methods.append(
-                ("pixelize", {"size": size, "range": range}),
+                ("pixelate", {"size": size, "range": range}),
             )
             self.been_pixelated = True
 
