@@ -133,11 +133,11 @@ class SetDataset:
     @property
     def samples(self):
         if len(self._samples) == 0 and not self._been_read and self._data is not None:
-            with self._data as split_zf:
-                split_data = np.load(BytesIO(split_zf.read()))
-                self._samples = split_data["samples"]
-                self._targets = split_data["targets"]
+            split_data = np.load(BytesIO(self._data.read()))
+            self._samples = split_data["samples"]
+            self._data.seek(0)
 
+        if len(self._samples) > 0 and len(self._targets) > 0:
             self._been_read = True
 
         return np.array(self._samples, dtype=np.float32)
@@ -145,11 +145,11 @@ class SetDataset:
     @property
     def targets(self):
         if len(self._targets) == 0 and not self._been_read and self._data is not None:
-            with self._data as split_zf:
-                split_data = np.load(BytesIO(split_zf.read()))
-                self._samples = split_data["samples"]
-                self._targets = split_data["targets"]
+            split_data = np.load(BytesIO(self._data.read()))
+            self._targets = split_data["targets"]
+            self._data.seek(0)
 
+        if len(self._samples) > 0 and len(self._targets) > 0:
             self._been_read = True
 
         return np.array(self._targets, dtype=np.int32)
