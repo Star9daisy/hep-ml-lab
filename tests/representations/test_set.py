@@ -5,31 +5,41 @@ from hml.representations import Set
 
 
 def test_init():
-    # Only strings
-    r = Set("FatJet0.Pt", "FatJet0.Eta", "FatJet0.Phi", "FatJet0.Mass")
-
-    # Strings and observables
-    r = Set("FatJet0.Pt", "FatJet0.Eta", "FatJet0.Phi", get_observable("FatJet0.Mass"))
-
-    # Parameters ------------------------------------------------------------- #
-    assert r.observables == [
-        get_observable("FatJet0.Pt"),
-        get_observable("FatJet0.Eta"),
-        get_observable("FatJet0.Phi"),
-        get_observable("FatJet0.Mass"),
-    ]
+    r = Set(
+        "FatJet0.Mass",
+        get_observable("FatJet0.TauMN", m=2, n=1),
+        "Jet0,Jet1.DeltaR",
+    )
 
     # Attributes ------------------------------------------------------------- #
-    assert r.names == ["FatJet0.Pt", "FatJet0.Eta", "FatJet0.Phi", "FatJet0.Mass"]
+    assert r.observables == [
+        get_observable("FatJet0.Mass"),
+        get_observable("FatJet0.TauMN", m=2, n=1),
+        get_observable("Jet0,Jet1.DeltaR"),
+    ]
+    assert r.names == ["FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR"]
     assert r.values is None
+    assert r.config == {
+        "observable_configs": {
+            "Mass": {"physics_object": "FatJet0"},
+            "TauMN": {"physics_object": "FatJet0", "m": 2, "n": 1},
+            "DeltaR": {"physics_object": "Jet0,Jet1"},
+        }
+    }
 
 
-def test_read(event):
-    r = Set("FatJet0.Pt", "FatJet0.Eta", "FatJet0.Phi", "FatJet0.Mass")
-    r.read_ttree(event)
+def test_read_ttree(event):
+    # Common cases ----------------------------------------------------------- #
+    r = Set("FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR").read_ttree(event)
 
-    assert r.values.shape == (4,)
+    assert r.values.shape == (3,)
 
+    # Error cases ------------------------------------------------------------ #
     with pytest.raises(ValueError):
-        r = Set("Jet:.Pt")
-        r.read_ttree(event)
+        Set("Jet:.Pt").read_ttree(event)
+
+
+def test_class_methods():
+    r = Set("FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR")
+
+    assert Set.from_config(r.config).config == r.config
