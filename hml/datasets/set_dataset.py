@@ -133,7 +133,7 @@ class SetDataset:
 
     @property
     def samples(self):
-        if self._samples == [] and not self._been_read:
+        if self._samples == [] and not self._been_read and self._data is not None:
             with self._data as split_zf:
                 split_data = np.load(BytesIO(split_zf.read()))
                 self._samples = split_data["samples"]
@@ -145,7 +145,7 @@ class SetDataset:
 
     @property
     def targets(self):
-        if self._targets == [] and not self._been_read:
+        if self._targets == [] and not self._been_read and self._data is not None:
             with self._data as split_zf:
                 split_data = np.load(BytesIO(split_zf.read()))
                 self._samples = split_data["samples"]
@@ -163,7 +163,7 @@ class SetDataset:
         return np.hstack([self.samples, self.targets])
 
     def to_pandas(self):
-        df = pd.DataFrame(self.samples, columns=self.feature_names)
+        df = pd.DataFrame(self.samples.tolist(), columns=self.feature_names)
         df["Target"] = self.targets
         return df
 
