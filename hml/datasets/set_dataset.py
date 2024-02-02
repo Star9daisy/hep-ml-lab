@@ -26,8 +26,8 @@ class SetDataset:
         self._data = None
         self._been_read = False
 
-    def read(self, event, target):
-        self.set.read(event)
+    def read_ttree(self, event, target):
+        self.set.read_ttree(event)
         self._samples.append(self.set.values)
         self._targets.append([target])
 
