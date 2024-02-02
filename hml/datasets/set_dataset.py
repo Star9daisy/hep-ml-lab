@@ -74,11 +74,7 @@ class SetDataset:
         self.been_split = True
 
     def save(self, filepath="dataset.ds"):
-        configs = {
-            "observables": self.set.names,
-            "been_split": self.been_split,
-            "seed": self.seed,
-        }
+        configs = self.config
         configs_json = json.dumps(configs)
 
         npz_data = BytesIO()
@@ -113,7 +109,7 @@ class SetDataset:
         with zf.open("configs.json") as json_file:
             configs = json.load(json_file)
 
-        dataset = cls(*configs["observables"])
+        dataset = cls.from_config(configs)
         dataset._filepath = filepath
         dataset._data = zf.open("data.npz")
 
@@ -170,3 +166,25 @@ class SetDataset:
         df = pd.DataFrame(self.samples, columns=self.feature_names)
         df["Target"] = self.targets
         return df
+
+    @property
+    def config(self):
+        config = self.set.config
+        config.update(
+            {
+                "been_split": self.been_split,
+                "seed": self.seed,
+            }
+        )
+
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        set = Set.from_config(config)
+
+        instance = cls(*set.observables)
+        instance.been_split = config["been_split"]
+        instance.seed = config["seed"]
+
+        return instance
