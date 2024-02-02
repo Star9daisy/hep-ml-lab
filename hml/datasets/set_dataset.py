@@ -4,24 +4,23 @@ from io import BytesIO
 
 import numpy as np
 import pandas as pd
-from numpy.lib.npyio import NpzFile
 from sklearn.model_selection import train_test_split
 
+from hml.observables import Observable
 from hml.representations import Set
-from hml.types import Observable, PathLike
-from hml.utils import get_observable
 
 
 class SetDataset:
     def __init__(self, *observables: str | Observable):
         self.set = Set(*observables)
+        self.been_split = False
+        self.seed = None
+
         self._samples = []
         self._targets = []
-        self.been_split = False
         self.train = None
         self.test = None
         self.val = None
-        self.seed = None
 
         self._data = None
         self._been_read = False
