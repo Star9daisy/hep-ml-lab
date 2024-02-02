@@ -34,7 +34,7 @@ def is_nested(name: str) -> bool:
 
 
 class Nested(PhysicsObject):
-    """The data class that represents a nested physics object.
+    """The class that represents a nested physics object.
 
     For example, the constituents of the leading jet, the first 100 constituents
     of the first three leading jets, etc.
@@ -48,10 +48,14 @@ class Nested(PhysicsObject):
 
     Attributes
     ----------
+    main : Single | Collective
+        The main physics object.
+    sub : Single | Collective
+        The sub physics object.
     name : str
         The name of the physics object.
-    value : list[Any] | None
-        The fetched values of the physics objects.
+    objects : list[Any] | None
+        The fetched objects of the physics objects.
 
     Examples
     --------
@@ -59,32 +63,34 @@ class Nested(PhysicsObject):
     >>> main = Single(branch="Jet", index=0)
     >>> sub = Collective(branch="Constituents", start=3, stop=6)
     >>> Nested(main=main, sub=sub)
-    Nested(name='Jet0.Constituents3:6', value=None)
+    Nested(name='Jet0.Constituents3:6', objects=None)
 
     Create a nested physics object from its name:
     >>> Nested.from_name("Jet0.Constituents3:6")
-    Nested(name='Jet0.Constituents3:6', value=None)
+    Nested(name='Jet0.Constituents3:6', objects=None)
 
     Read an event to fetch the first three constituents of the leading jet:
     >>> main = Single(branch="Jet", index=0)
     >>> sub = Collective(branch="Constituents", stop=3)
     >>> obj = Nested(main=main, sub=sub).read_ttree(event)
     >>> obj
-    Nested(name='Jet0.Constituents:3', value=[[<cppyy.gbl.Tower object at 0x9683af0>, <cppyy.gbl.Track object at 0x9041bd0>, <cppyy.gbl.Track object at 0x9041f90>]])
+    Nested(name='Jet0.Constituents:3', objects=[[<cppyy.gbl.Tower object at 0x9683af0>, <cppyy.gbl.Track object at 0x9041bd0>, <cppyy.gbl.Track object at 0x9041f90>]])
 
     Use `main` and `sub` to show details:
     >>> obj.main
-    Single(name='Jet0', value=<cppyy.gbl.Jet object at 0xa08dab0>)
+    Single(name='Jet0', objects=[<cppyy.gbl.Jet object at 0xa08dab0>])
     >>> obj.sub
-    Collective(name='Constituents:3', value=[<cppyy.gbl.Tower object at 0x9683af0>, <cppyy.gbl.Track object at 0x9041bd0>, <cppyy.gbl.Track object at 0x9041f90>])
+    Collective(name='Constituents:3', objects=[<cppyy.gbl.Tower object at 0x9683af0>, <cppyy.gbl.Track object at 0x9041bd0>, <cppyy.gbl.Track object at 0x9041f90>])
     """
 
     def __init__(self, main: Single | Collective, sub: Single | Collective):
         self.main = main
         self.sub = sub
 
+        self._objects = None
+
     def read_ttree(self, event: Any) -> Nested:
-        """Read an event to fetch the value.
+        """Read an event in `TTree` format to fetch the objects.
 
         Parameters
         ----------
@@ -97,36 +103,66 @@ class Nested(PhysicsObject):
 
         Examples
         --------
-        Read an event to fetch the first ten constituents of the first two
+        Read an event to fetch the first three constituents of the first two
         leading jet:
         >>> main = Collective(branch="Jet", stop=2)
-        >>> sub = Collective(branch="Constituents", stop=10)
-        >>> obj = Nested(main=main, sub=sub).read_ttree(event)
-        Collective(name='Constituents:10', value=[<cppyy.gbl.Tower object at 0x9683790>, <cppyy.gbl.Track object at 0x9041090>, <cppyy.gbl.Tower object at 0x9683940>, <cppyy.gbl.Track object at 0x8514610>, <cppyy.gbl.Track object at 0x9040af0>, <cppyy.gbl.Track object at 0x9040280>, <cppyy.gbl.Tower object at 0x9835b20>, <cppyy.gbl.Track object at 0x9040cd0>, <cppyy.gbl.Track object at 0x9040910>, <cppyy.gbl.Track object at 0x9040be0>])
+        >>> sub = Collective(branch="Constituents", stop=3)
+        >>> Nested(main=main, sub=sub).read_ttree(event)
+        Nested(name='Jet:2.Constituents:3', objects=[[<cppyy.gbl.Tower object at 0x9919e00>, <cppyy.gbl.Track object at 0x92d8610>, <cppyy.gbl.Track object at 0x92d8340>], [<cppyy.gbl.Track object at 0x92d7530>, <cppyy.gbl.Track object at 0x92d7440>, <cppyy.gbl.Tower object at 0x9a84d10>]])
 
         The lengths of objects keep nested:
+        - The `Single` objects may have a length of 1 or 0.
+        - The `Collective` objects may have a length greater or equal to 0.
 
-        - Single + Single -> 1, 1
+        When the main object fails to fetch the objects, the objects length will
+        be zero: (v, v) -> (0,):
+        >>> obj = Nested.from_name("Jet100.Constituents0").read_ttree(event)
+        >>> len(obj.objects)
+        0
+        >>> obj.objects
+        []
+
+        >>> obj = Nested.from_name("Jet100:.Constituents:").read_ttree(event)
+        >>> len(obj.objects)
+        0
+        >>> obj.objects
+        []
+
+        Otherwise the objects length is composed of the main and sub objects:
+
+        - Single + Single -> (1, v)
+        >>> obj = Nested.from_name("Jet0.Constituents100").read_ttree(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 0)
+        >>> obj.objects
+        [[]]
+
         >>> obj = Nested.from_name("Jet0.Constituents0").read_ttree(event)
-        >>> len(obj.value), len(obj.value[0])
+        >>> len(obj.objects), len(obj.objects[0])
         (1, 1)
-        >>> obj.value
+        >>> obj.objects
         [[<cppyy.gbl.Tower object at 0x9683af0>]]
 
-        - Single + Collective -> 1, var (depending on the stop index)
+        - Single + Collective -> 1, v (depending on the stop index)
+        >>> obj = Nested.from_name("Jet0.Constituents100:").read_ttree(event)
+        >>> len(obj.objects), len(obj.objects[0])
+        (1, 0)
+        >>> obj.objects
+        [[]]
+
         >>> obj = Nested.from_name("Jet0.Constituents:4").read_ttree(event)
-        >>> len(obj.value), len(obj.value[0])
+        >>> len(obj.objects), len(obj.objects[0])
         (1, 4)
-        >>> obj.value
+        >>> obj.objects
         [[<cppyy.gbl.Tower object at 0x9683af0>,
          <cppyy.gbl.Track object at 0x9041bd0>,
          <cppyy.gbl.Track object at 0x9041f90>,
          <cppyy.gbl.Tower object at 0x9683c10>]]
 
         >>> obj = Nested.from_name("Jet0.Constituents:").read_ttree(event)
-        >>> len(obj.value), len(obj.value[0])
+        >>> len(obj.objects), len(obj.objects[0])
         (1, 21)
-        >>> obj.value
+        >>> obj.objects
         [[<cppyy.gbl.Tower object at 0x9683af0>,
           <cppyy.gbl.Track object at 0x9041bd0>,
           <cppyy.gbl.Track object at 0x9041f90>,
@@ -149,14 +185,14 @@ class Nested(PhysicsObject):
           <cppyy.gbl.Track object at 0x9041ae0>,
           <cppyy.gbl.Tower object at 0x96839d0>]]
 
-        Here is a table for all possible cases of fetched value:
+        Here is a summary of all possible lengths of fetched objects:
 
-        |                 | Jet0       | Jet100     | Jet:100      | Jet100: |
-        |-----------------|------------|------------|--------------|---------|
-        | Constituent0    | o (1, 1)   | x (1, 1)   | ? (100, 1)   | x []    |
-        | Constituent100  | x (1, 1)   | x (1, 1)   | x (100, 1)   | x []    |
-        | Constituent:100 | ? (1, 100) | x (1, 100) | ? (100, 100) | x []    |
-        | Constituent100: | x (1, 0)   | x (1, 0)   | x (100, 0)   | x []    |
+        |                  | Jet0       | Jet100 | Jet:100      | Jet100: |
+        |------------------|------------|--------|--------------|---------|
+        | Constituents0    | o (1, 1)   | x (0,) | ? (100, 1)   | x (0,)  |
+        | Constituents100  | x (1, 0)   | x (0,) | x (100, 0)   | x (0,)  |
+        | Constituents:100 | ? (1, 100) | x (0,) | ? (100, 100) | x (0,)  |
+        | Constituents100: | x (1, 0)   | x (0,) | x (100, 0)   | x (0,)  |
 
         - First row: the main physics object
         - Second row: the sub physics object
@@ -165,19 +201,19 @@ class Nested(PhysicsObject):
         - "?": some of the objects are `None`
 
         """
-        self._value = []
+        self._objects = []
 
         self.main.read_ttree(event)
-        main_values = (
-            [self.main.value] if isinstance(self.main, Single) else self.main.value
-        )
 
-        for obj in main_values:
-            self.sub.read_ttree(obj)
-            sub_values = (
-                [self.sub.value] if isinstance(self.sub, Single) else self.sub.value
-            )
-            self._value.append(sub_values)
+        if len(self.main.objects) == 0:
+            return self
+
+        for obj in self.main.objects:
+            if obj is None:
+                self._objects.append([])
+            else:
+                self.sub.read_ttree(obj)
+                self._objects.append(self.sub.objects)
 
         return self
 
@@ -186,9 +222,8 @@ class Nested(PhysicsObject):
         return f"{self.main.name}.{self.sub.name}"
 
     @property
-    def value(self) -> Any:
-        if hasattr(self, "_value"):
-            return self._value
+    def objects(self) -> Any:
+        return self._objects
 
     @property
     def config(self) -> dict[str, Any]:

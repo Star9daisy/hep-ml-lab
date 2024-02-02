@@ -33,7 +33,7 @@ def is_collective(name: str) -> bool:
 
 
 class Collective(PhysicsObject):
-    """The data class that represents a collective physics object.
+    """The class that represents a collective physics object.
 
     For example, the leading three jets, all the constituents of the leading jet,
     etc.
@@ -41,7 +41,7 @@ class Collective(PhysicsObject):
     Parameters
     ----------
     branch : str
-        The branch of the physics object.
+        The branch name of the physics object.
     start : int
         The starting index of the physics object.
     stop : int
@@ -49,6 +49,12 @@ class Collective(PhysicsObject):
 
     Attributes
     ----------
+    branch : str
+        The branch name of the physics object.
+    start : int
+        The starting index of the physics object.
+    stop : int
+        The stopping index of the physics object.
     name : str
         The name of the physics object.
     value : list[Any] | None
@@ -58,23 +64,21 @@ class Collective(PhysicsObject):
     --------
     Create a collective physics object by its name, start and stop indices:
     >>> Collective(branch="Jet", start=1, stop=2)
-    Collective(name='Jet1:3', value=None)
+    Collective(name='Jet1:3', objects=None)
 
     Create a collective physics object from its name:
     >>> Collective.from_name("Jet:")
-    Collective(name='Jet:', value=None)
+    Collective(name='Jet:', objects=None)
     >>> Collective.from_name("Jet1:")
-    Collective(name='Jet1:', value=None)
+    Collective(name='Jet1:', objects=None)
     >>> Collective.from_name("Jet:3")
-    Collective(name='Jet:3', value=None)
+    Collective(name='Jet:3', objects=None)
     >>> Collective.from_name("Jet1:3")
-    Collective(name='Jet1:3', value=None)
+    Collective(name='Jet1:3', objects=None)
 
     Read an event to fetch the leading three jets:
-    >>> Collective(branch="Jet", stop=3).read_ttree(event).value
-    [<cppyy.gbl.Jet object at 0xa0be000>,
-     <cppyy.gbl.Jet object at 0xa0be630>,
-     <cppyy.gbl.Jet object at 0xa0bec60>]
+    >>> Collective(branch="Jet", stop=3).read_ttree(event).objects
+    Collective(name='Jet:3', objects=[<cppyy.gbl.Jet object at 0xa323030>, <cppyy.gbl.Jet object at 0xa323660>, <cppyy.gbl.Jet object at 0xa323c90>])
     """
 
     def __init__(self, branch: str, start: int = 0, stop: int = -1):
@@ -82,8 +86,10 @@ class Collective(PhysicsObject):
         self.start = start
         self.stop = stop
 
+        self._objects = None
+
     def read_ttree(self, event: Any) -> Collective:
-        """Read an event to fetch the value.
+        """Read an event in `TTree` format to fetch the objects.
 
         Parameters
         ----------
@@ -96,12 +102,12 @@ class Collective(PhysicsObject):
 
         Examples
         --------
-        Four cases:
+        There are four cases of start and stop indices:
 
         - Keep start and stop indices as default to fetch all objects:
         >>> obj = Collective(branch="Jet")
         >>> obj.read_ttree(event)
-        >>> obj.value
+        >>> obj.objects
         [<cppyy.gbl.Jet object at 0xa0be000>,
          <cppyy.gbl.Jet object at 0xa0be630>,
          <cppyy.gbl.Jet object at 0xa0bec60>,
@@ -111,7 +117,7 @@ class Collective(PhysicsObject):
         - Only set start index to fetch objects from it:
         >>> obj = Collective(branch="Jet", start=1)
         >>> obj.read_ttree(event)
-        >>> obj.value
+        >>> obj.objects
         [<cppyy.gbl.Jet object at 0xa0be630>,
          <cppyy.gbl.Jet object at 0xa0bec60>,
          <cppyy.gbl.Jet object at 0xa0bf290>,
@@ -120,7 +126,7 @@ class Collective(PhysicsObject):
         - Only set stop index to fetch objects before it:
         >>> obj = Collective(branch="Jet", stop=3)
         >>> obj.read_ttree(event)
-        >>> obj.value
+        >>> obj.objects
         [<cppyy.gbl.Jet object at 0xa0be000>,
          <cppyy.gbl.Jet object at 0xa0be630>,
          <cppyy.gbl.Jet object at 0xa0bec60>]
@@ -128,33 +134,40 @@ class Collective(PhysicsObject):
         - Set both start and stop indices to fetch objects between them:
         >>> obj = Collective(branch="Jet", start=1, stop=3)
         >>> obj.read_ttree(event)
-        >>> obj.value
+        >>> obj.objects
         [<cppyy.gbl.Jet object at 0xa0be630>, <cppyy.gbl.Jet object at 0xa0bec60>]
 
 
         ! If the start index is out of range, an empty list will be returned:
         >>> obj = Collective(branch="Jet", start=100)
         >>> obj.read_ttree(event)
-        >>> obj.value
+        >>> obj.objects
         []
 
         ! If the stop index is out of range, `None` will be filled:
         >>> obj = Collective(branch="Jet", start=3, stop=6)
         >>> obj.read_ttree(event)
-        >>> obj.value
+        >>> obj.objects
         [<cppyy.gbl.Jet object at 0xa0bf290>,
          <cppyy.gbl.Jet object at 0xa0bf8c0>,
          None]
         """
-        self._value = []
+        self._objects = []
 
-        branch = getattr(event, self.branch, None)
-        n_entries = branch.GetEntries() if branch is not None else 0
+        if not hasattr(event, self.branch):
+            raise ValueError(f"Branch '{self.branch}' not found in the event")
+
+        branch = getattr(event, self.branch)
+        n_entries = branch.GetEntries()
         stop = self.stop if self.stop != -1 else n_entries
 
         for i in range(self.start, stop):
             single = Single(self.branch, i).read_ttree(event)
-            self._value.append(single.value)
+
+            if len(single.objects) == 0:
+                self._objects.append(None)
+            else:
+                self._objects.append(single.objects[0])
 
         return self
 
@@ -170,9 +183,8 @@ class Collective(PhysicsObject):
             return f"{self.branch}{self.start}:{self.stop}"
 
     @property
-    def value(self) -> Any:
-        if hasattr(self, "_value"):
-            return self._value
+    def objects(self) -> Any:
+        return self._objects
 
     @property
     def config(self) -> dict[str, Any]:
