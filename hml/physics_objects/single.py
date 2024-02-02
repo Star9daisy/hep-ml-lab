@@ -32,45 +32,51 @@ def is_single(name: str) -> bool:
 
 
 class Single(PhysicsObject):
-    """The data class that represents a single physics object.
+    """The class that represents a single physics object.
 
     For example, the leading jet, the first constituent, the second electron, etc.
 
     Parameters
     ----------
     branch : str
-        The branch of the physics object.
+        The branch name of the physics object.
     index : int
         The index of the physics object.
 
     Attributes
     ----------
+    branch : str
+        The branch name of the physics object.
+    index : int
+        The index of the physics object.
     name : str
-        The unique string for a single physics object.
-    value : Any
-        The fetched value of the single physics object.
+        The name of the physics object.
+    objects : list[Any] | None
+        The fetched objects of the physics object.
 
     Examples
     --------
     Create a single physics object by its branch and index:
     >>> Single(branch="Jet", index=0)
-    Single(name='Jet0', value=None)
+    Single(name='Jet0', objects=None)
 
     Create a single physics object from its name:
     >>> Single.from_name("Jet0")
-    Single(name='Jet0', value=None)
+    Single(name='Jet0', objects=None)
 
     Read an event to fetch the leading jet:
     >>> Single(branch="Jet", index=0).read_ttree(event)
-    Single(name='Jet0', value=<cppyy.gbl.Jet object at 0x81e4940>)
+    Single(name='Jet0', objects=[<cppyy.gbl.Jet object at 0x81e4940>])
     """
 
     def __init__(self, branch: str, index: int):
         self.branch = branch
         self.index = index
 
+        self._objects = None
+
     def read_ttree(self, event: Any) -> Single:
-        """Read an event of TTree to fetch the value.
+        """Read an event in `TTree` format to fetch the objects.
 
         Parameters
         ----------
@@ -86,28 +92,30 @@ class Single(PhysicsObject):
         Read an event to fetch the leading jet:
         >>> obj = Single(branch="Jet", index=0)
         >>> obj.read_ttree(event)
-        >>> obj.value
-        <cppyy.gbl.Jet object at 0x9a7f9c0>
+        >>> obj.objects
+        [<cppyy.gbl.Jet object at 0x9a7f9c0>]
 
         Read the leading jet to fetch the first constituent:
         >>> obj = Single(branch="Constituents", index=0)
         >>> obj.read_ttree(event.Jet[0])
-        >>> obj.value
-        <cppyy.gbl.Tower object at 0x8f59ed0>
+        >>> obj.objects
+        [<cppyy.gbl.Tower object at 0x8f59ed0>]
 
-        ! If the index is out of range, the value will be `None`:
+        ! If the index is out of range, the objects will be an empty list:
         >>> obj = Single(branch="Jet", index=100)
         >>> obj.read_ttree(event)
-        >>> print(obj.value)
-        None
+        >>> obj.objects
+        []
         """
-        self._value = None
+        self._objects = []
 
-        if hasattr(event, self.branch):
-            branch = getattr(event, self.branch)
+        if not hasattr(event, self.branch):
+            raise ValueError(f"Branch '{self.branch}' not found in the event")
 
-            if self.index < branch.GetEntries():
-                self._value = branch[self.index]
+        branch = getattr(event, self.branch)
+
+        if self.index < branch.GetEntries():
+            self._objects.append(branch[self.index])
 
         return self
 
@@ -116,9 +124,8 @@ class Single(PhysicsObject):
         return f"{self.branch}{self.index}"
 
     @property
-    def value(self) -> Any:
-        if hasattr(self, "_value"):
-            return self._value
+    def objects(self) -> Any:
+        return self._objects
 
     @property
     def config(self) -> dict[str, Any]:

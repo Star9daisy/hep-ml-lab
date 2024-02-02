@@ -9,7 +9,8 @@ from typing import Any
 
 class PhysicsObject(ABC):
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(name='{self.name}', value={self.value!r})"
+        class_name = self.__class__.__name__
+        return f"{class_name}(name='{self.name}', objects={self.objects!r})"
 
     def __eq__(self, other: dict[str, Any]) -> bool:
         return self.config == other.config
@@ -23,7 +24,7 @@ class PhysicsObject(ABC):
         ...
 
     @abstractproperty
-    def value(self) -> Any:
+    def objects(self) -> Any:
         ...
 
     @abstractproperty
