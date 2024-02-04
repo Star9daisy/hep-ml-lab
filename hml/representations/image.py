@@ -42,6 +42,18 @@ class Image:
         return self
 
     def with_subjets(self, constituents, algorithm, r, min_pt):
+        self.registered_methods.append(
+            (
+                "with_subjets",
+                {
+                    "constituents": constituents,
+                    "algorithm": algorithm,
+                    "r": r,
+                    "min_pt": min_pt,
+                },
+            )
+        )
+
         if self.been_read:
             px = get_observable(f"{constituents}.Px").read_ttree(self.event).value[0]
             py = get_observable(f"{constituents}.Py").read_ttree(self.event).value[0]
@@ -53,22 +65,11 @@ class Image:
             self.cluster = ClusterSequence(particles, subjet_def)
             self.subjets = self.cluster.inclusive_jets(min_pt)
 
-        else:
-            self.registered_methods.append(
-                (
-                    "with_subjets",
-                    {
-                        "constituents": constituents,
-                        "algorithm": algorithm,
-                        "r": r,
-                        "min_pt": min_pt,
-                    },
-                )
-            )
-
         return self
 
     def translate(self, origin="SubJet0"):
+        self.registered_methods.append(("translate", {"origin": origin}))
+
         if self.been_read:
             origin_height = get_observable(f"{origin}.{self.height.__class__.__name__}")
             origin_width = get_observable(f"{origin}.{self.width.__class__.__name__}")
@@ -98,14 +99,13 @@ class Image:
             self.height._value = translated_height.tolist()
             self.width._value = translated_width.tolist()
 
-        else:
-            self.registered_methods.append(
-                ("translate", {"origin": origin}),
-            )
-
         return self
 
     def rotate(self, axis="SubJet1", orientation=-90):
+        self.registered_methods.append(
+            ("rotate", {"axis": axis, "orientation": orientation})
+        )
+
         if self.been_read:
             if self.status is False:
                 return self
@@ -154,14 +154,12 @@ class Image:
                 .tolist()
             )
 
-        else:
-            self.registered_methods.append(
-                ("rotate", {"axis": axis, "orientation": orientation}),
-            )
-
         return self
 
     def pixelate(self, size, range):
+        self.registered_methods.append(("pixelate", {"size": size, "range": range}))
+        self.been_pixelated = True
+
         if self.been_read:
             if self.status is False:
                 return self
@@ -184,14 +182,6 @@ class Image:
                 self.width.to_numpy(squeeze=False).shape
             )
             self.width._value = pixelated_values.tolist()
-
-            self.been_pixelated = True
-
-        else:
-            self.registered_methods.append(
-                ("pixelate", {"size": size, "range": range}),
-            )
-            self.been_pixelated = True
 
         return self
 
