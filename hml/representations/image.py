@@ -1,3 +1,5 @@
+from importlib import import_module
+
 import matplotlib.pyplot as plt
 import numpy as np
 from fastjet import ClusterSequence
@@ -280,3 +282,64 @@ class Image:
             plt.grid(alpha=0.5)
 
         plt.show()
+
+    @property
+    def config(self):
+        return {
+            "height_config": {
+                "class_name": self.height.__class__.__name__,
+                "config": self.height.config,
+            },
+            "width_config": {
+                "class_name": self.width.__class__.__name__,
+                "config": self.width.config,
+            },
+            "channel_config": (
+                {
+                    "class_name": self.channel.__class__.__name__,
+                    "config": self.channel.config if self.channel is not None else None,
+                }
+                if self.channel is not None
+                else None
+            ),
+            "registered_methods": self.registered_methods,
+            "been_pixelated": self.been_pixelated,
+            "w_bins": (
+                self.w_bins.tolist() if self.been_pixelated and self.been_read else None
+            ),
+            "h_bins": (
+                self.h_bins.tolist() if self.been_pixelated and self.been_read else None
+            ),
+        }
+
+    @classmethod
+    def from_config(cls, config):
+        module = import_module("hml.observables")
+
+        height_class_name = config["height_config"]["class_name"]
+        height_class = getattr(module, height_class_name)
+        height = height_class.from_config(config["height_config"]["config"])
+
+        width_class_name = config["width_config"]["class_name"]
+        width_class = getattr(module, width_class_name)
+        width = width_class.from_config(config["width_config"]["config"])
+
+        if config["channel_config"] is not None:
+            channel_class_name = config["channel_config"]["class_name"]
+            channel_class = getattr(module, channel_class_name)
+            channel = channel_class.from_config(config["channel_config"]["config"])
+        else:
+            channel = None
+
+        instance = cls(height, width, channel)
+
+        instance.registered_methods = config["registered_methods"]
+        instance.been_pixelated = config["been_pixelated"]
+        instance.w_bins = (
+            np.array(config["w_bins"]) if config["w_bins"] is not None else None
+        )
+        instance.h_bins = (
+            np.array(config["h_bins"]) if config["h_bins"] is not None else None
+        )
+
+        return instance
