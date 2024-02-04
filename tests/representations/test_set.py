@@ -21,9 +21,18 @@ def test_init():
     assert r.values is None
     assert r.config == {
         "observable_configs": {
-            "Mass": {"physics_object": "FatJet0"},
-            "TauMN": {"physics_object": "FatJet0", "m": 2, "n": 1},
-            "DeltaR": {"physics_object": "Jet0,Jet1"},
+            0: {
+                "class_name": "Mass",
+                "config": {"physics_object": "FatJet0"},
+            },
+            1: {
+                "class_name": "TauMN",
+                "config": {"physics_object": "FatJet0", "m": 2, "n": 1},
+            },
+            2: {
+                "class_name": "DeltaR",
+                "config": {"physics_object": "Jet0,Jet1"},
+            },
         }
     }
 
