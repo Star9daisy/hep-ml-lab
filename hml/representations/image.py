@@ -9,10 +9,16 @@ from hml.utils import get_jet_algorithm
 
 
 class Image:
-    def __init__(self, height, width, channel):
-        self.height = get_observable(height)
-        self.width = get_observable(width)
-        self.channel = get_observable(channel) if channel is not None else None
+    def __init__(self, height, width, channel=None):
+        self.height = get_observable(height) if isinstance(height, str) else height
+        self.width = get_observable(width) if isinstance(width, str) else width
+
+        if channel is not None:
+            self.channel = (
+                get_observable(channel) if isinstance(channel, str) else channel
+            )
+        else:
+            self.channel = None
 
         self.been_pixelated = None
         self.been_read = False
