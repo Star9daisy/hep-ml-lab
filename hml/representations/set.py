@@ -60,7 +60,11 @@ class Set:
     def config(self):
         return {
             "observable_configs": {
-                i.__class__.__name__: i.config for i in self.observables
+                i: {
+                    "class_name": obs.__class__.__name__,
+                    "config": obs.config,
+                }
+                for i, obs in enumerate(self.observables)
             },
         }
 
@@ -69,7 +73,9 @@ class Set:
         observables = []
         module = import_module("hml.observables")
 
-        for class_name, class_config in config["observable_configs"].items():
+        for i_config in config["observable_configs"].values():
+            class_name = i_config["class_name"]
+            class_config = i_config["config"]
             class_ = getattr(module, class_name)
             observables.append(class_.from_config(class_config))
 

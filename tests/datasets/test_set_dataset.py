@@ -23,9 +23,18 @@ def test_init():
     assert ds.feature_names == ["FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR"]
     assert ds.config == {
         "observable_configs": {
-            "Mass": {"physics_object": "FatJet0"},
-            "TauMN": {"physics_object": "FatJet0", "m": 2, "n": 1},
-            "DeltaR": {"physics_object": "Jet0,Jet1"},
+            0: {
+                "class_name": "Mass",
+                "config": {"physics_object": "FatJet0"},
+            },
+            1: {
+                "class_name": "TauMN",
+                "config": {"physics_object": "FatJet0", "m": 2, "n": 1},
+            },
+            2: {
+                "class_name": "DeltaR",
+                "config": {"physics_object": "Jet0,Jet1"},
+            },
         },
         "been_split": False,
         "seed": None,
