@@ -149,6 +149,24 @@ def test_values(event):
     assert np.isnan(r.values).all()
 
     # values are not nan if the image has read a TTree
+    r = Image(
+        height="FatJet0.Constituents:.Phi",
+        width="FatJet0.Constituents:.Eta",
+    ).read_ttree(event)
+    assert not np.isnan(r.values).all()
+
+    # values will contain nan if the range is not enough to cover all the values
+    r = (
+        Image(
+            height="FatJet0.Constituents:.Phi",
+            width="FatJet0.Constituents:.Eta",
+        )
+        .read_ttree(event)
+        .pixelate(size=(33, 33), range=[(5, 10), (5, 10)])
+    )
+    assert np.isnan(r.height.value).all()
+    assert np.isnan(r.width.value).all()
+
     r = (
         Image(
             height="FatJet0.Constituents:.Phi",
@@ -157,5 +175,33 @@ def test_values(event):
         .read_ttree(event)
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
     )
+    assert not np.isnan(r.height.value).any()
+    assert not np.isnan(r.width.value).any()
+
+    # common cases
+    r = (
+        Image(
+            height="FatJet0.Constituents:.Phi",
+            width="FatJet0.Constituents:.Eta",
+        )
+        .read_ttree(event)
+        .with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+        .translate(origin="SubJet0")
+        .rotate(axis="SubJet1", orientation=-90)
+        .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
+    )
     assert r.values.shape == (33, 33)
-    assert not np.isnan(r.values).all()
+
+    r = (
+        Image(
+            height="FatJet0.Constituents:.Phi",
+            width="FatJet0.Constituents:.Eta",
+            channel="FatJet0.Constituents:.Pt",
+        )
+        .read_ttree(event)
+        .with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+        .translate(origin="SubJet0")
+        .rotate(axis="SubJet1", orientation=-90)
+        .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
+    )
+    assert r.values.shape == (33, 33)
