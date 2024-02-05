@@ -120,8 +120,6 @@ class Image:
 
     def rotate(self, axis="SubJet1", orientation=-90):
         if self.been_read:
-            if self.status is False:
-                return self
 
             axis_height = get_observable(f"{axis}.{self.height.__class__.__name__}")
             axis_width = get_observable(f"{axis}.{self.width.__class__.__name__}")
