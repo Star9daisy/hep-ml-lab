@@ -178,13 +178,12 @@ class Image:
 
     def pixelate(self, size, range):
         self.been_pixelated = True
+        self.h_bins = np.linspace(*range[0], size[0] + 1)
+        self.w_bins = np.linspace(*range[1], size[1] + 1)
 
         if self.been_read:
             if self.status is False:
                 return self
-
-            self.h_bins = np.linspace(*range[0], size[0] + 1)
-            self.w_bins = np.linspace(*range[1], size[1] + 1)
 
             pixelated_values = self.continuous_to_center(
                 self.height.to_numpy(), self.h_bins
