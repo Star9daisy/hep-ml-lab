@@ -25,6 +25,7 @@ class Image:
         self.been_pixelated = None
         self.been_read = False
         self.registered_methods = []
+        self.recorded_operations = []
         self.status = True
 
     def read_ttree(self, event):
@@ -44,18 +45,6 @@ class Image:
         return self
 
     def with_subjets(self, constituents, algorithm, r, min_pt):
-        self.registered_methods.append(
-            (
-                "with_subjets",
-                {
-                    "constituents": constituents,
-                    "algorithm": algorithm,
-                    "r": r,
-                    "min_pt": min_pt,
-                },
-            )
-        )
-
         if self.been_read:
             px = get_observable(f"{constituents}.Px").read_ttree(self.event).value[0]
             py = get_observable(f"{constituents}.Py").read_ttree(self.event).value[0]
@@ -67,11 +56,33 @@ class Image:
             self.cluster = ClusterSequence(particles, subjet_def)
             self.subjets = self.cluster.inclusive_jets(min_pt)
 
+            self.recorded_operations.append(
+                (
+                    "with_subjets",
+                    {
+                        "constituents": constituents,
+                        "algorithm": algorithm,
+                        "r": r,
+                        "min_pt": min_pt,
+                    },
+                )
+            )
+        else:
+            self.registered_methods.append(
+                (
+                    "with_subjets",
+                    {
+                        "constituents": constituents,
+                        "algorithm": algorithm,
+                        "r": r,
+                        "min_pt": min_pt,
+                    },
+                )
+            )
+
         return self
 
     def translate(self, origin="SubJet0"):
-        self.registered_methods.append(("translate", {"origin": origin}))
-
         if self.been_read:
             origin_height = get_observable(f"{origin}.{self.height.__class__.__name__}")
             origin_width = get_observable(f"{origin}.{self.width.__class__.__name__}")
@@ -101,13 +112,13 @@ class Image:
             self.height._value = translated_height.tolist()
             self.width._value = translated_width.tolist()
 
+            self.recorded_operations.append(("translate", {"origin": origin}))
+        else:
+            self.registered_methods.append(("translate", {"origin": origin}))
+
         return self
 
     def rotate(self, axis="SubJet1", orientation=-90):
-        self.registered_methods.append(
-            ("rotate", {"axis": axis, "orientation": orientation})
-        )
-
         if self.been_read:
             if self.status is False:
                 return self
@@ -156,10 +167,18 @@ class Image:
                 .tolist()
             )
 
+            self.recorded_operations.append(
+                ("rotate", {"axis": axis, "orientation": orientation})
+            )
+
+        else:
+            self.registered_methods.append(
+                ("rotate", {"axis": axis, "orientation": orientation})
+            )
+
         return self
 
     def pixelate(self, size, range):
-        self.registered_methods.append(("pixelate", {"size": size, "range": range}))
         self.been_pixelated = True
 
         if self.been_read:
@@ -185,6 +204,13 @@ class Image:
             )
             self.width._value = pixelated_values.tolist()
 
+            self.recorded_operations.append(
+                ("pixelate", {"size": size, "range": range})
+            )
+
+        else:
+            self.registered_methods.append(("pixelate", {"size": size, "range": range}))
+
         return self
 
     def continuous_to_center(self, values, bins):
@@ -202,7 +228,7 @@ class Image:
 
     @property
     def values(self):
-        if self.been_pixelated is not None:
+        if self.been_pixelated is not None and self.been_read:
             if self.channel is not None:
                 hist, _, _ = np.histogram2d(
                     self.width.to_numpy(),
@@ -302,7 +328,11 @@ class Image:
                 if self.channel is not None
                 else None
             ),
-            "registered_methods": self.registered_methods,
+            "registered_methods": (
+                self.registered_methods
+                if not self.been_read
+                else self.recorded_operations
+            ),
             "been_pixelated": self.been_pixelated,
             "w_bins": (
                 self.w_bins.tolist() if self.been_pixelated and self.been_read else None
