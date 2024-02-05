@@ -331,12 +331,8 @@ class Image:
                 else self.recorded_operations
             ),
             "been_pixelated": self.been_pixelated,
-            "w_bins": (
-                self.w_bins.tolist() if self.been_pixelated and self.been_read else None
-            ),
-            "h_bins": (
-                self.h_bins.tolist() if self.been_pixelated and self.been_read else None
-            ),
+            "w_bins": (self.w_bins.tolist() if self.been_pixelated else None),
+            "h_bins": (self.h_bins.tolist() if self.been_pixelated else None),
         }
 
     @classmethod
