@@ -13,7 +13,7 @@ from hml.representations import Image
 class ImageDataset:
     def __init__(self, representation: Image):
         self.image = representation
-        self._samples = [] if self.image.been_pixelized else [[], []]
+        self._samples = [] if self.image.been_pixelated else [[], []]
         self._targets = []
         self.been_split = False
         self.train = None
@@ -24,10 +24,10 @@ class ImageDataset:
         self._data = None
         self._been_read = False
 
-    def read(self, event, target):
-        self.image.read(event)
+    def read_ttree(self, event, target):
+        self.image.read_ttree(event)
 
-        if self.image.been_pixelized and np.all(np.isnan(self.image.values)):
+        if self.image.been_pixelated and np.all(np.isnan(self.image.values)):
             return
         elif np.all(np.isnan(self.image.values[0])) or np.all(
             np.isnan(self.image.values)
@@ -36,7 +36,7 @@ class ImageDataset:
 
         if self.image.status:
             self._targets.append([target])
-            if self.image.been_pixelized:
+            if self.image.been_pixelated:
                 self._samples.append(self.image.values)
             else:
                 self._samples[0].append(self.image.values[0])
@@ -170,7 +170,7 @@ class ImageDataset:
 
             self._been_read = True
 
-        if self.image.been_pixelized:
+        if self.image.been_pixelated:
             return np.array(self._samples, dtype=np.float32)
         else:
             height = ak.to_numpy(ak.flatten(ak.from_iter(self._samples[0])))
@@ -207,7 +207,7 @@ class ImageDataset:
         target=None,
     ):
         if target is not None:
-            if self.image.been_pixelized:
+            if self.image.been_pixelated:
                 samples = self.samples[np.squeeze(self.targets) == target]
             else:
                 samples = (
@@ -219,7 +219,7 @@ class ImageDataset:
 
         plt.figure()
 
-        if not self.image.been_pixelized:
+        if not self.image.been_pixelated:
             plt.scatter(
                 x=samples[1][:n_samples],
                 y=samples[0][:n_samples],
