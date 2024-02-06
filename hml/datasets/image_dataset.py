@@ -22,7 +22,7 @@ class ImageDataset:
         self.seed = None
 
         self._data = None
-        self._been_read = False
+        self._been_read = None
 
     def read_ttree(self, event, target):
         self.image.read_ttree(event)
@@ -134,6 +134,8 @@ class ImageDataset:
                 dataset._samples = split_data["samples"]
                 dataset._targets = split_data["targets"]
                 dataset._been_read = True
+        else:
+            dataset._been_read = False
 
         # Extract and load train, test, and val .npz files
         if configs["been_split"]:
@@ -147,7 +149,7 @@ class ImageDataset:
 
     @property
     def samples(self):
-        if self._samples == [] and not self._been_read:
+        if self._been_read is False:
             with self._data as split_zf:
                 split_data = np.load(BytesIO(split_zf.read()))
                 self._samples = split_data["samples"]
