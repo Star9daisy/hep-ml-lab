@@ -149,13 +149,13 @@ class ImageDataset:
 
     @property
     def samples(self):
-        if self._been_read is False:
-            with self._data as split_zf:
-                split_data = np.load(BytesIO(split_zf.read()))
-                self._samples = split_data["samples"]
-                self._targets = split_data["targets"]
+        if self._been_read is False and self._data is not None:
+            split_data = np.load(BytesIO(self._data.read()))
+            self._samples = split_data["samples"]
+            self._data.seek(0)
 
-            self._been_read = True
+            if np.array(self._samples).size > 0 and np.array(self._targets).size > 0:
+                self._been_read = True
 
         if self.image.been_pixelated:
             return np.array(self._samples, dtype=np.float32)
@@ -177,13 +177,13 @@ class ImageDataset:
 
     @property
     def targets(self):
-        if self._been_read is False:
-            with self._data as split_zf:
-                split_data = np.load(BytesIO(split_zf.read()))
-                self._samples = split_data["samples"]
-                self._targets = split_data["targets"]
+        if self._been_read is False and self._data is not None:
+            split_data = np.load(BytesIO(self._data.read()))
+            self._targets = split_data["targets"]
+            self._data.seek(0)
 
-            self._been_read = True
+            if np.array(self._samples).size > 0 and np.array(self._targets).size > 0:
+                self._been_read = True
 
         return np.array(self._targets, dtype=np.int32)
 
