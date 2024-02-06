@@ -1,6 +1,8 @@
 import pytest
 import ROOT
 
+from hml.generators.madgraph5 import Madgraph5Run
+
 
 @pytest.fixture
 def event():
@@ -11,3 +13,8 @@ def event():
     tree.GetEntry(0)
 
     yield tree
+
+
+@pytest.fixture
+def run():
+    return Madgraph5Run("tests/data/pp2zz", "run_01")
