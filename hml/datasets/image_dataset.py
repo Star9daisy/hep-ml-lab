@@ -85,17 +85,8 @@ class ImageDataset:
         self.been_split = True
 
     def save(self, filepath="dataset.ds"):
-        configs = {
-            "height": self.image.height.name,
-            "width": self.image.width.name,
-            "channel": self.image.channel.name if self.image.channel else None,
-            "registered_methods": self.image.registered_methods,
-            "been_split": self.been_split,
-            "seed": self.seed,
-            "been_pixelized": self.image.been_pixelized,
-            "w_bins": self.image.w_bins.tolist(),
-            "h_bins": self.image.h_bins.tolist(),
-        }
+        configs = self.image.config
+        configs.update({"been_split": self.been_split, "seed": self.seed})
         configs_json = json.dumps(configs)
 
         npz_data = BytesIO()
@@ -130,13 +121,7 @@ class ImageDataset:
         with zf.open("configs.json") as json_file:
             configs = json.load(json_file)
 
-        image = Image(
-            height=configs["height"], width=configs["width"], channel=configs["channel"]
-        )
-        image.been_pixelized = configs["been_pixelized"]
-        image.registered_methods = configs["registered_methods"]
-        image.h_bins = np.array(configs["h_bins"])
-        image.w_bins = np.array(configs["w_bins"])
+        image = Image.from_config(configs)
 
         dataset = cls(image)
         dataset._filepath = filepath
