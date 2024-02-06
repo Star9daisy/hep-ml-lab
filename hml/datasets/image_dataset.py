@@ -204,14 +204,9 @@ class ImageDataset:
         n_samples=-1,
         target=None,
     ):
-        if target is not None:
-            if self.image.been_pixelated:
-                samples = self.samples[np.squeeze(self.targets) == target]
-            else:
-                samples = (
-                    self.samples[0][np.squeeze(self.targets) == target],
-                    self.samples[1][np.squeeze(self.targets) == target],
-                )
+        if target is not None and self.image.been_pixelated:
+            samples = self.samples[np.squeeze(self.targets) == target]
+
         else:
             samples = self.samples
 
