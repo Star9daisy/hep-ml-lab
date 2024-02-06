@@ -177,7 +177,7 @@ class ImageDataset:
 
     @property
     def targets(self):
-        if self._targets == [] and not self._been_read:
+        if self._been_read is False:
             with self._data as split_zf:
                 split_data = np.load(BytesIO(split_zf.read()))
                 self._samples = split_data["samples"]
