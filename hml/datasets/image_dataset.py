@@ -190,9 +190,9 @@ class ImageDataset:
     @property
     def features(self):
         return {
-            "height": self.image.height,
-            "width": self.image.width,
-            "channel": self.image.channel,
+            "height": self.image.height.name,
+            "width": self.image.width.name,
+            "channel": self.image.channel.name if self.image.channel else None,
         }
 
     def show(
