@@ -158,8 +158,19 @@ class ImageDataset:
         if self.image.been_pixelated:
             return np.array(self._samples, dtype=np.float32)
         else:
-            height = ak.to_numpy(ak.flatten(ak.from_iter(self._samples[0])))
-            width = ak.to_numpy(ak.flatten(ak.from_iter(self._samples[1])))
+            height = ak.from_iter(self._samples[0])
+            width = ak.from_iter(self._samples[1])
+
+            # 1D non-pixelated data should come from a loaded dataset
+            if height.ndim == 1:
+                height = ak.to_numpy(height)
+                width = ak.to_numpy(width)
+
+            # 2D non-pixelated data should come from an event loop
+            else:
+                height = ak.to_numpy(ak.flatten(height))
+                width = ak.to_numpy(ak.flatten(width))
+
             return height, width
 
     @property
