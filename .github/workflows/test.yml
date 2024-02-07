@@ -10,5 +10,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Clean cache
+      run: rm -rf /opt/hostedtoolcache
+    
     - name: Check space
       run: df -h
