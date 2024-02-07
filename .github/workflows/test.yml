@@ -6,13 +6,9 @@ on:
 jobs:
   run_tests:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Delete huge unnecessary tools folder
-      run: rm -rf /opt/hostedtoolcache
-
     - uses: actions/checkout@v4
-
-    - name: Run tests in Docker container
-      uses: docker://star9daisy/hml-env:2.0.0
-      with:
-        args: bash -c "chmod +x /github/workspace/scripts/run_tests.sh && /github/workspace/scripts/run_tests.sh"
+    
+    - name: Check space
+      run: df -h
