@@ -3,9 +3,10 @@ import re
 import awkward as ak
 import keras
 import pandas as pd
-from keras import initializers, ops
+from keras import initializers
+from keras import ops
 
-from hml.utils import get_observable
+from hml.observables import get_observable
 
 
 @keras.saving.register_keras_serializable()
@@ -162,7 +163,7 @@ class CutLayer(keras.Layer):
 
         obs_pattern = r"\b(?!\d+\b)(?!\d*\.\d+\b)\S+\b"
         obs_names = [re.findall(obs_pattern, i)[0] for i in cuts_per_obs]
-        obs_list = [get_observable(i).read(event) for i in obs_names]
+        obs_list = [get_observable(i).read_ttree(event) for i in obs_names]
         for obs in obs_list:
             if "var" in obs.shape:
                 obs.value = ak.flatten(obs.value)
@@ -170,7 +171,12 @@ class CutLayer(keras.Layer):
         for i in obs_names:
             cut_exp = cut_exp.replace(i, f"`{i}`")
 
-        df = pd.DataFrame({obs.name: obs.value for obs in obs_list})
+        df = pd.DataFrame(
+            {
+                obs.name: [obs.value] if not isinstance(obs.value, list) else obs.value
+                for obs in obs_list
+            }
+        )
 
         result = False
         if is_any:
