@@ -1,40 +1,40 @@
-from __future__ import annotations
-
-from abc import ABC
-from abc import abstractclassmethod
-from abc import abstractmethod
-from abc import abstractproperty
-from typing import Any
-
-
-class PhysicsObject(ABC):
-    def __repr__(self) -> str:
-        class_name = self.__class__.__name__
-        return f"{class_name}(name='{self.name}', objects={self.objects!r})"
-
-    def __eq__(self, other: dict[str, Any]) -> bool:
+class PhysicsObject:
+    def __eq__(self, other: "PhysicsObject") -> bool:
         return self.config == other.config
 
-    @abstractmethod
-    def read_ttree(self, event: Any) -> PhysicsObject:
-        ...
+    def __repr__(self) -> str:
+        classname = self.__class__.__name__
 
-    @abstractproperty
-    def name(self) -> str:
-        ...
+        configs = []
+        for key, value in self.config.items():
+            if isinstance(value, str):
+                configs.append(f"{key}='{value}'")
+            else:
+                configs.append(f"{key}={value}")
+        configs = ", ".join(configs)
 
-    @abstractproperty
-    def objects(self) -> Any:
-        ...
-
-    @abstractproperty
-    def config(self) -> dict[str, Any]:
-        ...
-
-    @abstractclassmethod
-    def from_name(cls, name: str) -> PhysicsObject:
-        ...
+        return f"{classname}({configs})"
 
     @classmethod
-    def from_config(cls, config: dict[str, Any]) -> PhysicsObject:
+    def from_name(cls, name: str) -> "PhysicsObject":
+        raise NotImplementedError
+
+    @classmethod
+    def from_config(cls, config: dict) -> "PhysicsObject":
         return cls(**config)
+
+    @property
+    def name(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def branch(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def slices(self) -> list[slice]:
+        raise NotImplementedError
+
+    @property
+    def config(self) -> dict:
+        raise NotImplementedError
