@@ -82,3 +82,6 @@ class Collective(PhysicsObject):
     @property
     def config(self) -> dict:
         return {"branch": self.branch, "start": self.start, "stop": self.stop}
+
+
+Collective.add_alias("collective")

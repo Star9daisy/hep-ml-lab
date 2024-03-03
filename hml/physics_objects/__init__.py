@@ -1,10 +1,14 @@
 from .collective import Collective, is_collective
 from .nested import Nested, is_nested
-from .physics_object import PhysicsObject
+from .physics_object import ALL_OBJECTS_DICT, PhysicsObject
 from .single import Single, is_single
 
 
-def get(name: str | None) -> PhysicsObject | None:
+def get(identifier: str | None):
+    return ALL_OBJECTS_DICT.get(identifier)
+
+
+def parse(name: str | None) -> PhysicsObject | None:
     if name is None:
         return
 

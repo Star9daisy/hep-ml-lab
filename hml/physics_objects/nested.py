@@ -68,3 +68,6 @@ class Nested(PhysicsObject):
     @property
     def config(self) -> dict:
         return {"main": self.main.name, "sub": self.sub.name}
+
+
+Nested.add_alias("nested")

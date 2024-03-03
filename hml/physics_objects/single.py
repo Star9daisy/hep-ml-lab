@@ -57,3 +57,6 @@ class Single(PhysicsObject):
     @property
     def config(self) -> dict:
         return {"branch": self.branch, "index": self.index}
+
+
+Single.add_alias("single")
