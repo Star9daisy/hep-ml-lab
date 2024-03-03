@@ -1,4 +1,11 @@
+ALL_OBJECTS_DICT = {}
+
+
 class PhysicsObject:
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+        ALL_OBJECTS_DICT[cls.__name__] = cls
+
     def __eq__(self, other: "PhysicsObject") -> bool:
         return self.config == other.config
 
@@ -14,6 +21,11 @@ class PhysicsObject:
         configs = ", ".join(configs)
 
         return f"{classname}({configs})"
+
+    @classmethod
+    def add_alias(cls, *alias: str) -> None:
+        for i in alias:
+            ALL_OBJECTS_DICT[i] = cls
 
     @classmethod
     def from_name(cls, name: str) -> "PhysicsObject":
