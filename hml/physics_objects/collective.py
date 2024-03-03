@@ -27,11 +27,12 @@ class Collective(PhysicsObject):
 
     @classmethod
     def from_name(cls, name: str) -> "Collective":
-        if (match_ := re.match(r"^([a-zA-Z]+)(\d*):?(\d*)$", name)) is None:
+        if re.match(r"^[a-zA-Z]+$|^[a-zA-Z]+\d*:\d*$", name) is None:
             raise ValueError(
                 f"Invalid name '{name}' for a {cls.__name__} physics object"
             )
 
+        match_ = re.match(r"^([a-zA-Z]+)(\d*):?(\d*)$", name)
         branch, start, stop = match_.groups()
         start = int(start) if start != "" else None
         stop = int(stop) if stop != "" else None
