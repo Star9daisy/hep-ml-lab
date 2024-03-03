@@ -6,7 +6,7 @@ on:
 jobs:
   run_tests:
     runs-on: ubuntu-latest
-    container: star9daisy/hml-env:2.1.0
+    container: star9daisy/hml-env:2.2.0
 
     steps:
     - uses: actions/checkout@v4
