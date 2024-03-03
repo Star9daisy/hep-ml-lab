@@ -1,159 +1,59 @@
-from __future__ import annotations
-
 import re
-from typing import Any
 
 from .physics_object import PhysicsObject
 
 
-def is_single(name: str) -> bool:
-    """Check if a name corresponds to a single physics object.
-
-    Parameters
-    ----------
-    name : str
-        The name of a physics object.
-
-    Returns
-    -------
-    result : bool
-
-    Examples
-    --------
-    >>> is_single("Jet0")
-    True
-    """
-    try:
-        Single.from_name(name)
-        return True
-
-    except Exception:
+def is_single(object_: str | PhysicsObject | None) -> bool:
+    if object_ is None:
         return False
+
+    elif isinstance(object_, PhysicsObject):
+        return isinstance(object_, Single)
+
+    else:
+        return bool(re.match(r"^[a-zA-Z]+\d+$", object_))
 
 
 class Single(PhysicsObject):
-    """The class that represents a single physics object.
-
-    For example, the leading jet, the first constituent, the second electron, etc.
-
-    Parameters
-    ----------
-    branch : str
-        The branch name of the physics object.
-    index : int
-        The index of the physics object.
-
-    Attributes
-    ----------
-    branch : str
-        The branch name of the physics object.
-    index : int
-        The index of the physics object.
-    name : str
-        The name of the physics object.
-    objects : list[Any] | None
-        The fetched objects of the physics object.
-
-    Examples
-    --------
-    Create a single physics object by its branch and index:
-    >>> Single(branch="Jet", index=0)
-    Single(name='Jet0', objects=None)
-
-    Create a single physics object from its name:
-    >>> Single.from_name("Jet0")
-    Single(name='Jet0', objects=None)
-
-    Read an event to fetch the leading jet:
-    >>> Single(branch="Jet", index=0).read_ttree(event)
-    Single(name='Jet0', objects=[<cppyy.gbl.Jet object at 0x81e4940>])
-    """
-
-    def __init__(self, branch: str, index: int):
+    def __init__(self, branch: str, index: int) -> None:
         self.branch = branch
         self.index = index
 
-        self._objects = None
+    @classmethod
+    def from_name(cls, name: str) -> "Single":
+        if (match_ := re.match(r"^([a-zA-Z]+)(\d+)$", name)) is None:
+            raise ValueError(
+                f"Invalid name '{name}' for a {cls.__name__} physics object"
+            )
 
-    def read_ttree(self, event: Any) -> Single:
-        """Read an event in `TTree` format to fetch the objects.
+        branch, index = match_.groups()
 
-        Parameters
-        ----------
-        event : TTree
-            An event or a branch read by PyROOT.
+        return cls(branch, int(index))
 
-        Returns
-        -------
-        self : Single
+    @property
+    def branch(self) -> str:
+        return self._branch
 
-        Examples
-        --------
-        Read an event to fetch the leading jet:
-        >>> obj = Single(branch="Jet", index=0)
-        >>> obj.read_ttree(event)
-        >>> obj.objects
-        [<cppyy.gbl.Jet object at 0x9a7f9c0>]
+    @branch.setter
+    def branch(self, branch: str) -> None:
+        self._branch = branch
 
-        Read the leading jet to fetch the first constituent:
-        >>> obj = Single(branch="Constituents", index=0)
-        >>> obj.read_ttree(event.Jet[0])
-        >>> obj.objects
-        [<cppyy.gbl.Tower object at 0x8f59ed0>]
+    @property
+    def index(self) -> int:
+        return self._index
 
-        ! If the index is out of range, the objects will be an empty list:
-        >>> obj = Single(branch="Jet", index=100)
-        >>> obj.read_ttree(event)
-        >>> obj.objects
-        []
-        """
-        self._objects = []
-
-        if not hasattr(event, self.branch):
-            raise ValueError(f"Branch '{self.branch}' not found in the event")
-
-        branch = getattr(event, self.branch)
-
-        if self.index < branch.GetEntries():
-            self._objects.append(branch[self.index])
-
-        return self
+    @index.setter
+    def index(self, index: int) -> None:
+        self._index = int(index)
 
     @property
     def name(self) -> str:
-        return f"{self.branch}{self.index}"
+        return self.branch + str(self.index)
 
     @property
-    def objects(self) -> Any:
-        return self._objects
+    def slices(self) -> list[slice]:
+        return [slice(self.index, self.index + 1)]
 
     @property
-    def config(self) -> dict[str, Any]:
-        return {
-            "branch": self.branch,
-            "index": self.index,
-        }
-
-    @classmethod
-    def from_name(cls, name: str) -> Single:
-        """Create a single physics object from its name.
-
-        Parameters
-        ----------
-        name : str
-
-        Returns
-        -------
-        physics object : Single
-
-        Raises
-        ------
-        ValueError
-            If the name is invalid.
-        """
-        if (match := re.match(r"^([a-zA-Z]+)(\d+)$", name)) is None:
-            raise ValueError(f"Invalid name '{name}' for {cls.__name__}")
-
-        branch, index = match.groups()
-
-        return cls(branch, int(index))
+    def config(self) -> dict:
+        return {"branch": self.branch, "index": self.index}
