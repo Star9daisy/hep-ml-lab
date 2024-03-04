@@ -151,6 +151,6 @@ class Observable:
                     pad = ak.unflatten(ak.Array([[]] * ak.sum(n_missing)), n_missing)
                     value = ak.concatenate([value, pad], axis=i + 1)
 
-        self._value = value
+        self.value = value
 
         return self
