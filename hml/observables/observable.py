@@ -60,7 +60,7 @@ class Observable:
 
         physics_object = ".".join(parts) if len(parts) > 0 else None
 
-        return cls(physics_object, class_name, **kwargs)
+        return cls(physics_object=physics_object, class_name=class_name, **kwargs)
 
     @classmethod
     def from_config(cls, config: dict) -> "Observable":
