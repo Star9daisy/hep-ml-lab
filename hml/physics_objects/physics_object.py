@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 ALL_OBJECTS_DICT = {}
 
 
@@ -31,11 +33,11 @@ class PhysicsObject:
             ALL_OBJECTS_DICT[i] = cls
 
     @classmethod
-    def from_name(cls, name: str) -> "PhysicsObject":
+    def from_name(cls, name: str) -> PhysicsObject:
         raise NotImplementedError
 
     @classmethod
-    def from_config(cls, config: dict) -> "PhysicsObject":
+    def from_config(cls, config: dict) -> PhysicsObject:
         return cls(**config)
 
     @property
