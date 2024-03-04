@@ -24,6 +24,7 @@ def test_special_methods():
     obj = Collective(branch="jet", start=1, stop=3)
 
     assert obj == Collective(branch="jet", start=1, stop=3)
+    assert str(obj) == "jet1:3"
     assert repr(obj) == "Collective(branch='jet', start=1, stop=3)"
 
 
