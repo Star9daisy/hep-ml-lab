@@ -9,7 +9,7 @@ def get(identifier: str | None):
 
 
 def parse(name: str | None) -> PhysicsObject | None:
-    if name is None:
+    if name is None or name == "None":
         return
 
     elif is_single(name):
