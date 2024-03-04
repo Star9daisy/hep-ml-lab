@@ -19,6 +19,7 @@ def test_special_methods():
     obj = Nested(main="jet0", sub="constituents1:3")
 
     assert obj == Nested(main="jet0", sub="constituents1:3")
+    assert obj == "jet0.constituents1:3"
     assert str(obj) == "jet0.constituents1:3"
     assert repr(obj) == "Nested(main='jet0', sub='constituents1:3')"
 

@@ -18,6 +18,7 @@ def test_special_methods():
     obj = Single(branch="jet", index=0)
 
     assert obj == Single(branch="jet", index=0)
+    assert obj == "jet0"
     assert str(obj) == "jet0"
     assert repr(obj) == "Single(branch='jet', index=0)"
 
