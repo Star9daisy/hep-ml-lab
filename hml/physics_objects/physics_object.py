@@ -9,6 +9,9 @@ class PhysicsObject:
     def __eq__(self, other: "PhysicsObject") -> bool:
         return self.config == other.config
 
+    def __str__(self) -> str:
+        return self.name
+
     def __repr__(self) -> str:
         classname = self.__class__.__name__
 
