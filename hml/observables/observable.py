@@ -102,7 +102,7 @@ class Observable:
 
     @value.setter
     def value(self, value: ak.Array | None) -> None:
-        self._value = value or ak.Array([])
+        self._value = value if value is not None else ak.Array([])
 
     @property
     def config(self) -> dict:
