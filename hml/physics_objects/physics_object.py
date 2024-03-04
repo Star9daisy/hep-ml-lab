@@ -8,8 +8,11 @@ class PhysicsObject:
         super().__init_subclass__(**kwargs)
         ALL_OBJECTS_DICT[cls.__name__] = cls
 
-    def __eq__(self, other: "PhysicsObject") -> bool:
-        return self.config == other.config
+    def __eq__(self, other: str | PhysicsObject) -> bool:
+        if isinstance(other, str):
+            return self.name == other
+        else:
+            return self.config == other.config
 
     def __str__(self) -> str:
         return self.name
