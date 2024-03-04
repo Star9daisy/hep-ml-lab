@@ -10,9 +10,9 @@ class PhysicsObject:
 
     def __eq__(self, other: str | PhysicsObject) -> bool:
         if isinstance(other, str):
-            return self.name == other
-        else:
-            return self.config == other.config
+            other = self.from_name(other)
+
+        return self.name.lower() == other.name.lower()
 
     def __str__(self) -> str:
         return self.name
