@@ -9,8 +9,7 @@ def test_init():
     assert obj.branch == "jet"
     assert obj.start == 1
     assert obj.stop == 3
-
-    assert obj.index == slice(1, 3)
+    assert obj.slices == [slice(1, 3)]
     assert obj.name == "jet1:3"
     assert obj.config == {"branch": "jet", "start": 1, "stop": 3}
 

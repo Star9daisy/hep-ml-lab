@@ -40,8 +40,8 @@ class Collective(PhysicsObject):
         return self._stop
 
     @property
-    def index(self) -> slice:
-        return slice(self.start, self.stop)
+    def slices(self) -> list[slice]:
+        return [slice(self.start, self.stop)]
 
     @property
     def name(self) -> str:
