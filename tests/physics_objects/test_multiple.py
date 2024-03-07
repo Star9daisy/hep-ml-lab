@@ -14,6 +14,12 @@ def test_init():
     assert obj.all[0] == Single(branch="jet", index=0)
     assert obj.all[1] == Collective(branch="jet")
     assert obj.all[2] == Nested(main="jet0", sub="constituents:3")
+    assert obj.branch == ["jet", "jet", "jet.constituents"]
+    assert obj.slices == [
+        [slice(0, 1)],
+        [slice(None, None)],
+        [slice(0, 1), slice(None, 3)],
+    ]
 
     assert obj.name == "jet0,jet,jet0.constituents:3"
     assert obj.config == {"objects": ["jet0", "jet", "jet0.constituents:3"]}
