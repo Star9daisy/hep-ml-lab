@@ -1,11 +1,13 @@
 import re
 
 from .angular_distance import AngularDistance
-from .tag import BTag, Charge, E, Eta, M, Phi, Pt, Px, Py, Pz, TauTag
+from .charge import Charge
 from .invariant_mass import InvariantMass
+from .kinematics import E, Eta, M, Phi, Pt, Px, Py, Pz
 from .n_subjettiness import NSubjettiness, NSubjettinessRatio, TauMN, TauN
 from .observable import Observable
 from .size import Size
+from .tag import BTag, TauTag
 
 ALL_OBJECTS = {
     Px,
