@@ -1,51 +1,45 @@
-from math import isnan
-
+import awkward as ak
 import pytest
 
-from hml.observables.n_subjettiness import NSubjettiness
-from hml.observables.n_subjettiness import TauN
+from hml.observables import TauMN, TauN
 
 
 def test_init():
-    obs = NSubjettiness(physics_object="FatJet0", n=1)
+    obs = TauN(n=1, physics_object="jet0")
 
-    # Parameters ------------------------------------------------------------- #
-    assert obs.n == 1
-    assert obs.physics_object.name == "FatJet0"
-    assert obs.supported_types == ["single", "collective"]
+    assert obs.physics_object.name == "jet0"
+    assert obs.class_name == "TauN"
 
-    # Attributes ------------------------------------------------------------- #
-    assert obs.name == "FatJet0.NSubjettiness"
-    assert isnan(obs.value)
-    assert obs.shape == "1 * float64"
-    assert obs.config == {"n": 1, "physics_object": obs.physics_object.name}
-    assert repr(obs) == "FatJet0.NSubjettiness : nan"
+    assert obs.name == "jet0.TauN"
+    assert len(obs.value) == 0
+    assert obs.config == {"n": 1, "physics_object": "jet0", "class_name": "TauN"}
 
-    obs = TauN(physics_object="FatJet0", n=1)
+    # Other init
+    assert TauMN(2, 1, physics_object="jet0").name == "jet0.TauMN"
 
-    # Attributes ------------------------------------------------------------- #
-    assert obs.name == "FatJet0.Tau1"
+    with pytest.raises(ValueError):
+        TauN(n=1, physics_object="jet0.constituents")
 
 
 def test_class_methods():
-    obs = NSubjettiness(physics_object="FatJet0", n=1)
-    assert obs == NSubjettiness.from_name("FatJet0.NSubjettiness", n=1)
-    assert obs == NSubjettiness.from_config(obs.config)
+    obs = TauN(n=1, physics_object="jet0")
+
+    assert TauN.from_name("jet0.tau1").name == "jet0.tau1"
+    assert TauN.from_config(obs.config).name == "jet0.TauN"
+
+
+def test_read(events):
+    cut = events["FatJet_size"].array() > 0
+
+    obs = TauN(n=1, physics_object="fatjet0").read(events)
+    assert ak.all(obs.value[cut][:, 0] == events["FatJet.Tau[5]"].array()[cut][:, 0, 1])
+    assert str(obs.value.type) == f"{len(obs.value)} * 1 * ?float32"
+
+    obs = TauN(n=1, physics_object="fatjet").read(events)
+    assert str(obs.value.type) == f"{len(obs.value)} * var * float32"
+
+    obs = TauN(n=1, physics_object="fatjet:10").read(events)
+    assert str(obs.value.type) == f"{len(obs.value)} * 10 * ?float32"
 
     with pytest.raises(ValueError):
-        NSubjettiness.from_name("NSubjettiness", n=1)
-
-    obs = TauN(physics_object="FatJet0", n=1)
-    assert obs == TauN.from_name("FatJet0.Tau1")
-    assert obs == TauN.from_config(obs.config)
-
-    with pytest.raises(ValueError):
-        TauN.from_name("Tau1")
-
-
-def test_read(event):
-    obs = TauN("FatJet0", 1).read_ttree(event)
-    assert obs.shape == "1 * float64"
-
-    obs = TauN("FatJet:5", 1).read_ttree(event)
-    assert obs.shape == "5 * float64"
+        TauN(n=1, physics_object="unknown").read(events)
