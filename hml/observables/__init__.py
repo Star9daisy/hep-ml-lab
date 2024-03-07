@@ -1,58 +1,75 @@
+import re
+
 from .angular_distance import AngularDistance
-from .angular_distance import DeltaR
-from .azimuthal_angle import AzimuthalAngle
-from .azimuthal_angle import Phi
-from .b_tag import BTag
-from .charge import Charge
-from .dummy import Dummy
-from .energy import E
-from .energy import Energy
+from .tag import BTag, Charge, E, Eta, M, Phi, Pt, Px, Py, Pz, TauTag
 from .invariant_mass import InvariantMass
-from .invariant_mass import InvM
-from .invariant_mass import InvMass
-from .mass import M
-from .mass import Mass
-from .momentum_x import MomentumX
-from .momentum_x import Px
-from .momentum_y import MomentumY
-from .momentum_y import Py
-from .momentum_z import MomentumZ
-from .momentum_z import Pz
-from .n_subjettiness import NSubjettiness
-from .n_subjettiness import TauN
-from .n_subjettiness_ratio import NSubjettinessRatio
-from .n_subjettiness_ratio import TauMN
+from .n_subjettiness import NSubjettiness, NSubjettinessRatio, TauMN, TauN
 from .observable import Observable
-from .pseudo_rapidity import Eta
-from .pseudo_rapidity import PseudoRapidity
 from .size import Size
-from .tau_tag import TauTag
-from .transverse_momentum import Pt
-from .transverse_momentum import TransverseMomentum
+
+ALL_OBJECTS = {
+    Px,
+    Py,
+    Pz,
+    E,
+    Pt,
+    Eta,
+    Phi,
+    M,
+    Charge,
+    BTag,
+    TauTag,
+    Size,
+    NSubjettiness,
+    NSubjettinessRatio,
+    TauMN,
+    TauN,
+    InvariantMass,
+    AngularDistance,
+}
+ALL_OBJECTS_DICT = {obj.__name__: obj for obj in ALL_OBJECTS}
+ALL_OBJECTS_DICT.update({obj.__name__.lower(): obj for obj in ALL_OBJECTS})
+ALL_OBJECTS_DICT.update(
+    {
+        "met": Pt,
+        "MET": Pt,
+        "energy": E,
+        "mass": M,
+        "tau_tag": TauTag,
+        "b_tag": BTag,
+        "n_subjettiness": NSubjettiness,
+        "n_subjettiness_ratio": NSubjettinessRatio,
+        "tau_mn": TauMN,
+        "tau_n": TauN,
+        "invariant_mass": InvariantMass,
+        "inv_mass": InvariantMass,
+        "inv_m": InvariantMass,
+        "angular_distance": AngularDistance,
+        "delta_r": AngularDistance,
+    }
+)
 
 
-def get_observable(name: str, *arg, **kwarg):
-    if "." in name:
-        # Each nested physics object has one dot, so there may be multiple dots.
-        # So we only take the last dot as the separator between physics object
-        # and observable name.
-        physics_object = ".".join(name.split(".")[:-1])
-        name = name.split(".")[-1]
-        kwarg["physics_object"] = physics_object
+def get(identifier: str | None) -> Observable | None:
+    if identifier is None or identifier == "None":
+        return
 
-        # Check if the observable name is a valid NSubjettiness
-        if name.startswith("Tau") or name.startswith("tau") or name.startswith("tau_"):
-            if name[-2].isdigit():
-                m = int(name[-2])
-                n = int(name[-1])
-                return TauMN(physics_object, m, n)
-            if name[-1].isdigit():
-                n = int(name[-1])
-                return TauN(physics_object, n)
-
-        name = name
-
-    if name not in Observable.ALL_OBSERVABLES:
-        return None
     else:
-        return Observable.ALL_OBSERVABLES[name](*arg, **kwarg)
+        return ALL_OBJECTS_DICT.get(identifier)
+
+
+def parse(name: str | None, **kwargs) -> Observable | None:
+    if name is None or (isinstance(name, str) and name == "None"):
+        return
+
+    if (class_name := name.split(".")[-1]) in ALL_OBJECTS_DICT:
+        return ALL_OBJECTS_DICT[class_name].from_name(name, **kwargs)
+
+    elif re.match(r"^tau\d$", class_name.lower()):
+        return TauN.from_name(name, **kwargs)
+
+    elif re.match(r"^tau\d\d$", class_name.lower()):
+        return TauMN.from_name(name, **kwargs)
+
+    else:
+        raise ValueError(f"Invalid '{name}' for an observable")

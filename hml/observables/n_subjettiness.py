@@ -1,28 +1,55 @@
 from __future__ import annotations
 
-from math import nan
+import awkward as ak
 
-from ..physics_objects.single import is_single
+from hml.physics_objects.physics_object import PhysicsObject
+
 from .observable import Observable
 
 
 class NSubjettiness(Observable):
-    def __init__(self, physics_object: str, n: int):
+    def __init__(
+        self,
+        n: int,
+        physics_object: str | PhysicsObject,
+        class_name: str | None = None,
+    ) -> None:
+        supported_objects = ["single", "collective"]
+        super().__init__(physics_object, class_name, supported_objects)
         self.n = n
-        supported_types = ["single", "collective"]
 
-        super().__init__(physics_object, supported_types)
+    def read(self, events):
+        all_keys = {i.lower(): i for i in events.keys(full_paths=False)}
+        branch = self.physics_object.branch.lower()
+        slices = self.physics_object.slices
 
-    def read_ttree(self, event):
-        objs = self.physics_object.read_ttree(event).objects
-
-        if is_single(self.physics_object.name):
-            self._value = objs[0].Tau[self.n - 1] if objs != [] else nan
+        if f"{branch}.tau[5]" in all_keys:
+            key = all_keys[f"{branch}.tau[5]"]
+            array = events[key].array()
+            value = array[:, *slices][:, :, self.n]
 
         else:
-            self._value = [
-                obj.Tau[self.n - 1] if obj is not None else nan for obj in objs
-            ]
+            raise ValueError
+
+        for i, slice_ in enumerate(slices):
+            if slice_.stop is not None:
+                start = slice_.start if slice_.start is not None else 0
+                required_length = slice_.stop - start
+
+                if i + 1 == len(slices) and ak.any(
+                    ak.num(value, i + 1) < required_length
+                ):
+                    value = ak.pad_none(value, required_length, axis=i + 1)
+
+                else:
+                    n_missing = required_length - ak.num(value, i + 1)
+                    if ak.sum(n_missing) > 0:
+                        pad = ak.unflatten(
+                            ak.Array([[]] * ak.sum(n_missing)), n_missing
+                        )
+                        value = ak.concatenate([value, pad], axis=i + 1)
+
+        self._value = value
 
         return self
 
@@ -34,20 +61,56 @@ class NSubjettiness(Observable):
 
 
 class TauN(NSubjettiness):
-    @property
-    def name(self):
-        return f"{self.physics_object.name}.Tau{self.n}"
-
     @classmethod
     def from_name(cls, name: str, **kwargs) -> TauN:
-        if "." not in name:
-            raise ValueError(f"Invalid name {name}.")
+        *parts, class_name = name.split(".")
+        physics_object = ".".join(parts) if len(parts) > 0 else None
 
-        physics_object, class_name = name.split(".")
-        n = int(class_name[-1])
+        if class_name.lower().startswith("tau"):
+            n = int(class_name[-1])
 
-        return cls(physics_object, n, **kwargs)
+        return cls(n, physics_object, class_name)
 
 
-NSubjettiness.add_alias("n_subjettiness")
-TauN.add_alias("tau_n")
+class NSubjettinessRatio(Observable):
+    def __init__(
+        self,
+        m: int,
+        n: int,
+        physics_object: str | PhysicsObject,
+        class_name: str | None = None,
+    ) -> None:
+        supported_objects = ["single", "collective"]
+        super().__init__(physics_object, class_name, supported_objects)
+        self.m = m
+        self.n = n
+
+        self.tau_m = TauN(m, physics_object)
+        self.tau_n = TauN(n, physics_object)
+
+    def read(self, events):
+        self.tau_m.read(events)
+        self.tau_n.read(events)
+
+        self._value = self.tau_m.value / self.tau_n.value
+
+        return self
+
+    @property
+    def config(self):
+        config = super().config
+        config.update({"m": self.m, "n": self.n})
+        return config
+
+
+class TauMN(NSubjettinessRatio):
+    @classmethod
+    def from_name(cls, name: str, **kwargs) -> TauMN:
+        *parts, class_name = name.split(".")
+        physics_object = ".".join(parts) if len(parts) > 0 else None
+
+        if class_name.lower().startswith("tau"):
+            m = int(class_name[-2])
+            n = int(class_name[-1])
+
+        return cls(m, n, physics_object, class_name)
