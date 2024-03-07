@@ -1,43 +1,29 @@
+from __future__ import annotations
+
 import re
 
 from .physics_object import PhysicsObject
 
 
 def is_collective(object_: str | PhysicsObject | None) -> bool:
-    if object_ is None:
-        return False
+    if isinstance(object_, str):
+        return bool(re.match(r"^[a-zA-Z]+$|^[a-zA-Z]+\d*:\d*$", object_))
 
     elif isinstance(object_, PhysicsObject):
         return isinstance(object_, Collective)
 
     else:
-        return bool(re.match(r"^[a-zA-Z]+$|^[a-zA-Z]+\d*:\d*$", object_))
+        return False
 
 
 class Collective(PhysicsObject):
     def __init__(
         self,
         branch: str,
-        start: int | None = None,
-        stop: int | None = None,
+        index: tuple[int | None, int | None] = (None, None),
     ) -> None:
         self.branch = branch
-        self.start = start
-        self.stop = stop
-
-    @classmethod
-    def from_name(cls, name: str) -> "Collective":
-        if re.match(r"^[a-zA-Z]+$|^[a-zA-Z]+\d*:\d*$", name) is None:
-            raise ValueError(
-                f"Invalid name '{name}' for a {cls.__name__} physics object"
-            )
-
-        match_ = re.match(r"^([a-zA-Z]+)(\d*):?(\d*)$", name)
-        branch, start, stop = match_.groups()
-        start = int(start) if start != "" else None
-        stop = int(stop) if stop != "" else None
-
-        return cls(branch, start, stop)
+        self.index = index
 
     @property
     def branch(self) -> str:
@@ -48,40 +34,43 @@ class Collective(PhysicsObject):
         self._branch = branch
 
     @property
-    def start(self) -> int:
-        return self._start
+    def index(self) -> slice:
+        return self._index
 
-    @start.setter
-    def start(self, start: None | int) -> None:
-        self._start = start
-
-    @property
-    def stop(self) -> int:
-        return self._stop
-
-    @stop.setter
-    def stop(self, stop: None | int) -> None:
-        self._stop = stop
+    @index.setter
+    def index(self, index: tuple[int | None, int | None]) -> None:
+        self._index = slice(*index)
 
     @property
     def name(self) -> str:
-        match self.start, self.stop:
-            case None, None:
-                return f"{self.branch}"
-            case None, _:
-                return f"{self.branch}:{self.stop}"
-            case _, None:
-                return f"{self.branch}{self.start}:"
-            case _:
-                return f"{self.branch}{self.start}:{self.stop}"
+        if self.index.start is None and self.index.stop is None:
+            return f"{self.branch}"
 
-    @property
-    def slices(self) -> list[slice]:
-        return [slice(self.start, self.stop)]
+        elif self.index.start is None:
+            return f"{self.branch}:{self.index.stop}"
+
+        elif self.index.stop is None:
+            return f"{self.branch}{self.index.start}:"
+
+        else:
+            return f"{self.branch}{self.index.start}:{self.index.stop}"
+
+    @classmethod
+    def from_name(cls, name: str) -> Collective:
+        if re.match(r"^[a-zA-Z]+$|^[a-zA-Z]+\d*:\d*$", name.strip()):
+            match_ = re.match(r"^([a-zA-Z]+)(\d*):?(\d*)$", name)
+            branch, start, stop = match_.groups()
+            start = int(start) if start != "" else None
+            stop = int(stop) if stop != "" else None
+
+            return cls(branch, (start, stop))
+
+        else:
+            raise ValueError
 
     @property
     def config(self) -> dict:
-        return {"branch": self.branch, "start": self.start, "stop": self.stop}
-
-
-Collective.add_alias("collective")
+        return {
+            "branch": self.branch,
+            "index": (self.index.start, self.index.stop),
+        }
