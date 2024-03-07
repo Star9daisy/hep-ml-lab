@@ -1,35 +1,35 @@
-from ROOT import TLorentzVector
+from functools import reduce
+
+import awkward as ak
+import vector
+
+from hml.physics_objects.physics_object import PhysicsObject
 
 from .observable import Observable
+from .observable_utils import branches_to_momentum4d
+
+vector.register_awkward()
 
 
 class InvariantMass(Observable):
-    def __init__(self, physics_object: str):
+    def __init__(
+        self,
+        physics_object: str | PhysicsObject,
+        class_name: str | None = None,
+    ) -> None:
         supported_objects = ["single", "multiple"]
-        super().__init__(physics_object, supported_objects)
+        super().__init__(physics_object, class_name, supported_objects)
 
-    def read_ttree(self, event):
-        self.physics_object.read_ttree(event)
-        vectors = TLorentzVector()
+    def read(self, events):
+        all_keys = {i.lower(): i for i in events.keys(full_paths=False)}
+
+        momenta = []
         for obj in self.physics_object.objects:
-            if obj != []:
-                vectors += obj[0].P4()
-            else:
-                vectors += TLorentzVector()
+            momentum4d = branches_to_momentum4d(events, all_keys[obj.branch.lower()])
+            padded_momentum4d = ak.pad_none(momentum4d[:, *obj.slices], 1)
+            momenta.append(padded_momentum4d)
 
-        self._value = vectors.M()
+        total = reduce(lambda x, y: x + y, momenta)
+        self._value = total.mass
 
         return self
-
-
-class InvMass(InvariantMass):
-    ...
-
-
-class InvM(InvariantMass):
-    ...
-
-
-InvariantMass.add_alias("invariant_mass")
-InvMass.add_alias("inv_mass")
-InvM.add_alias("inv_m")
