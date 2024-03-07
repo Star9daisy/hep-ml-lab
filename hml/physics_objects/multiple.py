@@ -19,9 +19,6 @@ def is_multiple(
         except Exception:
             return False
 
-    elif not isinstance(object_, Multiple):
-        return False
-
     if supported_objects is None:
         return True
 
