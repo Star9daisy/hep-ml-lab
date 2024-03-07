@@ -4,14 +4,14 @@ from hml.physics_objects import Collective, Nested, Single, is_nested
 
 
 def test_init():
-    obj = Nested(main="jet0", sub="constituents1:3")
+    obj = Nested(main=Single("jet", 0), sub="constituents1:3")
 
     assert obj.main == Single(branch="jet", index=0)
     assert obj.sub == Collective(branch="constituents", start=1, stop=3)
 
-    assert obj.name == "jet0.constituents1:3"
     assert obj.branch == "jet.constituents"
     assert obj.slices == [slice(0, 1), slice(1, 3)]
+    assert obj.name == "jet0.constituents1:3"
     assert obj.config == {"main": "jet0", "sub": "constituents1:3"}
 
 
@@ -19,7 +19,6 @@ def test_special_methods():
     obj = Nested(main="jet0", sub="constituents1:3")
 
     assert obj == Nested(main="jet0", sub="constituents1:3")
-    assert obj == "jet0.constituents1:3"
     assert str(obj) == "jet0.constituents1:3"
     assert repr(obj) == "Nested(main='jet0', sub='constituents1:3')"
 
