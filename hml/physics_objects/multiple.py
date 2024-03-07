@@ -62,7 +62,7 @@ class Multiple(PhysicsObject):
 
     @property
     def slices(self) -> list[list[slice]]:
-        return [i.slice for i in all]
+        return [i.slices for i in self.all]
 
     @property
     def name(self) -> str:
