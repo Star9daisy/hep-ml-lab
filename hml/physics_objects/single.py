@@ -30,6 +30,10 @@ class Single(PhysicsObject):
         return self._index
 
     @property
+    def slices(self) -> list[slice]:
+        return [slice(self.index, self.index + 1)]
+
+    @property
     def name(self) -> str:
         return f"{self.branch}{self.index}"
 

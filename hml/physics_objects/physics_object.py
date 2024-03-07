@@ -27,7 +27,7 @@ class PhysicsObject(ABC):
 
     @property
     @abstractmethod
-    def index(self) -> int | slice | list[slice]: ...
+    def slices(self) -> list[slice] | list[list[slice]]: ...
 
     @property
     @abstractmethod
