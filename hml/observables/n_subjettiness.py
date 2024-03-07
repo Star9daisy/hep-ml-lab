@@ -26,7 +26,7 @@ class NSubjettiness(Observable):
         if f"{branch}.tau[5]" in all_keys:
             key = all_keys[f"{branch}.tau[5]"]
             array = events[key].array()
-            value = array[:, *slices][:, :, self.n]
+            value = array[:, *slices][:, :, self.n - 1]
 
         else:
             raise ValueError
