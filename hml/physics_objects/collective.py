@@ -20,40 +20,42 @@ class Collective(PhysicsObject):
     def __init__(
         self,
         branch: str,
-        index: tuple[int | None, int | None] = (None, None),
+        start: int | None = None,
+        stop: int | None = None,
     ) -> None:
-        self.branch = branch
-        self.index = index
+        self._branch = branch
+        self._start = start
+        self._stop = stop
 
     @property
     def branch(self) -> str:
         return self._branch
 
-    @branch.setter
-    def branch(self, branch: str) -> None:
-        self._branch = branch
+    @property
+    def start(self) -> int | None:
+        return self._start
+
+    @property
+    def stop(self) -> int | None:
+        return self._stop
 
     @property
     def index(self) -> slice:
-        return self._index
-
-    @index.setter
-    def index(self, index: tuple[int | None, int | None]) -> None:
-        self._index = slice(*index)
+        return slice(self.start, self.stop)
 
     @property
     def name(self) -> str:
-        if self.index.start is None and self.index.stop is None:
+        if self.start is None and self.stop is None:
             return f"{self.branch}"
 
-        elif self.index.start is None:
-            return f"{self.branch}:{self.index.stop}"
+        elif self.start is None:
+            return f"{self.branch}:{self.stop}"
 
-        elif self.index.stop is None:
-            return f"{self.branch}{self.index.start}:"
+        elif self.stop is None:
+            return f"{self.branch}{self.start}:"
 
         else:
-            return f"{self.branch}{self.index.start}:{self.index.stop}"
+            return f"{self.branch}{self.start}:{self.stop}"
 
     @classmethod
     def from_name(cls, name: str) -> Collective:
@@ -63,14 +65,14 @@ class Collective(PhysicsObject):
             start = int(start) if start != "" else None
             stop = int(stop) if stop != "" else None
 
-            return cls(branch, (start, stop))
+            return cls(branch, start, stop)
 
-        else:
-            raise ValueError
+        raise ValueError("Invalid name")
 
     @property
     def config(self) -> dict:
         return {
             "branch": self.branch,
-            "index": (self.index.start, self.index.stop),
+            "start": self.start,
+            "stop": self.stop,
         }

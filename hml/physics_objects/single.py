@@ -18,24 +18,16 @@ def is_single(object_: str | PhysicsObject | None) -> bool:
 
 class Single(PhysicsObject):
     def __init__(self, branch: str, index: int) -> None:
-        self.branch = branch
-        self.index = index
+        self._branch = branch
+        self._index = index
 
     @property
     def branch(self) -> str:
         return self._branch
 
-    @branch.setter
-    def branch(self, branch: str) -> None:
-        self._branch = branch
-
     @property
     def index(self) -> int:
         return self._index
-
-    @index.setter
-    def index(self, index: int) -> None:
-        self._index = index
 
     @property
     def name(self) -> str:
