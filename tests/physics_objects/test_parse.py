@@ -20,4 +20,4 @@ def test_parse(
         assert isinstance(parse(case), Nested)
 
     with pytest.raises(ValueError):
-        parse("jet0,jet1")
+        parse("jet0_jet1")
