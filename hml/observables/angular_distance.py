@@ -5,7 +5,7 @@ import numpy as np
 
 from hml.physics_objects.physics_object import PhysicsObject
 
-from .tag import Eta, Phi
+from .kinematics import Eta, Phi
 from .observable import Observable
 
 
