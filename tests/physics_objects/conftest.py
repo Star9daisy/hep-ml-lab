@@ -5,6 +5,7 @@ import pytest
 def single_names():
     yield [
         "jet0",
+        "muon1",
     ]
 
 
@@ -43,4 +44,15 @@ def nested_names():
         "jet1:3.Constituents1:",
         "jet1:3.Constituents:3",
         "jet1:3.Constituents1:3",
+    ]
+
+
+@pytest.fixture
+def multiple_names():
+    yield [
+        "jet0,jet1",
+        "jet0,jet1,jet2",
+        "jet0,jet:",
+        "jet0,jet0.constituents:",
+        "jet0.constituents:,jet0.constituents:",
     ]
