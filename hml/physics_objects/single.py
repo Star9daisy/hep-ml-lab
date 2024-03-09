@@ -7,7 +7,7 @@ from .physics_object import PhysicsObject
 
 def is_single(object_: PhysicsObject | str) -> bool:
     """Check if an object is a single physics object"""
-    if isinstance(PhysicsObject, object_):
+    if isinstance(object_, PhysicsObject):
         return isinstance(object_, Single)
 
     return bool(re.match(r"^[a-zA-Z]+\d+$", object_))
