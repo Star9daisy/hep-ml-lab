@@ -9,22 +9,14 @@ ALL_OBJECTS_DICT = {cls.__name__: cls for cls in ALL_OBJECTS}
 ALL_OBJECTS_DICT.update({cls.__name__.lower(): cls for cls in ALL_OBJECTS})
 
 
-def get(identifier: str | None) -> PhysicsObject | None:
-    if identifier is None or identifier == "None":
-        return
-
-    else:
-        return ALL_OBJECTS_DICT.get(identifier)
+def get(identifier: str) -> PhysicsObject | None:
+    """Retrieve a physics object class from its identifier"""
+    return ALL_OBJECTS_DICT.get(identifier)
 
 
-def parse(name: str | PhysicsObject | None) -> PhysicsObject | None:
-    if name is None or (isinstance(name, str) and name == "None"):
-        return
-
-    elif isinstance(name, PhysicsObject):
-        return name
-
-    elif is_single(name):
+def parse(name: str) -> PhysicsObject:
+    """Parse a name to create a physics object"""
+    if is_single(name):
         return Single.from_name(name)
 
     elif is_collective(name):
@@ -37,4 +29,4 @@ def parse(name: str | PhysicsObject | None) -> PhysicsObject | None:
         return Multiple.from_name(name)
 
     else:
-        raise ValueError(f"Invalid '{name}' for a physics object")
+        raise ValueError(f"Invalid name '{name}' for a physics object")

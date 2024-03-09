@@ -42,7 +42,7 @@ class Nested(PhysicsObject):
             main, sub = name.split(".")
             return cls(main, sub)
 
-        raise ValueError
+        raise ValueError(f"Invalid name '{name}' for a nested physics object")
 
     @property
     def main(self) -> PhysicsObject:
