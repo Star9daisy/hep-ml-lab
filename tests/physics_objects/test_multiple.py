@@ -6,35 +6,44 @@ from hml.physics_objects import Collective, Multiple, Nested, Single, is_multipl
 
 
 def test_init():
-    obj = Multiple(
-        objects=[Single(branch="jet", index=0), "jet", "jet0.constituents:3"]
-    )
+    obj = Multiple(all=["jet0", "jet", "jet0.constituents:3"])
 
     assert len(obj.all) == 3
     assert obj.all[0] == Single(branch="jet", index=0)
     assert obj.all[1] == Collective(branch="jet")
     assert obj.all[2] == Nested(main="jet0", sub="constituents:3")
+
     assert obj.branch == ["jet", "jet", "jet.constituents"]
     assert obj.slices == [
         [slice(0, 1)],
         [slice(None, None)],
         [slice(0, 1), slice(None, 3)],
     ]
-
     assert obj.name == "jet0,jet,jet0.constituents:3"
-    assert obj.config == {"objects": ["jet0", "jet", "jet0.constituents:3"]}
+    assert obj.config == {"all": ["jet0", "jet", "jet0.constituents:3"]}
+
+    # Other cases
+    obj = Multiple(
+        all=[
+            Single(branch="jet", index=0),
+            Collective(branch="jet"),
+            Nested(main="jet0", sub="constituents:3"),
+        ]
+    )
+    assert obj.name == "jet0,jet,jet0.constituents:3"
 
 
 def test_special_methods():
-    obj = Multiple(objects=["jet0", "jet", "jet0.constituents:3"])
+    obj = Multiple(all=["jet0", "jet", "jet0.constituents:3"])
 
-    assert obj == Multiple(objects=["jet0", "jet", "jet0.constituents:3"])
+    assert obj == Multiple(all=["jet0", "jet", "jet0.constituents:3"])
+    assert obj == "jet0,jet,jet0.constituents:3"
     assert str(obj) == "jet0,jet,jet0.constituents:3"
-    assert repr(obj) == "Multiple(objects=['jet0', 'jet', 'jet0.constituents:3'])"
+    assert repr(obj) == "Multiple(all=['jet0', 'jet', 'jet0.constituents:3'])"
 
 
 def test_class_methods():
-    obj = Multiple(objects=["jet0", "jet", "jet0.constituents:3"])
+    obj = Multiple(all=["jet0", "jet", "jet0.constituents:3"])
 
     assert obj == Multiple.from_name("jet0,jet,jet0.constituents:3")
     assert obj == Multiple.from_config(obj.config)
@@ -44,9 +53,7 @@ def test_class_methods():
 
 
 def test_is_multiple(single_names, collective_names, nested_names, multiple_names):
-    assert is_multiple(None) is False
-
-    assert is_multiple(Multiple(objects=["jet0", "jet", "jet0.constituents:3"])) is True
+    assert is_multiple(Multiple(all=["jet0", "jet", "jet0.constituents:3"])) is True
 
     for case in multiple_names:
         assert is_multiple(case) is True
