@@ -4,8 +4,11 @@ from abc import ABC, abstractmethod
 
 
 class PhysicsObject(ABC):
-    def __eq__(self, other: PhysicsObject) -> bool:
-        return self.name.lower() == other.name.lower()
+    def __eq__(self, other: PhysicsObject | str) -> bool:
+        if isinstance(other, PhysicsObject):
+            return self.name.lower() == other.name.lower()
+
+        return self.name.lower() == other.lower()
 
     def __str__(self) -> str:
         return self.name
