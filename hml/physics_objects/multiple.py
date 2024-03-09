@@ -7,36 +7,38 @@ from .single import Single, is_single
 
 
 def is_multiple(
-    object_: str | PhysicsObject | None,
-    supported_objects: list[str | PhysicsObject] | None = None,
+    object_: PhysicsObject | str,
+    supported_types: list[PhysicsObject | str] | None = None,
 ) -> bool:
-    if object_ is None:
-        return False
-
+    """Check if an object is a multiple physics object"""
     if isinstance(object_, str):
         try:
             object_ = Multiple.from_name(object_)
         except Exception:
             return False
 
-    if supported_objects is None:
+    if supported_types is None:
         return True
 
-    supported_objects = [i if isinstance(i, str) else i.name for i in supported_objects]
-    supported_objects = [i.lower() for i in supported_objects]
+    supported_types = [
+        i.lower() if isinstance(i, str) else i.__class__.__name__.lower()
+        for i in supported_types
+    ]
 
     for obj in object_.all:
-        if obj.__class__.__name__.lower() not in supported_objects:
+        if obj.__class__.__name__.lower() not in supported_types:
             return False
 
     return True
 
 
 class Multiple(PhysicsObject):
-    def __init__(self, objects: list[str | PhysicsObject]) -> None:
+    """A multiple physics object"""
+
+    def __init__(self, objects: list[PhysicsObject | str]) -> None:
         self._all = self._init_all(objects)
 
-    def _init_all(self, objects: list[str | PhysicsObject]) -> list[PhysicsObject]:
+    def _init_all(self, objects: list[PhysicsObject | str]) -> list[PhysicsObject]:
         output = []
         for obj in objects:
             if isinstance(obj, PhysicsObject):
@@ -50,7 +52,16 @@ class Multiple(PhysicsObject):
 
             else:
                 output.append(Nested.from_name(obj))
+
         return output
+
+    @classmethod
+    def from_name(cls, name: str) -> Multiple:
+        if "," in name:
+            all_ = name.split(",")
+            return cls(all_)
+
+        raise ValueError
 
     @property
     def all(self) -> list[PhysicsObject]:
@@ -68,14 +79,6 @@ class Multiple(PhysicsObject):
     def name(self) -> str:
         return ",".join(obj.name for obj in self.all)
 
-    @classmethod
-    def from_name(cls, name: str) -> Multiple:
-        if "," in name:
-            all_ = name.split(",")
-            return cls(all_)
-
-        raise ValueError
-
     @property
     def config(self) -> dict:
-        return {"objects": [i.name for i in self.all]}
+        return {"all": [i.name for i in self.all]}

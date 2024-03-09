@@ -5,29 +5,36 @@ import re
 from .physics_object import PhysicsObject
 
 
-def is_single(object_: str | PhysicsObject | None) -> bool:
-    if isinstance(object_, str):
-        return bool(re.match(r"^[a-zA-Z]+\d+$", object_))
-
-    elif isinstance(object_, PhysicsObject):
+def is_single(object_: PhysicsObject | str) -> bool:
+    """Check if an object is a single physics object"""
+    if isinstance(PhysicsObject, object_):
         return isinstance(object_, Single)
 
-    else:
-        return False
+    return bool(re.match(r"^[a-zA-Z]+\d+$", object_))
 
 
 class Single(PhysicsObject):
+    """A single physics object"""
+
     def __init__(self, branch: str, index: int) -> None:
         self._branch = branch
         self._index = index
 
-    @property
-    def branch(self) -> str:
-        return self._branch
+    @classmethod
+    def from_name(cls, name: str) -> Single:
+        if match_ := re.match(r"^([a-zA-Z]+)(\d+)$", name.strip()):
+            branch, index = match_.groups()
+            return cls(branch, int(index))
+
+        raise ValueError(f"Invalid name {name} for a single physics object")
 
     @property
     def index(self) -> int:
         return self._index
+
+    @property
+    def branch(self) -> str:
+        return self._branch
 
     @property
     def slices(self) -> list[slice]:
@@ -36,14 +43,6 @@ class Single(PhysicsObject):
     @property
     def name(self) -> str:
         return f"{self.branch}{self.index}"
-
-    @classmethod
-    def from_name(cls, name: str) -> Single:
-        if match_ := re.match(r"^([a-zA-Z]+)(\d+)$", name.strip()):
-            branch, index = match_.groups()
-            return cls(branch, int(index))
-
-        raise ValueError("Invalid name")
 
     @property
     def config(self) -> dict:

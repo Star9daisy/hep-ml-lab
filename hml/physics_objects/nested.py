@@ -7,27 +7,26 @@ from .physics_object import PhysicsObject
 from .single import Single, is_single
 
 
-def is_nested(object_: str | PhysicsObject | None) -> bool:
-    if isinstance(object_, str):
-        return bool(re.match(r"^[a-zA-Z]+\d*:?\d*\.[a-zA-Z]+\d*:?\d*$", object_))
-
-    elif isinstance(object_, PhysicsObject):
+def is_nested(object_: PhysicsObject | str) -> bool:
+    """Check if an object is a nested physics object"""
+    if isinstance(object_, PhysicsObject):
         return isinstance(object_, Nested)
 
-    else:
-        return False
+    return bool(re.match(r"^[a-zA-Z]+\d*:?\d*\.[a-zA-Z]+\d*:?\d*$", object_))
 
 
 class Nested(PhysicsObject):
+    """A nested physics object"""
+
     def __init__(
         self,
-        main: str | PhysicsObject,
-        sub: str | PhysicsObject,
+        main: PhysicsObject | str,
+        sub: PhysicsObject | str,
     ) -> None:
         self._main = self._init_object(main)
         self._sub = self._init_object(sub)
 
-    def _init_object(self, object_: str | PhysicsObject) -> PhysicsObject:
+    def _init_object(self, object_: PhysicsObject | str) -> PhysicsObject:
         if isinstance(object_, PhysicsObject):
             return object_
 
@@ -36,6 +35,14 @@ class Nested(PhysicsObject):
 
         else:
             return Collective.from_name(object_)
+
+    @classmethod
+    def from_name(cls, name: str) -> Nested:
+        if "." in name:
+            main, sub = name.split(".")
+            return cls(main, sub)
+
+        raise ValueError
 
     @property
     def main(self) -> PhysicsObject:
@@ -56,14 +63,6 @@ class Nested(PhysicsObject):
     @property
     def name(self) -> str:
         return f"{self.main.name}.{self.sub.name}"
-
-    @classmethod
-    def from_name(cls, name: str) -> Nested:
-        if "." in name:
-            main, sub = name.split(".")
-            return cls(main, sub)
-
-        raise ValueError
 
     @property
     def config(self) -> dict:
