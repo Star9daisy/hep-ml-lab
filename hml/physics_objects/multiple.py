@@ -35,8 +35,8 @@ def is_multiple(
 class Multiple(PhysicsObject):
     """A multiple physics object"""
 
-    def __init__(self, objects: list[PhysicsObject | str]) -> None:
-        self._all = self._init_all(objects)
+    def __init__(self, all: list[PhysicsObject | str]) -> None:
+        self._all = self._init_all(all)
 
     def _init_all(self, objects: list[PhysicsObject | str]) -> list[PhysicsObject]:
         output = []
