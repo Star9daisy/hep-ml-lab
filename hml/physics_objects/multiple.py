@@ -61,7 +61,7 @@ class Multiple(PhysicsObject):
             all_ = name.split(",")
             return cls(all_)
 
-        raise ValueError
+        raise ValueError(f"Invalid name '{name}' for a multiple physics object")
 
     @property
     def all(self) -> list[PhysicsObject]:

@@ -36,7 +36,7 @@ class Collective(PhysicsObject):
 
             return cls(branch, start, stop)
 
-        raise ValueError("Invalid name")
+        raise ValueError(f"Invalid name '{name}' for a collective physics object")
 
     @property
     def start(self) -> int | None:

@@ -26,7 +26,7 @@ class Single(PhysicsObject):
             branch, index = match_.groups()
             return cls(branch, int(index))
 
-        raise ValueError(f"Invalid name {name} for a single physics object")
+        raise ValueError(f"Invalid name '{name}' for a single physics object")
 
     @property
     def index(self) -> int:
