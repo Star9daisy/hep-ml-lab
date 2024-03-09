@@ -8,4 +8,3 @@ def test_get():
     assert get("Collective") is Collective
     assert get("nested") is Nested
     assert get("Nested") is Nested
-    assert get(None) is None

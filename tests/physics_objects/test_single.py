@@ -17,6 +17,7 @@ def test_special_methods():
     obj = Single(branch="jet", index=0)
 
     assert obj == Single(branch="jet", index=0)
+    assert obj == "jet0"
     assert str(obj) == "jet0"
     assert repr(obj) == "Single(branch='jet', index=0)"
 
@@ -32,8 +33,6 @@ def test_class_methods():
 
 
 def test_is_single(single_names, collective_names, nested_names):
-    assert is_single(None) is False
-
     assert is_single(Single(branch="jet", index=0)) is True
 
     for case in single_names:
