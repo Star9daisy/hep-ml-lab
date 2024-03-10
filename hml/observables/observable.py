@@ -86,7 +86,7 @@ class Observable:
         return self._class_name
 
     @property
-    def supported_objects(self) -> list[PhysicsObject] | None:
+    def supported_objects(self) -> list[str] | None:
         return self._supported_objects
 
     @property
