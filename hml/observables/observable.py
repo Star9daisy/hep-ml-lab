@@ -20,7 +20,14 @@ class Observable:
         self._validate_physics_object()
 
     def _init_object(self, object_: str | PhysicsObject | None) -> PhysicsObject | None:
-        return parse_object(object_)
+        if isinstance(object_, PhysicsObject):
+            return object_
+
+        elif isinstance(object_, str):
+            return parse_object(object_)
+
+        else:
+            return
 
     def _init_class_name(self, class_name: str | None) -> str:
         return class_name if class_name else self.__class__.__name__
