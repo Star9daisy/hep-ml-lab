@@ -165,6 +165,10 @@ class Observable:
         *parts, class_name = name.split(".")
         physics_object = ".".join(parts) if len(parts) > 0 else None
 
+        if "class_name" in kwargs:
+            class_name = kwargs["class_name"]
+            del kwargs["class_name"]
+
         return cls(physics_object=physics_object, class_name=class_name, **kwargs)
 
     @classmethod
