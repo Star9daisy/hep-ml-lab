@@ -18,15 +18,15 @@ class AngularDistance(Observable):
         supported_objects = ["single", "collective", "nested", "multiple"]
         super().__init__(physics_object, class_name, supported_objects)
         assert (
-            len(self.physics_object.objects) == 2
+            len(self.physics_object.all) == 2
         ), "Two physics objects are required for angular distance"
 
     def read(self, events) -> None:
-        obj0_eta = Eta(self.physics_object.objects[0]).read(events).value
-        obj0_phi = Phi(self.physics_object.objects[0]).read(events).value
+        obj0_eta = Eta(self.physics_object.all[0]).read(events).value
+        obj0_phi = Phi(self.physics_object.all[0]).read(events).value
 
-        obj1_eta = Eta(self.physics_object.objects[1]).read(events).value
-        obj1_phi = Phi(self.physics_object.objects[1]).read(events).value
+        obj1_eta = Eta(self.physics_object.all[1]).read(events).value
+        obj1_phi = Phi(self.physics_object.all[1]).read(events).value
 
         if obj0_eta.ndim == 3:
             obj0_eta = ak.flatten(obj0_eta, axis=-1)
