@@ -1,43 +1,48 @@
-from math import isnan
+import pytest
 
-from hml.observables.invariant_mass import InvariantMass
-from hml.observables.invariant_mass import InvM
-from hml.observables.invariant_mass import InvMass
+from hml.observables import InvariantMass
 
 
 def test_init():
-    obs = InvariantMass(physics_object="Jet0,Jet1")
+    obs = InvariantMass(physics_object="jet0,jet1")
 
-    # Parameters ------------------------------------------------------------- #
-    assert obs.physics_object.name == "Jet0,Jet1"
-    assert obs.supported_types == ["single", "multiple"]
+    assert obs.physics_object.name == "jet0,jet1"
+    assert obs.class_name == "InvariantMass"
 
-    # Attributes ------------------------------------------------------------- #
-    assert obs.name == "Jet0,Jet1.InvariantMass"
-    assert isnan(obs.value)
-    assert obs.shape == "1 * float64"
-    assert obs.config == {"physics_object": obs.physics_object.name}
-    assert repr(obs) == "Jet0,Jet1.InvariantMass : nan"
+    assert obs.name == "jet0,jet1.InvariantMass"
+    assert len(obs.value) == 0
+    assert obs.config == {
+        "physics_object": obs.physics_object.name,
+        "class_name": "InvariantMass",
+    }
 
-    obs = InvMass(physics_object="Jet0,Jet1")
-    assert obs == InvariantMass(physics_object="Jet0,Jet1")
 
-    obs = InvM(physics_object="Jet0,Jet1")
-    assert obs == InvariantMass(physics_object="Jet0,Jet1")
+def test_special_methods():
+    obs = InvariantMass(physics_object="jet0,jet1")
+
+    assert obs == InvariantMass(physics_object="jet0,jet1")
+    assert obs == "jet0,jet1.InvariantMass"
+    assert obs == "jet0,jet1.invariant_mass"
+    assert str(obs) == "jet0,jet1.InvariantMass: 0 * unknown"
+    assert repr(obs) == "jet0,jet1.InvariantMass: 0 * unknown"
 
 
 def test_class_methods():
-    obs = InvM(physics_object="Jet0,Jet1")
-    assert obs == InvM.from_name("Jet0,Jet1.InvM")
-    assert obs == InvM.from_config(obs.config)
+    obs = InvariantMass(physics_object="jet0,jet1")
+
+    assert obs == InvariantMass.from_name("jet0,jet1.InvariantMass")
+    assert obs == InvariantMass.from_config(obs.config)
+
+    with pytest.raises(ValueError):
+        InvariantMass.from_name("jet,muon")
 
 
-def test_read(event):
-    obs = InvM("Jet0,Jet1").read_ttree(event)
-    assert obs.shape == "1 * float64"
+def test_read(events):
+    obs = InvariantMass("jet0,jet1").read(events)
+    assert str(obs.value.type) == "100 * 1 * ?float32"
 
-    obs = InvM("Jet0,Jet1,Jet2").read_ttree(event)
-    assert obs.shape == "1 * float64"
+    obs = InvariantMass("jet0,jet1,jet2").read(events)
+    assert str(obs.value.type) == "100 * 1 * ?float32"
 
-    obs = InvM("Jet0,Jet1,Jet100").read_ttree(event)
-    assert obs.shape == "1 * float64"
+    obs = InvariantMass("jet0,jet1,jet100").read(events)
+    assert str(obs.value.type) == "100 * 1 * ?float32"
