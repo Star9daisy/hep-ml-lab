@@ -5,7 +5,7 @@ import vector
 vector.register_awkward()
 
 
-@nb.njit
+@nb.njit(cache=True)
 def find_1d_in_2d(a, b):  # pragma: no cover
     index_array = []
 
@@ -68,7 +68,7 @@ def branches_to_momentum4d(events, branch, with_id=False):
     return momenta
 
 
-@nb.njit
+@nb.njit(cache=True)
 def take_2d_from_1d(array, indices):  # pragma: no cover
     pt = []
     eta = []
