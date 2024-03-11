@@ -24,7 +24,7 @@ class InvariantMass(Observable):
         all_keys = {i.lower(): i for i in events.keys(full_paths=False)}
 
         momenta = []
-        for obj in self.physics_object.objects:
+        for obj in self.physics_object.all:
             momentum4d = branches_to_momentum4d(events, all_keys[obj.branch.lower()])
             padded_momentum4d = ak.pad_none(momentum4d[:, *obj.slices], 1)
             momenta.append(padded_momentum4d)
