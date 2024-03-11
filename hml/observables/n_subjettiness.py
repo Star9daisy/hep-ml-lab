@@ -67,7 +67,10 @@ class TauN(NSubjettiness):
         physics_object = ".".join(parts) if len(parts) > 0 else None
 
         if class_name.lower().startswith("tau"):
-            n = int(class_name[-1])
+            if "n" not in kwargs:
+                n = int(class_name[-1])
+            else:
+                n = kwargs["n"]
 
         return cls(n, physics_object, class_name)
 
@@ -110,7 +113,14 @@ class TauMN(NSubjettinessRatio):
         physics_object = ".".join(parts) if len(parts) > 0 else None
 
         if class_name.lower().startswith("tau"):
-            m = int(class_name[-2])
-            n = int(class_name[-1])
+            if "m" not in kwargs:
+                m = int(class_name[-2])
+            else:
+                m = kwargs["m"]
+
+            if "n" not in kwargs:
+                n = int(class_name[-1])
+            else:
+                n = kwargs["n"]
 
         return cls(m, n, physics_object, class_name)
