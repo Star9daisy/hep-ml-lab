@@ -1,54 +1,61 @@
 import pytest
 
-from hml.observables import get_observable
+from hml.observables import parse
 from hml.representations import Set
 
 
 def test_init():
     r = Set(
-        "FatJet0.Mass",
-        get_observable("FatJet0.TauMN", m=2, n=1),
-        "Jet0,Jet1.DeltaR",
+        [
+            "FatJet0.Mass",
+            parse("FatJet0.TauMN", m=2, n=1),
+            "Jet0,Jet1.DeltaR",
+        ]
     )
 
     # Attributes ------------------------------------------------------------- #
     assert r.observables == [
-        get_observable("FatJet0.Mass"),
-        get_observable("FatJet0.TauMN", m=2, n=1),
-        get_observable("Jet0,Jet1.DeltaR"),
+        parse("FatJet0.Mass"),
+        parse("FatJet0.TauMN", m=2, n=1),
+        parse("Jet0,Jet1.DeltaR"),
     ]
-    assert r.names == ["FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR"]
+    assert r.names == ["FatJet0.Mass", "FatJet0.TauMN", "Jet0,Jet1.DeltaR"]
     assert r.values is None
     assert r.config == {
         "observable_configs": {
             0: {
-                "class_name": "Mass",
-                "config": {"physics_object": "FatJet0"},
+                "class_name": "M",
+                "config": {"physics_object": "FatJet0", "class_name": "Mass"},
             },
             1: {
                 "class_name": "TauMN",
-                "config": {"physics_object": "FatJet0", "m": 2, "n": 1},
+                "config": {
+                    "class_name": "TauMN",
+                    "physics_object": "FatJet0",
+                    "m": 2,
+                    "n": 1,
+                },
             },
             2: {
-                "class_name": "DeltaR",
-                "config": {"physics_object": "Jet0,Jet1"},
+                "class_name": "AngularDistance",
+                "config": {"physics_object": "Jet0,Jet1", "class_name": "DeltaR"},
             },
         }
     }
 
 
-def test_read_ttree(event):
+def test_read(events):
     # Common cases ----------------------------------------------------------- #
-    r = Set("FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR").read_ttree(event)
+    r = Set(["FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR"]).read(events)
 
-    assert r.values.shape == (3,)
+    assert str(r.values.type) == "100 * 3 * ?float32"
 
     # Error cases ------------------------------------------------------------ #
     with pytest.raises(ValueError):
-        Set("Jet:.Pt").read_ttree(event)
+        Set(["Jet:.Pt"]).read(events)
 
 
 def test_class_methods():
-    r = Set("FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR")
+    r = Set(["FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR"])
 
     assert Set.from_config(r.config).config == r.config

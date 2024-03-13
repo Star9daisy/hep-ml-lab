@@ -1,42 +1,43 @@
+import awkward as ak
 import numpy as np
 import pytest
 
-from hml.observables import get_observable
+from hml.observables import parse
 from hml.representations import Image
 
 
 def test_init():
     r = Image(
-        height="FatJet0.Constituents:.Phi",
-        width=get_observable("FatJet0.Constituents:.Eta"),
+        height="FatJet0.Constituents.Phi",
+        width=parse("FatJet0.Constituents.Eta"),
     )
 
     # Attributes ------------------------------------------------------------- #
-    assert r.height == get_observable("FatJet0.Constituents:.Phi")
-    assert r.width == get_observable("FatJet0.Constituents:.Eta")
+    assert r.height == parse("FatJet0.Constituents.Phi")
+    assert r.width == parse("FatJet0.Constituents.Eta")
     assert r.channel is None
 
     r = Image(
-        height="FatJet0.Constituents:.Phi",
-        width=get_observable("FatJet0.Constituents:.Eta"),
-        channel="FatJet0.Constituents:.Pt",
+        height="FatJet0.Constituents.Phi",
+        width=parse("FatJet0.Constituents.Eta"),
+        channel="FatJet0.Constituents.Pt",
     )
 
     # Attributes ------------------------------------------------------------- #
-    assert r.height == get_observable("FatJet0.Constituents:.Phi")
-    assert r.width == get_observable("FatJet0.Constituents:.Eta")
-    assert r.channel == get_observable("FatJet0.Constituents:.Pt")
+    assert r.height == parse("FatJet0.Constituents.Phi")
+    assert r.width == parse("FatJet0.Constituents.Eta")
+    assert r.channel == parse("FatJet0.Constituents.Pt")
 
 
-def test_register(event):
+def test_register(events):
     image1 = (
         Image(
-            height="FatJet0.Constituents:.Phi",
-            width="FatJet0.Constituents:.Eta",
-            channel="FatJet0.Constituents:.Pt",
+            height="FatJet0.Constituents.Phi",
+            width="FatJet0.Constituents.Eta",
+            channel="FatJet0.Constituents.Pt",
         )
-        .read_ttree(event)
-        .with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+        .read(events)
+        .with_subjets("FatJet0.Constituents", "kt", 0.3, 0)
         .translate(origin="SubJet0")
         .rotate(axis="SubJet1", orientation=-90)
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
@@ -44,11 +45,11 @@ def test_register(event):
 
     image2 = (
         Image(
-            height="FatJet0.Constituents:.Phi",
-            width="FatJet0.Constituents:.Eta",
-            channel="FatJet0.Constituents:.Pt",
+            height="FatJet0.Constituents.Phi",
+            width="FatJet0.Constituents.Eta",
+            channel="FatJet0.Constituents.Pt",
         )
-        .with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+        .with_subjets("FatJet0.Constituents", "kt", 0.3, 0)
         .translate(origin="SubJet0")
         .rotate(axis="SubJet1", orientation=-90)
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
@@ -56,16 +57,16 @@ def test_register(event):
 
     assert image1.config == image2.config
 
-    image2.read_ttree(event)
+    image2.read(events)
     assert image1.values.shape == image2.values.shape
 
 
-def test_error_cases(event):
+def test_error_cases(events):
     r = Image(
-        height="FatJet0.Constituents:.Phi",
-        width="FatJet0.Constituents:.Eta",
-        channel="FatJet0.Constituents:.Pt",
-    ).read_ttree(event)
+        height="FatJet0.Constituents.Phi",
+        width="FatJet0.Constituents.Eta",
+        channel="FatJet0.Constituents.Pt",
+    ).read(events)
 
     # translate to a non-supported origin
     with pytest.raises(ValueError):
@@ -77,7 +78,7 @@ def test_error_cases(event):
 
     # status will be False if there are no enough subjets
     # then rotate and pixelate will not work
-    r.with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+    r.with_subjets("FatJet0.Constituents", "kt", 0.3, 0)
 
     assert r.translate(origin="SubJet100").status is False
     assert r.rotate(axis="SubJet100", orientation=90).config == r.config
@@ -86,15 +87,15 @@ def test_error_cases(event):
     )
 
 
-def test_show(event):
+def test_show(events):
     r = Image(
-        height="FatJet0.Constituents:.Phi",
-        width="FatJet0.Constituents:.Eta",
-        channel="FatJet0.Constituents:.Pt",
-    ).read_ttree(event)
+        height="FatJet0.Constituents.Phi",
+        width="FatJet0.Constituents.Eta",
+        channel="FatJet0.Constituents.Pt",
+    ).read(events)
     r.show()
 
-    r.with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+    r.with_subjets("FatJet0.Constituents", "kt", 0.3, 0)
     r.show()
 
     r.translate(origin="SubJet0")
@@ -113,13 +114,13 @@ def test_show(event):
 
 def test_class_methods():
     r = Image(
-        height="FatJet0.Constituents:.Phi",
-        width="FatJet0.Constituents:.Eta",
-        channel="FatJet0.Constituents:.Pt",
+        height="FatJet0.Constituents.Phi",
+        width="FatJet0.Constituents.Eta",
+        channel="FatJet0.Constituents.Pt",
     )
     assert Image.from_config(r.config).config == r.config
 
-    r.with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+    r.with_subjets("FatJet0.Constituents", "kt", 0.3, 0)
     assert Image.from_config(r.config).config == r.config
 
     r.translate(origin="SubJet0")
@@ -132,76 +133,82 @@ def test_class_methods():
     assert Image.from_config(r.config).config == r.config
 
     r = Image(
-        height="FatJet0.Constituents:.Phi",
-        width="FatJet0.Constituents:.Eta",
+        height="FatJet0.Constituents.Phi",
+        width="FatJet0.Constituents.Eta",
     )
     assert Image.from_config(r.config).config == r.config
 
 
-def test_values(event):
+def test_values(events):
     # values are nan if the image has not read a TTree
     r = Image(
-        height="FatJet0.Constituents:.Phi",
-        width="FatJet0.Constituents:.Eta",
+        height="FatJet0.Constituents.Phi",
+        width="FatJet0.Constituents.Eta",
     )
 
     assert isinstance(r.values, tuple)
-    assert np.isnan(r.values).all()
+    assert str(r.values[0].type) == "0 * unknown"
+    assert str(r.values[1].type) == "0 * unknown"
 
     # values are not nan if the image has read a TTree
     r = Image(
-        height="FatJet0.Constituents:.Phi",
-        width="FatJet0.Constituents:.Eta",
-    ).read_ttree(event)
-    assert not np.isnan(r.values).all()
+        height="FatJet0.Constituents.Phi",
+        width="FatJet0.Constituents.Eta",
+    ).read(events)
+    assert str(r.values[0].type) == "100 * var * float32"
+    assert str(r.values[1].type) == "100 * var * float32"
 
     # values will contain nan if the range is not enough to cover all the values
     r = (
         Image(
-            height="FatJet0.Constituents:.Phi",
-            width="FatJet0.Constituents:.Eta",
+            height="FatJet0.Constituents.Phi",
+            width="FatJet0.Constituents.Eta",
         )
-        .read_ttree(event)
+        .read(events)
         .pixelate(size=(33, 33), range=[(5, 10), (5, 10)])
     )
-    assert np.isnan(r.height.value).all()
-    assert np.isnan(r.width.value).all()
+    assert isinstance(r.values, np.ndarray)
+    assert r.values.shape[1:] == (33, 33)
+    assert ak.count_nonzero(ak.nan_to_num(r.height.value, 0)) == 0
+    assert ak.count_nonzero(ak.nan_to_num(r.width.value, 0)) == 0
 
     r = (
         Image(
-            height="FatJet0.Constituents:.Phi",
-            width="FatJet0.Constituents:.Eta",
+            height="FatJet0.Constituents.Phi",
+            width="FatJet0.Constituents.Eta",
         )
-        .read_ttree(event)
+        .read(events)
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
     )
-    assert not np.isnan(r.height.value).any()
-    assert not np.isnan(r.width.value).any()
+    assert isinstance(r.values, np.ndarray)
+    assert r.values.shape[1:] == (33, 33)
+    assert ak.count_nonzero(ak.nan_to_num(r.height.value, 0)) > 0
+    assert ak.count_nonzero(ak.nan_to_num(r.width.value, 0)) > 0
 
     # common cases
     r = (
         Image(
-            height="FatJet0.Constituents:.Phi",
-            width="FatJet0.Constituents:.Eta",
+            height="FatJet0.Constituents.Phi",
+            width="FatJet0.Constituents.Eta",
         )
-        .read_ttree(event)
-        .with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+        .read(events)
+        .with_subjets("FatJet0.Constituents", "kt", 0.3, 0)
         .translate(origin="SubJet0")
         .rotate(axis="SubJet1", orientation=-90)
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
     )
-    assert r.values.shape == (33, 33)
+    assert r.values.shape[1:] == (33, 33)
 
     r = (
         Image(
-            height="FatJet0.Constituents:.Phi",
-            width="FatJet0.Constituents:.Eta",
-            channel="FatJet0.Constituents:.Pt",
+            height="FatJet0.Constituents.Phi",
+            width="FatJet0.Constituents.Eta",
+            channel="FatJet0.Constituents.Pt",
         )
-        .read_ttree(event)
-        .with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+        .read(events)
+        .with_subjets("FatJet0.Constituents", "kt", 0.3, 0)
         .translate(origin="SubJet0")
         .rotate(axis="SubJet1", orientation=-90)
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
     )
-    assert r.values.shape == (33, 33)
+    assert r.values.shape[1:] == (33, 33)
