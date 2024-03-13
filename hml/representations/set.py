@@ -1,9 +1,9 @@
 from importlib import import_module
 
+import awkward as ak
 import numpy as np
 
-from hml.observables import Observable
-from hml.observables import get_observable
+from hml.observables import ALL_OBJECTS_DICT, Observable, parse
 
 
 class Set:
@@ -19,32 +19,40 @@ class Set:
         A list of observables or their names.
     """
 
-    def __init__(self, *observables: str | Observable):
-        self.observables = []
-        for obs in observables:
-            if isinstance(obs, str):
-                obs = get_observable(obs)
-
-            self.observables.append(obs)
-
+    def __init__(self, observables: list[str | Observable]):
+        self.observables = self._init_observables(observables)
         self._values = None
 
-    def read_ttree(self, event):
-        self._values = []
+    def _init_observables(self, observables: list[str | Observable]):
+        output = []
+        for obs in observables:
+            if isinstance(obs, str):
+                output.append(parse(obs))
+            else:
+                output.append(obs)
 
+        return output
+
+    def read(self, events):
+        values = []
         for obs in self.observables:
-            value = obs.read_ttree(event).to_numpy()
+            obs.read(events)
 
-            # Check if the observable is a scalar
-            if value.shape != ():
-                raise ValueError(
-                    f"Observable {obs.name} has shape {obs.to_numpy().shape} "
-                    "but should be a scalar."
-                )
+            if len(obs.shape) == 2:
+                # Maybe a single or collective observable
+                if obs.shape[-1] != "1":
+                    raise ValueError
 
-            self._values.append(value)
+                value = obs.value
 
-        self._values = np.array(self._values)
+            if len(obs.shape) == 3:
+                # Should be the delta_r observable
+                if obs.shape[1] == "1" and obs.shape[2] == "1":
+                    value = obs.value[:, :, 0]
+
+            values.append(value)
+
+        self._values = ak.concatenate(values, axis=1)
 
         return self
 
@@ -79,4 +87,4 @@ class Set:
             class_ = getattr(module, class_name)
             observables.append(class_.from_config(class_config))
 
-        return cls(*observables)
+        return cls(observables)
