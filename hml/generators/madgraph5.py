@@ -177,7 +177,7 @@ class Madgraph5:
         decays=[],
         cards=[],
         multi_run=1,
-        seed=0,
+        seed=None,
         dry=False,
     ):
         run_log = ""
@@ -194,7 +194,8 @@ class Madgraph5:
         commands += f"madspin={madspin}\n"
         commands += "done\n"
 
-        settings["iseed"] = seed
+        if seed is not None:
+            settings["iseed"] = seed
         if settings != {}:
             commands += "\n".join([f"set {k} {v}" for k, v in settings.items()])
             commands += "\n"
