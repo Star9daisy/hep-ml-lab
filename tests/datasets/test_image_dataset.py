@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from hml.approaches.cuts.cut import Cut
 from hml.datasets import ImageDataset
 from hml.representations import Image
 
@@ -8,11 +9,11 @@ from hml.representations import Image
 def test_init():
     image = (
         Image(
-            height="FatJet0.Constituents:.Phi",
-            width="FatJet0.Constituents:.Eta",
-            channel="FatJet0.Constituents:.Pt",
+            height="FatJet0.Constituents.Phi",
+            width="FatJet0.Constituents.Eta",
+            channel="FatJet0.Constituents.Pt",
         )
-        .with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+        .with_subjets("FatJet0.Constituents", "kt", 0.3, 0)
         .translate(origin="SubJet0")
         .rotate(axis="SubJet1", orientation=-90)
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
@@ -37,35 +38,36 @@ def test_init():
     assert ds._been_read is None
 
     assert ds.features == {
-        "height": "FatJet0.Constituents:.Phi",
-        "width": "FatJet0.Constituents:.Eta",
-        "channel": "FatJet0.Constituents:.Pt",
+        "height": "FatJet0.Constituents.Phi",
+        "width": "FatJet0.Constituents.Eta",
+        "channel": "FatJet0.Constituents.Pt",
     }
 
     assert ds.samples.size == 0
     assert ds.targets.size == 0
 
 
-def test_read_ttree(event):
+def test_read(events):
     # No pixelation, samples are a tuple of height and width ----------------- #
     image = (
         Image(
-            height="FatJet0.Constituents:.Phi",
-            width="FatJet0.Constituents:.Eta",
-            channel="FatJet0.Constituents:.Pt",
+            height="FatJet0.Constituents.Phi",
+            width="FatJet0.Constituents.Eta",
+            channel="FatJet0.Constituents.Pt",
         )
-        .with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
+        .with_subjets("FatJet0.Constituents", "kt", 0.3, 0)
         .translate(origin="SubJet0")
         .rotate(axis="SubJet1", orientation=-90)
     )
 
+    cut = Cut("fatjet.size > 0").read(events).value
     ds = ImageDataset(image)
-    ds.read_ttree(event, target=1)
+    ds.read(events, 1, cut)
 
     assert isinstance(ds.samples, tuple)
     assert isinstance(ds.samples[0], np.ndarray)
     assert isinstance(ds.samples[1], np.ndarray)
-    assert ds.targets.shape == (1, 1)
+    assert ds.targets.shape == (99, 1)
 
     # Pixelation, samples are a single array for an image -------------------- #
     image = (
@@ -81,11 +83,11 @@ def test_read_ttree(event):
     )
 
     ds = ImageDataset(image)
-    ds.read_ttree(event, target=1)
+    ds.read(events, 1, cut)
 
     assert isinstance(ds.samples, np.ndarray)
-    assert ds.samples.shape == (1, 33, 33)
-    assert ds.targets.shape == (1, 1)
+    assert ds.samples.shape == (99, 33, 33)
+    assert ds.targets.shape == (99, 1)
 
 
 def test_split():
@@ -122,12 +124,12 @@ def test_split():
         ds.split(0.7, 0.2, 0.5)
 
 
-def test_save_load(run, tmp_path):
+def test_save_load(events, tmp_path):
     image = (
         Image(
-            height="FatJet0.Constituents:.Phi",
-            width="FatJet0.Constituents:.Eta",
-            channel="FatJet0.Constituents:.Pt",
+            height="FatJet0.Constituents.Phi",
+            width="FatJet0.Constituents.Eta",
+            channel="FatJet0.Constituents.Pt",
         )
         .with_subjets("FatJet0.Constituents:", "kt", 0.3, 0)
         .translate(origin="SubJet0")
@@ -135,13 +137,8 @@ def test_save_load(run, tmp_path):
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
     )
     ds = ImageDataset(image)
-
-    for event in run.events():
-        if event.FatJet_size < 1:
-            continue
-
-        ds.read_ttree(event, 1)
-
+    cut = Cut("fatjet.size > 0").read(events).value
+    ds.read(events, 1, cut)
     ds.split(0.7, 0.2, 0.1)
     ds.save(f"{tmp_path}/mock.ds")
 
@@ -174,12 +171,7 @@ def test_save_load(run, tmp_path):
         .rotate(axis="SubJet1", orientation=-90)
     )
     ds = ImageDataset(image)
-
-    for event in run.events():
-        if event.FatJet_size < 1:
-            continue
-
-        ds.read_ttree(event, 1)
+    ds.read(events, 1, cut)
 
     # non-pixelated data is not supported for split method yet
     ds.save(f"{tmp_path}/mock.ds")
@@ -189,8 +181,14 @@ def test_save_load(run, tmp_path):
 
     assert loaded_ds._samples.size != 0
     assert loaded_ds._targets.size != 0
-    assert (loaded_ds.samples[0] == ds.samples[0]).all()
-    assert (loaded_ds.samples[1] == ds.samples[1]).all()
+    assert (
+        np.nan_to_num(ds.samples[0], nan=0.0)
+        == np.nan_to_num(loaded_ds.samples[0], nan=0.0)
+    ).all()
+    assert (
+        np.nan_to_num(ds.samples[1], nan=0.0)
+        == np.nan_to_num(loaded_ds.samples[1], nan=0.0)
+    ).all()
 
     # Lazy loading ----------------------------------------------------------- #
     loaded_ds = ImageDataset.load(f"{tmp_path}/mock.ds")
@@ -198,12 +196,18 @@ def test_save_load(run, tmp_path):
     # It's [[], []] because it's not been pixelated and is expected to be a tuple
     assert loaded_ds._samples == [[], []]
     assert loaded_ds._targets == []
-    assert (loaded_ds.samples[0] == ds.samples[0]).all()
-    assert (loaded_ds.samples[1] == ds.samples[1]).all()
+    assert (
+        np.nan_to_num(ds.samples[0], nan=0.0)
+        == np.nan_to_num(loaded_ds.samples[0], nan=0.0)
+    ).all()
+    assert (
+        np.nan_to_num(ds.samples[1], nan=0.0)
+        == np.nan_to_num(loaded_ds.samples[1], nan=0.0)
+    ).all()
     assert (loaded_ds.targets == ds.targets).all()
 
 
-def test_show(run):
+def test_show(events):
     # Pixelated data --------------------------------------------------------- #
     image = (
         Image(
@@ -217,19 +221,8 @@ def test_show(run):
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
     )
     ds = ImageDataset(image)
-
-    for event in run.events():
-        if event.FatJet_size < 1:
-            continue
-
-        ds.read_ttree(event, 1)
-
-    # Loop twice to pretend it's another class of events
-    for event in run.events():
-        if event.FatJet_size < 1:
-            continue
-
-        ds.read_ttree(event, 0)
+    cut = Cut("fatjet.size > 0").read(events).value
+    ds.read(events, 1, cut)
 
     # Total image
     ds.show(show_pixels=True, norm="log")
@@ -247,19 +240,8 @@ def test_show(run):
         .rotate(axis="SubJet1", orientation=-90)
     )
     ds = ImageDataset(image)
-
-    for event in run.events():
-        if event.FatJet_size < 1:
-            continue
-
-        ds.read_ttree(event, 1)
-
-    # Loop twice to pretend it's another class of events
-    for event in run.events():
-        if event.FatJet_size < 1:
-            continue
-
-        ds.read_ttree(event, 0)
+    cut = Cut("fatjet.size > 0").read(events).value
+    ds.read(events, 1, cut)
 
     # Non-pixelated data should be shown as a scatter plot
     ds.show(limits=[(-1.6, 1.6), (-1.6, 1.6)])

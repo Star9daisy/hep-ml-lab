@@ -24,23 +24,31 @@ class ImageDataset:
         self._data = None
         self._been_read = None
 
-    def read_ttree(self, event, target):
-        self.image.read_ttree(event)
-
-        if self.image.been_pixelated and np.all(np.isnan(self.image.values)):
-            return
-        elif np.all(np.isnan(self.image.values[0])) or np.all(
-            np.isnan(self.image.values)
-        ):
-            return
+    def read(self, events, target, cut=None):
+        self.image.read(events)
 
         if self.image.status:
-            self._targets.append([target])
+            self._samples = self.image.values
             if self.image.been_pixelated:
-                self._samples.append(self.image.values)
+                self._targets = ak.values_astype(
+                    ak.Array([target] * len(self._samples)), "int32"
+                )[:, None]
             else:
-                self._samples[0].append(self.image.values[0])
-                self._samples[1].append(self.image.values[1])
+                self._targets = ak.values_astype(
+                    ak.Array([target] * len(self._samples[0])), "int32"
+                )[:, None]
+                # self._samples[0].append(self.image.values[0])
+                # self._samples[1].append(self.image.values[1])
+
+        if cut is not None:
+            self._cut = cut
+            self._targets = self._targets[cut]
+            if self.image.been_pixelated:
+                self._samples = self._samples[cut]
+            else:
+                self._samples = list(self._samples)
+                self._samples[0] = self._samples[0][cut]
+                self._samples[1] = self._samples[1][cut]
 
     def split(self, train, test, val=None, seed=None):
         train *= 10

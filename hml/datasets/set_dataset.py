@@ -2,6 +2,7 @@ import json
 import zipfile
 from io import BytesIO
 
+import awkward as ak
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -11,8 +12,8 @@ from hml.representations import Set
 
 
 class SetDataset:
-    def __init__(self, *observables: str | Observable):
-        self.set = Set(*observables)
+    def __init__(self, observables: list[str | Observable]):
+        self.set = Set(observables)
         self.been_split = False
         self.seed = None
 
@@ -25,10 +26,17 @@ class SetDataset:
         self._data = None
         self._been_read = False
 
-    def read_ttree(self, event, target):
-        self.set.read_ttree(event)
-        self._samples.append(self.set.values)
-        self._targets.append([target])
+    def read(self, events, target, cut=None):
+        self.set.read(events)
+        self._samples = self.set.values
+        self._targets = ak.values_astype(
+            ak.Array([target] * len(self._samples)), "int32"
+        )[:, None]
+
+        if cut is not None:
+            self._cut = cut
+            self._samples = self._samples[cut]
+            self._targets = self._targets[cut]
 
     def split(self, train, test, val=None, seed=None):
         train *= 10
@@ -59,14 +67,14 @@ class SetDataset:
                 random_state=seed,
             )
 
-            self.val = SetDataset(*self.set.observables)
+            self.val = SetDataset(self.set.observables)
             self.val._samples = x_val
             self.val._targets = y_val
 
-        self.train = SetDataset(*self.set.observables)
+        self.train = SetDataset(self.set.observables)
         self.train._samples = x_train
         self.train._targets = y_train
-        self.test = SetDataset(*self.set.observables)
+        self.test = SetDataset(self.set.observables)
         self.test._samples = x_test
         self.test._targets = y_test
 
@@ -140,7 +148,8 @@ class SetDataset:
         if len(self._samples) > 0 and len(self._targets) > 0:
             self._been_read = True
 
-        return np.array(self._samples, dtype=np.float32)
+        # return np.array(self._samples, dtype=np.float32)
+        return ak.to_numpy(self._samples, allow_missing=False)
 
     @property
     def targets(self):
@@ -152,7 +161,8 @@ class SetDataset:
         if len(self._samples) > 0 and len(self._targets) > 0:
             self._been_read = True
 
-        return np.array(self._targets, dtype=np.int32)
+        # return np.array(self._targets, dtype=np.int32)
+        return ak.to_numpy(self._targets, allow_missing=False)
 
     @property
     def feature_names(self):
@@ -182,7 +192,7 @@ class SetDataset:
     def from_config(cls, config):
         set = Set.from_config(config)
 
-        instance = cls(*set.observables)
+        instance = cls(set.observables)
         instance.been_split = config["been_split"]
         instance.seed = config["seed"]
 
