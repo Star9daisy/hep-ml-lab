@@ -3,16 +3,19 @@ from __future__ import annotations
 import re
 import shutil
 import subprocess
+from pathlib import Path
 
 import pexpect
-import ROOT
+
+# import ROOT
 from bs4 import BeautifulSoup
 from rich.console import Console
 from rich.table import Table
 
-from ..types import Path, PathLike
+PathLike = Path | str
+# from ..types import Path, PathLike
 
-_ = ROOT.gSystem.Load("libDelphes")  # type: ignore
+# _ = ROOT.gSystem.Load("libDelphes")  # type: ignore
 
 
 class Madgraph5:
@@ -322,26 +325,29 @@ class Madgraph5Run:
 
     @property
     def n_events(self) -> int:
-        n_events = self.events().GetEntries()
-        if n_events == 0:
-            n_events = self._info["n_events"]
-
-        return n_events
+        return self._info["n_events"]
 
     @property
     def sub_runs(self) -> list[Madgraph5Run]:
         return [Madgraph5Run(self.output_dir, i.name) for i in self._subs]
 
-    def events(self, file_format="root") -> ROOT.TChain | Any:  # type: ignore
+    def events(self, file_format="root"):  # type: ignore
         if file_format == "root":
-            events = ROOT.TChain("Delphes")  # type: ignore
+            root_files = []
+            # events = ROOT.TChain("Delphes")  # type: ignore
             if self.sub_runs != []:
                 for run in self.sub_runs:
                     for root_file in run.directory.glob("*.root"):
-                        events.Add(root_file.as_posix())
+                        root_files.append(f"{root_file.as_posix()}:Delphes")
             else:
                 for root_file in self.directory.glob("*.root"):
-                    events.Add(root_file.as_posix())
+                    root_files.append(f"{root_file.as_posix()}:Delphes")
+
+            # keys = uproot.open(root_files[0]).keys()
+            # keys = [key for key in keys if "fBits" not in key]
+
+            # events = uproot.concatenate(root_files, filter_name=keys)
+            events = root_files
         else:
             raise NotImplementedError(f"File format {file_format} not supported yet.")
 
