@@ -68,10 +68,11 @@ class Cut:
 
         self._value = ak.fill_none(eval(expression), False)
 
-        if self._is_any:
-            self._value = ak.any(self._value, axis=1)
-        else:
-            self._value = ak.all(self._value, axis=1)
+        if self._value.ndim > 1:
+            if self._is_any:
+                self._value = ak.any(self._value, axis=1)
+            else:
+                self._value = ak.all(self._value, axis=1)
 
         if self._is_veto:
             self._value = ~self._value
