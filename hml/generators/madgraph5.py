@@ -4,6 +4,7 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import pexpect
 
@@ -131,7 +132,7 @@ class Madgraph5:
 
     def output(self, output_dir: PathLike | None = None, overwrite: bool = True):
         if output_dir is None:
-            log = self.run_command(f"output")
+            log = self.run_command("output")
             self.process_log += log
 
             match = re.findall(r"Output to directory (.+) done.", log)
@@ -203,7 +204,94 @@ class Madgraph5:
         if decays != []:
             commands += "\n".join([f"decay {i}" for i in decays]) + "\n"
 
-        if cards != []:
+        default_pythia8_card = self.output_dir / "Cards/pythia8_card_default.dat"
+        default_delphes_card = self.output_dir / "Cards/delphes_card_default.dat"
+        resolved_cards = []
+        if seed is not None:
+            if shower == "on" or shower == "pythia8":
+                pythia8_card = None
+                for card in cards:
+                    if "pythia8" in card:
+                        pythia8_card = card
+
+                if pythia8_card is None:
+                    pythia8_card = default_pythia8_card
+
+                    with NamedTemporaryFile(
+                        delete=False, prefix="pythia8_card_"
+                    ) as temp:
+                        temp.write(pythia8_card.read_text().encode())
+                        temp.write(b"\n! Modified by hep-ml-lab")
+                        temp.write(
+                            f"\nRandom:setSeed = on\nRandom:seed = {seed}\n".encode()
+                        )
+
+                else:
+                    with open(pythia8_card, "r") as f:
+                        lines = f.readlines()
+                        set_seed = False
+                        found_seed = False
+                        for i, line in enumerate(lines):
+                            if line.startswith("Random:setSeed = on"):
+                                set_seed = True
+                            if line.startswith("Random:seed"):
+                                found_seed = True
+                                lines[i] = f"Random:seed = {seed}\n"
+                                break
+
+                        if not set_seed:
+                            lines.append("Random:setSeed = on\n")
+                            lines.append(f"Random:seed = {seed}\n")
+                        elif not found_seed:
+                            lines.append(f"Random:seed = {seed}\n")
+
+                    with NamedTemporaryFile(
+                        delete=False, prefix="pythia8_card_"
+                    ) as temp:
+                        temp.write("".join(lines).encode())
+
+                    resolved_cards.append(temp.name)
+
+            if detector == "on" or detector == "delphes":
+                delphes_card = None
+                for card in cards:
+                    if "delphes" in card:
+                        delphes_card = card
+
+                if delphes_card is None:
+                    delphes_card = default_delphes_card
+
+                    with NamedTemporaryFile(
+                        delete=False, prefix="delphes_card_"
+                    ) as temp:
+                        temp.write(f"set RandomSeed {seed}\n".encode())
+                        temp.write(delphes_card.read_text().encode())
+                        print(1)
+
+                else:
+                    with open(delphes_card, "r") as f:
+                        lines = f.readlines()
+                        found_seed = False
+                        for i, line in enumerate(lines):
+                            if line.startswith("set RandomSeed"):
+                                found_seed = True
+                                lines[i] = f"set RandomSeed {seed}\n"
+                                break
+
+                        if not found_seed:
+                            lines.insert(0, f"set RandomSeed {seed}\n")
+
+                    with NamedTemporaryFile(
+                        delete=False, prefix="delphes_card_"
+                    ) as temp:
+                        temp.write("".join(lines).encode())
+                        print(2)
+
+                resolved_cards.append(temp.name)
+
+        if resolved_cards != []:
+            commands += "\n".join(resolved_cards) + "\n"
+        else:
             commands += "\n".join(cards) + "\n"
         commands += "done\n"
 
