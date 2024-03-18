@@ -146,11 +146,11 @@ class Madgraph5:
                     raise FileExistsError(f"{self.output_dir} already exists")
             self.process_log += self.run_command(f"output {self.output_dir}")
 
-        try:
-            if self.diagram_dir.exists():
-                self.diagram_dir = self.diagram_dir.rename(self.DEFAULT_DIAGRAM_DIR)
-                shutil.move(self.diagram_dir, self.output_dir / self.diagram_dir)
-        except AttributeError:
+            # try:
+            #     if self.diagram_dir.exists():
+            #         self.diagram_dir = self.diagram_dir.rename(self.DEFAULT_DIAGRAM_DIR)
+            #         shutil.move(self.diagram_dir, self.output_dir / self.diagram_dir)
+            # except AttributeError:
             self.display_diagrams(self.output_dir / self.DEFAULT_DIAGRAM_DIR)
 
         self.log_dir = self.output_dir / self.DEFAULT_LOG_DIR
