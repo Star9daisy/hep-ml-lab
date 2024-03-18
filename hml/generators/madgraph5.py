@@ -438,7 +438,7 @@ class Madgraph5Run:
             # events = uproot.concatenate(root_files, filter_name=keys)
             events = root_files
         else:
-            raise NotImplementedError(f"File format {file_format} not supported yet.")
+            raise ValueError(f"File format {file_format} not supported yet.")
 
         return events
 
