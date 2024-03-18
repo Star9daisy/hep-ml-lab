@@ -463,7 +463,7 @@ class Madgraph5Run:
 
         if list(run_dir.glob("*_banner.txt")) != []:
             banner_file = list(run_dir.glob("*_banner.txt"))[0]
-        elif events_dir.glob(f"{name}_banner.txt") != []:
+        elif list(events_dir.glob(f"{name}_banner.txt")) != []:
             banner_file = list(events_dir.glob(f"{name}_banner.txt"))[0]
         else:
             raise FileNotFoundError("Banner file not found")
