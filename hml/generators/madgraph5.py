@@ -285,7 +285,6 @@ class Madgraph5:
                         delete=False, prefix="delphes_card_"
                     ) as temp:
                         temp.write("".join(lines).encode())
-                        print(2)
 
                 resolved_cards.append(temp.name)
 
