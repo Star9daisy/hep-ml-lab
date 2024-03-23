@@ -64,7 +64,7 @@ class Cut:
 
         expression = self._expr
         for cut in cuts_results:
-            expression = expression.replace(cut, f"cuts_results['{cut}']")
+            expression = re.sub(cut, f"cuts_results['{cut}']", expression)
 
         self._value = ak.fill_none(eval(expression), False)
 
