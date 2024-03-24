@@ -1,9 +1,7 @@
 import keras
 from keras import ops
 
-from hml.types import CutLayerTopologies
-from hml.utils import ops_histogram_fixed_width
-from hml.utils import ops_unique
+from hml.utils import ops_histogram_fixed_width, ops_unique
 
 from .cut_layer import CutLayer
 
@@ -14,7 +12,7 @@ class CutAndCount(keras.Model):
         self,
         n_observables: int,
         n_bins: int = 50,
-        topology: CutLayerTopologies = "parallel",
+        topology="parallel",
         **kwargs,
     ):
         super().__init__(**kwargs)
