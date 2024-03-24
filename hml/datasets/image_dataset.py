@@ -26,29 +26,61 @@ class ImageDataset:
 
     def read(self, events, target, cut=None):
         self.image.read(events)
+        if cut is not None:
+            if self.image.been_pixelated:
+                image_values = self.image.values[cut]
+            else:
+                image_values = [self.image.values[0][cut], self.image.values[1][cut]]
+        else:
+            image_values = self.image.values
 
         if self.image.status:
-            self._samples = self.image.values
-            if self.image.been_pixelated:
-                self._targets = ak.values_astype(
-                    ak.Array([target] * len(self._samples)), "int32"
-                )[:, None]
+            if isinstance(self._samples, list):
+                self._samples = image_values
             else:
-                self._targets = ak.values_astype(
-                    ak.Array([target] * len(self._samples[0])), "int32"
-                )[:, None]
+                self._samples = ak.concatenate([self._samples, image_values])
+
+            if self.image.been_pixelated:
+                if isinstance(self._targets, list):
+                    self._targets = ak.values_astype(
+                        ak.Array([target] * len(image_values)), "int32"
+                    )[:, None]
+                else:
+                    self._targets = ak.concatenate(
+                        [
+                            self._targets,
+                            ak.values_astype(
+                                ak.Array([target] * len(image_values)), "int32"
+                            )[:, None],
+                        ]
+                    )
+
+            else:
+                if isinstance(self._targets, list):
+                    self._targets = ak.values_astype(
+                        ak.Array([target] * len(image_values[0])), "int32"
+                    )[:, None]
+                else:
+                    self._targets = ak.concatenate(
+                        [
+                            self._targets,
+                            ak.values_astype(
+                                ak.Array([target] * len(image_values[0])), "int32"
+                            )[:, None],
+                        ]
+                    )
                 # self._samples[0].append(self.image.values[0])
                 # self._samples[1].append(self.image.values[1])
 
-        if cut is not None:
-            self._cut = cut
-            self._targets = self._targets[cut]
-            if self.image.been_pixelated:
-                self._samples = self._samples[cut]
-            else:
-                self._samples = list(self._samples)
-                self._samples[0] = self._samples[0][cut]
-                self._samples[1] = self._samples[1][cut]
+        # if cut is not None:
+        #     self._cut = cut
+        #     self._targets = self._targets[cut]
+        #     if self.image.been_pixelated:
+        #         self._samples = self._samples[cut]
+        #     else:
+        #         self._samples = list(self._samples)
+        #         self._samples[0] = self._samples[0][cut]
+        #         self._samples[1] = self._samples[1][cut]
 
     def split(self, train, test, val=None, seed=None):
         train *= 10

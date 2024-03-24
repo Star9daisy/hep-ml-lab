@@ -28,15 +28,29 @@ class SetDataset:
 
     def read(self, events, target, cut=None):
         self.set.read(events)
-        self._samples = self.set.values
-        self._targets = ak.values_astype(
-            ak.Array([target] * len(self._samples)), "int32"
-        )[:, None]
-
         if cut is not None:
-            self._cut = cut
-            self._samples = self._samples[cut]
-            self._targets = self._targets[cut]
+            set_values = self.set.values[cut]
+        else:
+            set_values = self.set.values
+
+        if isinstance(self._samples, list):
+            self._samples = set_values
+        else:
+            self._samples = ak.concatenate([self._samples, set_values])
+
+        if isinstance(self._targets, list):
+            self._targets = ak.values_astype(
+                ak.Array([target] * len(set_values)), "int32"
+            )[:, None]
+        else:
+            self._targets = ak.concatenate(
+                [
+                    self._targets,
+                    ak.values_astype(ak.Array([target] * len(set_values)), "int32")[
+                        :, None
+                    ],
+                ]
+            )
 
     def split(self, train, test, val=None, seed=None):
         train *= 10
@@ -149,7 +163,9 @@ class SetDataset:
             self._been_read = True
 
         # return np.array(self._samples, dtype=np.float32)
-        return ak.to_numpy(self._samples, allow_missing=False)
+        nan_float32 = np.array(np.nan, dtype=np.float32)
+        return ak.to_numpy(ak.fill_none(self._samples, nan_float32))
+        # return ak.to_numpy(self._samples, allow_missing=False)
 
     @property
     def targets(self):
@@ -162,7 +178,9 @@ class SetDataset:
             self._been_read = True
 
         # return np.array(self._targets, dtype=np.int32)
-        return ak.to_numpy(self._targets, allow_missing=False)
+        nan_float32 = np.array(np.nan, dtype=np.float32)
+        return ak.to_numpy(ak.fill_none(self._targets, nan_float32))
+        # return ak.to_numpy(self._targets, allow_missing=False)
 
     @property
     def feature_names(self):
