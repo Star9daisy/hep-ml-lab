@@ -121,7 +121,7 @@ class CutAndCount(keras.Model):
 
         candidates = ops_unique(ops.concatenate([candidates0, candidates1], 0))
         candidates = ops.cond(
-            ops.equal(ops.shape(candidates), (1,)),
+            ops.equal(ops.shape(candidates)[0], 1),
             lambda: ops.append(candidates, x_max),
             lambda: candidates,
         )
