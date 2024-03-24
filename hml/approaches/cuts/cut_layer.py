@@ -6,7 +6,7 @@ import pandas as pd
 from keras import initializers
 from keras import ops
 
-from hml.observables import get_observable
+from hml.observables import parse as get_observable
 
 
 @keras.saving.register_keras_serializable()
