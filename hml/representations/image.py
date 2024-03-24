@@ -213,7 +213,6 @@ class Image:
         self.been_pixelated = True
         self.h_bins = np.linspace(*range[0], size[0] + 1)
         self.w_bins = np.linspace(*range[1], size[1] + 1)
-        print(11)
 
         if self.been_read:
             if self.status is False:
