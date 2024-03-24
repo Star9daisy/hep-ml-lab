@@ -69,7 +69,9 @@ class CutAndCount(keras.Model):
 
             if y is not None:
                 masked_x = ops.take(ix, ops.squeeze(ops.where(mask >= 0), 0))
-                masked_y = ops.take(y, ops.squeeze(ops.where(mask >= 0), 0))
+                masked_y = ops.take(
+                    y, ops.squeeze(ops.where(mask >= 0), 0), 0
+                )  # should keep y as original
                 cut_left, cut_right, case = self.find_best_cut(masked_x, masked_y)
                 cut_layer._cut_left.assign(cut_left)
                 cut_layer._cut_right.assign(cut_right)
