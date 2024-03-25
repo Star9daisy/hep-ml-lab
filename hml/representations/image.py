@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numba as nb
 import numpy as np
 import vector
-from fastjet import ClusterSequence, JetDefinition, PseudoJet
+from fastjet import ClusterSequence, JetDefinition
 
 from hml.observables import parse
 from hml.utils import get_jet_algorithm
