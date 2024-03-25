@@ -1,7 +1,8 @@
 import keras
 from keras import ops
 
-from hml.utils import ops_histogram_fixed_width, ops_unique
+# from hml.utils import ops_histogram_fixed_width, ops_unique
+from hml.operations import ops_histogram_fixed_width, ops_unique
 
 from .cut_layer import CutLayer
 

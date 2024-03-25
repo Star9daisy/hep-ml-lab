@@ -8,7 +8,7 @@ import vector
 from fastjet import ClusterSequence, JetDefinition
 
 from hml.observables import parse
-from hml.utils import get_jet_algorithm
+from hml.operations import get_jet_algorithm
 
 vector.register_awkward()
 
