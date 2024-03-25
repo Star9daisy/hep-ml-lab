@@ -135,7 +135,7 @@ class CutAndCount(keras.Model):
             candidate_pairs,
         )
         min_index = ops.argmin(ops.take(losses_and_cases, 0, 1))
-        min_loss = losses_and_cases[min_index, 0]  # type: ignore
+        # min_loss = losses_and_cases[min_index, 0]  # type: ignore
         min_case = losses_and_cases[min_index, 1]  # type: ignore
 
         lower = candidate_pairs[min_index, 0]  # type: ignore
