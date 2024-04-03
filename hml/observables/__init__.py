@@ -78,6 +78,13 @@ def get(identifier: str | None) -> Observable | None:
         return ALL_OBJECTS_DICT.get(identifier)
 
 
+def register(obs: Observable, *alias: str) -> None:
+    ALL_OBJECTS.add(obs)
+
+    for name in alias:
+        ALL_OBJECTS_DICT[name] = obs
+
+
 def parse(name: str | None, **kwargs) -> Observable | None:
     if name is None or (isinstance(name, str) and name == "None"):
         return
