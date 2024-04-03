@@ -1,8 +1,4 @@
 from .cuts import Cut, CutAndCount, CutLayer
+from .trees import GradientBoostedDecisionTree
 
 # from .networks import SimpleCNN, SimpleGNN, SimpleMLP
-# from .trees import (
-#     AdaBoostedDecisionTree,
-#     GradientBoostedDecisionTree,
-#     RandomizedDecisionTree,
-# )
