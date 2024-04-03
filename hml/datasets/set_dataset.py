@@ -1,5 +1,6 @@
 import json
 import zipfile
+from functools import reduce
 from io import BytesIO
 
 import awkward as ak
@@ -7,6 +8,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+from hml.approaches import Cut
 from hml.observables import Observable
 from hml.representations import Set
 
@@ -26,10 +28,18 @@ class SetDataset:
         self._data = None
         self._been_read = False
 
-    def read(self, events, target, cut=None):
+    def read(self, events, target, cuts: list[str | Cut] | None = None):
         self.set.read(events)
-        if cut is not None:
-            set_values = self.set.values[cut]
+        if cuts is not None:
+            compiled_cuts = []
+            for i in cuts:
+                if isinstance(i, str):
+                    compiled_cuts.append(Cut(i).read(events).value)
+                else:
+                    compiled_cuts.append(i.read(events).value)
+
+            mask = reduce(np.logical_and, compiled_cuts)
+            set_values = self.set.values[mask]
         else:
             set_values = self.set.values
 
