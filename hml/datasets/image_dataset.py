@@ -1,5 +1,6 @@
 import json
 import zipfile
+from functools import reduce
 from io import BytesIO
 
 import awkward as ak
@@ -7,6 +8,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
+from hml.approaches import Cut
 from hml.representations import Image
 
 
@@ -24,13 +26,21 @@ class ImageDataset:
         self._data = None
         self._been_read = None
 
-    def read(self, events, target, cut=None):
+    def read(self, events, target, cuts: list[str | Cut] | None = None):
         self.image.read(events)
-        if cut is not None:
+        if cuts is not None:
+            compiled_cuts = []
+            for i in cuts:
+                if isinstance(i, str):
+                    compiled_cuts.append(Cut(i).read(events).value)
+                else:
+                    compiled_cuts.append(i.read(events).value)
+            mask = reduce(np.logical_and, compiled_cuts)
+
             if self.image.been_pixelated:
-                image_values = self.image.values[cut]
+                image_values = self.image.values[mask]
             else:
-                image_values = [self.image.values[0][cut], self.image.values[1][cut]]
+                image_values = [self.image.values[0][mask], self.image.values[1][mask]]
         else:
             image_values = self.image.values
 
