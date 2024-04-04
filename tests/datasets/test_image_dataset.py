@@ -60,9 +60,9 @@ def test_read(events):
         .rotate(axis="SubJet1", orientation=-90)
     )
 
-    cut = Cut("fatjet.size > 0").read(events).value
+    cuts = ["fatjet.size > 0"]
     ds = ImageDataset(image)
-    ds.read(events, 1, cut)
+    ds.read(events, 1, cuts)
 
     assert isinstance(ds.samples, tuple)
     assert isinstance(ds.samples[0], np.ndarray)
@@ -83,7 +83,7 @@ def test_read(events):
     )
 
     ds = ImageDataset(image)
-    ds.read(events, 1, cut)
+    ds.read(events, 1, cuts)
 
     assert isinstance(ds.samples, np.ndarray)
     assert ds.samples.shape == (99, 33, 33)
@@ -137,8 +137,8 @@ def test_save_load(events, tmp_path):
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
     )
     ds = ImageDataset(image)
-    cut = Cut("fatjet.size > 0").read(events).value
-    ds.read(events, 1, cut)
+    cuts = ["fatjet.size > 0"]
+    ds.read(events, 1, cuts)
     ds.split(0.7, 0.2, 0.1)
     ds.save(f"{tmp_path}/mock.ds")
 
@@ -171,7 +171,7 @@ def test_save_load(events, tmp_path):
         .rotate(axis="SubJet1", orientation=-90)
     )
     ds = ImageDataset(image)
-    ds.read(events, 1, cut)
+    ds.read(events, 1, cuts)
 
     # non-pixelated data is not supported for split method yet
     ds.save(f"{tmp_path}/mock.ds")
@@ -221,8 +221,8 @@ def test_show(events):
         .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
     )
     ds = ImageDataset(image)
-    cut = Cut("fatjet.size > 0").read(events).value
-    ds.read(events, 1, cut)
+    cuts = ["fatjet.size > 0"]
+    ds.read(events, 1, cuts)
 
     # Total image
     ds.show(show_pixels=True, norm="log")
@@ -240,8 +240,8 @@ def test_show(events):
         .rotate(axis="SubJet1", orientation=-90)
     )
     ds = ImageDataset(image)
-    cut = Cut("fatjet.size > 0").read(events).value
-    ds.read(events, 1, cut)
+    cuts = ["fatjet.size > 0"]
+    ds.read(events, 1, cuts)
 
     # Non-pixelated data should be shown as a scatter plot
     ds.show(limits=[(-1.6, 1.6), (-1.6, 1.6)])
