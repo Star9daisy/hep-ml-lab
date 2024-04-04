@@ -1,57 +1,27 @@
+import keras
 from keras import Model
 from keras.layers import Dense, Input
 
 
-class SimpleMLP:
-    def __init__(self, input_shape, name="simple_mlp"):
+@keras.saving.register_keras_serializable()
+class SimpleMLP(Model):
+    def __init__(self, input_shape, name="simple_mlp", **kwargs):
+        super().__init__(name=name, **kwargs)
         self.input_shape = input_shape
-        self.name = name
-        self.model = self._init_model()
+        self.dense1 = Dense(units=32, activation="relu")
+        self.dense2 = Dense(units=64, activation="relu")
+        self.dense3 = Dense(units=32, activation="relu")
+        self.dense4 = Dense(units=2, activation="softmax")
 
-    def _init_model(self):
-        inputs = Input(shape=self.input_shape)
-        x = Dense(units=32, activation="relu")(inputs)
-        x = Dense(units=64, activation="relu")(x)
-        x = Dense(units=32, activation="relu")(x)
-        outputs = Dense(units=2, activation="softmax")(x)
+        self.call(Input(shape=input_shape))
 
-        return Model(inputs=inputs, outputs=outputs, name=self.name)
+    def call(self, x):
+        x = self.dense1(x)
+        x = self.dense2(x)
+        x = self.dense3(x)
+        return self.dense4(x)
 
-    def compile(
-        self,
-        optimizer="rmsprop",
-        loss=None,
-        metrics=None,
-        **kwargs,
-    ):
-        self.model.compile(
-            optimizer=optimizer,
-            loss=loss,
-            metrics=metrics,
-            **kwargs,
-        )
-
-    def fit(
-        self,
-        x=None,
-        y=None,
-        batch_size=None,
-        epochs=1,
-        **kwargs,
-    ):
-        return self.model.fit(
-            x,
-            y,
-            batch_size=batch_size,
-            epochs=epochs,
-            **kwargs,
-        )
-
-    def predict(self, x=None, **kwargs):
-        return self.model.predict(x, **kwargs)
-
-    def summary(self):
-        return self.model.summary()
-
-    def save(self, filepath, overwrite=True):
-        self.model.save(filepath, overwrite=overwrite)
+    def get_config(self):
+        base_config = super().get_config()
+        config = {"input_shape": self.input_shape}
+        return {**base_config, **config}

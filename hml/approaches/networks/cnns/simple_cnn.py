@@ -1,4 +1,4 @@
-from keras import Model
+import keras
 from keras.layers import (
     Conv2D,
     Dense,
@@ -9,62 +9,33 @@ from keras.layers import (
 )
 
 
+@keras.saving.register_keras_serializable()
 class SimpleCNN:
-    def __init__(self, input_shape, name="simple_cnn"):
+    def __init__(self, input_shape, name="simple_cnn", **kwargs):
+        super().__init__(name=name, **kwargs)
         self.input_shape = input_shape
-        self.name = name
-        self.model = self._init_model()
+        self.conv1 = Conv2D(8, 3, padding="same", activation="relu")
+        self.conv2 = Conv2D(16, 3, padding="same", activation="relu")
+        self.conv3 = Conv2D(32, 3, padding="same", activation="relu")
+        self.max_pool = MaxPooling2D()
+        self.global_avg_pool = GlobalAveragePooling2D()
+        self.dropout = Dropout(0.5)
+        self.dense1 = Dense(2, activation="relu")
 
-    def _init_model(self):
-        inputs = Input(shape=self.input_shape)
-        x = Conv2D(filters=8, kernel_size=3, padding="same", activation="relu")(inputs)
-        x = MaxPooling2D()(x)
-        x = Conv2D(filters=16, kernel_size=3, padding="same", activation="relu")(x)
-        x = MaxPooling2D()(x)
-        x = Conv2D(filters=32, kernel_size=3, padding="same", activation="relu")(x)
-        x = MaxPooling2D()(x)
-        x = GlobalAveragePooling2D()(x)
-        x = Dense(units=10, activation="relu")(x)
-        x = Dropout(rate=0.5)(x)
-        outputs = Dense(units=2, activation="softmax")(x)
+        self.call(Input(shape=input_shape))
 
-        return Model(inputs=inputs, outputs=outputs, name=self.name)
+    def call(self, x):
+        x = self.conv1(x)
+        x = self.max_pool(x)
+        x = self.conv2(x)
+        x = self.max_pool(x)
+        x = self.conv3(x)
+        x = self.max_pool(x)
+        x = self.global_avg_pool(x)
+        x = self.dense1(x)
+        return self.dense1(x)
 
-    def compile(
-        self,
-        optimizer="rmsprop",
-        loss=None,
-        metrics=None,
-        **kwargs,
-    ):
-        self.model.compile(
-            optimizer=optimizer,
-            loss=loss,
-            metrics=metrics,
-            **kwargs,
-        )
-
-    def fit(
-        self,
-        x=None,
-        y=None,
-        batch_size=None,
-        epochs=1,
-        **kwargs,
-    ):
-        return self.model.fit(
-            x,
-            y,
-            batch_size=batch_size,
-            epochs=epochs,
-            **kwargs,
-        )
-
-    def predict(self, x=None, **kwargs):
-        return self.model.predict(x, **kwargs)
-
-    def summary(self):
-        return self.model.summary()
-
-    def save(self, filepath, overwrite=True):
-        self.model.save(filepath, overwrite=overwrite)
+    def get_config(self):
+        base_config = super().get_config()
+        config = {"input_shape": self.input_shape}
+        return {**base_config, **config}
