@@ -1,12 +1,5 @@
-import re
-
-import awkward as ak
 import keras
-import pandas as pd
-from keras import initializers
-from keras import ops
-
-from hml.observables import parse as get_observable
+from keras import initializers, ops
 
 
 @keras.saving.register_keras_serializable()
@@ -134,69 +127,6 @@ class CutLayer(keras.Layer):
 
     def compute_output_shape(self, input_shape):
         return input_shape
-
-    def is_passed(self, event):
-        # TODO: if cut does not have logical operators, it will be treated as a
-        #       learnable cut. Calling this method will raise an error.
-        if not isinstance(self._cut, str):
-            raise TypeError(f"is_passed should be used when specify a cut manually")
-
-        cut_exp = self._cut.strip()
-
-        veto = False
-        if "veto" in cut_exp:
-            cut_exp = cut_exp.replace("veto", "")
-            veto = True
-
-        is_any = False
-        if "[any]" in cut_exp:
-            cut_exp = cut_exp.replace("[any]", "")
-            is_any = True
-        else:
-            cut_exp = cut_exp.replace("[all]", "")
-
-        cuts_per_obs = cut_exp.strip().split("and")
-        cuts_per_obs = [i.strip().split("or") for i in cuts_per_obs]
-        cuts_per_obs = [i for j in cuts_per_obs for i in j]
-        cuts_per_obs = [i.strip().split("xor") for i in cuts_per_obs]
-        cuts_per_obs = [i for j in cuts_per_obs for i in j]
-
-        obs_pattern = r"\b(?!\d+\b)(?!\d*\.\d+\b)\S+\b"
-        obs_names = [re.findall(obs_pattern, i)[0] for i in cuts_per_obs]
-        obs_list = [get_observable(i).read_ttree(event) for i in obs_names]
-        for obs in obs_list:
-            if "var" in obs.shape:
-                obs.value = ak.flatten(obs.value)
-
-        for i in obs_names:
-            cut_exp = cut_exp.replace(i, f"`{i}`")
-
-        df = pd.DataFrame(
-            {
-                obs.name: [obs.value] if not isinstance(obs.value, list) else obs.value
-                for obs in obs_list
-            }
-        )
-
-        result = False
-        if is_any:
-            if len(df.query(cut_exp)) > 0:
-                result = True
-            else:
-                self._count += 1
-                result = False
-        else:
-            if len(df) == len(df.query(cut_exp)):
-                result = True
-            else:
-                self._count += 1
-                result = False
-
-        if veto:
-            self._count += 1
-            result = not result
-
-        return result
 
     def get_config(self):
         config = super().get_config()
