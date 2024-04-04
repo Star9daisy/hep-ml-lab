@@ -49,9 +49,9 @@ def test_init():
 
 
 def test_read(events):
-    cut = Cut("fatjet.size > 0 and jet.size > 1").read(events).value
+    cuts = ["fatjet.size > 0 and jet.size > 1"]
     ds = SetDataset(["FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR"])
-    ds.read(events, 1, cut)
+    ds.read(events, 1, cuts)
 
     assert ds.samples.shape == (75, 3)
     assert ds.targets.shape == (75, 1)
@@ -64,9 +64,9 @@ def test_from_config():
 
 
 def test_split(events):
-    cut = Cut("fatjet.size > 0 and jet.size > 1").read(events).value
+    cuts = ["fatjet.size > 0 and jet.size > 1"]
     ds = SetDataset(["FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR"])
-    ds.read(events, 1, cut)
+    ds.read(events, 1, cuts)
 
     ds.split(0.7, 0.3)
     assert ds.train.samples.shape == (52, 3)
@@ -86,9 +86,9 @@ def test_split(events):
 
 
 def test_save_load(events, tmp_path):
-    cut = Cut("fatjet.size > 0 and jet.size > 1").read(events).value
+    cuts = ["fatjet.size > 0 and jet.size > 1"]
     ds = SetDataset(["FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR"])
-    ds.read(events, 1, cut)
+    ds.read(events, 1, cuts)
     ds.split(0.7, 0.2, 0.1)
     ds.save(f"{tmp_path}/mock.ds")
 
@@ -148,16 +148,16 @@ def test_save_load(events, tmp_path):
 
 
 def test_to_numpy(events):
-    cut = Cut("fatjet.size > 0 and jet.size > 1").read(events).value
+    cuts = ["fatjet.size > 0 and jet.size > 1"]
     ds = SetDataset(["FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR"])
-    ds.read(events, 1, cut)
+    ds.read(events, 1, cuts)
 
     assert ds.to_numpy().shape == (75, 4)
 
 
 def test_to_pandas(events):
-    cut = Cut("fatjet.size > 0 and jet.size > 1").read(events).value
+    cuts = ["fatjet.size > 0 and jet.size > 1"]
     ds = SetDataset(["FatJet0.Mass", "FatJet0.Tau21", "Jet0,Jet1.DeltaR"])
-    ds.read(events, 1, cut)
+    ds.read(events, 1, cuts)
 
     assert ds.to_pandas().shape == (75, 4)
