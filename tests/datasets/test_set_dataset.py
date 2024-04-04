@@ -1,7 +1,5 @@
-import numpy as np
 import pytest
 
-from hml.approaches.cuts.cut import Cut
 from hml.datasets import SetDataset
 from hml.representations import Set
 
