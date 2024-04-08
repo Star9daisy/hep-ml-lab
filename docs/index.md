@@ -23,12 +23,12 @@ pip install hep-ml-lab
 
 ## Module overview
 
-![module_overview](images/module_overview.svg)
+![module_overview](images/hml_modules.png)
 
 - `hml.generators`: API of Madgraph5 for simulating colliding events;
+- `hml.physics_objects`: General physics objects;
 - `hml.observables`: General observables in jet physics;
 - `hml.representations`: Different data structure used to represent an event;
 - `hml.datasets`: Existing datasets and helper classes for creating new datasets;
 - `hml.approaches`: Cuts, trees and networks for classification;
 - `hml.metrics`: Metrics used in classical signal vs background analysis;
-- `hml.utils`: Utility functions.
