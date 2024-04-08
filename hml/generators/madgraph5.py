@@ -119,10 +119,15 @@ class Madgraph5:
         except AttributeError:
             raise AttributeError("No processes defined yet")
 
-    def display_diagrams(self, diagram_dir: PathLike = "Diagrams"):
+    def display_diagrams(
+        self, diagram_dir: PathLike = "Diagrams", overwrite: bool = True
+    ):
         self.diagram_dir = Path(diagram_dir)
         if self.diagram_dir.exists():
-            raise FileExistsError(f"{self.diagram_dir} already exists")
+            if not overwrite:
+                raise FileExistsError(f"{self.diagram_dir} already exists")
+            else:
+                shutil.rmtree(self.diagram_dir)
 
         self.diagram_dir.mkdir(parents=True)
         self.process_log += self.run_command(f"display diagrams {self.diagram_dir}")
