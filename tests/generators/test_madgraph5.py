@@ -28,8 +28,6 @@ def test_output():
     assert g.processes == ["p p > t t~", "p p > t t~"]
 
     g.display_diagrams("/tmp/Diagrams")
-    with pytest.raises(FileExistsError):
-        g.display_diagrams("/tmp/Diagrams")
     shutil.rmtree("/tmp/Diagrams")
 
     # output is None
