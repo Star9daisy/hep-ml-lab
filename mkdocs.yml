@@ -72,7 +72,6 @@ nav:
   - Examples:
     - 1511.05190: examples/1511.05190.md
     - 1801.00797: examples/1801.00797.md
-    - example: examples/example.ipynb
   - API:
       - hml.generators: api/hml.generators.md
       - physics_objects:
@@ -89,5 +88,4 @@ nav:
           - networks:
               - mlps: api/hml.approaches/networks/mlps.md
       - hml.metrics: api/hml.metrics.md
-      - hml.utils: api/hml.utils.md
   - History: history.md
