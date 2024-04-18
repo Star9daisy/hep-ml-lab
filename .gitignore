@@ -4,7 +4,7 @@
 **/site
 .env
 *coverage*
-docs/**/data/
 **/dist
 **/checkpoints
 **/archive
+**/data
