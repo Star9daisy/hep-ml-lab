@@ -271,7 +271,6 @@ class Madgraph5:
                     ) as temp:
                         temp.write(f"set RandomSeed {seed}\n".encode())
                         temp.write(delphes_card.read_text().encode())
-                        print(1)
 
                 else:
                     with open(delphes_card, "r") as f:
