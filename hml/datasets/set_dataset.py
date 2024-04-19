@@ -68,6 +68,7 @@ class SetDataset:
         test *= 10
         samples = self.samples
         targets = self.targets
+        self.seed = seed
 
         if val is None:
             if train + test != 10:
