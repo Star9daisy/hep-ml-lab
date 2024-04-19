@@ -211,6 +211,7 @@ class SetDataset:
         config = self.set.config
         config.update(
             {
+                "class_name": self.__class__.__name__,
                 "been_split": self.been_split,
                 "seed": self.seed,
             }
