@@ -136,8 +136,7 @@ class ImageDataset:
         self.been_split = True
 
     def save(self, filepath="dataset.ds"):
-        configs = self.image.config
-        configs.update({"been_split": self.been_split, "seed": self.seed})
+        configs = self.config
         configs_json = json.dumps(configs)
 
         npz_data = BytesIO()
@@ -172,9 +171,7 @@ class ImageDataset:
         with zf.open("configs.json") as json_file:
             configs = json.load(json_file)
 
-        image = Image.from_config(configs)
-
-        dataset = cls(image)
+        dataset = cls.from_config(configs)
         dataset._filepath = filepath
         dataset._data = zf.open("data.npz")
 
@@ -310,3 +307,26 @@ class ImageDataset:
             plt.grid(alpha=0.5)
 
         plt.show()
+
+    @property
+    def config(self):
+        config = self.image.config
+        config.update(
+            {
+                "class_name": self.__class__.__name__,
+                "been_split": self.been_split,
+                "seed": self.seed,
+            }
+        )
+
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        image = Image.from_config(config)
+
+        instance = cls(image)
+        instance.been_split = config["been_split"]
+        instance.seed = config["seed"]
+
+        return instance
