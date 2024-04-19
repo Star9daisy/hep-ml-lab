@@ -4,6 +4,7 @@ from functools import reduce
 from io import BytesIO
 
 import awkward as ak
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -225,3 +226,34 @@ class SetDataset:
         instance.seed = config["seed"]
 
         return instance
+
+    def show(self, n_feature_per_line=3, n_samples=-1, target=None):
+        if n_samples != -1:
+            samples = self.samples[:n_samples]
+        else:
+            samples = self.samples
+
+        plt.figure(figsize=(4 * n_feature_per_line, 4))
+        for i, name in enumerate(self.feature_names):
+            ax = plt.subplot(1, n_feature_per_line, i + 1)
+
+            if target is None:
+                for i_target in np.unique(self.targets):
+                    ax.hist(
+                        samples[np.squeeze(self.targets == i_target)][:, i],
+                        bins=50,
+                        histtype="step",
+                        label=f"Target {i_target}",
+                    )
+            else:
+                ax.hist(
+                    samples[np.squeeze(self.targets == i_target)][:, i],
+                    bins=50,
+                    histtype="step",
+                    label=f"Target {i_target}",
+                )
+            ax.set_title(name)
+
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
