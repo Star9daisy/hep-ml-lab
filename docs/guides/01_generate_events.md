@@ -1,63 +1,83 @@
 # Generate events
 
-This guide shows how to use the Madgraph5 class of HML to generate events from Z boson and QCD to dijets processes. To get started, let’s import some necessary classes from `generators` module:
+This guide shows how to use the `Madgraph5` class to generate events WW and QCD to dijet processes. To get started, let’s import some necessary classes from `generators` module:
 
 ```python
-from hml.generators import Madgraph5, Madgraph5MultiRun, Madgraph5Run
+from hml.generators import Madgraph5, Madgraph5Run
 ```
 
-<div class="result" markdown>
+API is designed to be as much similar as the CLI. The following table shows the correspondence between the CLI commands and the API methods:
 
-```
-Welcome to JupyROOT 6.24/02
-```
+| CLI command                                    | API method                               |
+|------------------------------------------------|------------------------------------------|
+| `import model sm`                              | `g.import_model("sm")`                   |
+| `define l = e+ e-`                             | `g.define("l = e+ e-")`                  |
+| `generate p p > j j` `add process p p > j j j` | `g.generate("p p > j j", "p p > j j j")` |
+| `display diagrams Diagrams`                    | `g.display_diagrams("Diagrams")`         |
+| `output ./test`                                | `g.output("./test")`                     |
+| `launch`                                       | `g.launch(...)`                          |
 
-</div>
 
 ## Initialization
 
-The Madgraph5 API (application programming interface) provided by HML works similarly to the Madgraph5 CLI (command line interface): initialization corresponds to the classic workflow of `generate, output, launch`.
+The Madgraph5 API (application programming interface) works similarly to the Madgraph5 CLI (command line interface). It uses CLI commands to generate events, so the very first step is to connect to the Madgraph5 executable file:
 
 ```python
-zjj = Madgraph5(
-    executable="mg5_aMC",
-    model="sm",
-    definitions={},
-    processes=["p p > z z, z > j j, z > vl vl~"],
-    output="data/pp2zz_z2jj_z2vlvl",
-)
+g = Madgraph5(executable="mg5_aMC", verbose=1)
 ```
 
 - `executable` refers to the path of the `mg5_aMC` executable file.
-- `model` is managed by Madgraph5 itself.
-- `definitions` are used for the `define` command in Madgraph5.
-- Usually in Madgraph5, you need to use `generate` and `add process` to create multiple processes. In HML, processes are represented as a list of strings.
-- If `output` already exists, this class will not generate processes again.
+- `verbose` is used to control the output level. The default value is 1 showing all the information as the CLI does. If it is set to 0, no information will be displayed.
 
-## Launch the first run
+## Generate the process
 
-After initializing the class (or `output` in Madgraph5 CLI), you can now launch a new run:
+We take "p p > w+ z" as the first example. We want to give the W boson a boost to simulate there is a heavy intermediate particles from new physics. So no decay chain is specified here. In the launch part, W boson decays to two jets and Z boson decays invisibly to ensure the fatjet is consistent with the W boson.
 
 ```python
-zjj.launch(
+g.generate("p p > w+ z")
+```
+!!! note
+    The `add process` and `generate` commands from CLI are combined into `generate` in the API. So you can directly add processes one by one. For example: `g.generate("p p > w+ j", "p p > w- j")`
+
+After generating the process, it is crutial to check the feynman diagram before moving on:
+
+```python
+g.display_diagram()
+```
+
+- By default, the diagram is stored in the `Diagrams` folder in the current directory. You can change the path by setting the parameter `diagram_dir`.
+- The `.eps` file is converted in `.pdf` format for convenience.
+
+Finally, we can save the process to a directory:
+
+```python
+g.output("data/pp2wz")
+```
+
+!!! note
+    Even if you don't `display_diagram` before, the diagram will be saved in the `Diagrams` folder of the output directory.
+
+## Launch the first run
+It's time to launch the first run. In the CLI, two prompts will show up: one for the tools and the other for the configurations. In the API, they are combined into one method:
+
+```python
+g.launch(
     shower="pythia8",
     detector="delphes",
-    settings={"iseed": 42, "nevents": 1000, "htjmin": 400},
+    madspin="none",
+    settings={
+        "nevents": 1000,
+        "run_tag": "250-300",
+        "pt_min_pdg": {24: 250},
+        "pt_max_pdg": {24: 300},
+    },
+    decays=[
+        "w+ > j j",
+        "z > vl vl~",
+    ],
+    seed=42,
 )
 ```
-
-<div class="result" markdown>
-
-```
-Running Survey
-Running Pythia8
-Running Delphes
-Storing files
-
-Done
-```
-
-</div>
 
 - `shower` and `detector` are options for parton shower and detector simulation tools. Currently, `pythia8` and `delphes` are available.
 - In Madgraph5, you can use the `set` command to change configurations in different cards without opening them. The `settings` attribute contains these configurations as a Python dictionary.
@@ -68,20 +88,28 @@ Done
 After the generation is finished, you can use `.summary()` to check all the information of runs:
 
 ```python
-zjj.summary()
+g.summary()
 ```
 
 <div class="result" markdown>
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-style: italic">                 p p &gt; z z, z &gt; j j, z &gt; vl vl~                 </span>
-┏━━━┳━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
-┃<span style="font-weight: bold"> # </span>┃<span style="font-weight: bold"> Name      </span>┃<span style="font-weight: bold"> Tag   </span>┃<span style="font-weight: bold"> Cross section (pb) </span>┃<span style="font-weight: bold"> N events </span>┃<span style="font-weight: bold"> Seed </span>┃
-┡━━━╇━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
-│ 0 │ run_01[1] │ tag_1 │     2.273e-03      │    1,000 │   42 │
-└───┴───────────┴───────┴────────────────────┴──────────┴──────┘
-<span style="color: #7f7f7f; text-decoration-color: #7f7f7f; font-style: italic">                            Output:                             </span>
-<span style="color: #7f7f7f; text-decoration-color: #7f7f7f; font-style: italic">/root/workspace_ssd/projects/hep-ml-lab/examples/data/pp2zz_z2jj</span>
-<span style="color: #7f7f7f; text-decoration-color: #7f7f7f; font-style: italic">                            _z2vlvl                             </span>
+<style>
+    pre.small-text {
+        font-size: 12px; /* Adjust this value to increase or decrease the font size */
+        font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+        line-height: normal;
+        overflow-x: auto;
+        white-space: pre;
+    }
+</style>
+<pre class="small-text">
+                                       p p > w+ z                                        
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ # ┃ Name      ┃ Collider         ┃ Tag     ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 0 │ run_01[1] │ pp:6500.0x6500.0 │ 250-300 │ 4.371e-02 +- 4.200e-04 │    1,000 │   42 │
+└───┴───────────┴──────────────────┴─────────┴────────────────────────┴──────────┴──────┘
+                                   Output: data/pp2wz                                    
 </pre>
 
 </div>
@@ -92,106 +120,281 @@ zjj.summary()
 The data in the summary table are properties of a run:
 
 ```python
-run_01 = zjj.runs[0]
-print("Name:", run_01.name)
-print("N Subruns:", len(run_01.runs))
-print("Tag:", run_01.tag)
-print("Cross section:", run_01.cross_section)
-print("N events:", run_01.n_events)
-print("Seed:", run_01.seed)
+run_01 = g.runs[0]
+print(f"Processes: {g.processes}")
+print(f"Name: {run_01.name}")
+print(f"N subruns: {len(run_01.sub_runs)}")
+print(f"Collider: {run_01.collider}")
+print(f"Tag: {run_01.tag}")
+print(f"Cross section: {run_01.cross}")
+print(f"Error: {run_01.error}")
+print(f"N events: {run_01.n_events}")
+print(f"Seed: {run_01.seed}")
 ```
 
 <div class="result" markdown>
 
 ```
+Processes: ['p p > w+ z']
 Name: run_01
-N Subruns: 1
-Tag: tag_1
-Cross section: 0.0022735
+N subruns: 1
+Collider: pp:6500.0x6500.0
+Tag: 250-300
+Cross section: 0.04371
+Error: 0.00042
 N events: 1000
 Seed: 42
+
 ```
 
 </div>
 
-You can access the `events` attribute to read the root file from Delphes:
+Use `events()` to retrieve the event files:
 
 ```python
-for event in run.events:
-    print(f"n_jets: {event.Jet_size}")
-    print(f"n_fat_jets: {event.FatJet_size}")
-    break
+run_01.events()
 ```
 
 <div class="result" markdown>
 
 ```
-n_jets: 2
-n_fat_jets: 1
+['data/pp2wz/Events/run_01_decayed_1/250-300_delphes_events.root:Delphes']
 ```
 
 </div>
 
-## Launch the second run similarly
-
-To build a signal vs background binary classification task, we need to generate QCD events without the intermediate Z boson.
+This string could be used directly in the `uproot`:
 
 ```python
-qcd = Madgraph5(
-    processes=['p p > j j / z'],
-    output="./data/qcd"
+import uproot
+
+events = uproot.open(run_01.events()[0])
+events
+```
+
+<div class="result" markdown>
+
+```
+<TTree 'Delphes' (34 branches) at 0x7fc181a77310>
+```
+
+</div>
+
+
+## Launch more runs
+
+Under the same process, we can adjust the configurations and launch multiple runs to "scan":
+
+```python
+low_limits = [300, 350, 400, 450]
+high_limits = [350, 400, 450, 500]
+
+g.verbose = 0
+
+for low, high in zip(low_limits, high_limits):
+    print(f"Generating events between {low} and {high} GeV")
+    g.launch(
+        shower="pythia8",
+        detector="delphes",
+        madspin="none",
+        settings={
+            "nevents": 1000,
+            "run_tag": f"{low}-{high}",
+            "pt_min_pdg": {24: low},
+            "pt_max_pdg": {24: high},
+        },
+        decays=[
+            "w+ > j j",
+            "z > vl vl~",
+        ],
+        seed=42,
+    )
+
+g.summary()
+```
+
+<div class="result" markdown>
+
+```
+Generating events between 300 and 350 GeV
+Generating events between 350 and 400 GeV
+Generating events between 400 and 450 GeV
+Generating events between 450 and 500 GeV
+```
+
+<style>
+    pre.small-text {
+        font-size: 12px; /* Adjust this value to increase or decrease the font size */
+        font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+        line-height: normal;
+        overflow-x: auto;
+        white-space: pre;
+    }
+</style>
+<pre class="small-text">
+                                       p p > w+ z                                        
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ # ┃ Name      ┃ Collider         ┃ Tag     ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 0 │ run_01[1] │ pp:6500.0x6500.0 │ 250-300 │ 4.371e-02 +- 4.200e-04 │    1,000 │   42 │
+│ 1 │ run_02[1] │ pp:6500.0x6500.0 │ 300-350 │ 2.021e-02 +- 1.900e-04 │    1,000 │   42 │
+│ 2 │ run_03[1] │ pp:6500.0x6500.0 │ 350-400 │ 9.985e-03 +- 9.400e-05 │    1,000 │   42 │
+│ 3 │ run_04[1] │ pp:6500.0x6500.0 │ 400-450 │ 5.322e-03 +- 8.100e-05 │    1,000 │   42 │
+│ 4 │ run_05[1] │ pp:6500.0x6500.0 │ 450-500 │ 2.972e-03 +- 3.500e-05 │    1,000 │   42 │
+└───┴───────────┴──────────────────┴─────────┴────────────────────────┴──────────┴──────┘
+                                   Output: data/pp2wz                                    
+</pre>
+
+</div>
+
+## Build a binary classification task
+
+We take QCD to dijet as the background and WZ to dijet as the signal. Both have 10,000 events.
+
+```python
+wz = Madgraph5(executable="mg5_aMC", verbose=0)
+
+wz.generate("p p > w+ z")
+wz.output("data/pp2wz@10k")
+wz.launch(
+    shower="pythia8",
+    detector="delphes",
+    madspin="none",
+    settings={
+        "nevents": 10000,
+        "pt_min_pdg": {24: 250},
+        "pt_max_pdg": {24: 300},
+    },
+    decays=[
+        "w+ > j j",
+        "z > vl vl~",
+    ],
+    seed=42,
 )
+
+wz.summary()
+```
+
+<div class="result" markdown>
+
+<style>
+    pre.small-text {
+        font-size: 12px; /* Adjust this value to increase or decrease the font size */
+        font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+        line-height: normal;
+        overflow-x: auto;
+        white-space: pre;
+    }
+</style>
+<pre class="small-text">
+                                      p p > w+ z                                       
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ # ┃ Name      ┃ Collider         ┃ Tag   ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 0 │ run_01[1] │ pp:6500.0x6500.0 │ tag_1 │ 4.375e-02 +- 1.400e-04 │   10,000 │   42 │
+└───┴───────────┴──────────────────┴───────┴────────────────────────┴──────────┴──────┘
+                                Output: data/pp2wz@10k                                 
+</pre>
+</div>
+
+```python
+qcd = Madgraph5(executable="mg5_aMC", verbose=0)
+
+qcd.generate("p p > j j")
+qcd.output("data/pp2jj@10k")
 qcd.launch(
     shower="pythia8",
     detector="delphes",
-    settings={"iseed": 42, "nevents": 1000, "htjmin": 400},
+    settings={
+        "nevents": 10000,
+        "ptj": 250,
+        "ptjmax": 300,
+    },
+    seed=42,
 )
+
 qcd.summary()
 ```
 
 <div class="result" markdown>
 
-```
-Running Survey
-Running Pythia8
-Running Delphes
-Storing files
+<style>
+    pre.small-text {
+        font-size: 12px; /* Adjust this value to increase or decrease the font size */
+        font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+        line-height: normal;
+        overflow-x: auto;
+        white-space: pre;
+    }
+</style>
+<pre class="small-text">
+                                       p p > j j                                       
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ # ┃ Name      ┃ Collider         ┃ Tag   ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 0 │ run_01[0] │ pp:6500.0x6500.0 │ tag_1 │ 1.161e+04 +- 4.000e+01 │   10,000 │   42 │
+└───┴───────────┴──────────────────┴───────┴────────────────────────┴──────────┴──────┘
+                                Output: data/pp2jj@10k                                 
 
-Done
-```
-
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><span style="font-style: italic">                         p p &gt; j j / z                          </span>
-┏━━━┳━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
-┃<span style="font-weight: bold"> # </span>┃<span style="font-weight: bold"> Name      </span>┃<span style="font-weight: bold"> Tag   </span>┃<span style="font-weight: bold"> Cross section (pb) </span>┃<span style="font-weight: bold"> N events </span>┃<span style="font-weight: bold"> Seed </span>┃
-┡━━━╇━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
-│ 0 │ run_01[1] │ tag_1 │     5.611e+04      │    1,000 │   42 │
-└───┴───────────┴───────┴────────────────────┴──────────┴──────┘
-<span style="color: #7f7f7f; text-decoration-color: #7f7f7f; font-style: italic">                            Output:                             </span>
-<span style="color: #7f7f7f; text-decoration-color: #7f7f7f; font-style: italic">   /root/workspace_ssd/projects/hep-ml-lab/examples/data/qcd    </span>
 </pre>
-
 </div>
 
 ## Read the existing output
 
-HML can handle three cases:
+Here we take the "pp2wz" as the exising output directory:
 
-1. Events are generated by HML:
-    
-    ```python
-    Madgraph5.from_output("./data/qcd")
-    ```
-    
-2. Events are generated by the `multi_run` command from MadEvent:
-    
-    ```python
-    Madgraph5MultiRun.from_name("run_01", "./data/qcd")
-    ```
-    
-3. Events are generated normally by the `launch` command from Madgraph5:
-    
-    ```python
-    Madgraph5Run.from_directory("./data/qcd/Events/run_01_0")
-    ```
+- If you want to check all information of runs inside this output, use `Madgraph5.from_output`:
 
-Check the [doc](../api/hml.generators.md) to learn more about `Madgraph5, Madgraph5MultiRun, Madgraph5Run`.
+```python
+g = Madgraph5.from_output("data/pp2wz", executable="mg5_aMC")
+g.summary()
+```
+
+<div class="result" markdown>
+
+<style>
+    pre.small-text {
+        font-size: 12px; /* Adjust this value to increase or decrease the font size */
+        font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+        line-height: normal;
+        overflow-x: auto;
+        white-space: pre;
+    }
+</style>
+<pre class="small-text">
+                                       p p > w+ z                                        
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┓
+┃ # ┃ Name      ┃ Collider         ┃ Tag     ┃   Cross section (pb)   ┃ N events ┃ Seed ┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━┩
+│ 0 │ run_01[1] │ pp:6500.0x6500.0 │ 250-300 │ 4.371e-02 +- 4.200e-04 │    1,000 │   42 │
+│ 1 │ run_02[1] │ pp:6500.0x6500.0 │ 300-350 │ 2.021e-02 +- 1.900e-04 │    1,000 │   42 │
+│ 2 │ run_03[1] │ pp:6500.0x6500.0 │ 350-400 │ 9.985e-03 +- 9.400e-05 │    1,000 │   42 │
+│ 3 │ run_04[1] │ pp:6500.0x6500.0 │ 400-450 │ 5.322e-03 +- 8.100e-05 │    1,000 │   42 │
+│ 4 │ run_05[1] │ pp:6500.0x6500.0 │ 450-500 │ 2.972e-03 +- 3.500e-05 │    1,000 │   42 │
+└───┴───────────┴──────────────────┴─────────┴────────────────────────┴──────────┴──────┘
+                                   Output: data/pp2wz                            
+</pre>
+</div>
+
+- Or you only want to retrieve a single run:
+
+```python
+run = Madgraph5Run("data/pp2wz", name="run_02")
+run
+```
+
+<div class="result" markdown>
+
+```
+Madgraph5Run run_02 (1 sub runs):
+- collider: pp:6500.0x6500.0
+- tag: 300-350
+- seed: 42
+- cross: 0.02021
+- error: 0.00019
+- n_events: 1000
+```
+
+</div>
+
+Check the [doc](../api/hml.generators.md) to learn more about `Madgraph5`, `Madgraph5Run`.
