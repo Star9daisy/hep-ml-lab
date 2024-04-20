@@ -197,7 +197,7 @@ class SetDataset:
         return self.set.names
 
     def to_numpy(self):
-        return np.hstack([self.samples, self.targets])
+        return np.hstack([self.samples, self.targets[:, None]])
 
     def to_pandas(self):
         df = pd.DataFrame(self.samples.tolist(), columns=self.feature_names)
