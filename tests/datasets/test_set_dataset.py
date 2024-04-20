@@ -41,6 +41,7 @@ def test_init():
                 "config": {"class_name": "DeltaR", "physics_object": "Jet0,Jet1"},
             },
         },
+        "class_name": "SetDataset",
         "been_split": False,
         "seed": None,
     }
@@ -52,7 +53,7 @@ def test_read(events):
     ds.read(events, 1, cuts)
 
     assert ds.samples.shape == (75, 3)
-    assert ds.targets.shape == (75, 1)
+    assert ds.targets.shape == (75,)
 
 
 def test_from_config():
@@ -96,28 +97,28 @@ def test_save_load(events, tmp_path):
     assert len(loaded_ds._samples) == 0
     assert len(loaded_ds._targets) == 0
     assert loaded_ds.samples.shape == (75, 3)
-    assert loaded_ds.targets.shape == (75, 1)
+    assert loaded_ds.targets.shape == (75,)
     assert len(loaded_ds._samples) != 0
     assert len(loaded_ds._targets) != 0
 
     assert len(loaded_ds.train._samples) == 0
     assert len(loaded_ds.train._targets) == 0
     assert loaded_ds.train.samples.shape == (52, 3)
-    assert loaded_ds.train.targets.shape == (52, 1)
+    assert loaded_ds.train.targets.shape == (52,)
     assert len(loaded_ds.train._samples) != 0
     assert len(loaded_ds.train._targets) != 0
 
     assert len(loaded_ds.test._samples) == 0
     assert len(loaded_ds.test._targets) == 0
     assert loaded_ds.test.samples.shape == (15, 3)
-    assert loaded_ds.test.targets.shape == (15, 1)
+    assert loaded_ds.test.targets.shape == (15,)
     assert len(loaded_ds.test._samples) != 0
     assert len(loaded_ds.test._targets) != 0
 
     assert len(loaded_ds.val._samples) == 0
     assert len(loaded_ds.val._targets) == 0
     assert loaded_ds.val.samples.shape == (8, 3)
-    assert loaded_ds.val.targets.shape == (8, 1)
+    assert loaded_ds.val.targets.shape == (8,)
     assert len(loaded_ds.val._samples) != 0
     assert len(loaded_ds.val._targets) != 0
 
@@ -127,22 +128,22 @@ def test_save_load(events, tmp_path):
     assert len(loaded_ds._samples) != 0
     assert len(loaded_ds._targets) != 0
     assert loaded_ds.samples.shape == (75, 3)
-    assert loaded_ds.targets.shape == (75, 1)
+    assert loaded_ds.targets.shape == (75,)
 
     assert len(loaded_ds.train._samples) != 0
     assert len(loaded_ds.train._targets) != 0
     assert loaded_ds.train.samples.shape == (52, 3)
-    assert loaded_ds.train.targets.shape == (52, 1)
+    assert loaded_ds.train.targets.shape == (52,)
 
     assert len(loaded_ds.test._samples) != 0
     assert len(loaded_ds.test._targets) != 0
     assert loaded_ds.test.samples.shape == (15, 3)
-    assert loaded_ds.test.targets.shape == (15, 1)
+    assert loaded_ds.test.targets.shape == (15,)
 
     assert len(loaded_ds.val._samples) != 0
     assert len(loaded_ds.val._targets) != 0
     assert loaded_ds.val.samples.shape == (8, 3)
-    assert loaded_ds.val.targets.shape == (8, 1)
+    assert loaded_ds.val.targets.shape == (8,)
 
 
 def test_to_numpy(events):
