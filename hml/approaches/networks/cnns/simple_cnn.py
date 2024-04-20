@@ -1,4 +1,5 @@
 import keras
+from keras import Model
 from keras.layers import (
     Conv2D,
     Dense,
@@ -10,7 +11,7 @@ from keras.layers import (
 
 
 @keras.saving.register_keras_serializable()
-class SimpleCNN:
+class SimpleCNN(Model):
     def __init__(self, input_shape, name="simple_cnn", **kwargs):
         super().__init__(name=name, **kwargs)
         self.input_shape = input_shape
@@ -21,6 +22,7 @@ class SimpleCNN:
         self.global_avg_pool = GlobalAveragePooling2D()
         self.dropout = Dropout(0.5)
         self.dense1 = Dense(2, activation="relu")
+        self.dense2 = Dense(2, activation="softmax")
 
         self.call(Input(shape=input_shape))
 
@@ -33,7 +35,7 @@ class SimpleCNN:
         x = self.max_pool(x)
         x = self.global_avg_pool(x)
         x = self.dense1(x)
-        return self.dense1(x)
+        return self.dense2(x)
 
     def get_config(self):
         base_config = super().get_config()
