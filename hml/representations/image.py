@@ -132,7 +132,13 @@ class Image:
             self.origin_width = origin_width
 
             translated_height = self.height.value - origin_height.value
+            if self.height.__class__.__name__ == "Phi":
+                translated_height = np.mod(translated_height + np.pi, 2 * np.pi) - np.pi
+
             translated_width = self.width.value - origin_width.value
+            if self.width.__class__.__name__ == "Phi":
+                translated_width = np.mod(translated_width + np.pi, 2 * np.pi) - np.pi
+
             self.height._value = translated_height
             self.width._value = translated_width
 
