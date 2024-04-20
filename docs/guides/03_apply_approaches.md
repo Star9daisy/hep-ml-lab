@@ -5,94 +5,142 @@ This guide shows how to use the three built-in approaches to differentiate signa
 Let's get started by importing the necessary modules:
 
 ```python
+# General
+import numpy as np
+import matplotlib.pyplot as plt
+from keras import ops
+from rich.table import Table
 # Dataset
 from hml.datasets import load_dataset
-from sklearn.model_selection import train_test_split
 # Approaches
-from hml.approaches import CutAndCount as CBA
+from hml.approaches import CutAndCount as CNC
 from hml.approaches import GradientBoostedDecisionTree as BDT
-from hml.approaches import ToyMultilayerPerceptron as MLP
+from hml.approaches import SimpleCNN as CNN
+from hml.approaches import SimpleMLP as MLP
 # Evaluation
 from keras.metrics import Accuracy, AUC
 from sklearn.metrics import roc_curve
 from hml.metrics import MaxSignificance, RejectionAtEfficiency
-from collections import defaultdict
-from tabulate import tabulate
-import matplotlib.pyplot as plt
-import numpy as np
 # Save and load
 from hml.approaches import load_approach
 ```
 
-## Loading the Dataset
-
-`load_dataset` works similarly to `get_observable` — users do not need to know the specific class name for that dataset to use it:
+Then we use a dictionary to store the benchmark results and define a helper function to get result for each approach:
 
 ```python
-dataset = load_dataset("./data/zjj_vs_qcd.npz")
+results = {}
+
+def get_result(approach, x_test, y_test):
+    y_pred = approach.predict(x_test, verbose=0)
+
+    fpr, tpr, _ = roc_curve(y_test, y_pred[:, 1])
+
+    result = {
+        approach.name: {
+            "acc": convert_to_numpy(Accuracy()(y_test, y_pred.argmax(axis=1))).item(),
+            "auc": convert_to_numpy(AUC()(y_test, y_pred[:, 1])).item(),
+            "sig": convert_to_numpy(MaxSignificance()(y_test, y_pred)).item(),
+            "r50": convert_to_numpy(RejectionAtEfficiency(0.5)(y_test, y_pred)).item(),
+            "r99": convert_to_numpy(RejectionAtEfficiency(0.99)(y_test, y_pred)).item(),
+            "fpr": fpr,
+            "tpr": tpr,
+        }
+    }
+
+    return result
 ```
 
-To split the whole dataset, use its properties `samples` and `targets`:
+## Cut and count
+
+`CutAndCount` approach is a simple cut-based analysis. It uses a set of cuts on observables to separate signal and background. It has two topologies to apply cuts: `parallel` and `sequential`. The `parallel` topology applies all cuts simultaneously, while the `sequential` topology applies cuts one by one.
 
 ```python
-x_train, x_test, y_train, y_test = train_test_split(
-    dataset.samples, dataset.targets, test_size=0.3, random_state=42
-)
-x_train, x_val, y_train, y_val = train_test_split(
-    x_train, y_train, test_size=0.2, random_state=42
-)
+# Dataset
+ds = load_dataset("./data/wjj_vs_qcd_set.ds")
+
+x_train, y_train = ds.train.samples, ds.train.targets
+x_test, y_test = ds.test.samples, ds.test.targets
 ```
 
-## Cut and Count Approach
-
-The cut-based analysis or cut and count approach is one of fundamental approaches widely used in HEP phenomenology . We implement it in Keras framework:
-
 ```python
-approach1 = CBA()
-approach1.compile(
+# Training
+cnc1 = CNC(
+    n_observables=3,
+    topology="parallel",
+    name="cnc_parallel",
+)
+cnc1.compile(
     optimizer="adam",
-    loss="sparse_categorical_crossentropy",
+    loss="crossentropy",
     metrics=["accuracy"],
+    run_eagerly=True,
 )
-history = approach1.fit(
-    x_train,
-    y_train,
-    batch_size=len(x_train),
-    validation_data=(x_val, y_val),
-)
+cnc1.fit(x_train, y_train, batch_size=len(x_train))
 ```
 
 <div class="result" markdown>
 
 ```
-1/1 [==============================] - 2s 2s/step - loss: 4.0295 - accuracy: 0.7500 - val_loss: 4.9923 - val_accuracy: 0.6903
+1/1 ━━━━━━━━━━━━━━━━━━━━ 7s 7s/step - accuracy: 0.7631 - loss: 3.8179
 ```
 
 </div>
 
-- The `optimizer` in `compile` has no effect for CutAndCount because there are no learnable parameters.
-- The `batch_size` is preferably the whole training set to show the complete distributions of observables. The `epochs` has no effect.
+```python
+# Training
+cnc2 = CNC(
+    n_observables=3,
+    topology="sequential",
+    name="cnc_sequential",
+)
+cnc2.compile(
+    optimizer="adam",
+    loss="crossentropy",
+    metrics=["accuracy"],
+    run_eagerly=True,
+)
+cnc2.fit(x_train, y_train, batch_size=len(x_train))
+```
+
+<div class="result" markdown>
+```
+1/1 ━━━━━━━━━━━━━━━━━━━━ 5s 5s/step - accuracy: 0.7968 - loss: 3.2749
+```
+
+</div>
+
+We could see that the `sequential` topology has a better performance than the `parallel` topology. It's reasonable because the `sequential` topology applies cuts one by one, which determines the best cut according to the current distribution not the original one.
+
+Now add the results to the dictionary:
+
+```python
+results.update(get_result(cnc1, x_test, y_test))
+results.update(get_result(cnc2, x_test, y_test))
+```
 
 ## Boosted Decision Tree
 
 We adapt `GradientBoostingClassifier` from `sklearn` to work as a `Keras` model:
 
 ```python
-approach2 = BDT()
-approach2.compile(
-    metrics=["accuracy"],
-)
-history = approach2.fit(
-    x_train,
-    y_train,
-    validation_data=(x_val, y_val),
-)
+# Dataset
+ds = load_dataset("./data/wjj_vs_qcd_set.ds")
+
+x_train, y_train = ds.train.samples, ds.train.targets
+x_test, y_test = ds.test.samples, ds.test.targets
+```
+
+```python
+# Training
+bdt = BDT(name="bdt")
+bdt.compile(metrics=["accuracy"])
+bdt.fit(x_train, y_train)
 ```
 
 <div class="result" markdown>
 
 ```
-100/100 [==============================] - 1s 8ms/step - loss: 0.4396 - accuracy: 0.9239 - val_loss: 1.2479 - val_accuracy: 0.5841
+100/100 ━━━━━━━━━━━━━━━━━━━━ 2s 18ms/step - loss: 0.5614 - accuracy: 0.9005
 ```
 
 </div>
@@ -101,96 +149,286 @@ history = approach2.fit(
 - `batch_size` and `epochs` are irrelevant for a tree.
 - The progress bar displays the number of estimators rather than training steps.
 
-## Networks
+Add the results to the dictionary:
+
+```python
+results.update(get_result(bdt, x_test, y_test))
+```
+
+## Simple Multi-Layer Perceptron
 
 Currently, HML provides a toy multi-layer perceptron to perform simple analysis:
 
 ```python
-approach3 = MLP()
-approach3.compile(
-    loss="sparse_categorical_crossentropy",
-    metrics=["accuracy"],
-)
-approach3.fit(
-    x_train,
-    y_train,
-    batch_size=128,
-    epochs=20,
-    validation_data=(x_val, y_val),
-)
+# Dataset
+ds = load_dataset("./data/wjj_vs_qcd_set.ds")
+
+x_train, y_train = ds.train.samples, ds.train.targets
+x_test, y_test = ds.test.samples, ds.test.targets
+
+scaler = MinMaxScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
+```
+
+```python
+mlp = MLP(name="mlp", input_shape=x_train.shape[1:])
+mlp.summary()
 ```
 
 <div class="result" markdown>
 
 ```
-Epoch 1/20
-8/8 [==============================] - 1s 34ms/step - loss: 13.7174 - accuracy: 0.5575 - val_loss: 10.6973 - val_accuracy: 0.5841
-Epoch 2/20
-8/8 [==============================] - 0s 19ms/step - loss: 10.3071 - accuracy: 0.5575 - val_loss: 8.0258 - val_accuracy: 0.5841
-Epoch 3/20
-8/8 [==============================] - 0s 19ms/step - loss: 7.5906 - accuracy: 0.5575 - val_loss: 5.7093 - val_accuracy: 0.5841
-Epoch 4/20
-8/8 [==============================] - 0s 21ms/step - loss: 5.1318 - accuracy: 0.5575 - val_loss: 3.5278 - val_accuracy: 0.5841
-Epoch 5/20
-8/8 [==============================] - 0s 19ms/step - loss: 2.8022 - accuracy: 0.5575 - val_loss: 1.2921 - val_accuracy: 0.5841
-Epoch 6/20
-8/8 [==============================] - 0s 22ms/step - loss: 0.8136 - accuracy: 0.6217 - val_loss: 0.5321 - val_accuracy: 0.8540
-Epoch 7/20
-8/8 [==============================] - 0s 19ms/step - loss: 0.4860 - accuracy: 0.8662 - val_loss: 0.5465 - val_accuracy: 0.7611
-Epoch 8/20
-8/8 [==============================] - 0s 20ms/step - loss: 0.4802 - accuracy: 0.8496 - val_loss: 0.5843 - val_accuracy: 0.7257
-Epoch 9/20
-8/8 [==============================] - 0s 19ms/step - loss: 0.4749 - accuracy: 0.8473 - val_loss: 0.6016 - val_accuracy: 0.6372
-Epoch 10/20
-8/8 [==============================] - 0s 22ms/step - loss: 0.4863 - accuracy: 0.8341 - val_loss: 0.5898 - val_accuracy: 0.7168
-Epoch 11/20
-8/8 [==============================] - 0s 19ms/step - loss: 0.4621 - accuracy: 0.8451 - val_loss: 0.5200 - val_accuracy: 0.7080
-Epoch 12/20
-8/8 [==============================] - 0s 19ms/step - loss: 0.4600 - accuracy: 0.8507 - val_loss: 0.6299 - val_accuracy: 0.7080
-Epoch 13/20
-8/8 [==============================] - 0s 20ms/step - loss: 0.4609 - accuracy: 0.8451 - val_loss: 0.5236 - val_accuracy: 0.7965
-Epoch 14/20
-8/8 [==============================] - 0s 22ms/step - loss: 0.4423 - accuracy: 0.8540 - val_loss: 0.5849 - val_accuracy: 0.7389
-Epoch 15/20
-8/8 [==============================] - 0s 20ms/step - loss: 0.4510 - accuracy: 0.8485 - val_loss: 0.4898 - val_accuracy: 0.8407
-Epoch 16/20
-8/8 [==============================] - 0s 20ms/step - loss: 0.4401 - accuracy: 0.8584 - val_loss: 0.4997 - val_accuracy: 0.8186
-Epoch 17/20
-8/8 [==============================] - 0s 20ms/step - loss: 0.4364 - accuracy: 0.8529 - val_loss: 0.5946 - val_accuracy: 0.7389
-Epoch 18/20
-8/8 [==============================] - 0s 20ms/step - loss: 0.4432 - accuracy: 0.8429 - val_loss: 0.4955 - val_accuracy: 0.8186
-Epoch 19/20
-8/8 [==============================] - 0s 20ms/step - loss: 0.4246 - accuracy: 0.8518 - val_loss: 0.4807 - val_accuracy: 0.8496
-Epoch 20/20
-8/8 [==============================] - 0s 19ms/step - loss: 0.4228 - accuracy: 0.8418 - val_loss: 0.6476 - val_accuracy: 0.6283
+Model: "mlp"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ dense_4 (Dense)                 │ (None, 32)             │           128 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_5 (Dense)                 │ (None, 64)             │         2,112 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_6 (Dense)                 │ (None, 32)             │         2,080 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_7 (Dense)                 │ (None, 2)              │            66 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+Total params: 4,386 (17.13 KB)
+Trainable params: 4,386 (17.13 KB)
+Non-trainable params: 0 (0.00 B)
+```
+
+```python
+# Training
+mlp.compile(loss="crossentropy", metrics=["accuracy"])
+mlp.fit(x_train, y_train, batch_size=128, epochs=100)
+```
+
+<div class="result" markdown>
+
+```
+Epoch 1/100
+99/99 ━━━━━━━━━━━━━━━━━━━━ 2s 7ms/step - accuracy: 0.7172 - loss: 0.5586
+Epoch 2/100
+99/99 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8607 - loss: 0.3469
+...
+Epoch 99/100
+99/99 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9025 - loss: 0.2489
+Epoch 100/100
+99/99 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9031 - loss: 0.2483
+```
+
+</div>
+
+## Simple Convolutional Neural Network
+
+We also provide a toy CNN to perform simple analysis. There're two ways to normalize the images: using the maximum value of each image or applying `log` to each pixel.
+
+```python
+# Dataset
+ds = load_dataset("./data/wjj_vs_qcd_image.ds")
+
+x_train, y_train = ds.train.samples, ds.train.targets
+x_test, y_test = ds.test.samples, ds.test.targets
+
+non_zero_train = x_train.reshape(x_train.shape[0], -1).sum(1) != 0
+non_zero_test = x_test.reshape(x_test.shape[0], -1).sum(1) != 0
+
+x_train, y_train = x_train[non_zero_train], y_train[non_zero_train]
+x_test, y_test = x_test[non_zero_test], y_test[non_zero_test]
+
+x_train = (
+    x_train.reshape(len(x_train), -1)
+    / x_train.reshape(len(x_train), -1).max(1, keepdims=True)
+).reshape(x_train.shape)
+x_test = (
+    x_test.reshape(len(x_test), -1)
+    / x_test.reshape(len(x_test), -1).max(1, keepdims=True)
+).reshape(x_test.shape)
+x_train = x_train[..., None]
+x_test = x_test[..., None]
+```
+
+```python
+cnn1 = CNN(name="cnn_max", input_shape=x_train.shape[1:])
+cnn1.summary()
+```
+
+<div class="result" markdown>
+
+```
+Model: "cnn_max"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ conv2d_3 (Conv2D)               │ (None, 33, 33, 8)      │            80 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_4 (Conv2D)               │ (None, 16, 16, 16)     │         1,168 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ conv2d_5 (Conv2D)               │ (None, 8, 8, 32)       │         4,640 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling2d_1 (MaxPooling2D)  │ (None, 4, 4, 32)       │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ global_average_pooling2d_1      │ (None, 32)             │             0 │
+│ (GlobalAveragePooling2D)        │                        │               │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout_1 (Dropout)             │ ?                      │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_10 (Dense)                │ (None, 2)              │            66 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_11 (Dense)                │ (None, 2)              │             6 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+Total params: 5,960 (23.28 KB)
+Trainable params: 5,960 (23.28 KB)
+Non-trainable params: 0 (0.00 B)
+```
+
+</div>
+
+```python
+# Training
+cnn1.compile(
+    optimizer="adam",
+    loss="crossentropy",
+    metrics=["accuracy"],
+)
+
+cnn1.fit(
+    x_train,
+    y_train,
+    epochs=100,
+    batch_size=128,
+)
+
+results.update(get_result(cnn1, x_test, y_test))
+```
+
+<div class="result" markdown>
+
+```
+Epoch 1/100
+98/98 ━━━━━━━━━━━━━━━━━━━━ 3s 13ms/step - accuracy: 0.5247 - loss: 0.6885
+Epoch 2/100
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.6175 - loss: 0.6423
+...
+Epoch 99/100
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8224 - loss: 0.4165
+Epoch 100/100
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8115 - loss: 0.4251
+```
+</div>
+
+```python
+# Dataset
+ds = load_dataset("./data/wjj_vs_qcd_image.ds")
+
+x_train, y_train = ds.train.samples, ds.train.targets
+x_test, y_test = ds.test.samples, ds.test.targets
+
+non_zero_train = x_train.reshape(x_train.shape[0], -1).sum(1) != 0
+non_zero_test = x_test.reshape(x_test.shape[0], -1).sum(1) != 0
+
+x_train, y_train = x_train[non_zero_train], y_train[non_zero_train]
+x_test, y_test = x_test[non_zero_test], y_test[non_zero_test]
+
+x_train = np.log(x_train + 1)
+x_test = np.log(x_test + 1)
+x_train = x_train[..., None]
+x_test = x_test[..., None]
+```
+
+```python
+# Training
+cnn2 = CNN(name="cnn_log", input_shape=x_train.shape[1:])
+
+cnn2.compile(
+    optimizer="adam",
+    loss="crossentropy",
+    metrics=["accuracy"],
+)
+
+cnn2.fit(
+    x_train,
+    y_train,
+    epochs=100,
+    batch_size=128,
+)
+
+results.update(get_result(cnn2, x_test, y_test)
+```
+
+<div class="result" markdown>
+
+```
+Epoch 1/100
+98/98 ━━━━━━━━━━━━━━━━━━━━ 3s 13ms/step - accuracy: 0.5914 - loss: 0.6731
+Epoch 2/100
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.7587 - loss: 0.5235
+...
+Epoch 99/100
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8278 - loss: 0.3906
+Epoch 100/100
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8424 - loss: 0.3684
 ```
 
 </div>
 
 ## Evaluation
 
-To benchmark these approaches, we use:
+```python
+table = Table(
+    "Name",
+    "ACC",
+    "AUC",
+    "Significance",
+    "R50",
+    "R99",
+    title="Approach Comparison",
+)
 
-- `Accuracy` and `Auc` to show overall performance;
-- `roc_curve` to display tradeoff between thresholds and performance;
-- `MaxSignificance` and `RejectionAtEfficiency`, crucial ones in phenomenology studies.
+for name, metrics in results.items():
+    table.add_row(
+        name,
+        f"{metrics['acc']:.6f}",
+        f"{metrics['auc']:.6f}",
+        f"{metrics['sig']:.6f}",
+        f"{metrics['r50']:.6f}",
+        f"{metrics['r99']:.6f}",
+    )
+
+table
+```
+
+<div class="result" markdown>
+
+<style>
+    pre.small-text {
+        font-size: 12px; /* Adjust this value to increase or decrease the font size */
+        font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+        line-height: normal;
+        overflow-x: auto;
+        white-space: pre;
+    }
+</style>
+<pre class="small-text">
+                             Approach Comparison                              
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━┓
+┃ Name           ┃ ACC      ┃ AUC      ┃ Significance ┃ R50       ┃ R99      ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━┩
+│ cnc_parallel   │ 0.765086 │ 0.743599 │ 34.742661    │ 4.256874  │ 1.000000 │
+│ cnc_sequential │ 0.805868 │ 0.788848 │ 37.796890    │ 5.151141  │ 1.000000 │
+│ bdt            │ 0.899797 │ 0.952525 │ 44.131214    │ 86.015831 │ 1.997420 │
+│ mlp            │ 0.899428 │ 0.952812 │ 44.129673    │ 95.070129 │ 1.974135 │
+│ cnn_max        │ 0.809667 │ 0.873104 │ 39.128853    │ 18.534716 │ 1.261342 │
+│ cnn_log        │ 0.810978 │ 0.874385 │ 38.911655    │ 19.270756 │ 1.225999 │
+└────────────────┴──────────┴──────────┴──────────────┴───────────┴──────────┘
+</pre>
+
+</div>
 
 ```python
-benchmark = defaultdict(list)
-for approach in [approach1, approach2, approach3]:
-    y_prob = approach.predict(x_test, verbose=0)
-    y_pred = y_prob.argmax(axis=1)
-
-    benchmark["Name"].append(approach.name)
-    benchmark["ACC"].append(Accuracy()(y_test, y_pred).numpy())
-    benchmark["AUC"].append(AUC()(y_test, y_prob[:, 1]).numpy())
-    benchmark["MaxSignificance"].append(MaxSignificance()(y_test, y_prob[:, 1]).numpy())
-    benchmark["RejectionAtEfficiency"].append(RejectionAtEfficiency(0.5)(y_test, y_prob[:, 1]).numpy())
-
-    fpr, tpr, _ = roc_curve(y_test, y_prob[:, 1])
-    plt.plot(fpr, tpr, label=f"{approach.name}")
-
-print(tabulate(benchmark, headers="keys", tablefmt="github"))
+for name, metrics in results.items():
+    fpr = metrics["fpr"]
+    tpr = metrics["tpr"]
+    plt.plot(fpr, tpr, label=f"{name}")
 
 plt.title("ROC Curves")
 plt.xlabel("Efficiency")
@@ -201,113 +439,49 @@ plt.show()
 
 <div class="result" markdown>
 
-| Name                           |      ACC |      AUC |   MaxSignificance |   RejectionAtEfficiency |
-|--------------------------------|----------|----------|-------------------|-------------------------|
-| cut_and_count                  | 0.729897 | 0.721404 |          10.1985  |                   1     |
-| gradient_boosted_decision_tree | 0.876289 | 0.93703  |          13.3053  |                 125     |
-| toy_multilayer_perceptron      | 0.610309 | 0.915157 |           6.78387 |                 249.999 |
-
 ![roc_curves.png](../images/roc_curves.png)
 
 </div>
 
-## Show Information
 
-To clear show information of different Keras-based approaches, we use `summary`:
+## Plot the cuts on distributions
 
 ```python
-approach1.summary()
-approach2.summary()
-approach3.summary()
+ds = load_dataset("./data/wjj_vs_qcd_set.ds")
+
+x_train, y_train = ds.train.samples, ds.train.targets
+x_test, y_test = ds.test.samples, ds.test.targets
 ```
-
-<div class="result" markdown>
-
-```
-Model: "cut_and_count"
-_________________________________________________________________
- Layer (type)                Output Shape              Param #   
-=================================================================
-=================================================================
-Total params: 10 (40.00 Byte)
-Trainable params: 0 (0.00 Byte)
-Non-trainable params: 10 (40.00 Byte)
-_________________________________________________________________
-n_bins: 50
-cuts:
-  #1: x >= 78.3743
-  #2: x <= 0.5286
-  #3: x <= 2.7339
-Model: "gradient_boosted_decision_tree"
-- ccp_alpha: 0
-- criterion: friedman_mse
-- init: None
-- learning_rate: 0.1
-- loss: log_loss
-- max_depth: 3
-- max_features: None
-- max_leaf_nodes: None
-- min_impurity_decrease: 0
-- min_samples_leaf: 1
-- min_samples_split: 2
-- min_weight_fraction_leaf: 0
-- n_estimators: 100
-- n_iter_no_change: None
-- name: gradient_boosted_decision_tree
-- random_state: None
-- subsample: 1
-- tol: 0.0001
-- validation_fraction: 0.1
-- verbose: 0
-- warm_start: False
-Model: "toy_multilayer_perceptron"
-_________________________________________________________________
- Layer (type)                Output Shape              Param #   
-=================================================================
- dense (Dense)               multiple                  40        
-                                                                 
- dense_1 (Dense)             multiple                  110       
-                                                                 
- dense_2 (Dense)             multiple                  22        
-                                                                 
-=================================================================
-Total params: 172 (688.00 Byte)
-Trainable params: 172 (688.00 Byte)
-Non-trainable params: 0 (0.00 Byte)
-_________________________________________________________________
-```
-
-</div>
-
-Let’s plot the cuts on distributions to show if it’s fair enough:
 
 ```python
 fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-for index in range(x_train.shape[1]):
-    case = approach1.cases[index]
-    cuts = approach1.cuts[index]
-    observable = dataset.feature_names[index]
-    bin_edges = np.linspace(x_train[:, index].min(), x_train[:, index].max(), approach1.n_bins+1)
+for i in range(x_train.shape[1]):
+    layer = cnc1.cut_layers[i]
 
-    axs[index].hist(x_test[:, index][y_test == 0], bins=bin_edges, alpha=0.5, label="0")
-    axs[index].hist(x_test[:, index][y_test == 1], bins=bin_edges, alpha=0.5, label="1")
+    observable = ds.feature_names[i]
+    bin_edges = np.linspace(
+        x_train[:, i].min(), x_train[:, i].max(), cnc1.n_bins + 1
+    )
 
-    y_min, y_max = axs[index].get_ylim()
-    axs[index].vlines(bin_edges, y_min, y_max, color="k", ls="dashed", lw=0.5, label="bin edges")
+    axs[i].hist(x_test[:, i][y_test == 0], bins=bin_edges, alpha=0.5, label="0")
+    axs[i].hist(x_test[:, i][y_test == 1], bins=bin_edges, alpha=0.5, label="1")
 
-    if case == 0:
-        axs[index].vlines(cuts[0], y_min, y_max, color="r", label=f"{observable} <= {cuts[0]:.2f}")
-    elif case == 1:
-        axs[index].vlines(cuts[0], y_min, y_max, color="r", label=f"{observable} >= {cuts[0]:.2f}")
-    elif case == 2:
-        axs[index].vlines(cuts[0], y_min, y_max, color="r", label=f"{cuts[0]:.2f} <= {observable} <= {cuts[1]:.2f}")
-        axs[index].vlines(cuts[1], y_min, y_max, color="r")
+    y_min, y_max = axs[i].get_ylim()
+    axs[i].vlines(bin_edges, y_min, y_max, color="k", ls="dashed", lw=0.5)
+
+    if layer.case == 0:
+        axs[i].vlines(layer.cut_left, y_min, y_max, color="r", label=layer.cut)
+    elif layer.case == 1:
+        axs[i].vlines(layer.cut_right, y_min, y_max, color="r", label=layer.cut)
+    elif layer.case == 2:
+        axs[i].vlines(layer.cut_left, y_min, y_max, color="r", label=layer.cut)
+        axs[i].vlines(layer.cut_right, y_min, y_max, color="r")
     else:
-        axs[index].vlines(cuts[0], y_min, y_max, color="r", label=f"{observable} <= {cuts[0]:.2f} or {observable} >= {cuts[1]:.2f}")
-        axs[index].vlines(cuts[1], y_min, y_max, color="r")
+        axs[i].vlines(layer.cut_left, y_min, y_max, color="r", label=layer.cut)
+        axs[i].vlines(layer.cut_right, y_min, y_max, color="r")
 
-    axs[index].set_title(f"{observable}")
-    axs[index].legend()
+    axs[i].set_title(f"{observable}")
+    axs[i].legend()
 
 plt.tight_layout()
 plt.show()
@@ -315,7 +489,95 @@ plt.show()
 
 <div class="result" markdown>
 
-![cut_on_distributions.png](../images/cut_on_distributions.png)
+![parallel_cuts](../images/parallel_cuts.png)
+
+</div>
+
+```python
+fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+for i in range(x_train.shape[1]):
+    layer = cnc2.cut_layers[i]
+
+    observable = ds.feature_names[i]
+    bin_edges = np.linspace(
+        x_train[:, i].min(), x_train[:, i].max(), cnc2.n_bins + 1
+    )
+
+    axs[i].hist(x_test[:, i][y_test == 0], bins=bin_edges, alpha=0.5, label="0")
+    axs[i].hist(x_test[:, i][y_test == 1], bins=bin_edges, alpha=0.5, label="1")
+
+    y_min, y_max = axs[i].get_ylim()
+    axs[i].vlines(bin_edges, y_min, y_max, color="k", ls="dashed", lw=0.5)
+
+    if layer.case == 0:
+        axs[i].vlines(layer.cut_left, y_min, y_max, color="r", label=layer.cut)
+    elif layer.case == 1:
+        axs[i].vlines(layer.cut_right, y_min, y_max, color="r", label=layer.cut)
+    elif layer.case == 2:
+        axs[i].vlines(layer.cut_left, y_min, y_max, color="r", label=layer.cut)
+        axs[i].vlines(layer.cut_right, y_min, y_max, color="r")
+    else:
+        axs[i].vlines(layer.cut_left, y_min, y_max, color="r", label=layer.cut)
+        axs[i].vlines(layer.cut_right, y_min, y_max, color="r")
+
+    axs[i].set_title(f"{observable}")
+    axs[i].legend()
+
+plt.tight_layout()
+plt.show()
+```
+
+<div class="result" markdown>
+
+![sequential_cuts](../images/sequential_cuts_on_original_distributions.png)
+
+</div>
+
+```python
+cut_layers = cnc2.cut_layers
+mask_train = ops.squeeze(ops.where(ops.ones(x_train.shape[0]) == 1))
+mask_test = ops.squeeze(ops.where(ops.ones(x_test.shape[0]) == 1))
+
+plt.figure(figsize=(15, 5))
+for i in range(x_train.shape[1]):
+    plt.subplot(1, 3, i + 1)
+    layer = cut_layers[i]
+
+    masked_x_train = ops.convert_to_numpy(ops.take(x_train[:, i], mask_train))
+    masked_y_train = ops.convert_to_numpy(ops.take(y_train, mask_train))
+    bin_edges = np.linspace(masked_x_train.min(), masked_x_train.max(), 50 + 1)
+    mask_train = ops.squeeze(ops.where(cut_layers[i].apply_cut(x_train) == 1))
+
+    masked_x_test = ops.convert_to_numpy(ops.take(x_test[:, i], mask_test))
+    masked_y_test = ops.convert_to_numpy(ops.take(y_test, mask_test))
+    mask_test = ops.squeeze(ops.where(cut_layers[i].apply_cut(x_test) == 1))
+
+    plt.hist(masked_x_test[masked_y_test == 0], bins=bin_edges, alpha=0.5, label="0")
+    plt.hist(masked_x_test[masked_y_test == 1], bins=bin_edges, alpha=0.5, label="1")
+
+    y_min, y_max = plt.gca().get_ylim()
+    plt.vlines(bin_edges, y_min, y_max, color="k", ls="dashed", lw=0.5)
+
+    if layer.case == 0:
+        plt.vlines(layer.cut_left, y_min, y_max, color="r", label=layer.cut)
+    elif layer.case == 1:
+        plt.vlines(layer.cut_left, y_min, y_max, color="r", label=layer.cut)
+    elif layer.case == 2:
+        plt.vlines(layer.cut_left, y_min, y_max, color="r", label=layer.cut)
+        plt.vlines(layer.cut_right, y_min, y_max, color="r")
+    else:
+        plt.vlines(layer.cut_left, y_min, y_max, color="r", label=layer.cut)
+        plt.vlines(layer.cut_right, y_min, y_max, color="r")
+
+    plt.title(ds.feature_names[i])
+    plt.legend()
+plt.tight_layout()
+plt.show()
+```
+
+<div class="result" markdown>
+
+![sequential_cuts](../images/sequential_cuts.png)
 
 </div>
 
@@ -330,21 +592,23 @@ mkdir checkpoints
 Then, in your codes or the notebook:
 
 ```python
-approach1.save("./checkpoints/CBA.keras")
-approach2.save("./checkpoints/BDT.pickle")
-approach3.save("./checkpoints/MLP.keras")
+cnc1.save("./checkpoints/cnc_parallel.keras")
+cnc2.save("./checkpoints/cnc_sequential.keras")
+bdt.save("./checkpoints/bdt.pickle")
+mlp.save("./checkpoints/mlp.keras")
+cnn1.save("./checkpoints/cnn1.keras")
+cnn2.save("./checkpoints/cnn2.keras")
 ```
 
-Once again, we use `load_approach` to let HML decide which class it actually is, just like `get_observable`, `load_dataset`:
+Once again, we use `load_approach` to let HML decide which class it actually is, just like `parse_observable`, `load_dataset`:
 
 ```python
-loaded_approach1 = load_approach("./checkpoints/CBA.keras")
-loaded_approach2 = load_approach("./checkpoints/BDT.pickle")
-loaded_approach3 = load_approach("./checkpoints/MLP.keras")
-
-assert (approach1.cuts.numpy() == loaded_approach1.cuts.numpy()).all()
-assert approach2.n_estimators_ == loaded_approach2.n_estimators_
-assert approach3.count_params() == loaded_approach3.count_params()
+loaded_cnc1 = load_approach("./checkpoints/cnc_parallel.keras")
+loaded_cnc2 = load_approach("./checkpoints/cnc_sequential.keras")
+loaded_bdt = load_approach("./checkpoints/bdt.pickle")
+loaded_mlp = load_approach("./checkpoints/mlp.keras")
+loaded_cnn1 = load_approach("./checkpoints/cnn1.keras")
+loaded_cnn2 = load_approach("./checkpoints/cnn2.keras")
 ```
 
 Check the doc to learn more about [cuts](../api/hml.approaches/cuts.md), [trees](../api/hml.approaches/trees.md), and networks.
