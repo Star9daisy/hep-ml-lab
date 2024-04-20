@@ -1,124 +1,89 @@
 # Create datasets
 
-This guide demonstrates how to use HML and Observable to build a Representation and create a dataset for future use. With Observable, you can create and use observables not only with specific classes but also with simple strings.
+This guide demonstrates how to use observable parsing system to create a dataset for future use. With this system, you can create and use observables not only with specific classes but also with simple strings.
 
 Start by importing the necessary modules:
 
 ```python
+import uproot
 from hml.generators import Madgraph5
-from hml.observables import get_observable
-from hml.representations import Set
-from hml.datasets import TabularDataset
-from hml.utils import Filter
-from keras.utils import Progbar
-import numpy as np
-import matplotlib.pyplot as plt
+from hml.representations import Image
+from hml.datasets import SetDataset, ImageDataset
+from hml.approaches import Cut
 ```
-
-<div class="result" markdown>
-
-```
-Welcome to JupyROOT 6.24/02
-```
-
-</div>
 
 ## Load generated events
 
-As the previous guide showed, HML can handle three cases. Here, we use the `Madgraph5` class to fetch runs from the output directory:
+As the previous guide showed, HML can handle two cases. Here, we use the `Madgraph5` class to fetch runs from the output directory:
 
 ```python
-zjj = Madgraph5.from_output("./data/pp2zz_z2jj_z2vlvl")
-qcd = Madgraph5.from_output("./data/qcd")
+wjj = Madgraph5.from_output("data/pp2wz@10k", "mg5_aMC")
+qcd = Madgraph5.from_output("data/pp2jj@10k", "mg5_aMC")
+
+wjj_events = uproot.open(wjj.runs[0].events()[0])
+qcd_events = uproot.open(qcd.runs[0].events()[0])
 ```
 
-We'll use `.runs[0].events` to refer to the root file from Delphes in the event loop.
+## Preselection
 
-## Preselection and Representation
-
-For the processes, we choose three observables: mass and n-subjettiness ratio of the leading fat jet, and the angular distance between the leading and subleading jets. To ensure we can obtain the observables, it’s necessary to preselect or filter events based on the number of fat jets and jets:
+For the processes, we choose three observables: mass and n-subjettiness ratio of the leading fat jet, and the angular distance between the leading and subleading jets. To ensure we can obtain the observables without missing value, it’s necessary to preselect or filter events based on the number of fat jets and jets:
 
 ```python
-preselections = Filter(["FatJet.Size > 0", "Jet.Size > 1"])
-```
-
-- `FatJet.Size` is the observable `Size` associated with the physics object `FatJet`. This observable refers to a collection of objects. In a root file, it applies to an entire branch. The physics object corresponds to the branch name.
-- An observable is always linked to one or more physics objects. This concept inspired HML to create its own observable parsing system: `<physics_object>-<another>.<observable>`. The `physics_object` is any branch defined in your root file. Multiple objects are separated by `-`. For a single object, specify the index with `_`, for example, `Jet_0`, `Muon_1`, and so on.
-
-Now, we use the 1D data container `Set` to hold these three observables for all events:
-
-```python
-zjj_set = Set(
-    [
-        get_observable("FatJet_0.Mass"),
-        get_observable("FatJet_0.TauMN", m=2, n=1),
-        get_observable("Jet_0-Jet_1.DeltaR"),
-    ]
-)
-
-qcd_set = Set(
-    [
-        get_observable("FatJet_0.Mass"),
-        get_observable("FatJet_0.TauMN", m=2, n=1),
-        get_observable("Jet_0-Jet_1.DeltaR"),
-    ]
-)
-```
-
-- The pattern mentioned above can fetch an observable class anonymously.
-- Each observable has several aliases: for instance, `TauMN` is an alias for `NSubjettinessRatio`, `pt, pT, PT` is an alias for `Pt`.
-- Fetch observables with an external parameter to initialize them correctly.
-
-## Event loop
-
-Next, we loop over the events, preselect the valid ones and prepare data in `Set`:
-
-```python
-zjj_bar = Progbar(zjj.runs[0].n_events)
-for i, event in enumerate(zjj.runs[0].events):
-    if preselections.read_event(event).passed():
-        zjj_set.read_event(event)
-
-    zjj_bar.update(i+1)
-
-qcd_bar = Progbar(qcd.runs[0].n_events)
-for i, event in enumerate(qcd.runs[0].events):
-    if preselections.read_event(event).passed():
-        qcd_set.read_event(event)
-
-    qcd_bar.update(i+1)
-
+preselection = Cut("fatjet.size > 0 and jet.size > 1")
+preselection.read(wjj_events)
+preselection.value
 ```
 
 <div class="result" markdown>
 
 ```
-1000/1000 [==============================] - 1s 889us/step
-1000/1000 [==============================] - 1s 1ms/step
+[True,
+ True,
+ True,
+ True,
+ True,
+ False,
+ True,
+ True,
+ False,
+ True,
+ ...,
+ False,
+ True,
+ True,
+ True,
+ False,
+ True,
+ True,
+ False,
+ False]
+------------------
+type: 10000 * bool
 ```
 
 </div>
 
-To confirm our choice of observables is powerful enough to differentiate the signal and background, we plot three distributions:
+- `fatjet.size` is the observable `Size` associated with the physics object `fatjet`. This observable refers to the number of the objects. In a root file, it applies to an entire branch. The physics object corresponds to the branch name (case-insensitive).
+- An observable is always linked to one or more physics objects. This concept inspires HML to create its own observable parsing system: `<physics_object>,<another>.<observable>`. The `physics_object` is any branch defined in your root file. Multiple objects are separated by `,`. For a single object, specify the index directly after the object name, e.g., "jet0", "muon1".
+
+To extract the observable values, use the `read` method, which returns a boolean list. The `value` attribute stores the result.
+
+## Create a set dataset
+
+Now, we use the 1D data container `SetDataset` to hold these three observables for all events:
 
 ```python
-fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+cut = "fatjet.size > 0 and jet.size > 1"
 
-axs[0].hist(zjj_set.to_numpy()[:, 0], alpha=0.5, label="Z -> jj")
-axs[0].hist(qcd_set.to_numpy()[:, 0], alpha=0.5, label="QCD dijets")
-axs[0].set_title(zjj_set.names[0])
+set_ds = SetDataset(["fatjet0.mass", "fatjet0.tau21", "jet0,jet1.delta_r"])
+set_ds.read(wjj_events, 1, [cut])
+set_ds.read(qcd_events, 0, [cut])
+```
 
-axs[1].hist(zjj_set.to_numpy()[:, 1], alpha=0.5, label="Z -> jj")
-axs[1].hist(qcd_set.to_numpy()[:, 1], alpha=0.5, label="QCD dijets")
-axs[1].set_title(zjj_set.names[1])
+To confirm our choice of observables is powerful enough to differentiate the signal and background, we use `show` to plot three distributions:
 
-axs[2].hist(zjj_set.to_numpy()[:, 2], alpha=0.5, label="Z -> jj")
-axs[2].hist(qcd_set.to_numpy()[:, 2], alpha=0.5, label="QCD dijets")
-axs[2].set_title(zjj_set.names[2])
-axs[2].legend()
-
-plt.tight_layout()
-plt.show()
+```python
+ds.show()
 ```
 
 <div class="result" markdown>
@@ -127,26 +92,77 @@ plt.show()
 
 </div>
 
-## Pack things up
-
-Lastly, we create our dataset:
+Right before saving the dataset to the disk, we use the `split` method to divide the dataset into training and testing sets:
 
 ```python
-samples = np.array(zjj_set.values + qcd_set.values, "float32")
-targets = np.array([1] * len(zjj_set.values) + [0] * len(qcd_set.values), "int32")
-dataset = TabularDataset(
-    samples=samples,
-    targets=targets,
-    feature_names=zjj_set.names,
-    target_names=["Z -> jj", "QCD dijets"],
-    description="Z -> jj vs QCD dijets",
-)
+set_ds.split(0.7, 0.3, seed=42)
+print(set_ds.train.samples.shape)
+print(set_ds.train.targets.shape)
 
-dataset.save("./data/zjj_vs_qcd")
+set_ds.save("data/wjj_vs_qcd_set.ds")
 ```
 
-- `samples` represent all data points, while `targets` represent the integer number assigned to each class.
-- Utilize `feature_names` and `target_names` to enhance the readability of your data.
-- Include a brief `description` for your dataset.
+<div class="result" markdown>
+
+```
+(12644, 3)
+(12644,)
+```
+
+</div>
+
+The `split` method also supports the validation set: `set_ds.split(0.7, 0.2, 0.1)`.
+
+## Create an image dataset
+
+Besides a set dataset, we can also represent each event as an image and then create a dataset of these images.
+
+```python
+image_ds = ImageDataset(
+    Image(
+        height="fatjet0.constituents.phi",
+        width="fatjet0.constituents.eta",
+        channel="fatjet0.constituents.pt",
+    )
+    .with_subjets("fatjet0.constituents", "kt", 0.3, 0)
+    .translate(origin="SubJet0")
+    .rotate(axis="SubJet1", orientation=-90)
+    .pixelate(size=(33, 33), range=[(-1.6, 1.6), (-1.6, 1.6)])
+)
+```
+
+- The `Image` class is a representation of the image. It takes three arguments: `height`, `width`, and `channel`. The `height` and `width` are the observables for the y-axis and x-axis, respectively. The `channel` is the observable for the pixel intensity.
+- The `with_subjets` method adds subjets to the image.
+- The `translate` method moves the origin of the image to the subjet.
+- The `rotate` method rotates the image.
+- The `pixelate` method pixelates the image. This step makes the points discrete and produce the real image.
+
+To create the image dataset, we still use the `read` method:
+
+```python
+image_ds.read(sig_events, 1, [cut])
+image_ds.read(bkg_events, 0, [cut])
+```
+
+To visualize the images, there is also a `show` method:
+
+```python
+image_ds.show(norm="log", target=0, show_pixels=True)
+image_ds.show(norm="log", target=1, show_pixels=True)
+```
+
+<div class="result" markdown>
+
+![background image](../images/bkg_image.png)
+![signal image](../images/sig_image.png)
+
+</div>
+
+Finally, we split and save the dataset:
+
+```python
+image_ds.split(0.7, 0.3, seed=42)
+image_ds.save("data/wjj_vs_qcd_image.ds")
+```
 
 Check the doc to learn more about [observables](../api/hml.observables.md), [representations](../api/hml.representations.md) and [datasets](../api/hml.datasets.md).
