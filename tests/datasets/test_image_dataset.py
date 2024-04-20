@@ -66,7 +66,7 @@ def test_read(events):
     assert isinstance(ds.samples, tuple)
     assert isinstance(ds.samples[0], np.ndarray)
     assert isinstance(ds.samples[1], np.ndarray)
-    assert ds.targets.shape == (99, 1)
+    assert ds.targets.shape == (99,)
 
     # Pixelation, samples are a single array for an image -------------------- #
     image = (
@@ -86,7 +86,7 @@ def test_read(events):
 
     assert isinstance(ds.samples, np.ndarray)
     assert ds.samples.shape == (99, 33, 33)
-    assert ds.targets.shape == (99, 1)
+    assert ds.targets.shape == (99,)
 
 
 def test_split():
