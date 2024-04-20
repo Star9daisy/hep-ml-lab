@@ -67,8 +67,9 @@ nav:
     - Docker: install/docker.md
   - Guides:
     - guides/index.md
-    - Generate events: guides/generate_events.ipynb
-    - Read events: guides/read_events.ipynb
+    - Generate events: guides/01_generate_events.md
+    - Create datasets: guides/02_create_datasets.md
+    - Apply approaches: guides/03_apply_approaches.md
   - Examples:
     - 1511.05190: examples/1511.05190.md
     - 1801.00797: examples/1801.00797.md
