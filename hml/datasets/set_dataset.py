@@ -52,14 +52,12 @@ class SetDataset:
         if isinstance(self._targets, list):
             self._targets = ak.values_astype(
                 ak.Array([target] * len(set_values)), "int32"
-            )[:, None]
+            )
         else:
             self._targets = ak.concatenate(
                 [
                     self._targets,
-                    ak.values_astype(ak.Array([target] * len(set_values)), "int32")[
-                        :, None
-                    ],
+                    ak.values_astype(ak.Array([target] * len(set_values)), "int32"),
                 ]
             )
 

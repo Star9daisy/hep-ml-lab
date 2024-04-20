@@ -54,14 +54,14 @@ class ImageDataset:
                 if isinstance(self._targets, list):
                     self._targets = ak.values_astype(
                         ak.Array([target] * len(image_values)), "int32"
-                    )[:, None]
+                    )
                 else:
                     self._targets = ak.concatenate(
                         [
                             self._targets,
                             ak.values_astype(
                                 ak.Array([target] * len(image_values)), "int32"
-                            )[:, None],
+                            ),
                         ]
                     )
 
