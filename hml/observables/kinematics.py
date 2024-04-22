@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ..physics_objects import PhysicsObject
 from .observable import Observable
 

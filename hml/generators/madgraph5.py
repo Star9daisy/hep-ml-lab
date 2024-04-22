@@ -5,6 +5,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Union
 
 import pexpect
 
@@ -13,7 +14,7 @@ from bs4 import BeautifulSoup
 from rich.console import Console
 from rich.table import Table
 
-PathLike = Path | str
+PathLike = Union[str, Path]
 # from ..types import Path, PathLike
 
 # _ = ROOT.gSystem.Load("libDelphes")  # type: ignore
