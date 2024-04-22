@@ -5,6 +5,7 @@ description = "An end-to-end framework used for research combining high-energy p
 license = "MIT"
 authors = ["Star9daisy <star9daisy@outlook.com>"]
 readme = "README.md"
+homepage = "https://github.com/Star9daisy/hep-ml-lab"
 repository = "https://github.com/Star9daisy/hep-ml-lab"
 documentation = "https://star9daisy.github.io/hep-ml-lab/"
 keywords = ["high energy physics", "machine learning", "framework"]
