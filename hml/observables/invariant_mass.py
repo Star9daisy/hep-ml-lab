@@ -26,7 +26,7 @@ class InvariantMass(Observable):
         momenta = []
         for obj in self.physics_object.all:
             momentum4d = branches_to_momentum4d(events, all_keys[obj.branch.lower()])
-            padded_momentum4d = ak.pad_none(momentum4d[:, *obj.slices], 1)
+            padded_momentum4d = ak.pad_none(momentum4d[:, obj.slices[0]], 1)
             momenta.append(padded_momentum4d)
 
         total = reduce(lambda x, y: x + y, momenta)

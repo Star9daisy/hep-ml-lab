@@ -127,16 +127,20 @@ class Observable:
         if is_single(self.physics_object) or is_collective(self.physics_object):
             if f"{branch}.{self.class_name.lower()}" in all_keys:
                 key = all_keys[f"{branch}.{self.class_name.lower()}"]
-                array = events[key].array()
-                value = array[:, *slices]
+                value = events[key].array()
 
             else:
                 array = branches_to_momentum4d(events, all_keys[branch])
-                value = getattr(array, self.class_name.lower())[:, *slices]
+                value = getattr(array, self.class_name.lower())
 
         else:
             array = get_constituents(events, all_keys[branch])
-            value = getattr(array, self.class_name.lower())[:, *slices]
+            value = getattr(array, self.class_name.lower())
+
+        if len(slices) == 1:
+            value = value[:, slices[0]]
+        else:
+            value = value[:, slices[0], slices[1]]
 
         for i, slice_ in enumerate(slices):
             if slice_.stop is not None:
