@@ -23,7 +23,7 @@ pip install hep-ml-lab
 
 ## Module overview
 
-![module_overview](docs/images/module_overview.svg)
+![module_overview](docs/images/hml_modules.png)
 
 - `hml.generators`: API of Madgraph5 for simulating colliding events;
 - `hml.physics_objects`: Physics objects classfied by their counts;
