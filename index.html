@@ -10,7 +10,7 @@
       
       
       
-        <link rel="next" href="examples/01_generate_events/">
+        <link rel="next" href="install/prerequisites/">
       
       <link rel="icon" href="assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
@@ -41,6 +41,8 @@
     
     
       <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="stylesheets/extra.css">
     
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -81,7 +83,7 @@
 
   
 
-<header class="md-header md-header--shadow" data-md-component="header">
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="." title="HEP ML Lab" class="md-header__button md-logo" aria-label="HEP ML Lab" data-md-component="logo">
       
@@ -102,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Introcution
+              Home
             
           </span>
         </div>
@@ -161,13 +163,112 @@
     
   </nav>
   
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+    
+  
+
+
+  <li class="md-tabs__item">
+    <a href="." class="md-tabs__link md-tabs__link--active">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="install/prerequisites/" class="md-tabs__link">
+        Install
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="guides/" class="md-tabs__link">
+        Guides
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="examples/1511.05190/" class="md-tabs__link">
+        Examples
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="api/hml.generators/" class="md-tabs__link">
+        API
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="history/" class="md-tabs__link">
+      History
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
 </header>
     
     <div class="md-container" data-md-component="container">
       
       
-        
-          
         
       
       <main class="md-main" data-md-component="main">
@@ -180,8 +281,10 @@
                   <div class="md-sidebar__inner">
                     
 
+  
 
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="." title="HEP ML Lab" class="md-nav__button md-logo" aria-label="HEP ML Lab" data-md-component="logo">
       
@@ -224,12 +327,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Introcution
+          Home
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="." class="md-nav__link md-nav__link--active">
-        Introcution
+        Home
       </a>
       
         
@@ -268,47 +371,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#updates" class="md-nav__link">
-    Updates
-  </a>
-  
-    <nav class="md-nav" aria-label="Updates">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#v0301" class="md-nav__link">
-    v0.3.0.1
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#v030" class="md-nav__link">
-    v0.3.0
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#v022" class="md-nav__link">
-    v0.2.2
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#v021" class="md-nav__link">
-    v0.2.1
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -333,16 +395,24 @@
       <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
       
       
+        
+          
+        
+          
+        
+          
+        
+      
       
         <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
-          Examples
+          Install
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_2">
           <span class="md-nav__icon md-icon"></span>
-          Examples
+          Install
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -352,8 +422,8 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/01_generate_events/" class="md-nav__link">
-        Generate events
+      <a href="install/prerequisites/" class="md-nav__link">
+        Prerequisites
       </a>
     </li>
   
@@ -366,8 +436,8 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/02_create_datasets/" class="md-nav__link">
-        Create datasets
+      <a href="install/pip/" class="md-nav__link">
+        pip
       </a>
     </li>
   
@@ -380,8 +450,8 @@
   
   
     <li class="md-nav__item">
-      <a href="examples/03_apply_approaches/" class="md-nav__link">
-        Apply approaches
+      <a href="install/docker/" class="md-nav__link">
+        Docker
       </a>
     </li>
   
@@ -410,18 +480,38 @@
       <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
       
       
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
       
-        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
-          API Reference
-          <span class="md-nav__icon md-icon"></span>
-        </label>
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="guides/">Guides</a>
+          
+            <label for="__nav_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
       
       <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
         <label class="md-nav__title" for="__nav_3">
           <span class="md-nav__icon md-icon"></span>
-          API Reference
+          Guides
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
           
             
               
@@ -429,8 +519,8 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/hml.generators/" class="md-nav__link">
-        hml.generators
+      <a href="guides/01_generate_events/" class="md-nav__link">
+        Generate events
       </a>
     </li>
   
@@ -443,7 +533,269 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/hml.observables/" class="md-nav__link">
+      <a href="guides/02_create_datasets/" class="md-nav__link">
+        Create datasets
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guides/03_apply_approaches/" class="md-nav__link">
+        Apply approaches
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          Examples
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/1511.05190/" class="md-nav__link">
+        1511.0519
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/1801.00797/" class="md-nav__link">
+        1801.00797
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          API
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          API
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/hml.generators/" class="md-nav__link">
+        hml.generators
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+          physics_objects
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5_2">
+          <span class="md-nav__icon md-icon"></span>
+          physics_objects
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/physics_objects/single/" class="md-nav__link">
+        single
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/physics_objects/collective/" class="md-nav__link">
+        collective
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/physics_objects/nested/" class="md-nav__link">
+        nested
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/physics_objects/multiple/" class="md-nav__link">
+        multiple
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/hml.observables/" class="md-nav__link">
         hml.observables
       </a>
     </li>
@@ -457,7 +809,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/hml.representations/" class="md-nav__link">
+      <a href="api/hml.representations/" class="md-nav__link">
         hml.representations
       </a>
     </li>
@@ -471,7 +823,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/hml.datasets/" class="md-nav__link">
+      <a href="api/hml.datasets/" class="md-nav__link">
         hml.datasets
       </a>
     </li>
@@ -490,17 +842,25 @@
       
       
       
-      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_6" >
       
       
+        
+          
+        
+          
+        
+          
+        
       
-        <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+      
+        <label class="md-nav__link" for="__nav_5_6" id="__nav_5_6_label" tabindex="0">
           hml.approaches
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-        <label class="md-nav__title" for="__nav_3_5">
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5_6">
           <span class="md-nav__icon md-icon"></span>
           hml.approaches
         </label>
@@ -512,8 +872,8 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/hml.approaches/cuts/" class="md-nav__link">
-        Cuts
+      <a href="api/hml.approaches/cuts/" class="md-nav__link">
+        cuts
       </a>
     </li>
   
@@ -526,8 +886,8 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/hml.approaches/trees/" class="md-nav__link">
-        Trees
+      <a href="api/hml.approaches/trees/" class="md-nav__link">
+        trees
       </a>
     </li>
   
@@ -545,19 +905,23 @@
       
       
       
-      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5_3" >
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_6_3" >
       
       
+        
+          
+        
       
-        <label class="md-nav__link" for="__nav_3_5_3" id="__nav_3_5_3_label" tabindex="0">
-          Networks
+      
+        <label class="md-nav__link" for="__nav_5_6_3" id="__nav_5_6_3_label" tabindex="0">
+          networks
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_5_3_label" aria-expanded="false">
-        <label class="md-nav__title" for="__nav_3_5_3">
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_6_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5_6_3">
           <span class="md-nav__icon md-icon"></span>
-          Networks
+          networks
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -567,8 +931,8 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/hml.approaches/networks/mlps/" class="md-nav__link">
-        MLP
+      <a href="api/hml.approaches/networks/mlps/" class="md-nav__link">
+        mlps
       </a>
     </li>
   
@@ -595,7 +959,7 @@
   
   
     <li class="md-nav__item">
-      <a href="api-reference/hml.metrics/" class="md-nav__link">
+      <a href="api/hml.metrics/" class="md-nav__link">
         hml.metrics
       </a>
     </li>
@@ -603,22 +967,23 @@
 
             
           
-            
-              
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
   
   
   
     <li class="md-nav__item">
-      <a href="api-reference/hml.utils/" class="md-nav__link">
-        hml.utils
+      <a href="history/" class="md-nav__link">
+        History
       </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
     </li>
   
 
@@ -670,47 +1035,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#updates" class="md-nav__link">
-    Updates
-  </a>
-  
-    <nav class="md-nav" aria-label="Updates">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#v0301" class="md-nav__link">
-    v0.3.0.1
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#v030" class="md-nav__link">
-    v0.3.0
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#v022" class="md-nav__link">
-    v0.2.2
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#v021" class="md-nav__link">
-    v0.2.1
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -747,43 +1071,15 @@ reproducible results.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">pip</span> <span class="n">install</span> <span class="n">hep</span><span class="o">-</span><span class="n">ml</span><span class="o">-</span><span class="n">lab</span>
 </span></code></pre></div>
 <h2 id="module-overview">Module overview<a class="headerlink" href="#module-overview" title="Permanent link">#</a></h2>
-<p><img alt="module_overview" src="images/module_overview.svg" /></p>
+<p><img alt="module_overview" src="images/hml_modules.png" /></p>
 <ul>
 <li><code>hml.generators</code>: API of Madgraph5 for simulating colliding events;</li>
+<li><code>hml.physics_objects</code>: General physics objects;</li>
 <li><code>hml.observables</code>: General observables in jet physics;</li>
 <li><code>hml.representations</code>: Different data structure used to represent an event;</li>
 <li><code>hml.datasets</code>: Existing datasets and helper classes for creating new datasets;</li>
 <li><code>hml.approaches</code>: Cuts, trees and networks for classification;</li>
 <li><code>hml.metrics</code>: Metrics used in classical signal vs background analysis;</li>
-<li><code>hml.utils</code>: Utility functions.</li>
-</ul>
-<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">#</a></h2>
-<h3 id="v0301">v0.3.0.1<a class="headerlink" href="#v0301" title="Permanent link">#</a></h3>
-<ul>
-<li>Fix a bug that Madgraph5 may run into an infinite loop caused by HML keeping
-  removing py.py file during initialization.</li>
-<li>Fix nan value not implemented in Fileter.</li>
-<li>Fix the wrong order of runs when using <code>hml.generators.Madgraph5.runs</code> and
-  <code>hml.generators.Madgraph5.summary</code>.</li>
-<li>Fix the typo "g1" in quickstart.</li>
-</ul>
-<h3 id="v030">v0.3.0<a class="headerlink" href="#v030" title="Permanent link">#</a></h3>
-<ul>
-<li>New Madgraph5 API now is closer to the original Madgraph5 CLI.</li>
-<li>New Observable parsing system makes it easier to use and define new observables.</li>
-<li>New CutAndCout and BoostedDecisionTree in Keras style.</li>
-</ul>
-<h3 id="v022">v0.2.2<a class="headerlink" href="#v022" title="Permanent link">#</a></h3>
-<ul>
-<li>Change output structure of <code>hml.generators.Madgraph5</code> to ensure reproducibility.</li>
-<li>Refactor <code>hml.generators.Madgraph5</code> and <code>hml.generators.MG5Run</code> to make
-  them more robust.</li>
-</ul>
-<h3 id="v021">v0.2.1<a class="headerlink" href="#v021" title="Permanent link">#</a></h3>
-<ul>
-<li>Add <code>summary</code> to <code>hml.generators.Madgraph5</code> to print a summary of all run.</li>
-<li>Add <code>remove</code> to <code>hml.generators.Madgraph5</code> to remove a run.</li>
-<li>Add <code>clean</code> to <code>hml.generators.Madgraph5</code> to remove the output directory.</li>
 </ul>
 
 
@@ -822,7 +1118,7 @@ reproducible results.</p>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.copy", "content.code.annotate"], "search": "assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.copy", "content.code.annotate", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes"], "search": "assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="assets/javascripts/bundle.220ee61c.min.js"></script>
