@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from keras import ops
 from keras.metrics import FalsePositives, Metric, TruePositives
 

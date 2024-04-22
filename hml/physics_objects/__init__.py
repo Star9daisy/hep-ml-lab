@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .collective import Collective, is_collective
 from .multiple import Multiple, is_multiple
 from .nested import Nested, is_nested
