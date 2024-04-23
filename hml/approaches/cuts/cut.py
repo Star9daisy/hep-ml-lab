@@ -66,7 +66,7 @@ class Cut:
 
         expression = self._expr
         for cut in cuts_results:
-            cut_pattern = r"\b" + cut.replace(".", "\.") + r"\b"
+            cut_pattern = r"\b" + cut.replace(".", "\\.") + r"\b"
             expression = re.sub(cut_pattern, f"cuts_results['{cut}']", expression)
 
         self._value = ak.fill_none(eval(expression), False)
