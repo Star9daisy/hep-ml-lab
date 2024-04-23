@@ -1,11 +1,12 @@
 import fastjet
 
 from hml import (
-    # approaches,
+    approaches,
     datasets,
-    # generators,
-    # metrics,
+    generators,
+    metrics,
     observables,
+    operations,
     physics_objects,
     representations,
 )

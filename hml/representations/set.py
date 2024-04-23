@@ -3,9 +3,8 @@ from __future__ import annotations
 from importlib import import_module
 
 import awkward as ak
-import numpy as np
 
-from hml.observables import ALL_OBJECTS_DICT, Observable, parse
+from hml.observables import Observable, parse
 
 
 class Set:
