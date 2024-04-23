@@ -7,8 +7,8 @@ import vector
 
 from hml.physics_objects.physics_object import PhysicsObject
 
+from ..operations import branch_to_momentum4d
 from .observable import Observable
-from .observable_utils import branches_to_momentum4d
 
 vector.register_awkward()
 
@@ -27,7 +27,7 @@ class InvariantMass(Observable):
 
         momenta = []
         for obj in self.physics_object.all:
-            momentum4d = branches_to_momentum4d(events, all_keys[obj.branch.lower()])
+            momentum4d = branch_to_momentum4d(events, all_keys[obj.branch.lower()])
             padded_momentum4d = ak.pad_none(momentum4d[:, obj.slices[0]], 1)
             momenta.append(padded_momentum4d)
 

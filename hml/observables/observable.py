@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import awkward as ak
 
+from ..operations import branch_to_momentum4d, constituents_to_momentum4d
 from ..physics_objects import PhysicsObject, is_collective, is_multiple, is_single
 from ..physics_objects import parse as parse_object
-from .observable_utils import branches_to_momentum4d, get_constituents
 
 
 class Observable:
@@ -130,11 +130,11 @@ class Observable:
                 value = events[key].array()
 
             else:
-                array = branches_to_momentum4d(events, all_keys[branch])
+                array = branch_to_momentum4d(events, all_keys[branch])
                 value = getattr(array, self.class_name.lower())
 
         else:
-            array = get_constituents(events, all_keys[branch])
+            array = constituents_to_momentum4d(events, all_keys[branch])
             value = getattr(array, self.class_name.lower())
 
         if len(slices) == 1:
