@@ -137,7 +137,7 @@ class GradientBoostedDecisionTree(GradientBoostingClassifier):
         def _monitor(i, model, local_variables):
             y_true = local_variables["y"]
             raw_pred = local_variables["raw_predictions"]
-            y_prob = model._loss._raw_prediction_to_proba(raw_pred)
+            y_prob = model._loss.predict_proba(raw_pred)
             sample_weight = local_variables["sample_weight"]
 
             loss = model._loss(y_true, raw_pred, sample_weight)
@@ -158,13 +158,14 @@ class GradientBoostedDecisionTree(GradientBoostingClassifier):
             # Validation metrics
             val_values = []
             if validation_split != 0.0 or validation_data is not None:
+                # Reshape y_val and change dtype to match the previous one
                 y_true = (
                     self.y_val if self.y_val.ndim == 1 else self.y_val.argmax(axis=1)
+                ).astype(
+                    y_true.dtype
                 )  # (n_samples,)
                 raw_pred = next(model._staged_raw_predict(self.x_val))  # (n_samples, 1)
-                y_prob = model._loss._raw_prediction_to_proba(
-                    raw_pred
-                )  # (n_samples, n_classes)
+                y_prob = model._loss.predict_proba(raw_pred)  # (n_samples, n_classes)
 
                 # ! sample_weight: (n_samples x (1 - validation_fraction),)
                 # here the validation_fraction is a parameter of the parent class
