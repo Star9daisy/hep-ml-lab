@@ -2,7 +2,6 @@ site_name: HEP ML Lab
 repo_url: https://github.com/star9daisy/hep-ml-lab
 repo_name: hep-ml-lab
 
-
 theme:
   name: material
   features:
@@ -14,7 +13,7 @@ theme:
   palette:
     primary: black
   icon:
-    repo: fontawesome/brands/git-alt 
+    repo: fontawesome/brands/git-alt
 
 plugins:
   - exclude:
@@ -49,7 +48,6 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
-  
 
 extra_javascript:
   - javascripts/mathjax.js
@@ -62,17 +60,16 @@ extra_css:
 nav:
   - Home: index.md
   - Install:
-    - Prerequisites: install/prerequisites.md
-    - pip: install/pip.md
-    - Docker: install/docker.md
+      - pip: install/pip.md
+      - Docker: install/docker.md
   - Guides:
-    - guides/index.md
-    - Generate events: guides/01_generate_events.md
-    - Create datasets: guides/02_create_datasets.md
-    - Apply approaches: guides/03_apply_approaches.md
+      - guides/index.md
+      - Generate events: guides/01_generate_events.md
+      - Create datasets: guides/02_create_datasets.md
+      - Apply approaches: guides/03_apply_approaches.md
   - Examples:
-    - 1511.05190: examples/1511.05190.md
-    - 1801.00797: examples/1801.00797.md
+      - 1511.05190: examples/1511.05190.md
+      - 1801.00797: examples/1801.00797.md
   - API:
       - hml.generators: api/hml.generators.md
       - physics_objects:

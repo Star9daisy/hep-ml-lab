@@ -1,10 +1,11 @@
 # Install hep-ml-lab with pip
 
-```bash
-pip install hep-ml-lab
-```
-
-This will install the latest version of `keras` without any backends such as `tensorflow`, `pytorch` or `jax`. Since we have only tested `hep-ml-lab` on `tensorflow`, here we show how to install `tensorflow` as a backend.
+## Prerequisites
+- Python >= 3.9
+- ROOT v6.26/14 (other versions should be OK. Required by Delphes)
+- Madgraph5 v3.5.3 (other versions should be OK)
+    - pythia8 v8.306 (installed by Madgraph5)
+    - Delphes v3.5.0 (installed by Madgraph5)
 
 The `keras` 3.0 requires the `tensorflow` 2.16 or higher, which is also the latest version. Before installing `tensorflow`, you need to install the following NVIDIA® softwares:
 
@@ -14,12 +15,18 @@ The `keras` 3.0 requires the `tensorflow` 2.16 or higher, which is also the late
 
 Check the offical page of [tensorflow](https://www.tensorflow.org/install/pip) for more details.
 
-Then you can install `tensorflow` with the following command
+## Installation
+```bash
+pip install hep-ml-lab
+```
+
+This will install the latest version of `keras` without any backends such as `tensorflow`, `pytorch` or `jax`. Since we have only tested `hep-ml-lab` on `tensorflow`, here we show how to install `tensorflow` as a backend. Then you can install `tensorflow` with the following command
 
 ```bash
 pip install tensorflow[and-cuda]
 ```
 
+## Fix the issue with tensorflow 2.16
 There's an known issue with `tensorflow` 2.16: it couldn't recognize GPUs smoothly like before. So we have to link the related libraries manually. Use the following script to do so:
 
 ```bash
