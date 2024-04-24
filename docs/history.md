@@ -1,6 +1,13 @@
 # History
 
-### v0.4.0
+## v0.4.1
+- Fix module overview image in README.
+- Fix `GradientBoostedDecisionTree` to be compatible with different `sklearn` versions.
+- Fix `hml.datasets.SetDataset.show` to display the correct rows and columns.
+- Rename the `parse` and `register` functions to `parse_physics_object`, `parse_observable`, and `register_observable`.
+- Update the installation document.
+
+## v0.4.0
 This version refactors most of the codebase to make it compatible with the array
 (from `awkward` and `uproot`) representation of the data.
 
