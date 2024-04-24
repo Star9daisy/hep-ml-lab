@@ -30,7 +30,7 @@ jobs:
           . /root/softwares/root6/bin/thisroot.sh
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/root/softwares/madgraph5/Delphes
           export ROOT_INCLUDE_PATH=/root/softwares/madgraph5/Delphes/external
-          poetry run pip install tensorflow[and-cuda]
+          poetry run pip install tensorflow
 
           poetry run pytest -v --cov=hml --cov-report=xml tests
         shell: bash
