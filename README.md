@@ -21,6 +21,8 @@ To get started, please check out the [documents](https://star9daisy.github.io/he
 pip install hep-ml-lab
 ```
 
+Check out the [install via pip](install/pip.md) for more details of prerequisites and post-installation steps or [install via Docker](install/docker.md) for a hassle-free experience.
+
 ## Module overview
 
 ![module_overview](docs/images/hml_modules.png)
@@ -34,6 +36,13 @@ pip install hep-ml-lab
 - `hml.metrics`: Metrics used in classical signal vs background analysis;
 
 ## Updates
+
+### v0.4.1
+- Fix module overview image in README.
+- Fix `GradientBoostedDecisionTree` to be compatible with different `sklearn` versions.
+- Fix `hml.datasets.SetDataset.show` to display the correct rows and columns.
+- Rename the `parse` and `register` functions to `parse_physics_object`, `parse_observable`, and `register_observable`.
+- Update the installation document.
 
 ### v0.4.0
 This version refactors most of the codebase to make it compatible with the array
