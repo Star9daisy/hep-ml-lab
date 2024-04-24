@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../prerequisites/">
+        <link rel="prev" href="../..">
       
       
         <link rel="next" href="../docker/">
@@ -194,7 +194,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../prerequisites/" class="md-tabs__link md-tabs__link--active">
+      <a href="./" class="md-tabs__link md-tabs__link--active">
         Install
       </a>
     </li>
@@ -349,8 +349,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
@@ -369,20 +367,6 @@
               
   
   
-  
-    <li class="md-nav__item">
-      <a href="../prerequisites/" class="md-nav__link">
-        Prerequisites
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
     
   
   
@@ -394,9 +378,54 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          pip
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         pip
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fix-the-issue-with-tensorflow-216" class="md-nav__link">
+    Fix the issue with tensorflow 2.16
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -967,6 +996,35 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fix-the-issue-with-tensorflow-216" class="md-nav__link">
+    Fix the issue with tensorflow 2.16
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -984,8 +1042,60 @@
 
 
 <h1 id="install-hep-ml-lab-with-pip">Install hep-ml-lab with pip<a class="headerlink" href="#install-hep-ml-lab-with-pip" title="Permanent link">#</a></h1>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<ul>
+<li>Python &gt;= 3.9</li>
+<li>ROOT v6.26/14 (other versions should be OK. Required by Delphes)</li>
+<li>Madgraph5 v3.5.3 (other versions should be OK)<ul>
+<li>pythia8 v8.306 (installed by Madgraph5)</li>
+<li>Delphes v3.5.0 (installed by Madgraph5)</li>
+</ul>
+</li>
+</ul>
+<p>The <code>keras</code> 3.0 requires the <code>tensorflow</code> 2.16 or higher, which is also the latest version. Before installing <code>tensorflow</code>, you need to install the following NVIDIA® softwares:</p>
+<ul>
+<li><a href="https://www.nvidia.com/drivers">NVIDIA® GPU</a> drivers version 450.80.02 or higher.</li>
+<li><a href="https://developer.nvidia.com/cuda-toolkit-archive">CUDA® Toolkit 11.8</a>.</li>
+<li><a href="https://developer.nvidia.com/cudnn">cuDNN SDK 8.6.0</a>.</li>
+</ul>
+<p>Check the offical page of <a href="https://www.tensorflow.org/install/pip">tensorflow</a> for more details.</p>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>hep-ml-lab
 </span></code></pre></div>
+<p>This will install the latest version of <code>keras</code> without any backends such as <code>tensorflow</code>, <code>pytorch</code> or <code>jax</code>. Since we have only tested <code>hep-ml-lab</code> on <code>tensorflow</code>, here we show how to install <code>tensorflow</code> as a backend. Then you can install <code>tensorflow</code> with the following command</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip<span class="w"> </span>install<span class="w"> </span>tensorflow<span class="o">[</span>and-cuda<span class="o">]</span>
+</span></code></pre></div>
+<h2 id="fix-the-issue-with-tensorflow-216">Fix the issue with tensorflow 2.16<a class="headerlink" href="#fix-the-issue-with-tensorflow-216" title="Permanent link">#</a></h2>
+<p>There's an known issue with <code>tensorflow</code> 2.16: it couldn't recognize GPUs smoothly like before. So we have to link the related libraries manually. Use the following script to do so:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># set_nvidia.sh</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># Attempt to locate the NVIDIA cudnn library file using Python.</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nv">NVIDIA_DIR</span><span class="o">=</span><span class="k">$(</span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import nvidia.cudnn; print(nvidia.cudnn.__file__)&quot;</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="k">)</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># Check if the NVIDIA directory variable is set (i.e., cudnn was found).</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>!<span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NVIDIA_DIR</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="c1"># Get the parent directory of the directory containing the __file__</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="nv">NVIDIA_DIR</span><span class="o">=</span><span class="k">$(</span>dirname<span class="w"> </span><span class="k">$(</span>dirname<span class="w"> </span><span class="nv">$NVIDIA_DIR</span><span class="k">))</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="c1"># Iterate over all directories in the NVIDIA package directory.</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span>dir<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$NVIDIA_DIR</span>/*<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">        </span><span class="c1"># Check if the directory has a &#39;lib&#39; subdirectory.</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$dir</span><span class="s2">/lib&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">            </span><span class="c1"># Prepend the library path to LD_LIBRARY_PATH.</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">            </span><span class="nb">export</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$dir</span><span class="s2">/lib:</span><span class="nv">$LD_LIBRARY_PATH</span><span class="s2">&quot;</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">        </span><span class="k">fi</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span><span class="k">done</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="k">fi</span>
+</span></code></pre></div>
+<p>Run it in the environment where you installed <code>tensorflow</code>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>bash<span class="w"> </span>set_nvidia.sh
+</span></code></pre></div>
+<p>Now you can test if <code>tensorflow</code> recognizes your GPUs:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import tensorflow as tf; print(tf.config.list_physical_devices(&#39;GPU&#39;))&quot;</span>
+</span></code></pre></div>
+<p>If it is set up successfully, you will see the following output:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>[PhysicalDevice(name=&#39;/physical_device:GPU:0&#39;, device_type=&#39;GPU&#39;)]
+</span></code></pre></div></p>
 
 
 

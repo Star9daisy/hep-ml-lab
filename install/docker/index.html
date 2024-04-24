@@ -194,7 +194,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../prerequisites/" class="md-tabs__link md-tabs__link--active">
+      <a href="../pip/" class="md-tabs__link md-tabs__link--active">
         Install
       </a>
     </li>
@@ -349,8 +349,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
@@ -364,20 +362,6 @@
           Install
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../prerequisites/" class="md-nav__link">
-        Prerequisites
-      </a>
-    </li>
-  
-
-            
           
             
               
@@ -408,9 +392,61 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Docker
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Docker
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#hml-env-image" class="md-nav__link">
+    hml-env image
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#start-a-container" class="md-nav__link">
+    Start a container
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-pip-to-continue-installation-of-hep-ml-lab" class="md-nav__link">
+    Use pip to continue installation of hep-ml-lab
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -967,6 +1003,42 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#hml-env-image" class="md-nav__link">
+    hml-env image
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#start-a-container" class="md-nav__link">
+    Start a container
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-pip-to-continue-installation-of-hep-ml-lab" class="md-nav__link">
+    Use pip to continue installation of hep-ml-lab
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -984,8 +1056,51 @@
 
 
 <h1 id="use-hep-ml-lab-in-docker">Use hep-ml-lab in Docker<a class="headerlink" href="#use-hep-ml-lab-in-docker" title="Permanent link">#</a></h1>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>star9daisy/hml-env:2.0.0
+<h2 id="hml-env-image">hml-env image<a class="headerlink" href="#hml-env-image" title="Permanent link">#</a></h2>
+<p><code>hml-env</code> is a comprehensive programming environment designed to facilitate research and development at the intersection of high-energy physics and machine learning. </p>
+<p>This image is based on <code>nvidia/cuda:11.8.0-cudnn8-devel-ubuntu20.04</code>. Below is a pre-installed software list:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>General</td>
+<td>shell: zsh (oh-my-zsh)</td>
+</tr>
+<tr>
+<td></td>
+<td>Python: 3.11.5 (Miniconda)</td>
+</tr>
+<tr>
+<td>High energy physics</td>
+<td><a href="https://root.cern">ROOT</a>: 6.26.14</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="https://lhapdf.hepforge.org">LHAPDF</a>: 6.5.3</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="https://launchpad.net/mg5amcnlo">MadGraph5_aMC@NLO</a>: 3.5.3 (with Pythia8 and Delphes installed)</td>
+</tr>
+</tbody>
+</table>
+<p>You can use <code>hep-ml-lab</code> in a Docker container. The Docker image (<code>hml-env</code>) is available on <a href="https://hub.docker.com/r/star9daisy/hml-env">Docker Hub</a>. This way, you can avoid the hassle of installing the NVIDIA® softwares.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
+<p>However, you still need to install the NVIDIA® drivers on your host machine. The <code>hml-env</code> image is built on top of the <code>nvidia/cuda</code> image, which requires the NVIDIA® drivers to be installed on the host machine. Check the <a href="https://hub.docker.com/r/star9daisy/hml-env">official page</a> for more details of prerequisites.</p>
+<h2 id="start-a-container">Start a container<a class="headerlink" href="#start-a-container" title="Permanent link">#</a></h2>
+<p>Once you have installed the NVIDIA® drivers, you can pull the <code>hml-env</code> image with the following command:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>star9daisy/hml-env
 </span></code></pre></div>
+<p>Then start a container with the following command:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--gpus<span class="w"> </span>all<span class="w"> </span>star9daisy/hml-env
+</span></code></pre></div>
+<h2 id="use-pip-to-continue-installation-of-hep-ml-lab">Use <code>pip</code> to continue installation of <code>hep-ml-lab</code><a class="headerlink" href="#use-pip-to-continue-installation-of-hep-ml-lab" title="Permanent link">#</a></h2>
+<p>Check this part in the <a href="../pip/">pip installation guide</a> for more details.</p>
 
 
 
