@@ -54,7 +54,7 @@ fi
 Run it in the environment where you installed `tensorflow`:
 
 ```bash
-bash set_nvidia.sh
+source set_nvidia.sh
 ```
 
 Now you can test if `tensorflow` recognizes your GPUs:
@@ -66,4 +66,24 @@ python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU')
 If it is set up successfully, you will see the following output:
 ```
 [PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
+```
+
+If you are in a conda environment and want to source it automatically, you can follow the steps below:
+
+```bash
+# Step1: Check the path of the conda environment
+conda env list
+
+# the path should look like
+# /root/miniconda3/envs/py39
+cd <path_to_the_environment>
+
+# Step2: Create the folder if it doesn't exist
+mkdir -p etc/conda/activate.d
+
+# Step3: Copy the script to the folder
+cp set_nvidia.sh etc/conda/activate.d/set_nvidia.sh
+
+# Step4: Reopen the conda environment
+conda activate <env_name>
 ```
