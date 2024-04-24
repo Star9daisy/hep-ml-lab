@@ -21,6 +21,8 @@ To get started, please check out the [documents](https://star9daisy.github.io/he
 pip install hep-ml-lab
 ```
 
+Check out the [install via pip](install/pip.md) for more details of prerequisites and post-installation steps or [install via Docker](install/docker.md) for a hassle-free experience.
+
 ## Module overview
 
 ![module_overview](docs/images/hml_modules.png)
