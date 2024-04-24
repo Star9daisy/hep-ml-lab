@@ -1,6 +1,6 @@
 import pytest
 
-from hml.observables import parse
+from hml.observables import parse_observable
 from hml.representations import Set
 
 
@@ -8,16 +8,16 @@ def test_init():
     r = Set(
         [
             "FatJet0.Mass",
-            parse("FatJet0.TauMN", m=2, n=1),
+            parse_observable("FatJet0.TauMN", m=2, n=1),
             "Jet0,Jet1.DeltaR",
         ]
     )
 
     # Attributes ------------------------------------------------------------- #
     assert r.observables == [
-        parse("FatJet0.Mass"),
-        parse("FatJet0.TauMN", m=2, n=1),
-        parse("Jet0,Jet1.DeltaR"),
+        parse_observable("FatJet0.Mass"),
+        parse_observable("FatJet0.TauMN", m=2, n=1),
+        parse_observable("Jet0,Jet1.DeltaR"),
     ]
     assert r.names == ["FatJet0.Mass", "FatJet0.TauMN", "Jet0,Jet1.DeltaR"]
     assert r.values is None

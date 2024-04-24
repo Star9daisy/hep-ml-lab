@@ -4,7 +4,7 @@ from importlib import import_module
 
 import awkward as ak
 
-from hml.observables import Observable, parse
+from hml.observables import Observable, parse_observable
 
 
 class Set:
@@ -28,7 +28,7 @@ class Set:
         output = []
         for obs in observables:
             if isinstance(obs, str):
-                output.append(parse(obs))
+                output.append(parse_observable(obs))
             else:
                 output.append(obs)
 

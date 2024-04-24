@@ -1,6 +1,12 @@
 import pytest
 
-from hml.physics_objects import Collective, Multiple, Nested, Single, parse
+from hml.physics_objects import (
+    Collective,
+    Multiple,
+    Nested,
+    Single,
+    parse_physics_object,
+)
 
 
 def test_parse(
@@ -10,16 +16,22 @@ def test_parse(
     multiple_names,
 ):
     for case in single_names:
-        assert isinstance(parse(case), Single)
+        assert isinstance(parse_physics_object(case), Single)
 
     for case in collective_names:
-        assert isinstance(parse(case), Collective)
+        assert isinstance(parse_physics_object(case), Collective)
 
     for case in nested_names:
-        assert isinstance(parse(case), Nested)
+        assert isinstance(parse_physics_object(case), Nested)
 
     for case in multiple_names:
-        assert isinstance(parse(case), Multiple)
+        assert isinstance(parse_physics_object(case), Multiple)
 
     with pytest.raises(ValueError):
-        parse("jet0_jet1")
+        parse_physics_object("jet0_jet1")
+
+    for case in multiple_names:
+        assert isinstance(parse_physics_object(case), Multiple)
+
+    with pytest.raises(ValueError):
+        parse_physics_object("jet0_jet1")

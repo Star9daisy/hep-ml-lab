@@ -16,7 +16,10 @@ def test_init():
     assert obs.config == {"physics_object": "jet0", "class_name": "Pt"}
 
     # Other initializations
-    assert kinematics.Pt(physics_object=physics_objects.parse("jet0")).name == "jet0.Pt"
+    assert (
+        kinematics.Pt(physics_object=physics_objects.parse_physics_object("jet0")).name
+        == "jet0.Pt"
+    )
     assert kinematics.Pt(physics_object="jet0", class_name="pt").name == "jet0.pt"
 
     assert kinematics.Px(physics_object="jet0").name == "jet0.Px"

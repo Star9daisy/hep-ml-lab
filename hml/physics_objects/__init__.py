@@ -16,7 +16,7 @@ def get(identifier: str) -> PhysicsObject | None:
     return ALL_OBJECTS_DICT.get(identifier)
 
 
-def parse(name: str) -> PhysicsObject:
+def parse_physics_object(name: str) -> PhysicsObject:
     """Parse a name to create a physics object"""
     if is_single(name):
         return Single.from_name(name)
