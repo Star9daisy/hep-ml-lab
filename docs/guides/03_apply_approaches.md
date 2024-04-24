@@ -332,6 +332,25 @@ Epoch 100/100
 </div>
 
 ```python
+# Dataset
+ds = load_dataset("./data/wjj_vs_qcd_image.ds")
+
+x_train, y_train = ds.train.samples, ds.train.targets
+x_test, y_test = ds.test.samples, ds.test.targets
+
+non_zero_train = x_train.reshape(x_train.shape[0], -1).sum(1) != 0
+non_zero_test = x_test.reshape(x_test.shape[0], -1).sum(1) != 0
+
+x_train, y_train = x_train[non_zero_train], y_train[non_zero_train]
+x_test, y_test = x_test[non_zero_test], y_test[non_zero_test]
+
+x_train = np.log(x_train + 1)
+x_test = np.log(x_test + 1)
+x_train = x_train[..., None]
+x_test = x_test[..., None]
+```
+
+```python
 # Training
 cnn2 = CNN(name="cnn_log", input_shape=x_train.shape[1:])
 
