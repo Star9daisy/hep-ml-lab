@@ -17,11 +17,11 @@ from hml.approaches import Cut
 As the previous guide showed, HML can handle two cases. Here, we use the `Madgraph5` class to fetch runs from the output directory:
 
 ```python
-wjj = Madgraph5.from_output("data/pp2wz@10k", "mg5_aMC")
-qcd = Madgraph5.from_output("data/pp2jj@10k", "mg5_aMC")
+sig = Madgraph5.from_output("data/pp2wz@10k", "mg5_aMC")
+bkg = Madgraph5.from_output("data/pp2jj@10k", "mg5_aMC")
 
-wjj_events = uproot.open(wjj.runs[0].events()[0])
-qcd_events = uproot.open(qcd.runs[0].events()[0])
+sig_events = uproot.open(sig.runs[0].events()[0])
+bkg_events = uproot.open(bkg.runs[0].events()[0])
 ```
 
 ## Preselection
@@ -30,7 +30,7 @@ For the processes, we choose three observables: mass and n-subjettiness ratio of
 
 ```python
 preselection = Cut("fatjet.size > 0 and jet.size > 1")
-preselection.read(wjj_events)
+preselection.read(sig_events)
 preselection.value
 ```
 
@@ -76,14 +76,14 @@ Now, we use the 1D data container `SetDataset` to hold these three observables f
 cut = "fatjet.size > 0 and jet.size > 1"
 
 set_ds = SetDataset(["fatjet0.mass", "fatjet0.tau21", "jet0,jet1.delta_r"])
-set_ds.read(wjj_events, 1, [cut])
-set_ds.read(qcd_events, 0, [cut])
+set_ds.read(sig_events, 1, [cut])
+set_ds.read(bkg_events, 0, [cut])
 ```
 
 To confirm our choice of observables is powerful enough to differentiate the signal and background, we use `show` to plot three distributions:
 
 ```python
-ds.show()
+set_ds.show()
 ```
 
 <div class="result" markdown>
@@ -143,6 +143,26 @@ To create the image dataset, we still use the `read` method:
 image_ds.read(sig_events, 1, [cut])
 image_ds.read(bkg_events, 0, [cut])
 ```
+
+<div class="result" markdown>
+
+```
+#--------------------------------------------------------------------------
+#                         FastJet release 3.4.1
+#                 M. Cacciari, G.P. Salam and G. Soyez                  
+#     A software package for jet finding and analysis at colliders      
+#                           http://fastjet.fr                           
+#	                                                                      
+# Please cite EPJC72(2012)1896 [arXiv:1111.6097] if you use this package
+# for scientific work and optionally PLB641(2006)57 [hep-ph/0512210].   
+#                                                                       
+# FastJet is provided without warranty under the GNU GPL v2 or higher.  
+# It uses T. Chan's closest pair algorithm, S. Fortune's Voronoi code,
+# CGAL and 3rd party plugin jet algorithms. See COPYING file for details.
+#--------------------------------------------------------------------------
+```
+
+</div>
 
 To visualize the images, there is also a `show` method:
 
