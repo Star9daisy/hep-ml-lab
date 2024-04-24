@@ -4,7 +4,7 @@ import re
 
 import awkward as ak
 
-from hml.observables import parse
+from hml.observables import parse_observable
 
 
 class Cut:
@@ -46,7 +46,9 @@ class Cut:
                 cuts_dict[cut] = obs
 
         self._cuts_dict = cuts_dict
-        self._observables_dict = {obs: parse(obs) for obs in cuts_dict.values()}
+        self._observables_dict = {
+            obs: parse_observable(obs) for obs in cuts_dict.values()
+        }
         self._expr = expr
 
     def read(self, events):

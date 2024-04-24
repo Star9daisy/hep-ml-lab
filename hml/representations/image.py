@@ -9,7 +9,7 @@ import numpy as np
 import vector
 from fastjet import ClusterSequence, JetDefinition
 
-from hml.observables import parse
+from hml.observables import parse_observable
 from hml.operations import get_jet_algorithm
 
 vector.register_awkward()
@@ -17,11 +17,13 @@ vector.register_awkward()
 
 class Image:
     def __init__(self, height, width, channel=None):
-        self.height = parse(height) if isinstance(height, str) else height
-        self.width = parse(width) if isinstance(width, str) else width
+        self.height = parse_observable(height) if isinstance(height, str) else height
+        self.width = parse_observable(width) if isinstance(width, str) else width
 
         if channel is not None:
-            self.channel = parse(channel) if isinstance(channel, str) else channel
+            self.channel = (
+                parse_observable(channel) if isinstance(channel, str) else channel
+            )
         else:
             self.channel = None
 
@@ -54,10 +56,10 @@ class Image:
 
     def with_subjets(self, constituents, algorithm, r, min_pt):
         if self.been_read:
-            px = parse(f"{constituents}.Px").read(self.event).value
-            py = parse(f"{constituents}.Py").read(self.event).value
-            pz = parse(f"{constituents}.Pz").read(self.event).value
-            e = parse(f"{constituents}.E").read(self.event).value
+            px = parse_observable(f"{constituents}.Px").read(self.event).value
+            py = parse_observable(f"{constituents}.Py").read(self.event).value
+            pz = parse_observable(f"{constituents}.Pz").read(self.event).value
+            e = parse_observable(f"{constituents}.E").read(self.event).value
 
             px = ak.flatten(px, -1)
             py = ak.flatten(py, -1)
@@ -99,8 +101,10 @@ class Image:
 
     def translate(self, origin="SubJet0"):
         if self.been_read:
-            origin_height = parse(f"{origin}.{self.height.__class__.__name__}")
-            origin_width = parse(f"{origin}.{self.width.__class__.__name__}")
+            origin_height = parse_observable(
+                f"{origin}.{self.height.__class__.__name__}"
+            )
+            origin_width = parse_observable(f"{origin}.{self.width.__class__.__name__}")
 
             obj = origin_height.physics_object.branch
             index = origin_height.physics_object.index
@@ -152,8 +156,8 @@ class Image:
 
     def rotate(self, axis="SubJet1", orientation=-90):
         if self.been_read:
-            axis_height = parse(f"{axis}.{self.height.__class__.__name__}")
-            axis_width = parse(f"{axis}.{self.width.__class__.__name__}")
+            axis_height = parse_observable(f"{axis}.{self.height.__class__.__name__}")
+            axis_width = parse_observable(f"{axis}.{self.width.__class__.__name__}")
 
             obj = axis_height.physics_object.branch
             index = axis_height.physics_object.index

@@ -2,31 +2,31 @@ import awkward as ak
 import numpy as np
 import pytest
 
-from hml.observables import parse
+from hml.observables import parse_observable
 from hml.representations import Image
 
 
 def test_init():
     r = Image(
         height="FatJet0.Constituents.Phi",
-        width=parse("FatJet0.Constituents.Eta"),
+        width=parse_observable("FatJet0.Constituents.Eta"),
     )
 
     # Attributes ------------------------------------------------------------- #
-    assert r.height == parse("FatJet0.Constituents.Phi")
-    assert r.width == parse("FatJet0.Constituents.Eta")
+    assert r.height == parse_observable("FatJet0.Constituents.Phi")
+    assert r.width == parse_observable("FatJet0.Constituents.Eta")
     assert r.channel is None
 
     r = Image(
         height="FatJet0.Constituents.Phi",
-        width=parse("FatJet0.Constituents.Eta"),
+        width=parse_observable("FatJet0.Constituents.Eta"),
         channel="FatJet0.Constituents.Pt",
     )
 
     # Attributes ------------------------------------------------------------- #
-    assert r.height == parse("FatJet0.Constituents.Phi")
-    assert r.width == parse("FatJet0.Constituents.Eta")
-    assert r.channel == parse("FatJet0.Constituents.Pt")
+    assert r.height == parse_observable("FatJet0.Constituents.Phi")
+    assert r.width == parse_observable("FatJet0.Constituents.Eta")
+    assert r.channel == parse_observable("FatJet0.Constituents.Pt")
 
 
 def test_register(events):

@@ -4,7 +4,7 @@ import awkward as ak
 
 from ..operations import branch_to_momentum4d, constituents_to_momentum4d
 from ..physics_objects import PhysicsObject, is_collective, is_multiple, is_single
-from ..physics_objects import parse as parse_object
+from ..physics_objects import parse_physics_object as parse_object
 
 
 class Observable:
