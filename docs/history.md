@@ -1,5 +1,9 @@
 # History
 
+### v0.4.0
+This version refactors most of the codebase to make it compatible with the array
+(from `awkward` and `uproot`) representation of the data.
+
 ## v0.3.0.1
 - Fix a bug that Madgraph5 may run into an infinite loop caused by HML keeping
   removing py.py file during initialization.
