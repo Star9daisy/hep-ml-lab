@@ -10,17 +10,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 from keras import ops
 from rich.table import Table
+
 # Dataset
+from sklearn.preprocessing import MinMaxScaler
 from hml.datasets import load_dataset
+
 # Approaches
 from hml.approaches import CutAndCount as CNC
 from hml.approaches import GradientBoostedDecisionTree as BDT
 from hml.approaches import SimpleCNN as CNN
 from hml.approaches import SimpleMLP as MLP
+
 # Evaluation
 from keras.metrics import Accuracy, AUC
 from sklearn.metrics import roc_curve
 from hml.metrics import MaxSignificance, RejectionAtEfficiency
+
 # Save and load
 from hml.approaches import load_approach
 ```
@@ -30,6 +35,7 @@ Then we use a dictionary to store the benchmark results and define a helper func
 ```python
 results = {}
 
+
 def get_result(approach, x_test, y_test):
     y_pred = approach.predict(x_test, verbose=0)
 
@@ -37,11 +43,17 @@ def get_result(approach, x_test, y_test):
 
     result = {
         approach.name: {
-            "acc": convert_to_numpy(Accuracy()(y_test, y_pred.argmax(axis=1))).item(),
-            "auc": convert_to_numpy(AUC()(y_test, y_pred[:, 1])).item(),
-            "sig": convert_to_numpy(MaxSignificance()(y_test, y_pred)).item(),
-            "r50": convert_to_numpy(RejectionAtEfficiency(0.5)(y_test, y_pred)).item(),
-            "r99": convert_to_numpy(RejectionAtEfficiency(0.99)(y_test, y_pred)).item(),
+            "acc": ops.convert_to_numpy(
+                Accuracy()(y_test, y_pred.argmax(axis=1))
+            ).item(),
+            "auc": ops.convert_to_numpy(AUC()(y_test, y_pred[:, 1])).item(),
+            "sig": ops.convert_to_numpy(MaxSignificance()(y_test, y_pred)).item(),
+            "r50": ops.convert_to_numpy(
+                RejectionAtEfficiency(0.5)(y_test, y_pred)
+            ).item(),
+            "r99": ops.convert_to_numpy(
+                RejectionAtEfficiency(0.99)(y_test, y_pred)
+            ).item(),
             "fpr": fpr,
             "tpr": tpr,
         }
@@ -118,7 +130,7 @@ results.update(get_result(cnc1, x_test, y_test))
 results.update(get_result(cnc2, x_test, y_test))
 ```
 
-## Boosted Decision Tree
+## Gradient boosted decision tree
 
 We adapt `GradientBoostingClassifier` from `sklearn` to work as a `Keras` model:
 
@@ -140,7 +152,7 @@ bdt.fit(x_train, y_train)
 <div class="result" markdown>
 
 ```
-100/100 ━━━━━━━━━━━━━━━━━━━━ 2s 18ms/step - loss: 0.5614 - accuracy: 0.9005
+100/100 ━━━━━━━━━━━━━━━━━━━━ 2s 19ms/step - loss: 0.2807 - accuracy: 0.9005
 ```
 
 </div>
@@ -155,7 +167,7 @@ Add the results to the dictionary:
 results.update(get_result(bdt, x_test, y_test))
 ```
 
-## Simple Multi-Layer Perceptron
+## Simple multi-layer perceptron
 
 Currently, HML provides a toy multi-layer perceptron to perform simple analysis:
 
@@ -196,29 +208,32 @@ Trainable params: 4,386 (17.13 KB)
 Non-trainable params: 0 (0.00 B)
 ```
 
+</div>
+
 ```python
 # Training
 mlp.compile(loss="crossentropy", metrics=["accuracy"])
 mlp.fit(x_train, y_train, batch_size=128, epochs=100)
+results.update(get_result(mlp, x_test, y_test))
 ```
 
 <div class="result" markdown>
 
 ```
 Epoch 1/100
-99/99 ━━━━━━━━━━━━━━━━━━━━ 2s 7ms/step - accuracy: 0.7172 - loss: 0.5586
+99/99 ━━━━━━━━━━━━━━━━━━━━ 2s 7ms/step - accuracy: 0.7073 - loss: 0.5788
 Epoch 2/100
-99/99 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8607 - loss: 0.3469
+99/99 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8625 - loss: 0.3370
 ...
 Epoch 99/100
-99/99 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9025 - loss: 0.2489
+99/99 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8954 - loss: 0.2585
 Epoch 100/100
-99/99 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9031 - loss: 0.2483
+99/99 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9016 - loss: 0.2526
 ```
 
 </div>
 
-## Simple Convolutional Neural Network
+## Simple convolutional neural network
 
 We also provide a toy CNN to perform simple analysis. There're two ways to normalize the images: using the maximum value of each image or applying `log` to each pixel.
 
@@ -305,35 +320,16 @@ results.update(get_result(cnn1, x_test, y_test))
 
 ```
 Epoch 1/100
-98/98 ━━━━━━━━━━━━━━━━━━━━ 3s 13ms/step - accuracy: 0.5247 - loss: 0.6885
+98/98 ━━━━━━━━━━━━━━━━━━━━ 4s 18ms/step - accuracy: 0.5386 - loss: 0.6891
 Epoch 2/100
-98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.6175 - loss: 0.6423
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.5982 - loss: 0.6491
 ...
 Epoch 99/100
-98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8224 - loss: 0.4165
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8107 - loss: 0.4378
 Epoch 100/100
-98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8115 - loss: 0.4251
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8104 - loss: 0.4392
 ```
 </div>
-
-```python
-# Dataset
-ds = load_dataset("./data/wjj_vs_qcd_image.ds")
-
-x_train, y_train = ds.train.samples, ds.train.targets
-x_test, y_test = ds.test.samples, ds.test.targets
-
-non_zero_train = x_train.reshape(x_train.shape[0], -1).sum(1) != 0
-non_zero_test = x_test.reshape(x_test.shape[0], -1).sum(1) != 0
-
-x_train, y_train = x_train[non_zero_train], y_train[non_zero_train]
-x_test, y_test = x_test[non_zero_test], y_test[non_zero_test]
-
-x_train = np.log(x_train + 1)
-x_test = np.log(x_test + 1)
-x_train = x_train[..., None]
-x_test = x_test[..., None]
-```
 
 ```python
 # Training
@@ -352,21 +348,21 @@ cnn2.fit(
     batch_size=128,
 )
 
-results.update(get_result(cnn2, x_test, y_test)
+results.update(get_result(cnn2, x_test, y_test))
 ```
 
 <div class="result" markdown>
 
 ```
 Epoch 1/100
-98/98 ━━━━━━━━━━━━━━━━━━━━ 3s 13ms/step - accuracy: 0.5914 - loss: 0.6731
+98/98 ━━━━━━━━━━━━━━━━━━━━ 3s 13ms/step - accuracy: 0.5350 - loss: 0.6880
 Epoch 2/100
-98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.7587 - loss: 0.5235
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.6368 - loss: 0.6431
 ...
 Epoch 99/100
-98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8278 - loss: 0.3906
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8183 - loss: 0.4266
 Epoch 100/100
-98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8424 - loss: 0.3684
+98/98 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8174 - loss: 0.4242
 ```
 
 </div>
@@ -416,9 +412,9 @@ table
 │ cnc_parallel   │ 0.765086 │ 0.743599 │ 34.742661    │ 4.256874  │ 1.000000 │
 │ cnc_sequential │ 0.805868 │ 0.788848 │ 37.796890    │ 5.151141  │ 1.000000 │
 │ bdt            │ 0.899797 │ 0.952525 │ 44.131214    │ 86.015831 │ 1.997420 │
-│ mlp            │ 0.899428 │ 0.952812 │ 44.129673    │ 95.070129 │ 1.974135 │
-│ cnn_max        │ 0.809667 │ 0.873104 │ 39.128853    │ 18.534716 │ 1.261342 │
-│ cnn_log        │ 0.810978 │ 0.874385 │ 38.911655    │ 19.270756 │ 1.225999 │
+│ mlp            │ 0.897583 │ 0.952662 │ 44.056389    │ 96.767815 │ 1.953497 │
+│ cnn_max        │ 0.806482 │ 0.868102 │ 38.510403    │ 16.526314 │ 1.191518 │
+│ cnn_log        │ 0.808917 │ 0.873000 │ 38.833694    │ 17.852850 │ 1.232795 │
 └────────────────┴──────────┴──────────┴──────────────┴───────────┴──────────┘
 </pre>
 
