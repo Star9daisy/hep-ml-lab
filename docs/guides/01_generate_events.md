@@ -26,6 +26,64 @@ The Madgraph5 API (application programming interface) works similarly to the Mad
 g = Madgraph5(executable="mg5_aMC", verbose=1)
 ```
 
+<div class="result" markdown>
+
+```
+************************************************************
+*                                                          *
+*                     W E L C O M E to                     *
+*              M A D G R A P H 5 _ a M C @ N L O           *
+*                                                          *
+*                                                          *
+*                 *                       *                *
+*                   *        * *        *                  *
+*                     * * * * 5 * * * *                    *
+*                   *        * *        *                  *
+*                 *                       *                *
+*                                                          *
+*         VERSION 3.5.3                 2023-12-23         *
+*                                                          *
+*    The MadGraph5_aMC@NLO Development Team - Find us at   *
+*              http://madgraph.phys.ucl.ac.be/             *
+*                            and                           *
+*            http://amcatnlo.web.cern.ch/amcatnlo/         *
+*                                                          *
+*               Type 'help' for in-line help.              *
+*           Type 'tutorial' to learn how MG5 works         *
+*    Type 'tutorial aMCatNLO' to learn how aMC@NLO works   *
+*    Type 'tutorial MadLoop' to learn how MadLoop works    *
+*                                                          *
+************************************************************
+load MG5 configuration from ../../../../softwares/madgraph5/input/mg5_configuration.txt 
+fastjet-config does not seem to correspond to a valid fastjet-config executable (v3+). We will use fjcore instead.
+ Please set the 'fastjet'variable to the full (absolute) /PATH/TO/fastjet-config (including fastjet-config).
+ MG5_aMC> set fastjet /PATH/TO/fastjet-config
+
+eMELA-config does not seem to correspond to a valid eMELA-config executable.
+ Please set the 'fastjet'variable to the full (absolute) /PATH/TO/eMELA-config (including eMELA-config).
+ MG5_aMC> set eMELA /PATH/TO/eMELA-config
+
+set lhapdf to lhapdf-config
+set lhapdf to lhapdf-config
+Using default text editor "vi". Set another one in ./input/mg5_configuration.txt
+No valid eps viewer found. Please set in ./input/mg5_configuration.txt
+No valid web browser found. Please set in ./input/mg5_configuration.txt
+Loading default model: sm
+INFO: Restrict model sm with file ../../../../softwares/madgraph5/models/sm/restrict_default.dat . 
+INFO: Run "set stdout_level DEBUG" before import for more information. 
+INFO: Change particles name to pass to MG5 convention 
+Defined multiparticle p = g u c d s u~ c~ d~ s~
+Defined multiparticle j = g u c d s u~ c~ d~ s~
+Defined multiparticle l+ = e+ mu+
+Defined multiparticle l- = e- mu-
+Defined multiparticle vl = ve vm vt
+Defined multiparticle vl~ = ve~ vm~ vt~
+Defined multiparticle all = g u c d s u~ c~ d~ s~ a ve vm vt e- mu- ve~ vm~ vt~ e+ mu+ t b t~ b~ z w+ h w- ta- ta+
+MG5_aMC>
+```
+
+</div>
+
 - `executable` refers to the path of the `mg5_aMC` executable file.
 - `verbose` is used to control the output level. The default value is 1 showing all the information as the CLI does. If it is set to 0, no information will be displayed.
 
@@ -36,14 +94,69 @@ We take "p p > w+ z" as the first example. We want to give the W boson a boost t
 ```python
 g.generate("p p > w+ z")
 ```
+<div class="result" markdown>
+
+```
+generate p p > w+ z
+INFO: Checking for minimal orders which gives processes. 
+INFO: Please specify coupling orders to bypass this step. 
+INFO: Trying process: u d~ > w+ z WEIGHTED<=4 @1  
+INFO: Process has 3 diagrams 
+INFO: Trying process: u s~ > w+ z WEIGHTED<=4 @1  
+INFO: Trying process: c d~ > w+ z WEIGHTED<=4 @1  
+INFO: Trying process: c s~ > w+ z WEIGHTED<=4 @1  
+INFO: Process has 3 diagrams 
+INFO: Process d~ u > w+ z added to mirror process u d~ > w+ z 
+INFO: Process s~ c > w+ z added to mirror process c s~ > w+ z 
+2 processes with 6 diagrams generated in 0.025 s
+Total: 2 processes with 6 diagrams
+```
+
+</div>
+
 !!! note
     The `add process` and `generate` commands from CLI are combined into `generate` in the API. So you can directly add processes one by one. For example: `g.generate("p p > w+ j", "p p > w- j")`
 
 After generating the process, it is crutial to check the feynman diagram before moving on:
 
 ```python
-g.display_diagram()
+g.display_diagrams()
 ```
+
+<div class="result" markdown>
+
+```
+display diagrams Diagrams
+Drawing Process: u d~ > w+ z WEIGHTED<=4 @1
+Wrote file Diagrams/diagrams_1_udx_wpz.eps
+open Diagrams/diagrams_1_udx_wpz.eps
+Not able to open file Diagrams/diagrams_1_udx_wpz.eps since no program configured.Please set one in ./input/mg5_configuration.txt
+Drawing Process: c s~ > w+ z WEIGHTED<=4 @1
+Wrote file Diagrams/diagrams_1_csx_wpz.eps
+open Diagrams/diagrams_1_csx_wpz.eps
+Not able to open file Diagrams/diagrams_1_csx_wpz.eps since no program configured.Please set one in ./input/mg5_configuration.txt
+time to draw 0.012159109115600586
+```
+
+</div>
+
+```python
+!tree Diagrams
+```
+
+<div class="result" markdown>
+
+```
+Diagrams/
+├── diagrams_1_csx_wpz.eps
+├── diagrams_1_csx_wpz.pdf
+├── diagrams_1_udx_wpz.eps
+└── diagrams_1_udx_wpz.pdf
+
+0 directories, 4 files
+```
+
+</div>
 
 - By default, the diagram is stored in the `Diagrams` folder in the current directory. You can change the path by setting the parameter `diagram_dir`.
 - The `.eps` file is converted in `.pdf` format for convenience.
@@ -53,6 +166,45 @@ Finally, we can save the process to a directory:
 ```python
 g.output("data/pp2wz")
 ```
+
+<div class="result" markdown>
+
+```
+output /root/workspace_ssd/projects/hep-ml-lab/examples/data/pp2wz
+INFO: initialize a new directory: pp2wz 
+INFO: remove old information in pp2wz 
+INFO: Organizing processes into subprocess groups 
+INFO: Generating Helas calls for process: u d~ > w+ z WEIGHTED<=4 @1 
+INFO: Processing color information for process: u d~ > w+ z @1 
+INFO: Combined process c s~ > w+ z WEIGHTED<=4 @1 with process u d~ > w+ z WEIGHTED<=4 @1 
+INFO: Creating files in directory P1_qq_wpz 
+INFO: Generating Feynman diagrams for Process: u d~ > w+ z WEIGHTED<=4 @1 
+INFO: Finding symmetric diagrams for subprocess group qq_wpz 
+Generated helas calls for 1 subprocesses (3 diagrams) in 0.007 s
+Wrote files for 10 helas calls in 0.033 s
+ALOHA: aloha starts to compute helicity amplitudes
+ALOHA: aloha creates 4 routines in  1.021 s
+The option auto_update is modified [7] but will not be written in the configuration files.
+If you want to make this value the default for future session, you can run 'save options --all'
+save configuration file to /root/workspace_ssd/projects/hep-ml-lab/examples/data/pp2wz/Cards/me5_configuration.txt
+INFO: Use Fortran compiler gfortran 
+INFO: Use c++ compiler g++ 
+INFO: Generate jpeg diagrams 
+INFO: Generate web pages 
+Output to directory /root/workspace_ssd/projects/hep-ml-lab/examples/data/pp2wz done.
+Type "launch" to generate events from this process, or see
+/root/workspace_ssd/projects/hep-ml-lab/examples/data/pp2wz/README
+Run "open index.html" to see more information about this process.
+display diagrams /root/workspace_ssd/projects/hep-ml-lab/examples/data/pp2wz/Diagrams
+Drawing Process: u d~ > w+ z WEIGHTED<=4 @1
+Wrote file /root/workspace_ssd/projects/hep-ml-lab/examples/data/pp2wz/Diagrams/diagrams_1_udx_wpz.eps
+open /root/workspace_ssd/projects/hep-ml-lab/examples/data/pp2wz/Diagrams/diagrams_1_udx_wpz.eps
+Not able to open file /root/workspace_ssd/projects/hep-ml-lab/examples/data/pp2wz/Diagrams/diagrams_1_udx_wpz.eps since no program configured.Please set one in ./input/mg5_configuration.txt
+time to draw 0.007663726806640625
+Process log saved to data/pp2wz/Logs/process.log
+```
+
+</div>
 
 !!! note
     Even if you don't `display_diagram` before, the diagram will be saved in the `Diagrams` folder of the output directory.
