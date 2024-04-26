@@ -36,19 +36,22 @@ class Cut:
         obs_pattern = r"\b(?!\d+\b)(?!\d*\.\d+\b)\S+\b"
         cuts_dict = {}
         for cut in cuts:
-            obs = re.findall(obs_pattern, cut)[0]
-            if "" not in cut.split(obs):
+            all_obs = re.findall(obs_pattern, cut)
+            # for the case value1 < obs < value2
+            if len(all_obs) == 1 and "" not in cut.split(all_obs[0]):
+                obs = all_obs[0]
                 new_cut = [cut.split(obs)[0] + obs, obs + cut.split(obs)[1]]
-                cuts_dict[new_cut[0]] = obs
-                cuts_dict[new_cut[1]] = obs
-                expr = expr.replace(cut, f"({new_cut[0]} & {new_cut[1]})")
+                cuts_dict[new_cut[0]] = [obs]
+                cuts_dict[new_cut[1]] = [obs]
+                expr = expr.replace(cut, f"( {new_cut[0]} & {new_cut[1]} )")
             else:
-                cuts_dict[cut] = obs
+                cuts_dict[cut] = all_obs
 
-        self._cuts_dict = cuts_dict
-        self._observables_dict = {
-            obs: parse_observable(obs) for obs in cuts_dict.values()
-        }
+        self._cuts_dict = cuts_dict  # single expression and its obs name
+        self._observables_dict = {}
+        for all_obs in cuts_dict.values():
+            for obs in all_obs:
+                self._observables_dict[obs] = parse_observable(obs)
         self._expr = expr
 
     def read(self, events):
@@ -57,8 +60,11 @@ class Cut:
         observables_dict = self._observables_dict
 
         cuts_results = {}
-        for cut, obs in self._cuts_dict.items():
-            result = eval(cut.replace(obs, f"observables_dict['{obs}'].value"))
+        for cut, all_obs in self._cuts_dict.items():
+            temp_cut = cut
+            for obs in all_obs:
+                temp_cut = temp_cut.replace(obs, f"observables_dict['{obs}'].value")
+            result = eval(temp_cut)
             cuts_results[cut] = result
 
         # Validate the type
@@ -68,7 +74,13 @@ class Cut:
 
         expression = self._expr
         for cut in cuts_results:
-            cut_pattern = r"\b" + cut.replace(".", "\\.") + r"\b"
+            if (
+                len(re.findall(r"\b" + cut.replace(".", "\\.") + r"\b", expression))
+                != 0
+            ):
+                cut_pattern = r"\b" + cut.replace(".", "\\.") + r"\b"
+            else:
+                cut_pattern = r"\s" + cut.replace(".", "\\.") + r"\s"
             expression = re.sub(cut_pattern, f"cuts_results['{cut}']", expression)
 
         self._value = ak.fill_none(eval(expression), False)
