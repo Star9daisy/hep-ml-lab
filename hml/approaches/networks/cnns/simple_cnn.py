@@ -23,8 +23,7 @@ class SimpleCNN(Model):
         self.max_pool = MaxPooling2D()
         self.global_avg_pool = GlobalAveragePooling2D()
         self.dropout = Dropout(0.5)
-        self.dense1 = Dense(2, activation="relu")
-        self.dense2 = Dense(2, activation="softmax")
+        self.dense1 = Dense(2, activation="softmax")
 
         self.call(Input(shape=input_shape))
 
@@ -36,8 +35,7 @@ class SimpleCNN(Model):
         x = self.conv3(x)
         x = self.max_pool(x)
         x = self.global_avg_pool(x)
-        x = self.dense1(x)
-        return self.dense2(x)
+        return self.dense1(x)
 
     def get_config(self):
         base_config = super().get_config()
