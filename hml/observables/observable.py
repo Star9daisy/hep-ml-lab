@@ -109,7 +109,7 @@ class Observable:
     @property
     def config(self) -> dict:
         return {
-            "physics_object": self.physics_object.name,
+            "physics_object": self.physics_object.name if self.physics_object else None,
             "class_name": self.class_name,
         }
 
