@@ -35,3 +35,13 @@ class InvariantMass(Observable):
         self._value = total.mass
 
         return self
+
+
+InvariantMass.with_aliases(
+    "InvariantMass",
+    "invariant_mass",
+    "InvMass",
+    "inv_mass",
+    "InvM",
+    "inv_m",
+)

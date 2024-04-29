@@ -20,7 +20,12 @@ class Size(Observable):
         if f"{branch}_size" in all_keys:
             key = all_keys[f"{branch}_size"]
             value = events[key].array()
+        else:
+            raise KeyError(f"Key {branch}_size not found in the events.")
 
         self._value = value
 
         return self
+
+
+Size.with_aliases("size")
