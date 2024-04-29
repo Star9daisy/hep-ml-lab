@@ -236,13 +236,10 @@ class SetDataset:
             samples = self.samples
 
         n_features = len(self.feature_names)
-        plt.figure(figsize=(3 * n_feature_per_line, 3))
+        n_rows = (n_features + n_feature_per_line - 1) // n_feature_per_line
+        plt.figure(figsize=(4 * n_feature_per_line, 3 * n_rows))
         for i, name in enumerate(self.feature_names):
-            ax = plt.subplot(
-                (n_features + n_feature_per_line - 1) // n_feature_per_line,
-                n_feature_per_line,
-                i + 1,
-            )
+            ax = plt.subplot(n_rows, n_feature_per_line, i + 1)
 
             if target is None:
                 for i_target in np.unique(self.targets):
