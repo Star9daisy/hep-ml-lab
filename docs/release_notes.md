@@ -1,4 +1,4 @@
-# History
+# Release notes
 
 ## v0.4.1
 - Fix module overview image in README.
