@@ -80,12 +80,13 @@ class Set:
     @classmethod
     def from_config(cls, config):
         observables = []
-        module = import_module("hml.observables")
 
         for i_config in config["observable_configs"].values():
-            class_name = i_config["class_name"]
-            class_config = i_config["config"]
+            class_type = Observable.aliases[i_config["class_name"]]
+            class_name = class_type.__name__
+            module = import_module(class_type.__module__)
             class_ = getattr(module, class_name)
+            class_config = i_config["config"]
             observables.append(class_.from_config(class_config))
 
         return cls(observables)
