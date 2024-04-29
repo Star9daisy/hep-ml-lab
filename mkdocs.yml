@@ -62,28 +62,29 @@ nav:
   - Install:
       - pip: install/pip.md
       - Docker: install/docker.md
-  - Guides:
-      - guides/index.md
-      - Generate events: guides/01_generate_events.md
-      - Create datasets: guides/02_create_datasets.md
-      - Apply approaches: guides/03_apply_approaches.md
-  - Examples:
-      - 1511.05190: examples/1511.05190.md
-      - 1801.00797: examples/1801.00797.md
-  - API:
-      - hml.generators: api/hml.generators.md
+  - Getting started:
+      - Generate events: getting_started/01_generate_events.md
+      - Create datasets: getting_started/02_create_datasets.md
+      - Apply approaches: getting_started/03_apply_approaches.md
+  - User guides:
+      - Observable naming conventions: user_guides/observable_naming_conventions.md
+  - Code examples:
+      - 1511.05190: code_examples/1511.05190.md
+      - 1801.00797: code_examples/1801.00797.md
+  - API reference:
+      - hml.generators: api_reference/hml.generators.md
       - physics_objects:
-          - single: api/physics_objects/single.md
-          - collective: api/physics_objects/collective.md
-          - nested: api/physics_objects/nested.md
-          - multiple: api/physics_objects/multiple.md
-      - hml.observables: api/hml.observables.md
-      - hml.representations: api/hml.representations.md
-      - hml.datasets: api/hml.datasets.md
+          - single: api_reference/physics_objects/single.md
+          - collective: api_reference/physics_objects/collective.md
+          - nested: api_reference/physics_objects/nested.md
+          - multiple: api_reference/physics_objects/multiple.md
+      - hml.observables: api_reference/hml.observables.md
+      - hml.representations: api_reference/hml.representations.md
+      - hml.datasets: api_reference/hml.datasets.md
       - hml.approaches:
-          - cuts: api/hml.approaches/cuts.md
-          - trees: api/hml.approaches/trees.md
+          - cuts: api_reference/hml.approaches/cuts.md
+          - trees: api_reference/hml.approaches/trees.md
           - networks:
-              - mlps: api/hml.approaches/networks/mlps.md
-      - hml.metrics: api/hml.metrics.md
-  - History: history.md
+              - mlps: api_reference/hml.approaches/networks/mlps.md
+      - hml.metrics: api_reference/hml.metrics.md
+  - Release notes: release_notes.md

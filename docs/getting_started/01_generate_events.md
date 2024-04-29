@@ -549,4 +549,4 @@ Madgraph5Run run_02 (1 sub runs):
 
 </div>
 
-Check the [doc](../api/hml.generators.md) to learn more about `Madgraph5`, `Madgraph5Run`.
+Check the [doc](../api_reference/hml.generators.md) to learn more about `Madgraph5`, `Madgraph5Run`.

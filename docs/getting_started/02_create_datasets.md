@@ -185,4 +185,4 @@ image_ds.split(0.7, 0.3, seed=42)
 image_ds.save("data/wjj_vs_qcd_image.ds")
 ```
 
-Check the doc to learn more about [observables](../api/hml.observables.md), [representations](../api/hml.representations.md) and [datasets](../api/hml.datasets.md).
+Check the doc to learn more about [observables](../api_reference/hml.observables.md), [representations](../api_reference/hml.representations.md) and [datasets](../api_reference/hml.datasets.md).
