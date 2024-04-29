@@ -135,17 +135,17 @@ class Observable:
             raise ValueError(f"Branch {self.physics_object.branch} not found")
 
         if is_single(self.physics_object) or is_collective(self.physics_object):
-            if f"{branch}.{self.class_name.lower()}" in all_keys:
-                key = all_keys[f"{branch}.{self.class_name.lower()}"]
+            if f"{branch}.{self.__class__.__name__.lower()}" in all_keys:
+                key = all_keys[f"{branch}.{self.__class__.__name__.lower()}"]
                 value = events[key].array()
 
             else:
                 array = branch_to_momentum4d(events, all_keys[branch])
-                value = getattr(array, self.class_name.lower())
+                value = getattr(array, self.__class__.__name__.lower())
 
         else:
             array = constituents_to_momentum4d(events, all_keys[branch])
-            value = getattr(array, self.class_name.lower())
+            value = getattr(array, self.__class__.__name__.lower())
 
         if len(slices) == 1:
             value = value[:, slices[0]]
