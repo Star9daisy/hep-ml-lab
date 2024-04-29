@@ -14,6 +14,9 @@ class BTag(Observable):
         super().__init__(physics_object, class_name, supported_objects)
 
 
+BTag.with_aliases("b_tag")
+
+
 class TauTag(Observable):
     def __init__(
         self,
@@ -22,3 +25,6 @@ class TauTag(Observable):
     ) -> None:
         supported_objects = ["single", "collective"]
         super().__init__(physics_object, class_name, supported_objects)
+
+
+TauTag.with_aliases("tau_tag")
