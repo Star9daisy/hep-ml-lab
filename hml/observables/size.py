@@ -26,3 +26,6 @@ class Size(Observable):
         self._value = value
 
         return self
+
+
+Size.with_aliases("size")

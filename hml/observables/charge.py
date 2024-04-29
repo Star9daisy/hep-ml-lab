@@ -12,3 +12,6 @@ class Charge(Observable):
     ) -> None:
         supported_objects = ["single", "collective"]
         super().__init__(physics_object, class_name, supported_objects)
+
+
+Charge.with_aliases("charge")
