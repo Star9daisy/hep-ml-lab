@@ -48,3 +48,6 @@ class AngularDistance(Observable):
         physics_object = ".".join(parts) if len(parts) > 0 else None
 
         return cls(physics_object, class_name)
+
+
+AngularDistance.with_aliases("angular_distance", "DeltaR", "delta_r")

@@ -8,6 +8,8 @@ from ..physics_objects import parse_physics_object as parse_object
 
 
 class Observable:
+    aliases = {}
+
     def __init__(
         self,
         physics_object: str | PhysicsObject | None = None,
@@ -18,6 +20,14 @@ class Observable:
         self._class_name = self._init_class_name(class_name)
         self._supported_objects = self._init_supported_objects(supported_objects)
         self._validate_physics_object()
+
+    def __init_subclass__(cls, **kwargs):
+        cls.aliases[cls.__name__] = cls
+
+    @classmethod
+    def with_aliases(cls, *aliases: str) -> Observable:
+        for alias in aliases:
+            cls.aliases[alias] = cls
 
     def _init_object(self, object_: str | PhysicsObject | None) -> PhysicsObject | None:
         if isinstance(object_, PhysicsObject):

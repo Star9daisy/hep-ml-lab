@@ -60,6 +60,9 @@ class NSubjettiness(Observable):
         return config
 
 
+NSubjettiness.with_aliases("n_subjettiness")
+
+
 class TauN(NSubjettiness):
     @classmethod
     def from_name(cls, name: str, **kwargs) -> TauN:
@@ -73,6 +76,9 @@ class TauN(NSubjettiness):
                 n = kwargs["n"]
 
         return cls(n, physics_object, class_name)
+
+
+TauN.with_aliases("tau_n")
 
 
 class NSubjettinessRatio(Observable):
@@ -106,6 +112,9 @@ class NSubjettinessRatio(Observable):
         return config
 
 
+NSubjettinessRatio.with_aliases("n_subjettiness_ratio")
+
+
 class TauMN(NSubjettinessRatio):
     @classmethod
     def from_name(cls, name: str, **kwargs) -> TauMN:
@@ -124,3 +133,6 @@ class TauMN(NSubjettinessRatio):
                 n = kwargs["n"]
 
         return cls(m, n, physics_object, class_name)
+
+
+TauMN.with_aliases("tau_mn")
