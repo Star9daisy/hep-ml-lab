@@ -13,21 +13,23 @@ from keras.metrics import (
 class MaxSignificance(Metric):
     def __init__(
         self,
-        cross_sections=[1, 1],
-        luminosity=1,
-        weights=[1, 1],
+        cross_sections=None,
+        luminosity=None,
+        weights=None,
         thresholds=None,
         class_id=1,
         name="max_significance",
         dtype=None,
     ):
         super().__init__(name=name, dtype=dtype)
-        self.luminosity = luminosity
+        self.luminosity = luminosity if luminosity is not None else 1.0
 
+        cross_sections = cross_sections if cross_sections is not None else [1, 1]
         self.cross_sections = cross_sections
         self.s_xsec = cross_sections.pop(class_id)
         self.b_xsec = cross_sections
 
+        weights = weights if weights is not None else [1, 1]
         self.weights = weights
         self.s_weight = weights.pop(class_id)
         self.b_weight = weights
