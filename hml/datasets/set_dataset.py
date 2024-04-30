@@ -9,6 +9,7 @@ import awkward as ak
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from sklearn.model_selection import train_test_split
 
 from hml.approaches import Cut
@@ -230,34 +231,25 @@ class SetDataset:
         return instance
 
     def show(self, n_feature_per_line=3, n_samples=-1, target=None):
-        if n_samples != -1:
-            samples = self.samples[:n_samples]
-        else:
-            samples = self.samples
+        df = self.to_pandas()
+        df = df.sample(n=n_samples) if n_samples != -1 else df
 
         n_features = len(self.feature_names)
         n_rows = (n_features + n_feature_per_line - 1) // n_feature_per_line
         plt.figure(figsize=(4 * n_feature_per_line, 3 * n_rows))
+
         for i, name in enumerate(self.feature_names):
             ax = plt.subplot(n_rows, n_feature_per_line, i + 1)
 
-            if target is None:
-                for i_target in np.unique(self.targets):
-                    ax.hist(
-                        samples[np.squeeze(self.targets == i_target)][:, i],
-                        bins=50,
-                        histtype="step",
-                        label=f"Target {i_target}",
-                    )
-            else:
-                ax.hist(
-                    samples[np.squeeze(self.targets == i_target)][:, i],
-                    bins=50,
-                    histtype="step",
-                    label=f"Target {i_target}",
-                )
-            ax.set_title(name)
+            sns.histplot(
+                df if target is None else df.query(f"Target == {target}"),
+                x=name,
+                hue="Target",
+                bins=40,
+                element="step",
+                multiple="dodge",
+            )
+            ax.grid(axis="y", alpha=0.5, linewidth=0.4)
 
-        plt.legend()
         plt.tight_layout()
         plt.show()
