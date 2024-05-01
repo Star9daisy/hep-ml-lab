@@ -130,4 +130,6 @@ def calculate_thresholds(y_score):
     threshold_idxs = ops.append(distinct_value_indices, ops.size(y_score) - 1)
 
     # Return the scores at the threshold indices
-    return ops.append([1 - epsilon()], ops.take(y_score_sorted, threshold_idxs))
+    thresholds = ops.append(1, ops.take(y_score_sorted, threshold_idxs))
+    thresholds = ops.clip(thresholds - epsilon(), 0, 1)
+    return thresholds
