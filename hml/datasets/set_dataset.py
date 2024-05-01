@@ -247,7 +247,7 @@ class SetDataset:
                 hue="Target",
                 bins=40,
                 element="step",
-                multiple="dodge",
+                multiple="layer",
             )
             ax.grid(axis="y", alpha=0.5, linewidth=0.4)
 
