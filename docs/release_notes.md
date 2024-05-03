@@ -1,5 +1,17 @@
 # Release notes
 
+## v0.4.3
+- Fix the thresholds issue in `hml.metrics.MaxSignificance` by making it similar to the one returned by `sklearn.metrics.roc_curve`.
+- Change `hml.datasets.SetDataset.show` to display figures using `seaborn`. 
+- Drop the requirement of `executable` in `hml.generators.Madgraph5.from_output`.
+
+## v0.4.2
+- Fix parsing cuts like "muon0.charge != muon1.charge".
+- Fix inconsistent model layers in `hml.approaches.networks.SimpleCNN`.
+- Fix registering and saving custom observables.
+- Add cross sections, luminosity and weights as parameters in `hml.metrics.MaxSignificance`.
+- Improve the figure ratio in `hml.datasets.SetDataset.show`.
+
 ## v0.4.1
 - Fix module overview image in README.
 - Fix `GradientBoostedDecisionTree` to be compatible with different `sklearn` versions.
