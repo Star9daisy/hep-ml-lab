@@ -626,4 +626,4 @@ loaded_cnn1 = load_approach("./checkpoints/cnn1.keras")
 loaded_cnn2 = load_approach("./checkpoints/cnn2.keras")
 ```
 
-Check the doc to learn more about [cuts](../api/hml.approaches/cuts.md), [trees](../api/hml.approaches/trees.md), and networks.
+Check the doc to learn more about [cuts](../api_reference/hml.approaches/cuts.md), [trees](../api_reference/hml.approaches/trees.md), and networks.
