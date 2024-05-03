@@ -6,13 +6,45 @@ import pytest
 from hml.generators import Madgraph5
 
 
+def test_madgraph5_default():
+    g = Madgraph5()
+    # Attributes ----------------------------------------------------------------- #
+    with pytest.raises(ValueError):
+        g.executable
+
+    assert g.verbose == 1
+
+    # Properties ----------------------------------------------------------------- #
+    assert g.home is None
+    assert g.version is None
+    with pytest.raises(AttributeError):
+        g.child
+    with pytest.raises(AttributeError):
+        g.processes
+    with pytest.raises(AttributeError):
+        g.runs
+
+    # Methods -------------------------------------------------------------------- #
+    with pytest.raises(AttributeError):
+        g.import_model("sm")
+    with pytest.raises(AttributeError):
+        g.define(["j = j b b~"])
+    with pytest.raises(AttributeError):
+        g.generate(["p p > t t~"])
+    with pytest.raises(AttributeError):
+        g.output("test_pp2tt")
+    with pytest.raises(AttributeError):
+        g.launch()
+    with pytest.raises(AttributeError):
+        g.summary()
+
+
 def test_init():
     g = Madgraph5(executable="mg5_aMC")
 
     assert g.executable == Path("/root/softwares/madgraph5/bin/mg5_aMC")
     assert g.home == Path("/root/softwares/madgraph5")
     assert g.version == "3.5.3"
-    assert repr(g) == "Madgraph5 v3.5.3"
 
     # Other cases
     with pytest.raises(FileNotFoundError):
@@ -22,8 +54,8 @@ def test_init():
 def test_output():
     g = Madgraph5(executable="mg5_aMC")
     g.import_model("sm")
-    g.define("p = g u c d s u~ c~ d~ s~")
-    g.generate("p p > t t~", "p p > t t~")
+    g.define(["p = g u c d s u~ c~ d~ s~"])
+    g.generate(["p p > t t~", "p p > t t~"])
 
     assert g.processes == ["p p > t t~", "p p > t t~"]
 
@@ -39,14 +71,10 @@ def test_output():
     g.output("/tmp/test_output")
     assert g.output_dir.name == "test_output"
 
-    # If not overwrite
-    with pytest.raises(FileExistsError):
-        g.output("/tmp/test_output", overwrite=False)
-
 
 def test_launch():
     g = Madgraph5(executable="mg5_aMC")
-    g.generate("p p > w+ z")
+    g.generate(["p p > w+ z"])
     g.output("test_pp2wz")
     g.launch(settings={"nevents": 100})
     g.launch(settings={"nevents": 100}, multi_run=2)
@@ -85,7 +113,7 @@ def test_launch():
             ],
             dry=True,
         ),
-        str,
+        list,
     )
 
     assert len(g.runs) == 4

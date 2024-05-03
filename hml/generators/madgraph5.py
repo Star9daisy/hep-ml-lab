@@ -5,119 +5,154 @@ import shutil
 import subprocess
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Union
 
 import pexpect
 from bs4 import BeautifulSoup
 from rich.console import Console
 from rich.table import Table
+from rich.theme import Theme
 
-PathLike = Union[str, Path]
+theme = Theme(
+    {
+        "sect": "white",  # section
+        "info": "blue",  # informatiom
+        "done": "green",  # done
+        "ques": "yellow",  # question
+        "error": "red",  # error
+        "warn": "yellow",  # warning
+        "hint": "italic yellow",  # hint
+        "path": "cyan underline",  # path
+        "number": "cyan",  # number
+    },
+    inherit=False,
+)
+
+c = Console(force_jupyter=False, theme=theme)
 
 
 class Madgraph5:
     def __init__(
         self,
-        executable: PathLike,
+        executable: Path | str | None = None,
         verbose: int = 1,
-    ):
+    ) -> None:
         self.verbose = verbose
         self.executable = executable
-        self.DEFAULT_LOG_DIR = Path("Logs")
-        self.DEFAULT_DIAGRAM_DIR = Path("Diagrams")
 
     @property
     def executable(self) -> Path:
         if self._executable is None:
-            raise AttributeError("Madgraph5 executable not set yet")
+            c.print("[error]✘ `executable` has not been set yet.\n")
+            c.print(
+                "[hint]! You could set it like this:\n"
+                "  generator = Madgraph5(executable='path/to/mg5_aMC')"
+            )
+            raise ValueError
 
         return self._executable
 
     @executable.setter
-    def executable(self, value: PathLike | None):
+    def executable(self, value: Path | str | None) -> None:
         if value is None:
-            self._executable = value
+            self._executable = None
 
-        elif shutil.which(value) is None:
-            raise FileNotFoundError(f"Could not find Madgraph5 executable {value}")
+        elif isinstance(value, (Path, str)):
+            # Check if the executable is valid
+            if (exe_path := shutil.which(str(value))) is None:
+                c.print(f"[error]✘ Could not find {value}")
+                c.print(
+                    "[hint]! The executable is the path you enter in the terminal"
+                    " to run Madgraph5. Make sure the path is correct."
+                )
+                raise FileNotFoundError
+
+            # Make the executable path absolute
+            self._executable = Path(exe_path).resolve()
+
+            # Start the child process
+            self._child = self._init_child()
 
         else:
-            self._executable = Path(shutil.which(value)).resolve()
-            self.child = pexpect.spawn(f"{self._executable.as_posix()}")
-            self.process_log = self.run_command("")
+            raise TypeError(f"Expected Path or str, got {type(value).__name__}")
 
     @property
-    def home(self) -> Path | None:
+    def verbose(self) -> int:
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, value: int) -> None:
+        if isinstance(value, int) and value >= 0:
+            self._verbose = value
+
+        else:
+            raise ValueError(f"Expected int >= 0, got {value}")
+
+    def _init_child(self) -> pexpect.spawn | None:
+        child = pexpect.spawn(self.executable.as_posix())
+
+        child.expect("VERSION [\d\.]+")
+        version = re.search(r"[\d\.]+", child.after.decode()).group(0)
+        self._version = version
+        print(f"Madgraph5_aMC@NLO v{version}") if self.verbose else None
+
+        child.expect("MG5_aMC>$")
+
+        self.clean_pypy()
+
+        return child
+
+    @property
+    def child(self) -> pexpect.spawn:
+        if not hasattr(self, "_child"):
+            c.print("[error]✘ The MadGraph5 child process has not been started yet.\n")
+            c.print(
+                "[hint]! You could start it by setting `executable` properly:\n"
+                "  generator.executable = 'path/to/mg5_aMC'"
+            )
+            raise AttributeError
+
+        return self._child
+
+    @property
+    def home(self) -> Path:
         if self._executable is not None:
             return self.executable.parent.parent
 
     @property
-    def version(self) -> str:
-        _version = "unknown"
+    def version(self) -> str | None:
+        if hasattr(self, "_version"):
+            return self._version
 
-        if self.home is not None:
-            with (self.home / "VERSION").open() as f:
-                for line in f.readlines():
-                    if line.startswith("version") and _version == "unknown":
-                        _version = line.split("=")[1].strip()
+    @property
+    def output_dir(self) -> Path:
+        if not hasattr(self, "_output_dir"):
+            c.print("[error]✘ No output directory has been set yet.")
+            c.print(
+                "[hint]! You could only view the runs after `output`:\n"
+                "  generator.output('path/to/output_dir')"
+            )
+            raise AttributeError
 
-        elif _version == "unknown" and hasattr(self, "output_dir"):
-            if (version_file := self.output_dir / "MGMEVersion.txt").exists():
-                with version_file.open() as f:
-                    content = f.readlines()
-                    if len(content) == 1:
-                        _version = content[0].strip()
+        return self._output_dir
 
-        return _version
+    @property
+    def runs(self) -> list[Madgraph5Run]:
+        run_paths = []
+        for i in self.output_dir.glob("Events/run_*"):
+            if i.is_dir() and i.name.count("_") == 1:
+                run_paths.append(i)
 
-    def __repr__(self):
-        return f"Madgraph5 v{self.version}"
+        # Sort the runs by their number
+        run_paths = sorted(run_paths, key=lambda x: int(x.name.split("_")[-1]))
+        runs = [Madgraph5Run(self.output_dir, i.name) for i in run_paths]
 
-    def run_command(
-        self,
-        command: str,
-        start_marker: str = r"\r\n",
-        end_marker: str = r"MG5_aMC>$",
-        timeout: int | None = None,
-    ) -> str:
-        output = ""
-        self.child.sendline(command)
-        while True:
-            if self.child.expect([start_marker, end_marker], timeout) == 1:  # type: ignore
-                break
-
-            middle_output = self.child.before.decode()
-            output += middle_output + "\r\n"
-            if self.verbose > 0:
-                print(middle_output)
-
-        self.clean_pypy()
-        return output
-
-    def clean_pypy(self):
-        py_py = Path("py.py")
-        if py_py.exists():
-            py_py.unlink()
-
-    def import_model(self, model: PathLike):
-        self.process_log += self.run_command(f"import model {model}")
-
-    def define(self, expression: str):
-        self.process_log += self.run_command(f"define {expression}")
-
-    def generate(self, *processes: str):
-        self._processes = [i for i in processes]
-        self.process_log += self.run_command(f"generate {processes[0]}")
-        for process in processes[1:]:
-            self.process_log += self.run_command(f"add process {process}")
+        return runs
 
     @property
     def processes(self) -> list[str]:
         # 1st case: generate() has been called
-        try:
+        if hasattr(self, "_processes"):
             return self._processes
-        except AttributeError:
-            pass
 
         # 2nd case: from_output() has been called
         try:
@@ -128,62 +163,167 @@ class Madgraph5:
                 processes = re.findall(r"^Results in the .+ for (.+)", title_col)[0]
                 return processes.split(",")
         except AttributeError:
-            raise AttributeError("No processes defined yet")
+            c.print("[error]✘ No processes have been generated yet.")
+            c.print(
+                "[hint]! You could generate some like this:\n"
+                "  generator.generate(['p p > t t~'])"
+            )
+            raise AttributeError
 
-    def display_diagrams(
-        self, diagram_dir: PathLike = "Diagrams", overwrite: bool = True
-    ):
-        self.diagram_dir = Path(diagram_dir)
-        if self.diagram_dir.exists():
-            if not overwrite:
-                raise FileExistsError(f"{self.diagram_dir} already exists")
-            else:
-                shutil.rmtree(self.diagram_dir)
+    def clean_pypy(self):
+        py_py = Path("py.py")
+        if py_py.exists():
+            py_py.unlink()
 
-        self.diagram_dir.mkdir(parents=True)
-        self.process_log += self.run_command(f"display diagrams {self.diagram_dir}")
+    def import_model(self, model: str | Path) -> None:
+        self.child.sendline(f"import model {model}")
+        while True:
+            self.child.expect("\r\n")
 
-        for eps in self.diagram_dir.glob("*.eps"):
-            subprocess.run(f"ps2pdf {eps} {eps.with_suffix('.pdf')}", shell=True)
+            if "Error" in self.child.before.decode():
+                c.print("[error]✘ Error importing model.")
+                c.print(self.child.before.decode())
+                raise ValueError
 
-    def output(self, output_dir: PathLike | None = None, overwrite: bool = True):
-        if output_dir is None:
-            log = self.run_command("output")
-            self.process_log += log
+            try:
+                self.child.expect("MG5_aMC>$", timeout=0.1)
+            except pexpect.exceptions.TIMEOUT:
+                continue
 
-            match = re.findall(r"Output to directory (.+) done.", log)
-            self.output_dir = Path(match[0]).resolve()
+            for line in self.child.before.decode().split("\r\n"):
+                if line.startswith("INFO: Restrict model"):
+                    model_dir = Path(line.split(" ")[-3]).absolute().parent
+
+                    try:
+                        model_dir_str = f"./{model_dir.relative_to(Path.cwd())}"
+                    except ValueError:
+                        model_dir_str = model_dir.as_posix()
+
+                    print(f"Model in {model_dir_str}")
+
+            break
+
+        self.clean_pypy()
+
+    def define(self, multi_particles: list[str]):
+        for particle in multi_particles:
+            self.child.sendline(f"define {particle}")
+            self.child.expect("MG5_aMC>$")
+
+            if "error" in self.child.before.decode():
+                c.print("[error]✘ Error defining particle.")
+                c.print(self.child.before.decode())
+                raise ValueError
+
+            for line in self.child.before.decode().splitlines():
+                if line.startswith("Defined multiparticle"):
+                    print(line)
+
+    def generate(self, processes: list[str]) -> None:
+        self._processes = processes
+        self.child.sendline(f"generate {processes[0]}")
+        self.child.expect("MG5_aMC>$")
+
+        if "error" in self.child.before.decode():
+            c.print("[error]✘ Error generating process.")
+            c.print(self.child.before.decode())
+            raise ValueError
+
+        if len(processes) == 1:
+            message = re.search(
+                r"Total: \d+ processes with \d+ diagrams",
+                self.child.before.decode(),
+            ).group(0)
+            print(message)
+
         else:
-            self.output_dir = Path(output_dir).resolve()
-            if self.output_dir.exists():
-                if overwrite:
-                    shutil.rmtree(self.output_dir)
-                else:
-                    raise FileExistsError(f"{self.output_dir} already exists")
-            self.process_log += self.run_command(f"output {self.output_dir}")
+            for process in processes[1:]:
+                self.child.sendline(f"add process {process}")
+            self.child.expect("MG5_aMC>$")
 
-            # try:
-            #     if self.diagram_dir.exists():
-            #         self.diagram_dir = self.diagram_dir.rename(self.DEFAULT_DIAGRAM_DIR)
-            #         shutil.move(self.diagram_dir, self.output_dir / self.diagram_dir)
-            # except AttributeError:
-            self.display_diagrams(self.output_dir / self.DEFAULT_DIAGRAM_DIR)
-
-        self.log_dir = self.output_dir / self.DEFAULT_LOG_DIR
-        self.log_dir.mkdir()
-        process_log_file = self.log_dir / "process.log"
-        process_log_file = process_log_file.resolve()
-
-        with process_log_file.open("w") as f:
-            f.write(self.process_log)
-        if self.verbose > 0:
-            if process_log_file.is_relative_to(Path.cwd()):
-                print(
-                    "Process log saved to",
-                    process_log_file.relative_to(Path.cwd()),
-                )
+            if "error" in self.child.before.decode():
+                c.print("[error]✘ Error generating process.")
+                c.print(self.child.before.decode())
+                raise ValueError
             else:
-                print("Process log saved to", process_log_file)
+                message = re.search(
+                    r"Total: \d+ processes with \d+ diagrams",
+                    self.child.before.decode(),
+                ).group(0)
+                print(message)
+
+        self.clean_pypy()
+
+    def display_diagrams(self, diagrams_dir="Diagrams", overwrite=True):
+        diagrams_dir = Path(diagrams_dir).resolve()
+        if diagrams_dir.exists():
+            if overwrite:
+                shutil.rmtree(diagrams_dir)
+            else:
+                c.print(f"[error]✘ Directory '{diagrams_dir}' already exists.")
+                c.print(
+                    "[hint]! If the generator is defined as g = Madgraph5(...),\n"
+                    "You could overwrite the existing directory like this:\n"
+                    "g.display_diagrams(overwrite=True)"
+                )
+
+                raise FileExistsError
+
+        diagrams_dir.mkdir(parents=True)
+
+        self.child.sendline(f"display diagrams {diagrams_dir.as_posix()}")
+        self.child.expect("MG5_aMC>$")
+
+        if "error" in self.child.before.decode():
+            c.print("[error]✘ Error displaying diagrams.")
+            c.print(self.child.before.decode())
+            raise ValueError
+        else:
+            try:
+                diagrams_dir_str = f"./{diagrams_dir.relative_to(Path.cwd())}"
+            except ValueError:
+                diagrams_dir_str = diagrams_dir.as_posix()
+
+            for eps in diagrams_dir.glob("*.eps"):
+                subprocess.run(f"ps2pdf {eps} {eps.with_suffix('.pdf')}", shell=True)
+                eps.unlink()
+
+            n_diagrams = len(list(diagrams_dir.glob("*.pdf")))
+            print(
+                f"{n_diagrams} diagrams saved in {diagrams_dir_str}"
+            ) if self.verbose else None
+
+        self.clean_pypy()
+
+    def output(self, output_dir=None):
+        if output_dir is None:
+            self.child.sendline("output")
+        else:
+            self.child.sendline(f"output {output_dir} -f")
+        self.child.expect("MG5_aMC>$")
+
+        if "error" in self.child.before.decode():
+            c.print("[error]✘ Error outputing to directory.")
+            c.print(self.child.before.decode())
+            raise ValueError
+        else:
+            path = Path(
+                re.findall(
+                    r"Output to directory (/[\w\.-]+(?:/[\w\.-]+)*)",
+                    self.child.before.decode(),
+                )[0]
+            )
+            self.display_diagrams(diagrams_dir=path / "Diagrams")
+
+            self._output_dir = path
+            try:
+                output_dir_str = f"./{path.relative_to(Path.cwd())}"
+            except ValueError:
+                output_dir_str = path.as_posix()
+
+            print(f"Output saved in {output_dir_str}") if self.verbose else None
+
+        self.clean_pypy()
 
     def launch(
         self,
@@ -197,28 +337,20 @@ class Madgraph5:
         seed=None,
         dry=False,
     ):
-        run_log = ""
+        config_commands = [
+            f"launch -i {self.output_dir}",
+            "generate_events" if multi_run == 1 else f"multi_run {multi_run}",
+            f"shower={shower}",
+            f"detector={detector}",
+            f"madspin={madspin}",
+            "done",
+        ]
 
-        # In the middle: MadEvent CLI ends with '>'
-        commands = f"launch -i {self.output_dir}\n"
-        if multi_run == 1:
-            commands += "generate_events\n"
-        else:
-            commands += f"multi_run {multi_run}\n"
+        if "iseed" not in settings:
+            settings["iseed"] = seed if seed is not None else 0
 
-        commands += f"shower={shower}\n"
-        commands += f"detector={detector}\n"
-        commands += f"madspin={madspin}\n"
-        commands += "done\n"
-
-        if seed is not None:
-            settings["iseed"] = seed
-        if settings != {}:
-            commands += "\n".join([f"set {k} {v}" for k, v in settings.items()])
-            commands += "\n"
-
-        if decays != []:
-            commands += "\n".join([f"decay {i}" for i in decays]) + "\n"
+        config_commands += [f"set {key} {value}" for key, value in settings.items()]
+        config_commands += [f"decay {decay}" for decay in decays]
 
         default_pythia8_card = self.output_dir / "Cards/pythia8_card_default.dat"
         default_delphes_card = self.output_dir / "Cards/delphes_card_default.dat"
@@ -303,44 +435,65 @@ class Madgraph5:
 
                 resolved_cards.append(temp.name)
 
-        if resolved_cards != []:
-            commands += "\n".join(resolved_cards) + "\n"
-        else:
-            commands += "\n".join(cards) + "\n"
-        commands += "done\n"
+        config_commands += resolved_cards if resolved_cards != [] else cards
 
         if dry:
-            return commands
+            return config_commands
 
-        run_log += self.run_command(commands, end_marker=r">$")
+        for command in config_commands:
+            self.child.sendline(command)
+            while True:
+                self.child.expect("\r\n")
 
-        # In the end: Back to Madgraph CLI
-        run_log += self.run_command("exit")
+                try:
+                    self.child.expect(">$", timeout=0.1)
+                except pexpect.exceptions.TIMEOUT:
+                    continue
 
-        run_name = re.findall(r"survey  (.+) \r\n", run_log)[0]
-        run_log_file = self.log_dir / f"{run_name}.log"
-        run_log_file = run_log_file.resolve()
-        with run_log_file.open("w") as f:
-            f.write(run_log)
+                if (
+                    "not valid option" in self.child.before.decode()
+                    or "invalid" in self.child.before.decode()
+                ):
+                    print(self.child.before.decode().split("\r\n")[0])
+                    raise ValueError
 
-        if self.verbose > 0:
-            if run_log_file.is_relative_to(Path.cwd()):
-                print("Run log saved to", run_log_file.relative_to(Path.cwd()))
-            else:
-                print("Run log saved to", run_log_file)
+                break
 
-    @property
-    def runs(self) -> list[Madgraph5Run]:
-        run_paths = []
-        for i in self.output_dir.glob("Events/run_*"):
-            if i.is_dir() and i.name.count("_") == 1:
-                run_paths.append(i)
+        self.child.sendline("done")
+        current_run_index = 0
+        while True:
+            self.child.expect("\r\n")
 
-        # Sort the runs by their number
-        run_paths = sorted(run_paths, key=lambda x: int(x.name.split("_")[-1]))
-        runs = [Madgraph5Run(self.output_dir, i.name) for i in run_paths]
+            if self.child.before.decode().startswith("Generating"):
+                run_name = self.child.before.decode().split(" ")[-1]
+                print(run_name + "...", end="") if self.verbose else None
 
-        return runs
+            if "Running Survey" in self.child.before.decode():
+                print("survey...", end="") if self.verbose else None
+
+            if "Running Pythia8" in self.child.before.decode():
+                print("pythia8...", end="") if self.verbose else None
+
+            if "Running Delphes" in self.child.before.decode():
+                print("delphes...", end="") if self.verbose else None
+
+            if "storing files of previous run" in self.child.before.decode():
+                print("storing...", end="") if self.verbose else None
+
+            # if self.child.before.decode().startswith("INFO: Done"):
+            if "INFO: Done" in self.child.before.decode():
+                print("✔") if self.verbose else None
+                current_run_index += 1
+
+                if current_run_index != multi_run:
+                    continue
+                else:
+                    self.child.expect(">$")
+                    break
+
+        self.child.sendline("quit")
+        self.child.expect(">$", timeout=0.1)
+        self.clean_pypy()
 
     def summary(self):
         console = Console()
@@ -375,8 +528,8 @@ class Madgraph5:
     @classmethod
     def from_output(
         cls,
-        output_dir: PathLike,
-        executable: PathLike | None = None,
+        output_dir: Path | str,
+        executable: Path | str | None = None,
     ) -> Madgraph5:
         output_dir = Path(output_dir)
         if not output_dir.exists():
@@ -385,13 +538,13 @@ class Madgraph5:
         output_dir = output_dir.resolve()
         mg5 = cls(executable, verbose=0)
         mg5.verbose = 1
-        mg5.output_dir = output_dir
+        mg5._output_dir = output_dir
 
         return mg5
 
 
 class Madgraph5Run:
-    def __init__(self, output_dir: PathLike, name: str):
+    def __init__(self, output_dir: str | Path, name: str):
         self.output_dir = Path(output_dir)
         self._events_dir = self.output_dir / "Events"
         self._run_dir = self._events_dir / name
@@ -474,7 +627,7 @@ class Madgraph5Run:
             f"- n_events: {self.n_events}"
         )
 
-    def _get_info(self, output_dir: PathLike, name: str):
+    def _get_info(self, output_dir: str | Path, name: str):
         output_dir = Path(output_dir)
         events_dir = output_dir / "Events"
         run_dir = events_dir / name
