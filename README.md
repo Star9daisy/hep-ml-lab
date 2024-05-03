@@ -37,6 +37,11 @@ Check out the [install via pip](install/pip.md) for more details of prerequisite
 
 ## Updates
 
+### v0.4.3
+- Fix the thresholds issue in `hml.metrics.MaxSignificance` by making it similar to the one returned by `sklearn.metrics.roc_curve`.
+- Change `hml.datasets.SetDataset.show` to display figures using `seaborn`. 
+- Drop the requirement of `executable` in `hml.generators.Madgraph5.from_output`.
+
 ### v0.4.2
 - Fix parsing cuts like "muon0.charge != muon1.charge".
 - Fix inconsistent model layers in `hml.approaches.networks.SimpleCNN`.

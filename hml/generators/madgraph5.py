@@ -21,37 +21,52 @@ class Madgraph5:
         executable: PathLike,
         verbose: int = 1,
     ):
+        self.verbose = verbose
         self.executable = executable
-        self.child = pexpect.spawn(f"{self.executable.as_posix()}")
-        self.process_log = ""
         self.DEFAULT_LOG_DIR = Path("Logs")
         self.DEFAULT_DIAGRAM_DIR = Path("Diagrams")
-        self.verbose = verbose
-
-        self.process_log += self.run_command("")
 
     @property
     def executable(self) -> Path:
+        if self._executable is None:
+            raise AttributeError("Madgraph5 executable not set yet")
+
         return self._executable
 
     @executable.setter
-    def executable(self, value: PathLike):
-        if (_executable := shutil.which(value)) is None:
+    def executable(self, value: PathLike | None):
+        if value is None:
+            self._executable = value
+
+        elif shutil.which(value) is None:
             raise FileNotFoundError(f"Could not find Madgraph5 executable {value}")
 
-        self._executable = Path(_executable).resolve()
+        else:
+            self._executable = Path(shutil.which(value)).resolve()
+            self.child = pexpect.spawn(f"{self._executable.as_posix()}")
+            self.process_log = self.run_command("")
 
     @property
-    def home(self) -> Path:
-        return self.executable.parent.parent
+    def home(self) -> Path | None:
+        if self._executable is not None:
+            return self.executable.parent.parent
 
     @property
     def version(self) -> str:
         _version = "unknown"
-        with (self.home / "VERSION").open() as f:
-            for line in f.readlines():
-                if line.startswith("version") and _version == "unknown":
-                    _version = line.split("=")[1].strip()
+
+        if self.home is not None:
+            with (self.home / "VERSION").open() as f:
+                for line in f.readlines():
+                    if line.startswith("version") and _version == "unknown":
+                        _version = line.split("=")[1].strip()
+
+        elif _version == "unknown" and hasattr(self, "output_dir"):
+            if (version_file := self.output_dir / "MGMEVersion.txt").exists():
+                with version_file.open() as f:
+                    content = f.readlines()
+                    if len(content) == 1:
+                        _version = content[0].strip()
 
         return _version
 
@@ -358,7 +373,11 @@ class Madgraph5:
         console.print(table)
 
     @classmethod
-    def from_output(cls, output_dir: PathLike, executable: PathLike) -> Madgraph5:
+    def from_output(
+        cls,
+        output_dir: PathLike,
+        executable: PathLike | None = None,
+    ) -> Madgraph5:
         output_dir = Path(output_dir)
         if not output_dir.exists():
             raise FileNotFoundError(f"Output directory {output_dir} does not exist")
