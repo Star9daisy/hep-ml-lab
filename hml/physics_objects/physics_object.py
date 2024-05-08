@@ -4,12 +4,6 @@ from abc import ABC, abstractmethod
 
 
 class PhysicsObject(ABC):
-    def __eq__(self, other: PhysicsObject | str) -> bool:
-        if isinstance(other, PhysicsObject):
-            return self.name.lower() == other.name.lower()
-
-        return self.name.lower() == other.lower()
-
     def __str__(self) -> str:
         return self.name
 
@@ -26,11 +20,11 @@ class PhysicsObject(ABC):
 
     @property
     @abstractmethod
-    def branch(self) -> str | list[str]: ...
+    def branch(self) -> str: ...
 
     @property
     @abstractmethod
-    def slices(self) -> list[slice] | list[list[slice]]: ...
+    def slices(self) -> list[slice]: ...
 
     @property
     @abstractmethod
@@ -45,5 +39,4 @@ class PhysicsObject(ABC):
     def from_name(cls, name: str) -> PhysicsObject: ...
 
     @classmethod
-    def from_config(cls, config: dict) -> PhysicsObject:
-        return cls(**config)
+    def from_config(cls, config: dict) -> PhysicsObject: ...
