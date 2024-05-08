@@ -90,12 +90,12 @@ class Madgraph5:
     def _init_child(self) -> pexpect.spawn | None:
         child = pexpect.spawn(self.executable.as_posix())
 
-        child.expect("VERSION [\d\.]+")
+        child.expect(r"VERSION [\d\.]+")
         version = re.search(r"[\d\.]+", child.after.decode()).group(0)
         self._version = version
         print(f"Madgraph5_aMC@NLO v{version}") if self.verbose else None
 
-        child.expect("MG5_aMC>$")
+        child.expect(r"MG5_aMC>$")
 
         self.clean_pypy()
 
@@ -178,7 +178,7 @@ class Madgraph5:
     def import_model(self, model: str | Path) -> None:
         self.child.sendline(f"import model {model}")
         while True:
-            self.child.expect("\r\n")
+            self.child.expect(r"\r\n")
 
             if "Error" in self.child.before.decode():
                 c.print("[error]✘ Error importing model.")
@@ -186,7 +186,7 @@ class Madgraph5:
                 raise ValueError
 
             try:
-                self.child.expect("MG5_aMC>$", timeout=0.1)
+                self.child.expect(r"MG5_aMC>$", timeout=0.1)
             except pexpect.exceptions.TIMEOUT:
                 continue
 
@@ -208,7 +208,7 @@ class Madgraph5:
     def define(self, multi_particles: list[str]):
         for particle in multi_particles:
             self.child.sendline(f"define {particle}")
-            self.child.expect("MG5_aMC>$")
+            self.child.expect(r"MG5_aMC>$")
 
             if "error" in self.child.before.decode():
                 c.print("[error]✘ Error defining particle.")
@@ -222,7 +222,7 @@ class Madgraph5:
     def generate(self, processes: list[str]) -> None:
         self._processes = processes
         self.child.sendline(f"generate {processes[0]}")
-        self.child.expect("MG5_aMC>$")
+        self.child.expect(r"MG5_aMC>$")
 
         if "error" in self.child.before.decode():
             c.print("[error]✘ Error generating process.")
@@ -239,7 +239,7 @@ class Madgraph5:
         else:
             for process in processes[1:]:
                 self.child.sendline(f"add process {process}")
-            self.child.expect("MG5_aMC>$")
+            self.child.expect(r"MG5_aMC>$")
 
             if "error" in self.child.before.decode():
                 c.print("[error]✘ Error generating process.")
@@ -272,7 +272,7 @@ class Madgraph5:
         diagrams_dir.mkdir(parents=True)
 
         self.child.sendline(f"display diagrams {diagrams_dir.as_posix()}")
-        self.child.expect("MG5_aMC>$")
+        self.child.expect(r"MG5_aMC>$")
 
         if "error" in self.child.before.decode():
             c.print("[error]✘ Error displaying diagrams.")
@@ -300,7 +300,7 @@ class Madgraph5:
             self.child.sendline("output")
         else:
             self.child.sendline(f"output {output_dir} -f")
-        self.child.expect("MG5_aMC>$")
+        self.child.expect(r"MG5_aMC>$")
 
         if "error" in self.child.before.decode():
             c.print("[error]✘ Error outputing to directory.")
@@ -443,10 +443,10 @@ class Madgraph5:
         for command in config_commands:
             self.child.sendline(command)
             while True:
-                self.child.expect("\r\n")
+                self.child.expect(r"\r\n")
 
                 try:
-                    self.child.expect(">$", timeout=0.1)
+                    self.child.expect(r">$", timeout=0.1)
                 except pexpect.exceptions.TIMEOUT:
                     continue
 
@@ -462,7 +462,7 @@ class Madgraph5:
         self.child.sendline("done")
         current_run_index = 0
         while True:
-            self.child.expect("\r\n")
+            self.child.expect(r"\r\n")
 
             if self.child.before.decode().startswith("Generating"):
                 run_name = self.child.before.decode().split(" ")[-1]
@@ -488,11 +488,11 @@ class Madgraph5:
                 if current_run_index != multi_run:
                     continue
                 else:
-                    self.child.expect(">$")
+                    self.child.expect(r">$")
                     break
 
         self.child.sendline("quit")
-        self.child.expect(">$", timeout=0.1)
+        self.child.expect(r">$", timeout=0.1)
         self.clean_pypy()
 
     def summary(self):
