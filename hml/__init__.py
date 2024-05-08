@@ -9,6 +9,7 @@ from hml import (
     operations,
     physics_objects,
     representations,
+    validators,
 )
 
 __version__ = "0.4.3"
