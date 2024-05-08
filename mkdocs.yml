@@ -77,7 +77,6 @@ nav:
           - single: api_reference/physics_objects/single.md
           - collective: api_reference/physics_objects/collective.md
           - nested: api_reference/physics_objects/nested.md
-          - multiple: api_reference/physics_objects/multiple.md
       - hml.observables: api_reference/hml.observables.md
       - hml.representations: api_reference/hml.representations.md
       - hml.datasets: api_reference/hml.datasets.md

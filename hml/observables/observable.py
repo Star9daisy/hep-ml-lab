@@ -3,7 +3,7 @@ from __future__ import annotations
 import awkward as ak
 
 from ..operations import branch_to_momentum4d, constituents_to_momentum4d
-from ..physics_objects import PhysicsObject, is_collective, is_multiple, is_single
+from ..physics_objects import PhysicsObject, is_collective, is_single
 from ..physics_objects import parse_physics_object as parse_object
 
 
@@ -72,8 +72,9 @@ class Observable:
                 raise ValueError
 
         else:
-            if not is_multiple(self.physics_object, self.supported_objects):
-                raise ValueError
+            pass
+            # if not is_multiple(self.physics_object, self.supported_objects):
+            #     raise ValueError
 
     def __eq__(self, other: str | Observable) -> bool:
         if isinstance(other, str):
