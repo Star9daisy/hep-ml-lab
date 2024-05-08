@@ -87,4 +87,5 @@ nav:
           - networks:
               - mlps: api_reference/hml.approaches/networks/mlps.md
       - hml.metrics: api_reference/hml.metrics.md
+      - hml.validators: api_reference/hml.validators.md
   - Release notes: release_notes.md
