@@ -14,7 +14,7 @@ def validate_type(
     ----------
     object_ : Any
         The object to validate.
-    expected_type : Type | tuple[Type, ...]
+    expected_types : Type | tuple[Type, ...]
         The expected type or types of the object.
     name : str, optional
         The name of the object. This is used in the error message.
