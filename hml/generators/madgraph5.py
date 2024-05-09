@@ -93,9 +93,10 @@ class Madgraph5:
         child.expect(r"VERSION [\d\.]+")
         version = re.search(r"[\d\.]+", child.after.decode()).group(0)
         self._version = version
-        print(f"Madgraph5_aMC@NLO v{version}") if self.verbose else None
+        print(f"Madgraph5_aMC@NLO v{version}") if self.verbose == 1 else None
 
         child.expect(r"MG5_aMC>$")
+        print(child.before.decode()) if self.verbose == 2 else None
 
         self.clean_pypy()
 
@@ -225,9 +226,10 @@ class Madgraph5:
                 c.print(self.child.before.decode())
                 raise ValueError
 
+            print(self.child.before.decode()) if self.verbose == 2 else None
             for line in self.child.before.decode().splitlines():
                 if line.startswith("Defined multiparticle"):
-                    print(line)
+                    print(line) if self.verbose == 1 else None
 
     def generate(self, processes: list[str]) -> None:
         self._processes = processes
@@ -454,9 +456,7 @@ class Madgraph5:
             self.child.sendline(command)
             while True:
                 self.child.expect(r"\r\n")
-
-                try:
-                    self.child.expect(r">$", timeout=0.1)
+            print(self.child.before.decode()) if self.verbose == 2 else None
                 except pexpect.exceptions.TIMEOUT:
                     continue
 
