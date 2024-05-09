@@ -368,7 +368,7 @@ class Madgraph5:
         default_delphes_card = self.output_dir / "Cards/delphes_card_default.dat"
         resolved_cards = []
         if seed is not None:
-            if shower == "on" or shower == "pythia8":
+            if shower.lower() == "pythia8":
                 pythia8_card = None
                 for card in cards:
                     if "pythia8" in card:
@@ -412,7 +412,7 @@ class Madgraph5:
 
                     resolved_cards.append(temp.name)
 
-            if detector == "on" or detector == "delphes":
+            if detector.lower() == "delphes":
                 delphes_card = None
                 for card in cards:
                     if "delphes" in card:
