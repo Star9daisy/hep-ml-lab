@@ -203,7 +203,7 @@ class Madgraph5:
             print(self.child.before.decode()) if self.verbose == 2 else None
             for line in self.child.before.decode().split("\r\n"):
                 if line.startswith("INFO: Restrict model"):
-                    model_dir = Path(line.split(" ")[-3]).absolute().parent
+                    model_dir = Path(line.split(" ")[-3]).resolve().parent
 
                     try:
                         model_dir_str = f"./{model_dir.relative_to(Path.cwd())}"
