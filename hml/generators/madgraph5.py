@@ -454,20 +454,16 @@ class Madgraph5:
 
         for command in config_commands:
             self.child.sendline(command)
-            while True:
-                self.child.expect(r"\r\n")
+            self.child.expect(r"\r\n")
             print(self.child.before.decode()) if self.verbose == 2 else None
-                except pexpect.exceptions.TIMEOUT:
-                    continue
+            self.child.expect(r">$", timeout=0.1)
 
-                if (
-                    "not valid option" in self.child.before.decode()
-                    or "invalid" in self.child.before.decode()
-                ):
-                    print(self.child.before.decode().split("\r\n")[0])
-                    raise ValueError
-
-                break
+            if (
+                "not valid option" in self.child.before.decode()
+                or "invalid" in self.child.before.decode()
+            ):
+                print(self.child.before.decode().split("\r\n")[0])
+                raise ValueError
 
         self.child.sendline("done")
         current_run_index = 0
