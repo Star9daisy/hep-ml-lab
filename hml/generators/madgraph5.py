@@ -177,19 +177,29 @@ class Madgraph5:
 
     def import_model(self, model: str | Path) -> None:
         self.child.sendline(f"import model {model}")
+
+        error = ""
+        has_error = False
         while True:
             self.child.expect(r"\r\n")
+            print(self.child.before.decode()) if self.verbose == 2 else None
 
             if "Error" in self.child.before.decode():
-                c.print("[error]✘ Error importing model.")
-                c.print(self.child.before.decode())
-                raise ValueError
+                error += self.child.before.decode()
+                has_error = True
 
             try:
                 self.child.expect(r"MG5_aMC>$", timeout=0.1)
             except pexpect.exceptions.TIMEOUT:
                 continue
 
+            if "Error" in self.child.before.decode() or has_error:
+                error += self.child.before.decode()
+                c.print("[error]✘ Error importing model.")
+                c.print(error)
+                raise ValueError
+
+            print(self.child.before.decode()) if self.verbose == 2 else None
             for line in self.child.before.decode().split("\r\n"):
                 if line.startswith("INFO: Restrict model"):
                     model_dir = Path(line.split(" ")[-3]).absolute().parent
@@ -199,7 +209,7 @@ class Madgraph5:
                     except ValueError:
                         model_dir_str = model_dir.as_posix()
 
-                    print(f"Model in {model_dir_str}")
+                    print(f"Model in {model_dir_str}") if self.verbose == 1 else None
 
             break
 
