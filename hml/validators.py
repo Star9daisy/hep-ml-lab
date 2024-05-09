@@ -33,7 +33,6 @@ def validate_type(
     Traceback (most recent call last):
         ...
     TypeError: object must be of type int, not str
-
     """
     name = name if name is not None else "object"
 
