@@ -60,6 +60,8 @@ class MaxSignificance(Metric):
         self.metric_tn = TrueNegatives(thresholds=self.thresholds, dtype=self.dtype)
         self.metric_fn = FalseNegatives(thresholds=self.thresholds, dtype=self.dtype)
 
+        self.thresholds = ops.convert_to_tensor(self.thresholds)
+
         self.metric_tp.update_state(y_true, valid_y_pred)
         self.metric_fp.update_state(y_true, valid_y_pred)
         self.metric_tn.update_state(y_true, valid_y_pred)
@@ -70,21 +72,27 @@ class MaxSignificance(Metric):
         fn = self.metric_fn.result()
         tn = self.metric_tn.result()
         fp = self.metric_fp.result()
+
+        tp = ops.expand_dims(tp, 0) if ops.ndim(tp) == 0 else tp
+        fn = ops.expand_dims(fn, 0) if ops.ndim(fn) == 0 else fn
+        tn = ops.expand_dims(tn, 0) if ops.ndim(tn) == 0 else tn
+        fp = ops.expand_dims(fp, 0) if ops.ndim(fp) == 0 else fp
+
         tpr = tp / (tp + fn)
         fpr = fp / (fp + tn)
+
+        if not ops.all(ops.equal(self.thresholds, [0.5])):
+            selection = fpr != 0
+            tpr = tpr[selection]
+            fpr = fpr[selection]
+            thresholds = ops.convert_to_tensor(self.thresholds)[selection]
+        else:
+            thresholds = ops.convert_to_tensor(self.thresholds)
 
         if self.cross_sections == [1, 1]:
             s = tp
             b = fp
         else:
-            if self.thresholds != [0.5]:
-                selection = fpr != 0
-                tpr = tpr[selection]
-                fpr = fpr[selection]
-                thresholds = ops.convert_to_tensor(self.thresholds)[selection]
-            else:
-                thresholds = ops.convert_to_tensor(self.thresholds)
-
             s = self.s_xsec * self.luminosity * self.s_weight * tpr
             b = sum(
                 [
@@ -97,16 +105,16 @@ class MaxSignificance(Metric):
         self.significance = significance
         max_index = ops.argmax(significance)
 
-        if self.thresholds != [0.5]:
+        if not ops.all(ops.equal(self.thresholds, [0.5])):
             self.selected_tpr = tpr[max_index]
             self.selected_fpr = fpr[max_index]
             self.selected_threshold = thresholds[max_index]
             max_significance = significance[max_index]
         else:
-            self.selected_tpr = tpr
-            self.selected_fpr = fpr
-            self.selected_threshold = self.thresholds
-            max_significance = significance
+            self.selected_tpr = tpr[0]
+            self.selected_fpr = fpr[0]
+            self.selected_threshold = self.thresholds[0]
+            max_significance = significance[0]
 
         return max_significance
 
