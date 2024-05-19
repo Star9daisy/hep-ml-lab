@@ -71,5 +71,8 @@ omit = ["*/*_test.py"]
 # Preserve types, even if a file imports `from __future__ import annotations`.
 keep-runtime-typing = true
 
+[tool.ruff.lint]
+ignore = ["E402"]
+
 [tool.pytest.ini_options]
 addopts = "--cov=hml --cov-report=html --cov-report=xml --cov-report=term --doctest-modules"
