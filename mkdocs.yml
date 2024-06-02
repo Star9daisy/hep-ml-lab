@@ -73,18 +73,21 @@ nav:
       - 1801.00797: code_examples/1801.00797.md
   - API reference:
       - hml.generators: api_reference/hml.generators.md
-      - physics_objects:
+      - hml.physics_objects:
           - single: api_reference/physics_objects/single.md
           - collective: api_reference/physics_objects/collective.md
           - nested: api_reference/physics_objects/nested.md
       - hml.observables: api_reference/hml.observables.md
       - hml.representations: api_reference/hml.representations.md
-      - hml.datasets: api_reference/hml.datasets.md
+      - hml.datasets:
+          - w_tagging: api_reference/hml.datasets/w_tagging.md
       - hml.approaches:
           - cuts: api_reference/hml.approaches/cuts.md
           - trees: api_reference/hml.approaches/trees.md
           - networks:
               - mlps: api_reference/hml.approaches/networks/mlps.md
       - hml.metrics: api_reference/hml.metrics.md
+      - hml.operations:
+          - awkward_ops: api_reference/hml.operations/awkward_ops.md
       - hml.validators: api_reference/hml.validators.md
   - Release notes: release_notes.md
