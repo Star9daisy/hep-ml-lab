@@ -42,7 +42,9 @@ def ak_from_h5(path: str | Path):
 
     Examples
     --------
-    >>> from hml.operations import ak_from_h5
+    >>> from hml.operations import ak_to_h5, ak_from_h5
+    >>> array = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
+    >>> ak_to_h5(array, "/tmp/array.h5")
     >>> array = ak_from_h5("/tmp/array.h5")
     """
     with h5py.File(path, "r") as file:
